@@ -2,12 +2,26 @@
 
 namespace DropletsInMotion
 {
-    // C:\Github\DropletsInMotion\tester.txt
     class Program
     {
+        // Global
         private static readonly bool Development = true;
+        private static readonly string DevelopmentPath = "/testprogram.txt";
 
         static async Task Main(string[] args)
+        {
+            string path = GetPathToProgram();
+
+            string contents = File.ReadAllText(path);
+            Console.WriteLine(contents);
+
+
+            await StartWebSocket();
+
+
+        }
+
+        public static string GetPathToProgram()
         {
             string? path = null;
 
@@ -24,18 +38,14 @@ namespace DropletsInMotion
             {
                 string workingDirectory = Environment.CurrentDirectory;
                 string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
-                path = projectDirectory + "/testprogram.txt";
+                path = projectDirectory + DevelopmentPath;
             }
 
+            return path;
+        }
 
-            
-
-
-            Console.WriteLine($"You entered : {path}");
-            string contents = File.ReadAllText(path);
-            Console.WriteLine(contents);
-
-
+        public async static Task StartWebSocket()
+        {
             // Start a websocket
             var websocketService = new WebsocketService("http://localhost:5000/ws/");
             var cancellationTokenSource = new CancellationTokenSource();

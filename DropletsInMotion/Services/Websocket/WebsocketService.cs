@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -11,12 +12,14 @@ namespace DropletsInMotion.Services.Websocket
     {
         private readonly HttpListener _httpListener;
         private readonly string _prefix;
+        private readonly List<WebSocket> _connectedClients;
 
         public WebsocketService(string prefix)
         {
             _httpListener = new HttpListener();
             _prefix = prefix;
             _httpListener.Prefixes.Add(_prefix);
+            _connectedClients = new List<WebSocket>();
         }
 
         public async Task StartServerAsync(CancellationToken cancellationToken)
@@ -33,9 +36,13 @@ namespace DropletsInMotion.Services.Websocket
                     HttpListenerWebSocketContext webSocketContext = await httpContext.AcceptWebSocketAsync(subProtocol: null);
                     WebSocket webSocket = webSocketContext.WebSocket;
 
-                    Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}"); // CLIENT CONNECTS
+                    // Add the new client to the list
+                    _connectedClients.Add(webSocket);
+                    Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}");
+                    Console.WriteLine($"Total connected clients: {_connectedClients.Count}");
 
-                    await HandleConnectionAsync(webSocket, cancellationToken);
+                    // Handle connection in the background
+                    _ = Task.Run(() => HandleConnectionAsync(webSocket, cancellationToken));
                 }
                 else
                 {
@@ -65,6 +72,7 @@ namespace DropletsInMotion.Services.Websocket
                     }
 
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
                     Console.WriteLine($"Received message: {message}");
 
                     await SendMessageAsync(webSocket, $"Echo: {message}", cancellationToken);
@@ -76,16 +84,38 @@ namespace DropletsInMotion.Services.Websocket
             }
             finally
             {
+                // Remove the client from the list when the connection is closed
+                _connectedClients.Remove(webSocket);
+                Console.WriteLine($"Client disconnected. Total connected clients: {_connectedClients.Count}");
+
                 webSocket.Dispose();
             }
         }
 
         private async Task SendMessageAsync(WebSocket webSocket, string message, CancellationToken cancellationToken)
         {
-            var encodedMessage = Encoding.UTF8.GetBytes(message);
-            var buffer = new ArraySegment<byte>(encodedMessage);
+            if (GetConnectedClientCount() > 0)
+            {
+                var encodedMessage = Encoding.UTF8.GetBytes(message);
+                var buffer = new ArraySegment<byte>(encodedMessage);
 
-            await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+                await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+            }
+            else
+            {
+                Console.WriteLine("Cannot send the message, there are no connected clients!");
+            }
+        }
+
+        // Method to get the list of connected clients and their count
+        public IReadOnlyList<WebSocket> GetConnectedClients()
+        {
+            return _connectedClients.AsReadOnly();
+        }
+
+        public int GetConnectedClientCount()
+        {
+            return _connectedClients.Count;
         }
     }
 }
