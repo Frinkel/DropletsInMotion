@@ -72,9 +72,9 @@ namespace DropletsInMotion.Services.Websocket
                     }
 
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
                     Console.WriteLine($"Received message: {message}");
 
+                    // Optionally, echo the message back to the client
                     await SendMessageAsync(webSocket, $"Echo: {message}", cancellationToken);
                 }
             }
@@ -92,30 +92,27 @@ namespace DropletsInMotion.Services.Websocket
             }
         }
 
+        public async Task SendMessageToAllAsync(string message, CancellationToken cancellationToken)
+        {
+            var tasks = new List<Task>();
+
+            foreach (var client in _connectedClients)
+            {
+                if (client.State == WebSocketState.Open)
+                {
+                    tasks.Add(SendMessageAsync(client, message, cancellationToken));
+                }
+            }
+
+            await Task.WhenAll(tasks);
+        }
+
         private async Task SendMessageAsync(WebSocket webSocket, string message, CancellationToken cancellationToken)
         {
-            if (GetConnectedClientCount() > 0)
-            {
-                var encodedMessage = Encoding.UTF8.GetBytes(message);
-                var buffer = new ArraySegment<byte>(encodedMessage);
+            var encodedMessage = Encoding.UTF8.GetBytes(message);
+            var buffer = new ArraySegment<byte>(encodedMessage);
 
-                await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
-            }
-            else
-            {
-                Console.WriteLine("Cannot send the message, there are no connected clients!");
-            }
-        }
-
-        // Method to get the list of connected clients and their count
-        public IReadOnlyList<WebSocket> GetConnectedClients()
-        {
-            return _connectedClients.AsReadOnly();
-        }
-
-        public int GetConnectedClientCount()
-        {
-            return _connectedClients.Count;
+            await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
         }
     }
 }

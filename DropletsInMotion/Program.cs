@@ -1,4 +1,8 @@
-﻿using DropletsInMotion.Services.Websocket;
+﻿using System.Collections;
+using System.Text.Json;
+using DropletsInMotion.Services.Websocket;
+using System.Threading;
+using DropletsInMotion.Models.Simulator;
 
 namespace DropletsInMotion
 {
@@ -46,13 +50,57 @@ namespace DropletsInMotion
 
         public async static Task StartWebSocket()
         {
-            // Start a websocket
             var websocketService = new WebsocketService("http://localhost:5000/ws/");
             var cancellationTokenSource = new CancellationTokenSource();
+            var webSocketTask = websocketService.StartServerAsync(cancellationTokenSource.Token);
 
-            await websocketService.StartServerAsync(cancellationTokenSource.Token);
+            while (!cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                Console.WriteLine("Enter a message to send to all connected clients, or 'exit' to stop the server:");
+                var input = Console.ReadLine();
 
-            // To stop the server, you can call cancellationTokenSource.Cancel();
+                if (input?.ToLower() == "q")
+                {
+                    cancellationTokenSource.Cancel();
+                    break;
+                }
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    ActionItem actionItem = new ActionItem("electrode", 198, 1);
+                    ActionQueueItem actionQueueItem = new ActionQueueItem(actionItem, 0);
+
+                    Queue<ActionQueueItem> actionQueue = new Queue<ActionQueueItem>();
+
+                    actionQueue.Enqueue(actionQueueItem);
+
+                    for (int i = 1; i < 25; i++)
+                    {
+                        actionItem = new ActionItem("electrode", 198 + i, 1);
+                        actionQueueItem = new ActionQueueItem(actionItem, i);
+                        actionQueue.Enqueue(actionQueueItem);
+
+                        actionItem = new ActionItem("electrode", 197 + i, 0);
+                        actionQueueItem = new ActionQueueItem(actionItem, (decimal)(i + 0.5));
+                        actionQueue.Enqueue(actionQueueItem);
+                    }
+
+                    WebSocketMessage<Queue<ActionQueueItem>> actionDto =
+                        new WebSocketMessage<Queue<ActionQueueItem>>(WebSocketMessageTypes.Action, actionQueue);
+
+                    string serializedObject = JsonSerializer.Serialize(actionDto);
+                    await websocketService.SendMessageToAllAsync(serializedObject, cancellationTokenSource.Token);
+                }
+            }
+
+            await webSocketTask;
+            //// Start a websocket
+            //var websocketService = new WebsocketService("http://localhost:5000/ws/");
+            //var cancellationTokenSource = new CancellationTokenSource();
+
+            //await websocketService.StartServerAsync(cancellationTokenSource.Token);
+
+            //// To stop the server, you can call cancellationTokenSource.Cancel();
         }
     }
 }
