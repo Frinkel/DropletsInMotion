@@ -10985,23 +10985,22 @@
   "actuators": [
   ],
   "sensors": [
-    {
-      "valueRed": 0,
-      "valueGreen": 0,
-      "valueBlue": 0,
-      "name": "RGBsensor1",
-      "ID": 725,
-      "sensorID": 1,
-      "type": "RGB_color",
-      "positionX": 280,
-      "positionY": 170,
-      "sizeX": 40,
-      "sizeY": 40
-    }
   ],
   "inputs": [],
   "outputs": [],
   "droplets": [
+    {
+      "name": "test droplet",
+      "ID": 0,
+      "substance_name": "h20",
+      "positionX": 220,
+      "positionY": 130,
+      "sizeX": 22,
+      "sizeY": 22,
+      "color": "#0000FF",
+      "temperature": 20,
+      "electrodeID": 198
+    }
   ],
   "bubbles": [
   ],
