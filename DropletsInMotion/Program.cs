@@ -4,14 +4,14 @@ using DropletsInMotion.Services.Websocket;
 using System.Threading;
 using DropletsInMotion.Controllers;
 using DropletsInMotion.Compilers;
-
-using DropletsInMotion.Models.Simulator;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using DropletsInMotion.Communication;
 using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Domain;
+using DropletsInMotion.Communication.Simulator.Models;
 
 
 namespace DropletsInMotion
@@ -81,57 +81,9 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton(Configuration);
 
             serviceCollection.AddTransient<ConsoleController>();
+            serviceCollection.AddTransient<CommunicationEngine>();
 
             return serviceCollection.BuildServiceProvider();
-        }
-
-
-        public async static Task StartWebSocket()
-        {
-            var websocketService = new WebsocketService("http://localhost:5000/ws/");
-            var cancellationTokenSource = new CancellationTokenSource();
-            var webSocketTask = websocketService.StartServerAsync(cancellationTokenSource.Token);
-
-            while (!cancellationTokenSource.Token.IsCancellationRequested)
-            {
-                Console.WriteLine("Enter a message to send to all connected clients, or 'exit' to stop the server:");
-                var input = Console.ReadLine();
-
-                if (input?.ToLower() == "q")
-                {
-                    cancellationTokenSource.Cancel();
-                    break;
-                }
-
-                if (!string.IsNullOrWhiteSpace(input))
-                {
-                    ActionItem actionItem = new ActionItem("electrode", 198, 1);
-                    ActionQueueItem actionQueueItem = new ActionQueueItem(actionItem, 0);
-
-                    Queue<ActionQueueItem> actionQueue = new Queue<ActionQueueItem>();
-
-                    actionQueue.Enqueue(actionQueueItem);
-
-                    for (int i = 1; i < 25; i++)
-                    {
-                        actionItem = new ActionItem("electrode", 198 + i, 1);
-                        actionQueueItem = new ActionQueueItem(actionItem, i);
-                        actionQueue.Enqueue(actionQueueItem);
-
-                        actionItem = new ActionItem("electrode", 197 + i, 0);
-                        actionQueueItem = new ActionQueueItem(actionItem, (decimal)(i + 0.5));
-                        actionQueue.Enqueue(actionQueueItem);
-                    }
-
-                    WebSocketMessage<Queue<ActionQueueItem>> actionDto =
-                        new WebSocketMessage<Queue<ActionQueueItem>>(WebSocketMessageTypes.Action, actionQueue);
-
-                    string serializedObject = JsonSerializer.Serialize(actionDto);
-                    await websocketService.SendMessageToAllAsync(serializedObject, cancellationTokenSource.Token);
-                }
-            }
-
-            await webSocketTask;
         }
     }
 }

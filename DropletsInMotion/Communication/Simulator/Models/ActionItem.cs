@@ -1,7 +1,7 @@
 ﻿
 using System.Text.Json.Serialization;
 
-namespace DropletsInMotion.Models.Simulator
+namespace DropletsInMotion.Communication.Simulator.Models
 {
     public class ActionItem
     {

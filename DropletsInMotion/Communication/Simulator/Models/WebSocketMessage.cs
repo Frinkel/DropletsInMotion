@@ -1,5 +1,4 @@
-﻿
-namespace DropletsInMotion.Models.Simulator
+﻿namespace DropletsInMotion.Communication.Simulator.Models
 {
     public class WebSocketMessage<T>
     {
