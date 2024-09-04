@@ -3,12 +3,15 @@ using System.Text.Json;
 using DropletsInMotion.Services.Websocket;
 using System.Threading;
 using DropletsInMotion.Controllers;
+using DropletsInMotion.Compilers;
+
 using DropletsInMotion.Models.Simulator;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using DropletsInMotion.Domain;
 
 
 namespace DropletsInMotion
@@ -59,7 +62,8 @@ namespace DropletsInMotion
                 Console.WriteLine(move);
             }
 
-
+            Compiler compiler = new Compiler(listener.Droplets, listener.Moves);
+            compiler.Compile();
             //await StartWebSocket();
         }
 
