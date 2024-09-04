@@ -10,6 +10,7 @@ namespace DropletsInMotion.Compilers
         public Electrode[][] Board { get; set; }
         public List<Droplet> Droplets { get; } = new List<Droplet>();
         public List<Move> Moves { get; } = new List<Move>();
+        public decimal time = 0m;
 
         public Compiler(List<Droplet> droplets, List<Move> moves)
         {
@@ -35,13 +36,15 @@ namespace DropletsInMotion.Compilers
 
             foreach (Move move in Moves)
             {
-                boardActions.Concat(CompileMove(move));
+                boardActions.AddRange(CompileMove(move, time));
+                time = boardActions.Last().Time + 1m;
             }
 
+            boardActions.OrderBy(b => b.Time).ToList();
             return boardActions;
         }
 
-        public List<BoardActionDto> CompileMove(Move move)
+        public List<BoardActionDto> CompileMove(Move move, decimal compileTime)
         {
             List<BoardActionDto> boardActions = new List<BoardActionDto>();
             string dropletName = move.DropletName;
@@ -57,7 +60,7 @@ namespace DropletsInMotion.Compilers
             int targetX = move.NewPositionX;
             int targetY = move.NewPositionY;
 
-            decimal time = 0m;
+            decimal time = compileTime;
 
             // Move horizontally first (if needed)
             while (currentX != targetX)
