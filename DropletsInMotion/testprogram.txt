@@ -1,5 +1,2 @@
-1
-2
-3
-Alex
-Joel
+Droplet(d1, 15, 15, 0.1);
+Move(d1, 3, 3);
