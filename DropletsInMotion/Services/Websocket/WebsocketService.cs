@@ -75,7 +75,7 @@ namespace DropletsInMotion.Services.Websocket
                     Console.WriteLine($"Received message: {message}");
 
                     // Optionally, echo the message back to the client
-                    await SendMessageAsync(webSocket, $"Echo: {message}", cancellationToken);
+                    //await SendMessageAsync(webSocket, $"Echo: {message}", cancellationToken);
                 }
             }
             catch (WebSocketException ex)

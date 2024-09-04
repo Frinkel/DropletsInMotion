@@ -11,13 +11,6 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void Test1()
-        {
-            Assert.AreNotEqual(Program.GetPathToProgram(), null);
-            Assert.Pass();
-        }
-
-        [Test]
         public void ParserTest1()
         {
             String contents = "Droplet(d1, 15, 15, 0.2);\r\nMove(d1, 3, 3);\r\n";

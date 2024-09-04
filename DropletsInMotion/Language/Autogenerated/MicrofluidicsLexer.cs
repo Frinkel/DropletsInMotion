@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Users/alexa/Documents/GitHub/DropletsInMotion/DropletsInMotion/language/Microfluidics.g4 by ANTLR 4.13.2
+// Generated from C:/Github/DropletsInMotion/DropletsInMotion/language/Microfluidics.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
