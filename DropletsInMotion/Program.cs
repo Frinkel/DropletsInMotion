@@ -32,32 +32,32 @@ namespace DropletsInMotion
             Console.WriteLine("Input Program:");
             Console.WriteLine(contents);
 
-            //// Parse the contents
-            //var inputStream = new AntlrInputStream(contents);
-            //var lexer = new MicrofluidicsLexer(inputStream);
-            //var commonTokenStream = new CommonTokenStream(lexer);
-            //var parser = new MicrofluidicsParser(commonTokenStream);
+            // Parse the contents
+            var inputStream = new AntlrInputStream(contents);
+            var lexer = new MicrofluidicsLexer(inputStream);
+            var commonTokenStream = new CommonTokenStream(lexer);
+            var parser = new MicrofluidicsParser(commonTokenStream);
 
-            //// Get the root of the parse tree (starting with 'program')
+            // Get the root of the parse tree (starting with 'program')
 
-            //var listener = new MicrofluidicsCustomListener();
+            var listener = new MicrofluidicsCustomListener();
 
-            //// Walk the parse tree with the custom listener
-            //var tree = parser.program();
-            //ParseTreeWalker.Default.Walk(listener, tree);
+            // Walk the parse tree with the custom listener
+            var tree = parser.program();
+            ParseTreeWalker.Default.Walk(listener, tree);
 
-            //// Output the collected droplets and moves
-            //Console.WriteLine("Droplets:");
-            //foreach (var droplet in listener.Droplets)
-            //{
-            //    Console.WriteLine(droplet);
-            //}
+            // Output the collected droplets and moves
+            Console.WriteLine("Droplets:");
+            foreach (var droplet in listener.Droplets)
+            {
+                Console.WriteLine(droplet);
+            }
 
-            //Console.WriteLine("Moves:");
-            //foreach (var move in listener.Moves)
-            //{
-            //    Console.WriteLine(move);
-            //}
+            Console.WriteLine("Moves:");
+            foreach (var move in listener.Moves)
+            {
+                Console.WriteLine(move);
+            }
 
 
             //await StartWebSocket();
