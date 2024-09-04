@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Text.Json;
-using DropletsInMotion.Services.Websocket;
 using System.Threading;
 using DropletsInMotion.Controllers;
 using DropletsInMotion.Compilers;
@@ -35,6 +34,8 @@ namespace DropletsInMotion
             string contents = File.ReadAllText(path);
             Console.WriteLine("Input Program:");
             Console.WriteLine(contents);
+            
+
 
             // Parse the contents
             var inputStream = new AntlrInputStream(contents);
@@ -50,22 +51,19 @@ namespace DropletsInMotion
             var tree = parser.program();
             ParseTreeWalker.Default.Walk(listener, tree);
 
-            // Output the collected droplets and moves
-            Console.WriteLine("Droplets:");
-            foreach (var droplet in listener.Droplets)
-            {
-                Console.WriteLine(droplet);
-            }
+            CommunicationEngine communicationEngine = new CommunicationEngine(true);
+            await communicationEngine.StartCommunication();
+            await communicationEngine.WaitForConnection();
+            Console.WriteLine("Press any key to start compilation");
+            Console.ReadLine();
+            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, communicationEngine);
+            await compiler.Compile();
 
-            Console.WriteLine("Moves:");
-            foreach (var move in listener.Moves)
+            string closeConsole = "";
+            while (closeConsole != "q")
             {
-                Console.WriteLine(move);
+                closeConsole = Console.ReadLine() ?? "";
             }
-
-            Compiler compiler = new Compiler(listener.Droplets, listener.Moves);
-            compiler.Compile();
-            //await StartWebSocket();
         }
 
 
@@ -81,7 +79,6 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton(Configuration);
 
             serviceCollection.AddTransient<ConsoleController>();
-            serviceCollection.AddTransient<CommunicationEngine>();
 
             return serviceCollection.BuildServiceProvider();
         }

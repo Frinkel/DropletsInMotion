@@ -14,20 +14,33 @@ namespace DropletsInMotion.Communication.Simulator
     {
         private WebsocketService? _websocketService;
         private CancellationTokenSource? _cancellationTokenSource;
+        public Task? WebSocketTask { get; private set; }
 
-        //public SimulationCommunicationEngine()
-        //{}
 
-        public async void StartCommunication()
+        public async Task StartCommunication()
         {
-            _websocketService = new WebsocketService("http://localhost:5000/ws/");
             _cancellationTokenSource = new CancellationTokenSource();
-            var webSocketTask = _websocketService.StartServerAsync(_cancellationTokenSource.Token);
+            _websocketService = new WebsocketService("http://localhost:5000/ws/");
 
-            await webSocketTask;
+            WebSocketTask = Task.Run(async () =>
+            {
+                await _websocketService.StartServerAsync(_cancellationTokenSource.Token);
+            });
+
+            await Task.Delay(100);
         }
 
-        public async void SendAction(List<BoardActionDto> boardActionDtoList)
+        public async Task WaitForConnection()
+        {
+            if (_websocketService == null)
+            {
+                throw new Exception("Error: Websocket is not defined");
+            }
+
+            await _websocketService.WaitForClientConnectionAsync();
+        }
+
+        public async Task SendActions(List<BoardActionDto> boardActionDtoList)
         {
             if (_websocketService == null)
             {

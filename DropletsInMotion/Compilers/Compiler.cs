@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Domain;
+﻿using DropletsInMotion.Communication;
+using DropletsInMotion.Domain;
 using DropletsInMotion.Compilers.Models;
 
 
@@ -7,13 +8,17 @@ namespace DropletsInMotion.Compilers
 {
     public class Compiler
     {
+        public CommunicationEngine CommunicationEngine;
+
         public Electrode[][] Board { get; set; }
         public List<Droplet> Droplets { get; } = new List<Droplet>();
         public List<Move> Moves { get; } = new List<Move>();
         public decimal time = 0m;
 
-        public Compiler(List<Droplet> droplets, List<Move> moves)
+        public Compiler(List<Droplet> droplets, List<Move> moves, CommunicationEngine communicationEngine)
         {
+            CommunicationEngine = communicationEngine;
+
             Droplets = droplets;
             Moves = moves;
 
@@ -30,18 +35,26 @@ namespace DropletsInMotion.Compilers
             }
         }
 
-        public List<BoardActionDto> Compile()
+        public async Task Compile()
         {
             List < BoardActionDto > boardActions = new List <BoardActionDto >();
 
             foreach (Move move in Moves)
             {
                 boardActions.AddRange(CompileMove(move, time));
-                time = boardActions.Last().Time + 1m;
+                if (boardActions.Count > 0)
+                {
+                    time = boardActions.Last().Time + 1m;
+                }
             }
 
             boardActions.OrderBy(b => b.Time).ToList();
-            return boardActions;
+
+
+            //await CommunicationEngine.StartCommunication();
+            Console.WriteLine("We started the communication!");
+            await CommunicationEngine.SendActions(boardActions);
+            Console.WriteLine("We send something!");
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)
@@ -138,5 +151,6 @@ namespace DropletsInMotion.Compilers
 
             return boardString.ToString();
         }
+
     }
 }

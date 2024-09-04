@@ -9,6 +9,8 @@ namespace DropletsInMotion.Communication.Simulator.Services
         private readonly HttpListener _httpListener;
         private readonly string _prefix;
         private readonly List<WebSocket> _connectedClients;
+        private readonly TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
+
 
         public WebsocketService(string prefix)
         {
@@ -34,6 +36,8 @@ namespace DropletsInMotion.Communication.Simulator.Services
 
                     // Add the new client to the list
                     _connectedClients.Add(webSocket);
+                    _clientConnectionTask.TrySetResult(true);
+
                     Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}");
                     Console.WriteLine($"Total connected clients: {_connectedClients.Count}");
 
@@ -49,6 +53,11 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
 
             _httpListener.Stop();
+        }
+
+        public Task WaitForClientConnectionAsync()
+        {
+            return _clientConnectionTask.Task;
         }
 
         private async Task HandleConnectionAsync(WebSocket webSocket, CancellationToken cancellationToken)
@@ -109,6 +118,12 @@ namespace DropletsInMotion.Communication.Simulator.Services
             var buffer = new ArraySegment<byte>(encodedMessage);
 
             await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+        }
+
+
+        public int GetNumberOfConnectedClients()
+        {
+            return _connectedClients.Count;
         }
     }
 }

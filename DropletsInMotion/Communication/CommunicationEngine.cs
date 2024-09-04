@@ -9,7 +9,7 @@ using DropletsInMotion.Compilers.Models;
 
 namespace DropletsInMotion.Communication
 {
-    internal class CommunicationEngine
+    public class CommunicationEngine : ICommunication
     {
         private ICommunication _communication;
 
@@ -25,20 +25,25 @@ namespace DropletsInMotion.Communication
             }
         }
 
-        public void StartCommunication(bool isSimulatorCommunication)
-        {
-           _communication.StartCommunication();
+        public async Task StartCommunication()
+        { 
+            await _communication.StartCommunication();
         }
 
-        public void SendAction(List<BoardActionDto> boardActionDtoList)
+        public async Task SendActions(List<BoardActionDto> boardActionDtoList)
         {
-            _communication.SendAction(boardActionDtoList);
+            await _communication.SendActions(boardActionDtoList);
         }
 
-        public void SendRequest()
+        public void SendRequest<T>(T request)
         {
             throw new NotImplementedException();
-            //_communication.SendRequest();
+        }
+
+        public async Task WaitForConnection()
+        {
+            Console.WriteLine("Waiting for a client to connect...");
+            await _communication.WaitForConnection();
         }
     }
 }

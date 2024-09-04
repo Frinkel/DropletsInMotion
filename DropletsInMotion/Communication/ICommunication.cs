@@ -9,8 +9,9 @@ namespace DropletsInMotion.Communication
 {
     internal interface ICommunication
     {
-        public void StartCommunication();
-        public void SendAction(List<BoardActionDto> boardActionDtoList);
+        public Task StartCommunication();
+        public Task SendActions(List<BoardActionDto> boardActionDtoList);
         public void SendRequest<T>(T request);
+        public Task WaitForConnection();
     }
 }

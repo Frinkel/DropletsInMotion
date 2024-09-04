@@ -68,7 +68,7 @@ namespace DropletsInMotion.Controllers
                 throw new ArgumentException("Path to board configuration cannot be null!");
             }
 
-            Console.WriteLine($"Platform configuration path {path}");
+            Console.WriteLine($"Platform configuration path {path}\n");
             return path;
         }
 
@@ -103,7 +103,7 @@ namespace DropletsInMotion.Controllers
                 throw new ArgumentException("Path to program cannot be null!");
             }
 
-            Console.WriteLine($"Program path {path}");
+            Console.WriteLine($"Program path {path}\n");
             return path;
         }
     }
