@@ -8,6 +8,9 @@ namespace DropletsInMotion.Controllers
     {
         public IConfiguration _configuration;
 
+        public string ProgramPath { get; set; }
+        public string PlatformPath { get; set; }
+
         public bool IsDevelopment { get; private set;  }
         public string? DevelopmentPath { get; private set;  }
         public string? DevelopmentProgram { get; private set; }
@@ -25,8 +28,8 @@ namespace DropletsInMotion.Controllers
         public void GetInitialInformation()
         {
             Console.WriteLine("Droplets In Motion - a DMF toolchain");
-            GetPathToBoardConfiguration();
-            GetPathToProgram();
+            PlatformPath = GetPathToBoardConfiguration();
+            ProgramPath = GetPathToProgram();
         }
 
         public string GetPathToBoardConfiguration()
@@ -35,11 +38,22 @@ namespace DropletsInMotion.Controllers
 
             if (!IsDevelopment)
             {
-                while (path == null)
+                while (path == null || path?.Trim() == "")
                 {
-                    Console.Write("Enter the path to your program: ");
+                    Console.Write("Enter the path to your platform configuration: ");
                     // TODO: Add validation logic for the path
                     path = Console.ReadLine();
+
+                    if (!File.Exists(path))
+                    {
+                        Console.WriteLine($"No file found on path \"{path}\"");
+                        path = null;
+                    } else if (Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("File is not a JSON file");
+                        path = null;
+                    }
+                    
                 }
             }
             else
@@ -49,7 +63,6 @@ namespace DropletsInMotion.Controllers
                 path = projectDirectory + DevelopmentPath + DevelopmentPlatform;
             }
 
-            // This should not happen
             if (path == null)
             {
                 throw new ArgumentException("Path to board configuration cannot be null!");
@@ -65,11 +78,17 @@ namespace DropletsInMotion.Controllers
 
             if (!IsDevelopment)
             {
-                while (path == null)
+                while (path == null || path?.Trim() == "")
                 {
                     Console.Write("Enter the path to your program: ");
                     // TODO: Add validation logic for the path
                     path = Console.ReadLine();
+                    
+                    if (!File.Exists(path))
+                    {
+                        Console.WriteLine($"No file found on path \"{path}\"");
+                        path = null;
+                    }
                 }
             }
             else
@@ -84,6 +103,7 @@ namespace DropletsInMotion.Controllers
                 throw new ArgumentException("Path to program cannot be null!");
             }
 
+            Console.WriteLine($"Program path {path}");
             return path;
         }
     }

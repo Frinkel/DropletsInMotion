@@ -28,7 +28,8 @@ namespace DropletsInMotion
 
             // Get the consoleController
             var consoleController = serviceProvider.GetRequiredService<ConsoleController>();
-            string path = consoleController.GetPathToProgram();
+            consoleController.GetInitialInformation();
+            string path = consoleController.ProgramPath;
 
             // Read file
             string contents = File.ReadAllText(path);
