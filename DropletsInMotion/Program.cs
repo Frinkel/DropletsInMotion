@@ -56,7 +56,7 @@ namespace DropletsInMotion
             await communicationEngine.WaitForConnection();
             Console.WriteLine("Press any key to start compilation");
             Console.ReadLine();
-            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, communicationEngine);
+            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, communicationEngine, consoleController.PlatformPath);
             await compiler.Compile();
 
             string closeConsole = "";
