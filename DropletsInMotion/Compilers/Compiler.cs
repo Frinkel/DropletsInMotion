@@ -54,8 +54,8 @@ namespace DropletsInMotion.Compilers
 
             await CommunicationEngine.SendActions(boardActions);
 
-            Console.WriteLine("Sending sensor request");
-            await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
+            //Console.WriteLine("Sending sensor request");
+            //await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)
@@ -114,7 +114,7 @@ namespace DropletsInMotion.Compilers
                 else
                 {
                     currentY--;
-                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("splitHorizontal", droplet, time);
+                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveUp", droplet, time);
                     boardActions.AddRange(appliedMove);
                     droplet.PositionY = currentY;
                     time = appliedMove.Last().Time;

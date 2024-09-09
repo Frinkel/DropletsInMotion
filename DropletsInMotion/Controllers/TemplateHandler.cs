@@ -19,7 +19,7 @@ namespace DropletsInMotion.Controllers
             string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
             string templatesPath = Path.Combine(projectDirectory, "Assets", "Templates");
             LoadTemplatesFromFiles(templatesPath);
-            PrintAllTemplates();
+            //PrintAllTemplates();
         }
 
         private void LoadTemplatesFromFiles(string folderPath)
@@ -59,8 +59,6 @@ namespace DropletsInMotion.Controllers
                 if (line.Contains(","))
                 {
                     string[] parts = line.Split(',');
-                    Console.WriteLine(parts[0].Trim());
-                    Console.WriteLine(decimal.Parse(parts[0].Trim(), CultureInfo.InvariantCulture));
                     timeOffset = decimal.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
                     rowIndex = 0; // Reset row index for the next grid
                 }
