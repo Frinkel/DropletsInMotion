@@ -52,11 +52,10 @@ namespace DropletsInMotion.Compilers
 
             boardActions.OrderBy(b => b.Time).ToList();
 
-
-            //await CommunicationEngine.StartCommunication();
-            Console.WriteLine("We started the communication!");
             await CommunicationEngine.SendActions(boardActions);
-            Console.WriteLine("We send something!");
+
+            Console.WriteLine("Sending sensor request");
+            await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)

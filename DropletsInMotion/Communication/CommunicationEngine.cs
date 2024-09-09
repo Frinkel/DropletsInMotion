@@ -35,9 +35,9 @@ namespace DropletsInMotion.Communication
             await _communication.SendActions(boardActionDtoList);
         }
 
-        public void SendRequest<T>(T request)
+        public async Task SendRequest(BoardSensorRequest sensorRequest)
         {
-            throw new NotImplementedException();
+            await _communication.SendRequest(sensorRequest);
         }
 
         public async Task WaitForConnection()

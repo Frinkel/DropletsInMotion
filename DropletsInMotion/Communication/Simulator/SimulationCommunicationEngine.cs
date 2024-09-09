@@ -26,7 +26,7 @@ namespace DropletsInMotion.Communication.Simulator
             {
                 await _websocketService.StartServerAsync(_cancellationTokenSource.Token);
             });
-
+            //_websocketService.StartServerAsync(_cancellationTokenSource.Token);
             await Task.Delay(100);
         }
 
@@ -64,9 +64,56 @@ namespace DropletsInMotion.Communication.Simulator
             await _websocketService.SendMessageToAllAsync(serializedObject, _cancellationTokenSource.Token);
         }
 
-        public void SendRequest<T>(T request)
+        // TODO: We should return something useful in this function!
+        public async Task SendRequest(BoardSensorRequest sensorRequest)
         {
-            throw new NotImplementedException();
+            if (_websocketService == null)
+            {
+                throw new Exception("Error: An action cannot be sent without a Websocket communication!");
+            }
+
+            WebSocketMessage<SensorRequest> sensorRequestDto =
+                new WebSocketMessage<SensorRequest>(WebSocketMessageTypes.Sensor, new SensorRequest(sensorRequest.Id, sensorRequest.Time));
+
+            string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
+
+            Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
+
+            var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+
+            
+
+            // Handle different response types
+            switch (response.Type)
+            {
+                case (WebSocketResponseTypes.Sensor):
+                    var sensor = JsonSerializer.Deserialize<Sensor>((response.Data?.ToString()) ?? string.Empty);
+
+                    if (sensor == null)
+                    {
+                        throw new Exception($"Sensor data was faulty: {response.Data}");
+                    }
+                    
+                    // Handle sensor types
+                    switch (sensor.Type)
+                    {
+                        case SensorTypes.Rgb:
+                            Console.WriteLine($"Color = ({sensor.ValueRed}, {sensor.ValueGreen}, {sensor.ValueBlue})");
+                            // TODO: This should return something useful!
+                            break;
+                        case SensorTypes.Temperature:
+                            Console.WriteLine($"Temperature = {sensor.ValueTemperature}");
+                            // TODO: This should return something useful!
+                            break;
+                        default:
+                            throw new Exception("The sensor type was not recognized!");
+                    }
+
+                    break;
+                    
+                default:
+                    throw new Exception("The response type was not recognized!");
+            }
         }
     }
 }
