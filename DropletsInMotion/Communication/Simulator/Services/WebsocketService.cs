@@ -1,6 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.WebSockets;
+using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
+using DropletsInMotion.Communication.Simulator.Models;
 
 namespace DropletsInMotion.Communication.Simulator.Services
 {
@@ -10,7 +14,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
         private readonly string _prefix;
         private readonly List<WebSocket> _connectedClients;
         private readonly TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
-
+        private readonly Dictionary<string, TaskCompletionSource<WebSocketMessage<object>>> _pendingRequests = new();
 
         public WebsocketService(string prefix)
         {
@@ -25,35 +29,54 @@ namespace DropletsInMotion.Communication.Simulator.Services
             _httpListener.Start();
             Console.WriteLine($"WebSocket server started at {_prefix}");
 
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                HttpListenerContext httpContext = await _httpListener.GetContextAsync();
-
-                if (httpContext.Request.IsWebSocketRequest)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    HttpListenerWebSocketContext webSocketContext = await httpContext.AcceptWebSocketAsync(subProtocol: null);
-                    WebSocket webSocket = webSocketContext.WebSocket;
+                    HttpListenerContext httpContext = await _httpListener.GetContextAsync();
 
-                    // Add the new client to the list
-                    _connectedClients.Add(webSocket);
-                    _clientConnectionTask.TrySetResult(true);
+                    if (httpContext.Request.IsWebSocketRequest)
+                    {
 
-                    Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}");
-                    Console.WriteLine($"Total connected clients: {_connectedClients.Count}");
+                        if (_connectedClients.Count >= 1)
+                        {
+                            Console.WriteLine("Rejected new connection, only one client is allowed.");
+                            httpContext.Response.StatusCode = 409;
+                            httpContext.Response.Close();
+                            continue;
+                        }
 
-                    // Handle connection in the background
-                    _ = Task.Run(() => HandleConnectionAsync(webSocket, cancellationToken));
-                }
-                else
-                {
-                    httpContext.Response.StatusCode = 400;
-                    httpContext.Response.Close();
-                    Console.WriteLine("Received non-WebSocket request, responded with 400 Bad Request.");
+                        HttpListenerWebSocketContext webSocketContext = await httpContext.AcceptWebSocketAsync(subProtocol: null);
+                        WebSocket webSocket = webSocketContext.WebSocket;
+
+                        Console.WriteLine("Client connected");
+                        _connectedClients.Add(webSocket);
+
+                        Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}");
+                        Console.WriteLine($"Total connected clients: {_connectedClients.Count}");
+
+                        _ = Task.Run(() => HandleConnectionAsync(webSocket, cancellationToken));
+
+                        _clientConnectionTask.TrySetResult(true);
+                    }
+                    else
+                    {
+                        httpContext.Response.StatusCode = 400;
+                        httpContext.Response.Close();
+                        Console.WriteLine("Received non-WebSocket request, responded with 400 Bad Request.");
+                    }
                 }
             }
-
-            _httpListener.Stop();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred in WebSocket server: {ex.Message}");
+            }
+            finally
+            {
+                _httpListener.Stop();
+            }
         }
+
 
         public Task WaitForClientConnectionAsync()
         {
@@ -76,11 +99,8 @@ namespace DropletsInMotion.Communication.Simulator.Services
                         break;
                     }
 
-                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    Console.WriteLine($"Received message: {message}");
-
-                    // Optionally, echo the message back to the client
-                    //await SendMessageAsync(webSocket, $"Echo: {message}", cancellationToken);
+                    // Handle the messages
+                    HandleReceivedMessages(result, buffer);
                 }
             }
             catch (WebSocketException ex)
@@ -94,6 +114,28 @@ namespace DropletsInMotion.Communication.Simulator.Services
                 Console.WriteLine($"Client disconnected. Total connected clients: {_connectedClients.Count}");
 
                 webSocket.Dispose();
+            }
+        }
+
+        private void HandleReceivedMessages(WebSocketReceiveResult result, byte[] buffer)
+        {
+            //var buffer = new byte[1024 * 4];
+
+            var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+            //var response = JsonSerializer.Deserialize<WebSocketMessage<T>>(message);
+            var baseMessage = JsonSerializer.Deserialize<WebSocketMessage<object>>(message);
+
+            if (baseMessage == null || baseMessage.Type == null || baseMessage.Data == null)
+            {
+                throw new Exception($"Response is missing data: {message}");
+            }
+
+            Console.WriteLine($"Received a message with request id {baseMessage.RequestId}");
+
+            if (_pendingRequests.TryGetValue(baseMessage.RequestId.ToString(), out var tcs))
+            {
+                tcs.TrySetResult(baseMessage);
             }
         }
 
@@ -118,6 +160,20 @@ namespace DropletsInMotion.Communication.Simulator.Services
             var buffer = new ArraySegment<byte>(encodedMessage);
 
             await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+        }
+
+        public async Task<WebSocketMessage<object>> SendRequestAndWaitForResponseAsync(string requestId, string message, CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<WebSocketMessage<object>>();
+            _pendingRequests[requestId] = tcs;
+
+            await SendMessageToAllAsync(message, cancellationToken);
+
+            var response = await tcs.Task;
+
+            _pendingRequests.Remove(requestId);
+
+            return response;
         }
 
 

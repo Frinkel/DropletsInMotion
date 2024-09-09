@@ -11,7 +11,7 @@ namespace DropletsInMotion.Communication
     {
         public Task StartCommunication();
         public Task SendActions(List<BoardActionDto> boardActionDtoList);
-        public void SendRequest<T>(T request);
+        public Task SendRequest(BoardSensorRequest sensorRequest);
         public Task WaitForConnection();
     }
 }
