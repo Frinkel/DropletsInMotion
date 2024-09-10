@@ -17,7 +17,7 @@ namespace DropletsInMotion.Compilers.Models
         public decimal Time { get; set; }
         public override string ToString()
         {
-            return $"BoardSensorRequest:(Id: {Id}, Time: {Time})";
+            return $"BoardSensorRequest(Id: {Id}, Time: {Time})";
         }
     }
 }

@@ -37,7 +37,7 @@ internal class SimulationCommunicationEngine : ICommunication
         {
             await _websocketService.StartServerAsync(_cancellationTokenSource.Token);
         });
-        //_websocketService.StartServerAsync(_cancellationTokenSource.Token);
+
         await Task.Delay(100);
     }
 
@@ -79,7 +79,8 @@ internal class SimulationCommunicationEngine : ICommunication
 
         string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
 
-        Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
+        //Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
+        Console.WriteLine(sensorRequestDto);
 
         var response = await WebsocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 

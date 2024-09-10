@@ -39,7 +39,7 @@ namespace DropletsInMotion.Compilers
 
         public async Task Compile()
         {
-            List < BoardActionDto > boardActions = new List <BoardActionDto >();
+            List <BoardActionDto> boardActions = new List <BoardActionDto >();
 
             foreach (Move move in Moves)
             {
@@ -54,8 +54,8 @@ namespace DropletsInMotion.Compilers
 
             await CommunicationEngine.SendActions(boardActions);
 
-            //Console.WriteLine("Sending sensor request");
-            //await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
+            Console.WriteLine("\nSending sensor request");
+            await CommunicationEngine.SendRequest(new BoardSensorRequest(725, time + 1m));
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)

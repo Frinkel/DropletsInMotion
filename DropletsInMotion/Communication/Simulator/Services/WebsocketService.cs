@@ -163,10 +163,24 @@ namespace DropletsInMotion.Communication.Simulator.Services
         private async Task SendMessageAsync(WebSocket webSocket, string message, CancellationToken cancellationToken)
         {
             var encodedMessage = Encoding.UTF8.GetBytes(message);
-            var buffer = new ArraySegment<byte>(encodedMessage);
+            int bufferSize = 1024 * 32; // Buffer size (32KB)
+            int offset = 0;
+            int messageLength = encodedMessage.Length;
 
-            await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+            while (offset < messageLength)
+            {
+                int remainingMessageLength = messageLength - offset;
+                int chunkSize = Math.Min(bufferSize, remainingMessageLength);
+                bool endOfMessage = (offset + chunkSize) >= messageLength;
+
+                var chunkBuffer = new ArraySegment<byte>(encodedMessage, offset, chunkSize);
+
+                await webSocket.SendAsync(chunkBuffer, WebSocketMessageType.Text, endOfMessage, cancellationToken);
+
+                offset += chunkSize;
+            }
         }
+
 
         public async Task<WebSocketMessage<object>> SendRequestAndWaitForResponseAsync(string requestId, string message, CancellationToken cancellationToken)
         {
