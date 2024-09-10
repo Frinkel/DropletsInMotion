@@ -71,7 +71,8 @@ namespace DropletsInMotion
                             // TODO: Maybe we need a filereader here to also handle configuration?
                             programContent = File.ReadAllText(path);
                             Console.WriteLine("Program:");
-                            consoleController.WriteColor(programContent, ConsoleColor.Black, ConsoleColor.DarkCyan);
+                            Console.WriteLine(programContent);
+                            //consoleController.WriteColor(programContent, ConsoleColor.Black, ConsoleColor.DarkCyan);
                             Console.WriteLine();
 
                             currentState = ProgramState.WaitingForClientConnection;
