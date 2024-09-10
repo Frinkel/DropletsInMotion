@@ -30,6 +30,11 @@ namespace DropletsInMotion.Communication
             await _communication.StartCommunication();
         }
 
+        public async Task StopCommunication()
+        {
+            await _communication.StopCommunication();
+        }
+
         public async Task SendActions(List<BoardActionDto> boardActionDtoList)
         {
             await _communication.SendActions(boardActionDtoList);
@@ -42,8 +47,17 @@ namespace DropletsInMotion.Communication
 
         public async Task WaitForConnection()
         {
-            Console.WriteLine("Waiting for a client to connect...");
             await _communication.WaitForConnection();
+        }
+
+        public async Task<bool> IsClientConnected()
+        {
+            return await _communication.IsClientConnected();
+        }
+
+        public async Task<bool> IsConnectionOpen()
+        {
+            return await _communication.IsConnectionOpen();
         }
     }
 }

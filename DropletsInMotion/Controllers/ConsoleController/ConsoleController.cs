@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace DropletsInMotion.Controllers
+namespace DropletsInMotion.Controllers.ConsoleController
 {
     internal class ConsoleController
     {
@@ -11,8 +11,8 @@ namespace DropletsInMotion.Controllers
         public string ProgramPath { get; set; }
         public string PlatformPath { get; set; }
 
-        public bool IsDevelopment { get; private set;  }
-        public string? DevelopmentPath { get; private set;  }
+        public bool IsDevelopment { get; private set; }
+        public string? DevelopmentPath { get; private set; }
         public string? DevelopmentProgram { get; private set; }
         public string? DevelopmentPlatform { get; private set; }
 
@@ -27,7 +27,6 @@ namespace DropletsInMotion.Controllers
 
         public void GetInitialInformation()
         {
-            Console.WriteLine("Droplets In Motion - a DMF toolchain");
             PlatformPath = GetPathToBoardConfiguration();
             ProgramPath = GetPathToProgram();
         }
@@ -48,12 +47,13 @@ namespace DropletsInMotion.Controllers
                     {
                         Console.WriteLine($"No file found on path \"{path}\"");
                         path = null;
-                    } else if (Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase))
+                    }
+                    else if (Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase))
                     {
                         Console.WriteLine("File is not a JSON file");
                         path = null;
                     }
-                    
+
                 }
             }
             else
@@ -83,7 +83,7 @@ namespace DropletsInMotion.Controllers
                     Console.Write("Enter the path to your program: ");
                     // TODO: Add validation logic for the path
                     path = Console.ReadLine();
-                    
+
                     if (!File.Exists(path))
                     {
                         Console.WriteLine($"No file found on path \"{path}\"");
@@ -105,6 +105,22 @@ namespace DropletsInMotion.Controllers
 
             Console.WriteLine($"Program path {path}\n");
             return path;
+        }
+
+
+        public void WriteSuccess(string message)
+        {
+            WriteColor(message, ConsoleColor.Green);
+        }
+
+        public void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
+        {
+            Console.BackgroundColor = backgroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

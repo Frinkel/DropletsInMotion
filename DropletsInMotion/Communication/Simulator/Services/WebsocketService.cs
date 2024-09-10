@@ -15,6 +15,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
         private readonly List<WebSocket> _connectedClients;
         private readonly TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
         private readonly Dictionary<string, TaskCompletionSource<WebSocketMessage<object>>> _pendingRequests = new();
+        private bool _isWebsocketRunning = false;
 
         public WebsocketService(string prefix)
         {
@@ -22,25 +23,26 @@ namespace DropletsInMotion.Communication.Simulator.Services
             _prefix = prefix;
             _httpListener.Prefixes.Add(_prefix);
             _connectedClients = new List<WebSocket>();
+            _isWebsocketRunning = false;
         }
 
-        public async Task StartServerAsync(CancellationToken cancellationToken)
+        public async Task StartServerAsync(CancellationToken serverCancellationToken)
         {
             _httpListener.Start();
-            Console.WriteLine($"WebSocket server started at {_prefix}");
+            _isWebsocketRunning = true;
+            Console.WriteLine($"WebSocket started at {_prefix}");
 
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (!serverCancellationToken.IsCancellationRequested)
                 {
                     HttpListenerContext httpContext = await _httpListener.GetContextAsync();
 
                     if (httpContext.Request.IsWebSocketRequest)
                     {
-
                         if (_connectedClients.Count >= 1)
                         {
-                            Console.WriteLine("Rejected new connection, only one client is allowed.");
+                            //Console.WriteLine("Rejected new connection, only one client is allowed.");
                             httpContext.Response.StatusCode = 409;
                             httpContext.Response.Close();
                             continue;
@@ -49,13 +51,10 @@ namespace DropletsInMotion.Communication.Simulator.Services
                         HttpListenerWebSocketContext webSocketContext = await httpContext.AcceptWebSocketAsync(subProtocol: null);
                         WebSocket webSocket = webSocketContext.WebSocket;
 
-                        Console.WriteLine("Client connected");
                         _connectedClients.Add(webSocket);
+                        _ = Task.Run(() => HandleConnectionAsync(webSocket, CancellationToken.None));  // Use a new cancellation token for client connections
 
-                        Console.WriteLine($"Client connected: {httpContext.Request.RemoteEndPoint}");
-                        Console.WriteLine($"Total connected clients: {_connectedClients.Count}");
-
-                        _ = Task.Run(() => HandleConnectionAsync(webSocket, cancellationToken));
+                        Console.WriteLine($"Client connected from {httpContext.Request.RemoteEndPoint}");
 
                         _clientConnectionTask.TrySetResult(true);
                     }
@@ -73,7 +72,13 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
             finally
             {
-                _httpListener.Stop();
+                // Only stop the listener if explicitly shutting down
+                if (serverCancellationToken.IsCancellationRequested)
+                {
+                    //Console.WriteLine("Server cancellation was called");
+                    _httpListener.Stop();
+                    _isWebsocketRunning = false;
+                }
             }
         }
 
@@ -109,13 +114,14 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
             finally
             {
-                // Remove the client from the list when the connection is closed
                 _connectedClients.Remove(webSocket);
-                Console.WriteLine($"Client disconnected. Total connected clients: {_connectedClients.Count}");
+                Console.WriteLine("Client disconnected");
 
                 webSocket.Dispose();
             }
         }
+
+
 
         private void HandleReceivedMessages(WebSocketReceiveResult result, byte[] buffer)
         {
@@ -176,10 +182,38 @@ namespace DropletsInMotion.Communication.Simulator.Services
             return response;
         }
 
+        public async Task CloseAllConnectionsAsync()
+        {
+            foreach (var webSocket in _connectedClients.ToList())
+            {
+                if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
+                {
+                    try
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client connection closed", CancellationToken.None);
+                        webSocket.Dispose();
+                        _connectedClients.Remove(webSocket);
+                        //Console.WriteLine($"Removed {webSocket.State}");
+                        //_clientConnectionTask.TrySetResult(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error closing WebSocket connection: {ex.Message}");
+                    }
+                }
+            }
+
+            //_connectedClients.Clear();
+        }
 
         public int GetNumberOfConnectedClients()
         {
             return _connectedClients.Count;
+        }
+
+        public bool IsWebsocketRunning()
+        {
+            return _isWebsocketRunning;
         }
     }
 }

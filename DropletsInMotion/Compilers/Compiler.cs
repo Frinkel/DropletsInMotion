@@ -52,8 +52,8 @@ namespace DropletsInMotion.Compilers
 
             await CommunicationEngine.SendActions(boardActions);
 
-            Console.WriteLine("Sending sensor request");
-            await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
+            //Console.WriteLine("Sending sensor request");
+            //await CommunicationEngine.SendRequest(new BoardSensorRequest(1, time));
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)
