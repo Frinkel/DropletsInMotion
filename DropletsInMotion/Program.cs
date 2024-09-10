@@ -51,7 +51,7 @@ namespace DropletsInMotion
             string path = "";
             string programContent = "";
 
-
+            
             Console.WriteLine();
 
             while (true)
@@ -108,7 +108,7 @@ namespace DropletsInMotion
                             ParseTreeWalker.Default.Walk(listener, tree);
 
                             // Compile the program
-                            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine);
+                            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);
                             await compiler.Compile();
                             // TODO: Maybe the compiler should return a status code for the compilation.
 

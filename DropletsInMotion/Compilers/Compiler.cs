@@ -1,7 +1,10 @@
-﻿using DropletsInMotion.Communication;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using DropletsInMotion.Communication;
 using DropletsInMotion.Domain;
 using DropletsInMotion.Compilers.Models;
-
+using DropletsInMotion.Compilers.Services;
+using DropletsInMotion.Controllers;
 
 
 namespace DropletsInMotion.Compilers
@@ -15,24 +18,23 @@ namespace DropletsInMotion.Compilers
         public List<Move> Moves { get; } = new List<Move>();
         public decimal time = 0m;
 
-        public Compiler(List<Droplet> droplets, List<Move> moves, CommunicationEngine communicationEngine)
+        private TemplateHandler TemplateHandler;
+
+        private PlatformService PlatformService;
+
+        public Compiler(List<Droplet> droplets, List<Move> moves, CommunicationEngine communicationEngine, string platformPath)
         {
             CommunicationEngine = communicationEngine;
 
             Droplets = droplets;
             Moves = moves;
+            PlatformService = new PlatformService(platformPath);
 
-            Board = new Electrode[32][];
+            Board = PlatformService.Board;
 
-            for (int i = 0; i < 32; i++)
-            {
-                Board[i] = new Electrode[20];
+            Console.WriteLine(Board[0][1]);
+            TemplateHandler = new TemplateHandler(Board);
 
-                for (int j = 0; j < 20; j++)
-                {
-                    Board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
-                }
-            }
         }
 
         public async Task Compile()
@@ -44,7 +46,7 @@ namespace DropletsInMotion.Compilers
                 boardActions.AddRange(CompileMove(move, time));
                 if (boardActions.Count > 0)
                 {
-                    time = boardActions.Last().Time + 1m;
+                    time = boardActions.Last().Time + 0m;
                 }
             }
 
@@ -80,23 +82,22 @@ namespace DropletsInMotion.Compilers
                 if (currentX < targetX)
                 {
                     currentX++;
+                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveRight", droplet, time);
+                    boardActions.AddRange(appliedMove);
+                    droplet.PositionX = currentX;
+                    time = appliedMove.Last().Time;
                 }
                 else
                 {
+
                     currentX--;
+                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveLeft", droplet, time);
+                    boardActions.AddRange(appliedMove);
+                    droplet.PositionX = currentX;
+                    time = appliedMove.Last().Time;
                 }
 
-                // Turn on the electrode at the new position
-                int electrodeId = Board[currentX][currentY].Id;
-                boardActions.Add(new BoardActionDto(electrodeId, 1, time));
-                time += 0.5m; // Increment time (example value, adjust as needed)
 
-                // Turn off the electrode at the previous position
-                electrodeId = Board[droplet.PositionX][droplet.PositionY].Id;
-                boardActions.Add(new BoardActionDto(electrodeId, 0, time));
-                time += 0.5m; // Increment time (example value, adjust as needed)
-
-                droplet.PositionX = currentX;
             }
 
             // Move vertically (if needed)
@@ -105,23 +106,19 @@ namespace DropletsInMotion.Compilers
                 if (currentY < targetY)
                 {
                     currentY++;
+                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveDown", droplet, time);
+                    boardActions.AddRange(appliedMove);
+                    droplet.PositionY = currentY;
+                    time = appliedMove.Last().Time;
                 }
                 else
                 {
                     currentY--;
+                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveUp", droplet, time);
+                    boardActions.AddRange(appliedMove);
+                    droplet.PositionY = currentY;
+                    time = appliedMove.Last().Time;
                 }
-
-                // Turn on the electrode at the new position
-                int electrodeId = Board[currentX][currentY].Id;
-                boardActions.Add(new BoardActionDto(electrodeId, 1, time));
-                time += 0.5m; // Increment time (example value, adjust as needed)
-
-                // Turn off the electrode at the previous position
-                electrodeId = Board[droplet.PositionX][droplet.PositionY].Id;
-                boardActions.Add(new BoardActionDto(electrodeId, 0, time));
-                time += 0.5m; // Increment time (example value, adjust as needed)
-
-                droplet.PositionY = currentY;
             }
 
             // Update the droplet's final position
@@ -135,21 +132,8 @@ namespace DropletsInMotion.Compilers
             return boardActions;
         }
 
-        public override string ToString()
-        {
-            var boardString = new System.Text.StringBuilder();
+        
 
-            for (int i = 0; i < Board.Length; i++)
-            {
-                for (int j = 0; j < Board[i].Length; j++)
-                {
-                    boardString.Append(Board[i][j].ToString() + "\t");
-                }
-                boardString.AppendLine(); // New line after each row
-            }
 
-            return boardString.ToString();
-        }
-
-    }
+}
 }
