@@ -1,13 +1,4 @@
 Droplet(d1, 3, 6, 0.1);
 Droplet(d2, 15, 12, 0.1);
 Move(d1, 6, 8);
-Move(d1, 2, 13);
-Move(d1, 7, 12);
-Move(d1, 12, 11);
-Move(d1, 12, 3);
-Move(d1, 19, 11);
-Move(d1, 25, 3);
-Move(d1, 28, 15);
-Move(d1, 19, 11);
-Move(d2, 25, 12);
-Move(d2, 9, 9);
+7 + 7;

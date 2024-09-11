@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace DropletsInMotion.Communication.Simulator.Models
+﻿namespace DropletsInMotion.Communication.Simulator.Models
 {
     public class SensorRequest
     {

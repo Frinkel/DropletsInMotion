@@ -1,17 +1,11 @@
-﻿using System.Collections;
-using System.Text.Json;
-using System.Threading;
-using DropletsInMotion.Compilers;
+﻿using DropletsInMotion.Compilers;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DropletsInMotion.Domain;
-using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Controllers.ConsoleController;
-using Microsoft.VisualBasic;
 
 
 namespace DropletsInMotion
@@ -71,10 +65,19 @@ namespace DropletsInMotion
                             // TODO: Maybe we need a filereader here to also handle configuration?
                             programContent = File.ReadAllText(path);
                             Console.WriteLine("Program:");
-                            consoleController.WriteColor(programContent, ConsoleColor.Black, ConsoleColor.DarkCyan);
+                            Console.WriteLine(programContent);
+                            //consoleController.WriteColor(programContent, ConsoleColor.Black, ConsoleColor.DarkCyan);
                             Console.WriteLine();
 
-                            currentState = ProgramState.WaitingForClientConnection;
+                            if (Configuration != null && Configuration.GetValue<bool>("Development:SkipCommunication"))
+                            {
+                                currentState = ProgramState.CompilingProgram;
+                            }
+                            else
+                            {
+                                currentState = ProgramState.WaitingForClientConnection;
+                            }
+                            
                             break;
                         case (ProgramState.WaitingForClientConnection):
 
@@ -107,6 +110,11 @@ namespace DropletsInMotion
                             var tree = parser.program();
                             ParseTreeWalker.Default.Walk(listener, tree);
                             Console.WriteLine(listener.Commands);
+
+                            if (listener.ExpressionStack.Count > 0)
+                            {
+                                Console.WriteLine("Result of the expression: " + listener.ExpressionStack.Pop());
+                            }
 
                             // Compile the program
                             Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);

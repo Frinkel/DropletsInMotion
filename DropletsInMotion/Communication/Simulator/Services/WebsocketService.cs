@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.WebSockets;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using DropletsInMotion.Communication.Simulator.Models;

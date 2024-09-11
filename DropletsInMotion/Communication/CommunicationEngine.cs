@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Communication.Simulator;
+﻿using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Compilers.Models;
 
 namespace DropletsInMotion.Communication
