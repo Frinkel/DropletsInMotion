@@ -54,11 +54,11 @@ namespace DropletsInMotion.Compilers
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
                 //print the commands
-                Console.WriteLine($"Commands to execute iteration {i}:");
-                foreach (ICommand command in commandsToExecute)
-                {
-                    Console.WriteLine(command);
-                }
+                //Console.WriteLine($"Commands to execute iteration {i}:");
+                //foreach (ICommand command in commandsToExecute)
+                //{
+                //    Console.WriteLine(command);
+                //}
 
                 boardActions.AddRange(Router.Route(Droplets, commandsToExecute, time));
                 boardActions = boardActions.OrderBy(b => b.Time).ToList();

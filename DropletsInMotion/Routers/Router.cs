@@ -45,7 +45,7 @@ public class Router
         List<BoardAction> boardActions = new List<BoardAction>();
 
 
-        Console.WriteLine("\n\n\nRunning router.....\n");
+        //Console.WriteLine("\n\n\nRunning router.....\n");
         
         
         foreach (var command in Commands)
@@ -82,7 +82,7 @@ public class Router
 
     private List<BoardAction> HandleMoveCommand(Move moveCommand)
     {
-        Console.WriteLine($"Moving droplet to ({moveCommand.PositionX}, {moveCommand.PositionY})");
+        //Console.WriteLine($"Moving droplet to ({moveCommand.PositionX}, {moveCommand.PositionY})");
 
         Droplet droplet = Droplets.Find(d => d.DropletName == moveCommand.DropletName)
                             ?? throw new InvalidOperationException($"No droplet found with name {moveCommand.DropletName}.");
@@ -99,7 +99,7 @@ public class Router
     private List<BoardAction> HandleMergeCommand(Merge mergeCommand)
     {
         // Add logic for processing the Merge command
-        Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
+        //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
 
         Droplet inputDroplet1 = Droplets.Find(d => d.DropletName == mergeCommand.InputName1)
                                 ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
@@ -133,7 +133,7 @@ public class Router
     private List<BoardAction> HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand)
     {
         // Add logic for processing the SplitByRatio command
-        Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
+        //Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
 
 
         Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByRatioCommand.InputName)
@@ -166,7 +166,7 @@ public class Router
     private List<BoardAction> HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
     {
         // Add logic for processing the SplitByVolume command
-        Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
+        //Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
 
         Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByVolumeCommand.InputName)
                                ?? throw new InvalidOperationException($"No droplet found with name {splitByVolumeCommand.InputName}.");
@@ -198,7 +198,7 @@ public class Router
     private List<BoardAction> HandleMixCommand(Mix mixCommand)
     {
         // Add logic for processing the Mix command
-        Console.WriteLine("Mixing droplets...");
+        //Console.WriteLine("Mixing droplets...");
 
         Droplet inputDroplet = Droplets.Find(d => d.DropletName == mixCommand.DropletName)
                                ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
