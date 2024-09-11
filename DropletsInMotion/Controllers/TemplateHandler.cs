@@ -123,7 +123,7 @@ namespace DropletsInMotion.Controllers
         {
             foreach (var template in templates)
             {
-                Console.WriteLine($"Template DropletName: {template.Item1}");
+                Console.WriteLine($"Template Name: {template.Item1}");
                 Console.WriteLine("Actions:");
                 foreach (var action in template.Item2)
                 {
@@ -131,6 +131,26 @@ namespace DropletsInMotion.Controllers
                 }
                 Console.WriteLine();
             }
+        }
+
+        public List<BoardAction> SpinTemplate(List<BoardAction> template)
+        {   
+            List<BoardAction> newTemplate = new List<BoardAction>();
+            int boardWidth = Board.Length;
+            foreach (var action in template)
+            {
+                BoardAction newAction = new BoardAction(action.ElectrodeId, action.Action, action.Time);
+                if (Math.Abs(action.ElectrodeId) < boardWidth)
+                {
+                    newAction.ElectrodeId *= boardWidth;
+                }
+                else
+                {
+                    newAction.ElectrodeId /= boardWidth;
+                }
+                newTemplate.Add(newAction);
+            }
+            return newTemplate;
         }
     }
 }
