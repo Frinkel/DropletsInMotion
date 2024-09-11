@@ -46,7 +46,7 @@ namespace DropletsInMotionTests
             }
 
             TemplateHandler templateHandler = new TemplateHandler(board);
-            List<(string, List<BoardActionDto>)> templates = templateHandler.templates;
+            List<(string, List<BoardAction>)> templates = templateHandler.templates;
             Console.WriteLine(templates);
             Assert.AreEqual(templates.Count, 1);
             Assert.AreEqual(templates[0].Item1, "template1");
@@ -81,7 +81,7 @@ namespace DropletsInMotionTests
         //    string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
         //    string platformPath = Path.Combine(projectDirectory, "TestAssets", "platform.json");
         //    Compiler compiler = new Compiler(droplets, moves, null, platformPath);
-        //    List<BoardActionDto> actions = compiler.Compile();
+        //    List<BoardAction> actions = compiler.Compile();
 
         //    Assert.AreEqual(8, actions.Count());
         //}

@@ -109,16 +109,14 @@ namespace DropletsInMotion
                             var listener = new MicrofluidicsCustomListener();
                             var tree = parser.program();
                             ParseTreeWalker.Default.Walk(listener, tree);
-                            Console.WriteLine(listener.Commands);
-
-                            if (listener.ExpressionStack.Count > 0)
+                            foreach (var elem in listener.Commands)
                             {
-                                Console.WriteLine("Result of the expression: " + listener.ExpressionStack.Pop());
+                                Console.WriteLine(elem.ToString());
                             }
 
                             // Compile the program
-                            Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);
-                            await compiler.Compile();
+                            //Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);
+                            //await compiler.Compile();
                             // TODO: Maybe the compiler should return a status code for the compilation.
 
                             currentState = ProgramState.Completed;

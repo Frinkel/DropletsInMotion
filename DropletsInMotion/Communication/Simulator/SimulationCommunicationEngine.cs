@@ -46,7 +46,7 @@ internal class SimulationCommunicationEngine : ICommunication
         await WebsocketService.WaitForClientConnectionAsync();
     }
 
-    public async Task SendActions(List<BoardActionDto> boardActionDtoList)
+    public async Task SendActions(List<BoardAction> boardActionDtoList)
     {
         Queue<ActionQueueItem> actionQueue = new Queue<ActionQueueItem>();
 

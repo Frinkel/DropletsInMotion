@@ -23,7 +23,7 @@ namespace DropletsInMotion.Domain
 
         public override string ToString()
         {
-            return $"Droplet(Name: {Name}, InputName: {InputName}, Volume: {Volume})";
+            return $"Dispense(Name: {Name}, InputName: {InputName}, Volume: {Volume})";
         }
     }
 }

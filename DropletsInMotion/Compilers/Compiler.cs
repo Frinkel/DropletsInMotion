@@ -14,7 +14,7 @@ namespace DropletsInMotion.Compilers
         public Electrode[][] Board { get; set; }
         public List<Droplet> Droplets { get; } = new List<Droplet>();
         public List<Move> Moves { get; } = new List<Move>();
-        public decimal time = 0m;
+        public double time = 0;
 
         private TemplateHandler TemplateHandler;
 
@@ -37,14 +37,14 @@ namespace DropletsInMotion.Compilers
 
         public async Task Compile()
         {
-            List <BoardActionDto> boardActions = new List <BoardActionDto >();
+            List <BoardAction> boardActions = new List <BoardAction >();
 
             foreach (Move move in Moves)
             {
                 boardActions.AddRange(CompileMove(move, time));
                 if (boardActions.Count > 0)
                 {
-                    time = boardActions.Last().Time + 0m;
+                    time = boardActions.Last().Time + 0;
                 }
             }
 
@@ -56,9 +56,9 @@ namespace DropletsInMotion.Compilers
             //await CommunicationEngine.SendRequest(new BoardSensorRequest(725, time + 1m));
         }
 
-        public List<BoardActionDto> CompileMove(Move move, decimal compileTime)
+        public List<BoardAction> CompileMove(Move move, double compileTime)
         {
-            List<BoardActionDto> boardActions = new List<BoardActionDto>();
+            List<BoardAction> boardActions = new List<BoardAction>();
             string dropletName = move.DropletName;
             Droplet droplet = Droplets.Find(d => d.Name == dropletName);
 
@@ -72,7 +72,7 @@ namespace DropletsInMotion.Compilers
             int targetX = move.NewPositionX;
             int targetY = move.NewPositionY;
 
-            decimal time = compileTime;
+            double time = compileTime;
 
             // Move horizontally first (if needed)
             while (currentX != targetX)
@@ -80,7 +80,7 @@ namespace DropletsInMotion.Compilers
                 if (currentX < targetX)
                 {
                     currentX++;
-                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveRight", droplet, time);
+                    List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveRight", droplet, time);
                     boardActions.AddRange(appliedMove);
                     droplet.PositionX = currentX;
                     time = appliedMove.Last().Time;
@@ -89,7 +89,7 @@ namespace DropletsInMotion.Compilers
                 {
 
                     currentX--;
-                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveLeft", droplet, time);
+                    List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveLeft", droplet, time);
                     boardActions.AddRange(appliedMove);
                     droplet.PositionX = currentX;
                     time = appliedMove.Last().Time;
@@ -104,7 +104,7 @@ namespace DropletsInMotion.Compilers
                 if (currentY < targetY)
                 {
                     currentY++;
-                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveDown", droplet, time);
+                    List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveDown", droplet, time);
                     boardActions.AddRange(appliedMove);
                     droplet.PositionY = currentY;
                     time = appliedMove.Last().Time;
@@ -112,7 +112,7 @@ namespace DropletsInMotion.Compilers
                 else
                 {
                     currentY--;
-                    List<BoardActionDto> appliedMove = TemplateHandler.ApplyTemplate("moveUp", droplet, time);
+                    List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveUp", droplet, time);
                     boardActions.AddRange(appliedMove);
                     droplet.PositionY = currentY;
                     time = appliedMove.Last().Time;

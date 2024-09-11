@@ -1,4 +1,10 @@
-Droplet(d1, 3, 6, 0.1);
-Droplet(d2, 15, 12, 0.1);
-Move(d1, 6, 8);
-7 + 7;
+Droplet(d1, 1, 1, 1.2);
+Dispense(d2, reservoir1, 1.0);
+Move(d1, 2, 2);
+SplitByRatio(d1, d2, d3, 4, 4, 6, 6, 0.5);
+SplitByVolume(d1, d2, d3, 4, 4, 6, 6, 0.5);
+Merge(d2, d3, d4, 4, 4);
+Mix(d4, 6, 6, 2, 4, 2);
+Store(d4, 20, 12, 3000);
+Wait(20);
+WaitForUserInput();

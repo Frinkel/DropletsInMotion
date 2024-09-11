@@ -1,14 +1,11 @@
 ﻿using DropletsInMotion.Domain;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace DropletsInMotion.Language
 {
     public class MicrofluidicsCustomListener : MicrofluidicsBaseListener
     {
-        public List<Droplet> Droplets { get; } = new List<Droplet>();
-        public List<Move> Moves { get; } = new List<Move>();
-        public Stack<int> ExpressionStack { get; } = new Stack<int>();
-
-        public List<ICommand> Commands => new List<ICommand>();
+        public List<ICommand> Commands { get; } = new List<ICommand>();
 
         public override void ExitDropletDeclaration(MicrofluidicsParser.DropletDeclarationContext context)
         {
@@ -17,8 +14,8 @@ namespace DropletsInMotion.Language
             int positionY = int.Parse(context.INT(1).GetText());
             double volume = double.Parse(context.FLOAT().GetText());
 
-            Droplets.Add(new Droplet(name, positionX, positionY, volume));
-            Commands.Add(new Droplet(name, positionX, positionY, volume));
+            ICommand command = new Droplet(name, positionX, positionY, volume);
+            Commands.Add(command);
         }
 
         public override void ExitMoveDroplet(MicrofluidicsParser.MoveDropletContext context)
@@ -27,25 +24,98 @@ namespace DropletsInMotion.Language
             int newPositionX = int.Parse(context.INT(0).GetText());
             int newPositionY = int.Parse(context.INT(1).GetText());
 
-            Moves.Add(new Move(dropletName, newPositionX, newPositionY));
-            Commands.Add(new Move(dropletName, newPositionX, newPositionY));
+            ICommand command = new Move(dropletName, newPositionX, newPositionY);
+            Commands.Add(command);
         }
 
-        // Listener for addition expressions
-        public override void ExitAddExpr(MicrofluidicsParser.AddExprContext context)
+        public override void ExitDispense(MicrofluidicsParser.DispenseContext context)
         {
-            // Pop the right and left operand from the stack and add them
-            int right = ExpressionStack.Pop();
-            int left = ExpressionStack.Pop();
-            ExpressionStack.Push(left + right);
+            string name = context.IDENTIFIER(0).GetText();
+            string inputName = context.IDENTIFIER(1).GetText();
+            double volume = double.Parse(context.FLOAT().GetText());
+
+            ICommand command = new Dispense(name, inputName, volume);
+            Commands.Add(command);
         }
 
-        // Listener for integer expressions
-        public override void ExitIntExpr(MicrofluidicsParser.IntExprContext context)
+        public override void ExitSplitByRatio(MicrofluidicsParser.SplitByRatioContext context)
         {
-            // Push the integer value onto the expression stack
-            ExpressionStack.Push(int.Parse(context.INT().GetText()));
+            string input = context.IDENTIFIER(0).GetText();
+            string output1 = context.IDENTIFIER(1).GetText();
+            string output2 = context.IDENTIFIER(2).GetText();
+            int posX1 = int.Parse(context.INT(0).GetText());
+            int posY1 = int.Parse(context.INT(1).GetText());
+            int posX2 = int.Parse(context.INT(2).GetText());
+            int posY2 = int.Parse(context.INT(3).GetText());
+            double ratio = double.Parse(context.FLOAT().GetText());
+
+            ICommand command = new SplitByRatio(input, output1, output2, posX1, posY1, posX2, posY2, ratio);
+            Commands.Add(command);
+        }
+
+        public override void ExitSplitByVolume(MicrofluidicsParser.SplitByVolumeContext context)
+        {
+            string input = context.IDENTIFIER(0).GetText();
+            string output1 = context.IDENTIFIER(1).GetText();
+            string output2 = context.IDENTIFIER(2).GetText();
+            int posX1 = int.Parse(context.INT(0).GetText());
+            int posY1 = int.Parse(context.INT(1).GetText());
+            int posX2 = int.Parse(context.INT(2).GetText());
+            int posY2 = int.Parse(context.INT(3).GetText());
+            double volume = double.Parse(context.FLOAT().GetText());
+
+            ICommand command = new SplitByVolume(input, output1, output2, posX1, posY1, posX2, posY2, volume);
+            Commands.Add(command);
+        }
+
+        public override void ExitMerge(MicrofluidicsParser.MergeContext context)
+        {
+            string input1 = context.IDENTIFIER(0).GetText();
+            string input2 = context.IDENTIFIER(1).GetText();
+            string output = context.IDENTIFIER(2).GetText();
+            int posX = int.Parse(context.INT(0).GetText());
+            int posY = int.Parse(context.INT(1).GetText());
+
+            ICommand command = new Merge(input1, input2, output, posX, posY);
+            Commands.Add(command);
+        }
+
+        public override void ExitMix(MicrofluidicsParser.MixContext context)
+        {
+            string name = context.IDENTIFIER().GetText();
+            int posX = int.Parse(context.INT(0).GetText());
+            int posY = int.Parse(context.INT(1).GetText());
+            int distanceX = int.Parse(context.INT(2).GetText());
+            int distanceY = int.Parse(context.INT(3).GetText());
+            int repeatTimes = int.Parse(context.INT(4).GetText());
+
+            ICommand command = new Mix(name, posX, posY, distanceX, distanceY, repeatTimes);
+            Commands.Add(command);
+        }
+
+        public override void ExitStore(MicrofluidicsParser.StoreContext context)
+        {
+            string name = context.IDENTIFIER().GetText();
+            int posX = int.Parse(context.INT(0).GetText());
+            int posY = int.Parse(context.INT(1).GetText());
+            int time = int.Parse(context.INT(2).GetText());
+
+            ICommand command = new Store(name, posX, posY, time);
+            Commands.Add(command);
+        }
+
+        public override void ExitWait(MicrofluidicsParser.WaitContext context)
+        {
+            int time = int.Parse(context.INT().GetText());
+
+            ICommand command = new Wait(time);
+            Commands.Add(command);
+        }
+
+        public override void ExitWaitForUserInput(MicrofluidicsParser.WaitForUserInputContext context)
+        {
+            ICommand command = new WaitForUserInput();
+            Commands.Add(command);
         }
     }
-
 }

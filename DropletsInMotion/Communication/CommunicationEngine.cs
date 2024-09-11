@@ -29,7 +29,7 @@ namespace DropletsInMotion.Communication
             await _communication.StopCommunication();
         }
 
-        public async Task SendActions(List<BoardActionDto> boardActionDtoList)
+        public async Task SendActions(List<BoardAction> boardActionDtoList)
         {
             await _communication.SendActions(boardActionDtoList);
         }

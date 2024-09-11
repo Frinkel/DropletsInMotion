@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DropletsInMotion.Domain
 {
-    public class SplitByRatio : ICommand
+    public class SplitByVolume : ICommand
     {
         public string InputName { get; }
         public string OutputName1 { get; }
@@ -15,10 +15,10 @@ namespace DropletsInMotion.Domain
         public int PositionY1 { get; }
         public int PositionX2 { get; }
         public int PositionY2 { get; }
-        public double Ratio { get; }
+        public double Volume { get; }
 
 
-        public SplitByRatio(string inputName, string outputName1, string outputName2, int positionX1, int positionY1, int positionX2, int positionY2, double ratio)
+        public SplitByVolume(string inputName, string outputName1, string outputName2, int positionX1, int positionY1, int positionX2, int positionY2, double volume)
         {
             InputName = inputName;
             OutputName1 = outputName1;
@@ -27,12 +27,12 @@ namespace DropletsInMotion.Domain
             PositionY1 = positionY1;
             PositionX2 = positionX2;
             PositionY2 = positionY2;
-            Ratio = ratio;
+            Volume = volume;
         }
 
         public override string ToString()
         {
-            return $"SplitByRatio(InputName: {InputName}, OutputName1: {OutputName1}, OutputName2: {OutputName2}, PositionX1: {PositionX1}, PositionY1: {PositionY1}, PositionX2: {PositionX2}, PositionY2: {PositionY2}, Ratio: {Ratio})";
+            return $"SplitByVolume(InputName: {InputName}, OutputName1: {OutputName1}, OutputName2: {OutputName2}, PositionX1: {PositionX1}, PositionY1: {PositionY1}, PositionX2: {PositionX2}, PositionY2: {PositionY2}, Volume: {Volume})";
         }
     }
 }

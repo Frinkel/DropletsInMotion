@@ -6,7 +6,7 @@ namespace DropletsInMotion.Controllers
 {
     public class TemplateHandler
     {
-        public List<(string, List<BoardActionDto>)> templates { get; private set; } = new List<(string, List<BoardActionDto>)>();
+        public List<(string, List<BoardAction>)> templates { get; private set; } = new List<(string, List<BoardAction>)>();
         public Electrode[][] Board { get; set; }
 
         public TemplateHandler(Electrode[][] board)
@@ -27,7 +27,7 @@ namespace DropletsInMotion.Controllers
             foreach (var filePath in templateFiles)
             {
                 string templateName = Path.GetFileNameWithoutExtension(filePath);
-                List<BoardActionDto> boardActions = ParseTemplateFile(filePath);
+                List<BoardAction> boardActions = ParseTemplateFile(filePath);
 
                 if (boardActions != null)
                 {
@@ -36,11 +36,11 @@ namespace DropletsInMotion.Controllers
             }
         }
 
-        private List<BoardActionDto> ParseTemplateFile(string filePath)
+        private List<BoardAction> ParseTemplateFile(string filePath)
         {
-            var boardActions = new List<BoardActionDto>();
+            var boardActions = new List<BoardAction>();
             string[] lines = File.ReadAllLines(filePath);
-            decimal timeOffset = 0m;
+            double timeOffset = 0;
             int gridSize = lines.Skip(1).First(line => !line.Contains(",") && !string.IsNullOrWhiteSpace(line)).Length; // Determine grid size from the first non-time, non-empty line
             int[] previousState = new int[gridSize * gridSize];
 
@@ -57,7 +57,7 @@ namespace DropletsInMotion.Controllers
                 if (line.Contains(","))
                 {
                     string[] parts = line.Split(',');
-                    timeOffset = decimal.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
+                    timeOffset = double.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
                     rowIndex = 0; // Reset row index for the next grid
                 }
                 else if (line.Contains(";"))
@@ -86,12 +86,12 @@ namespace DropletsInMotion.Controllers
                             // Only create actions for changes in state
                             if (action == 1 && previousState[index] == 0)
                             {
-                                boardActions.Add(new BoardActionDto(electrodeIdOffset, 1, timeOffset));
+                                boardActions.Add(new BoardAction(electrodeIdOffset, 1, timeOffset));
                                 previousState[index] = 1;
                             }
                             else if (action == 0 && previousState[index] == 1)
                             {
-                                boardActions.Add(new BoardActionDto(electrodeIdOffset, 0, timeOffset));
+                                boardActions.Add(new BoardAction(electrodeIdOffset, 0, timeOffset));
                                 previousState[index] = 0;
                             }
                         }
@@ -106,14 +106,14 @@ namespace DropletsInMotion.Controllers
 
 
 
-        public List<BoardActionDto> ApplyTemplate(string templateName, Droplet droplet, decimal time)
+        public List<BoardAction> ApplyTemplate(string templateName, Droplet droplet, double time)
         {
-            List<BoardActionDto> template = templates.Find(t => t.Item1 == templateName).Item2;
+            List<BoardAction> template = templates.Find(t => t.Item1 == templateName).Item2;
             int relativePosition = Board[droplet.PositionX][droplet.PositionY].Id;
-            List<BoardActionDto> finalActionDtos = new List<BoardActionDto>();
-            foreach (BoardActionDto boardAction in template)
+            List<BoardAction> finalActionDtos = new List<BoardAction>();
+            foreach (BoardAction boardAction in template)
             {
-                BoardActionDto newAction = new BoardActionDto(boardAction.ElectrodeId + relativePosition, boardAction.Action, boardAction.Time + time);
+                BoardAction newAction = new BoardAction(boardAction.ElectrodeId + relativePosition, boardAction.Action, boardAction.Time + time);
                 finalActionDtos.Add(newAction);
             }
             return finalActionDtos;

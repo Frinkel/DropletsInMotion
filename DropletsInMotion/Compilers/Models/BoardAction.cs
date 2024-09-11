@@ -1,12 +1,12 @@
 ﻿namespace DropletsInMotion.Compilers.Models
 {
-    public class BoardActionDto
+    public class BoardAction
     {
         public int ElectrodeId { get; set; }
         public int Action { get; set; }
-        public decimal Time { get; set; }
+        public double Time { get; set; }
 
-        public BoardActionDto(int electrodeId, int action, decimal time)
+        public BoardAction(int electrodeId, int action, double time)
         {
             ElectrodeId = electrodeId;
             Action = action;
@@ -15,7 +15,7 @@
 
         public override string ToString()
         {
-            return $"BoardActionDto(ElectrodeId: {ElectrodeId}, Action: {Action}, Time: {Time})";
+            return $"BoardAction(ElectrodeId: {ElectrodeId}, Action: {Action}, Time: {Time})";
         }
     }
 }

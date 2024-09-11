@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DropletsInMotion.Domain
+{
+    public class Merge : ICommand
+    {
+        public string InputName1 { get; }
+        public string InputName2 { get; }
+        public string OutputName { get; }
+        public int PositionX { get; }
+        public int PositionY { get; }
+
+        public Merge(string inputName1, string inputName2, string outputName, int positionX, int positionY)
+        {
+            InputName1 = inputName1;
+            InputName2 = inputName2;
+            OutputName = outputName;
+            PositionX = positionX;
+            PositionY = positionY;
+        }
+
+        public override string ToString()
+        {
+            return $"Merge(InputName1: {InputName1}, InputName2: {InputName2}, OutputName: {OutputName}, PositionX: {PositionX}, PositionY: {PositionY})";
+        }
+    }
+}
