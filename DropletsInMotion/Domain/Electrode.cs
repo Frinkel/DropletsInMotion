@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DropletsInMotion.Domain
+﻿namespace DropletsInMotion.Domain
 {
     /// <summary>
     /// Naming was decided by Joel whom you can complain to if you do not agree

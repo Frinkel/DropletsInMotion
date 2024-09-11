@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using DropletsInMotion.Communication;
+﻿using DropletsInMotion.Communication;
 using DropletsInMotion.Domain;
 using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Compilers.Services;
@@ -54,8 +52,8 @@ namespace DropletsInMotion.Compilers
 
             await CommunicationEngine.SendActions(boardActions);
 
-            Console.WriteLine("\nSending sensor request");
-            await CommunicationEngine.SendRequest(new BoardSensorRequest(725, time + 1m));
+            //Console.WriteLine("\nSending sensor request");
+            //await CommunicationEngine.SendRequest(new BoardSensorRequest(725, time + 1m));
         }
 
         public List<BoardActionDto> CompileMove(Move move, decimal compileTime)

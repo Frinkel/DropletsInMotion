@@ -6,6 +6,7 @@ namespace DropletsInMotion.Language
     {
         public List<Droplet> Droplets { get; } = new List<Droplet>();
         public List<Move> Moves { get; } = new List<Move>();
+        public Stack<int> ExpressionStack { get; } = new Stack<int>();
 
         public override void ExitDropletDeclaration(MicrofluidicsParser.DropletDeclarationContext context)
         {
@@ -24,6 +25,22 @@ namespace DropletsInMotion.Language
             int newPositionY = int.Parse(context.INT(1).GetText());
 
             Moves.Add(new Move(dropletName, newPositionX, newPositionY));
+        }
+
+        // Listener for addition expressions
+        public override void ExitAddExpr(MicrofluidicsParser.AddExprContext context)
+        {
+            // Pop the right and left operand from the stack and add them
+            int right = ExpressionStack.Pop();
+            int left = ExpressionStack.Pop();
+            ExpressionStack.Push(left + right);
+        }
+
+        // Listener for integer expressions
+        public override void ExitIntExpr(MicrofluidicsParser.IntExprContext context)
+        {
+            // Push the integer value onto the expression stack
+            ExpressionStack.Push(int.Parse(context.INT().GetText()));
         }
     }
 

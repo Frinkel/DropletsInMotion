@@ -1,17 +1,11 @@
-﻿using System.Collections;
-using System.Text.Json;
-using System.Threading;
-using DropletsInMotion.Compilers;
+﻿using DropletsInMotion.Compilers;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DropletsInMotion.Domain;
-using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Controllers.ConsoleController;
-using Microsoft.VisualBasic;
 
 
 namespace DropletsInMotion
@@ -75,7 +69,15 @@ namespace DropletsInMotion
                             //consoleController.WriteColor(programContent, ConsoleColor.Black, ConsoleColor.DarkCyan);
                             Console.WriteLine();
 
-                            currentState = ProgramState.WaitingForClientConnection;
+                            if (Configuration != null && Configuration.GetValue<bool>("Development:SkipCommunication"))
+                            {
+                                currentState = ProgramState.CompilingProgram;
+                            }
+                            else
+                            {
+                                currentState = ProgramState.WaitingForClientConnection;
+                            }
+                            
                             break;
                         case (ProgramState.WaitingForClientConnection):
 
@@ -107,6 +109,11 @@ namespace DropletsInMotion
                             var listener = new MicrofluidicsCustomListener();
                             var tree = parser.program();
                             ParseTreeWalker.Default.Walk(listener, tree);
+
+                            if (listener.ExpressionStack.Count > 0)
+                            {
+                                Console.WriteLine("Result of the expression: " + listener.ExpressionStack.Pop());
+                            }
 
                             // Compile the program
                             Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);

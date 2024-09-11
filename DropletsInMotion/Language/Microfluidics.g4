@@ -8,6 +8,7 @@ program
 statement
     : dropletDeclaration
     | moveDroplet
+    | expr
     ;
 
 dropletDeclaration
@@ -16,6 +17,13 @@ dropletDeclaration
 
 moveDroplet
     : 'Move' '(' IDENTIFIER ',' INT ',' INT ')'
+    ;
+
+
+// Expressions
+expr
+    : expr '+' expr   # AddExpr  // Rule for addition
+    | INT             # IntExpr  // Integers are now part of the expression rules
     ;
 
 // Lexer rules
