@@ -7,9 +7,9 @@ using System.IO;
 
 namespace DropletsInMotion.Controllers
 {
-    class TemplateHandler
+    public class TemplateHandler
     {
-        private List<(string, List<BoardActionDto>)> templates = new List<(string, List<BoardActionDto>)>();
+        public List<(string, List<BoardActionDto>)> templates { get; private set; } = new List<(string, List<BoardActionDto>)>();
         public Electrode[][] Board { get; set; }
 
         public TemplateHandler(Electrode[][] board)
@@ -22,7 +22,7 @@ namespace DropletsInMotion.Controllers
             //PrintAllTemplates();
         }
 
-        private void LoadTemplatesFromFiles(string folderPath)
+        public void LoadTemplatesFromFiles(string folderPath)
         {
             // Get all txt files in the specified folder
             var templateFiles = Directory.GetFiles(folderPath, "*.txt");
@@ -48,6 +48,7 @@ namespace DropletsInMotion.Controllers
             int[] previousState = new int[gridSize * gridSize];
 
             int rowIndex = 0;
+            int boardWidth = Board.Length;
 
             foreach (var line in lines)
             {
@@ -78,7 +79,7 @@ namespace DropletsInMotion.Controllers
                         // Calculate electrodeIdOffset relative to the center of the grid
                         int centerRow = gridSize / 2;
                         int centerCol = gridSize / 2;
-                        int electrodeIdOffset = (rowIndex - centerRow) * 32 + (colIndex - centerCol);
+                        int electrodeIdOffset = (rowIndex - centerRow) * boardWidth + (colIndex - centerCol);
 
                         // Ensure indices are within the grid bounds
                         if (rowIndex >= 0 && rowIndex < gridSize && colIndex >= 0 && colIndex < gridSize)

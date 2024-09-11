@@ -4,6 +4,9 @@ using DropletsInMotion.Compilers;
 using DropletsInMotion.Domain;
 using System.Xml.Linq;
 using DropletsInMotion.Compilers.Models;
+using DropletsInMotion.Controllers;
+using NUnit.Framework;
+using DropletsInMotion.Compilers.Services;
 
 namespace DropletsInMotionTests
 {
@@ -28,6 +31,44 @@ namespace DropletsInMotionTests
             Assert.AreEqual(tree.ToStringTree(parser), "(program (statement (dropletDeclaration Droplet ( d1 , 15 , 15 , 0.2 ))) ; (statement (moveDroplet Move ( d1 , 3 , 3 ))) ; <EOF>)");
         }
 
+        [Test]
+        public void templateTester()
+        {
+            Electrode[][] board = new Electrode[32][];
+            board = new Electrode[32][];
+            for (int i = 0; i < 32; i++)
+            {
+                board[i] = new Electrode[20];
+                for (int j = 0; j < 20; j++)
+                {
+                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+                }
+            }
+
+            TemplateHandler templateHandler = new TemplateHandler(board);
+            List<(string, List<BoardActionDto>)> templates = templateHandler.templates;
+            Console.WriteLine(templates);
+            Assert.AreEqual(templates.Count, 1);
+            Assert.AreEqual(templates[0].Item1, "template1");
+            Assert.AreEqual(templates[0].Item2.Count, 3);
+            Assert.AreEqual(templates[0].Item2[1].ElectrodeId, 32);
+
+        }
+
+        [Test]
+        public void platformServiceTester()
+        {
+            string workingDirectory = Environment.CurrentDirectory;
+            string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
+            string platformPath = Path.Combine(projectDirectory, "Assets", "platform.json");
+            PlatformService platformService = new PlatformService(platformPath);
+            Electrode[][] board = platformService.Board;
+            Assert.AreEqual(board.Length, 32);
+            Assert.AreEqual(board[0].Length, 20);
+            Assert.AreEqual(board[0][0].Id, 1);
+            Assert.AreEqual(board[31][19].Id, 640);
+            Assert.AreEqual(board[23][10].Id, 344);
+        }
         //[Test]
         //public void CompilerTest()
         //{

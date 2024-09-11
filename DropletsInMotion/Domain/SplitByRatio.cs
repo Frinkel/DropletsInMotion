@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace DropletsInMotion.Domain
 {
-    public class Droplet : ICommand
+    public class SplitByRatio : ICommand
     {
         public string Name { get; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public double Volume { get; set; }
 
-        public Droplet(string name, int positionX, int positionY, double volume)
+        public SplitByRatio(string name, int positionX, int positionY, double volume)
         {
             Name = name;
             PositionX = positionX;

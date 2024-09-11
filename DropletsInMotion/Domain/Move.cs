@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DropletsInMotion.Domain
 {
-    public class Move
+    public class Move : ICommand
     {
         public string DropletName { get; }
         public int NewPositionX { get; }

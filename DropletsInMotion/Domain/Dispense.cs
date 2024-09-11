@@ -6,24 +6,24 @@ using System.Threading.Tasks;
 
 namespace DropletsInMotion.Domain
 {
-    public class Droplet : ICommand
+    public class Dispense : ICommand
     {
         public string Name { get; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+
+        public string InputName { get; }
+    
         public double Volume { get; set; }
 
-        public Droplet(string name, int positionX, int positionY, double volume)
+        public Dispense(string name, string inputName, double volume)
         {
             Name = name;
-            PositionX = positionX;
-            PositionY = positionY;
+            InputName = inputName;
             Volume = volume;
         }
 
         public override string ToString()
         {
-            return $"Droplet(Name: {Name}, PositionX: {PositionX}, PositionY: {PositionY}, Volume: {Volume})";
+            return $"Droplet(Name: {Name}, InputName: {InputName}, Volume: {Volume})";
         }
     }
 }

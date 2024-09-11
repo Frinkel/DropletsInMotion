@@ -106,6 +106,7 @@ namespace DropletsInMotion
                             var listener = new MicrofluidicsCustomListener();
                             var tree = parser.program();
                             ParseTreeWalker.Default.Walk(listener, tree);
+                            Console.WriteLine(listener.Commands);
 
                             // Compile the program
                             Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);

@@ -7,6 +7,8 @@ namespace DropletsInMotion.Language
         public List<Droplet> Droplets { get; } = new List<Droplet>();
         public List<Move> Moves { get; } = new List<Move>();
 
+        public List<ICommand> Commands => new List<ICommand>();
+
         public override void ExitDropletDeclaration(MicrofluidicsParser.DropletDeclarationContext context)
         {
             string name = context.IDENTIFIER().GetText();
@@ -15,6 +17,7 @@ namespace DropletsInMotion.Language
             double volume = double.Parse(context.FLOAT().GetText());
 
             Droplets.Add(new Droplet(name, positionX, positionY, volume));
+            Commands.Add(new Droplet(name, positionX, positionY, volume));
         }
 
         public override void ExitMoveDroplet(MicrofluidicsParser.MoveDropletContext context)
@@ -24,6 +27,7 @@ namespace DropletsInMotion.Language
             int newPositionY = int.Parse(context.INT(1).GetText());
 
             Moves.Add(new Move(dropletName, newPositionX, newPositionY));
+            Commands.Add(new Move(dropletName, newPositionX, newPositionY));
         }
     }
 
