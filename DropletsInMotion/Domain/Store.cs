@@ -9,21 +9,21 @@ namespace DropletsInMotion.Domain
     public class Store : ICommand
     {
         public string DropletName { get; }
-        public int NewPositionX { get; }
-        public int NewPositionY { get; }
+        public int PositionX { get; }
+        public int PositionY { get; }
         public double Time { get; }
 
         public Store(string dropletName, int newPositionX, int newPositionY, double time)
         {
             DropletName = dropletName;
-            NewPositionX = newPositionX;
-            NewPositionY = newPositionY;
+            PositionX = newPositionX;
+            PositionY = newPositionY;
             Time = time;
         }
 
         public override string ToString()
         {
-            return $"Store(DropletName: {DropletName}, NewPositionX: {NewPositionX}, NewPositionY: {NewPositionY}, Time: {Time})";
+            return $"Store(DropletName: {DropletName}, PositionX: {PositionX}, PositionY: {PositionY}, Time: {Time})";
         }
 
         public List<string> GetInputDroplets()

@@ -104,8 +104,6 @@ namespace DropletsInMotion.Controllers
             return boardActions;
         }
 
-
-
         public List<BoardAction> ApplyTemplate(string templateName, Droplet droplet, double time)
         {
             List<BoardAction> template = templates.Find(t => t.Item1 == templateName).Item2;
@@ -118,6 +116,7 @@ namespace DropletsInMotion.Controllers
             }
             return finalActionDtos;
         }
+
 
         // Method to print all templates
         public void PrintAllTemplates()
