@@ -14,5 +14,15 @@ namespace DropletsInMotion.Domain
         {
             return $"WaitForUserInput()";
         }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { };
+        }
     }
 }

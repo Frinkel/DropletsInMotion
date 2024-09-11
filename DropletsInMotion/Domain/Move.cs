@@ -1,4 +1,6 @@
-﻿namespace DropletsInMotion.Domain
+﻿using System.Xml.Linq;
+
+namespace DropletsInMotion.Domain
 {
     public class Move : ICommand
     {
@@ -16,6 +18,15 @@
         public override string ToString()
         {
             return $"Move(DropletName: {DropletName}, NewPositionX: {NewPositionX}, NewPositionY: {NewPositionY})";
+        }
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { DropletName };
         }
     }
 }

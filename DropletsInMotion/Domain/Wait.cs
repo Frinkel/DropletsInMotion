@@ -19,5 +19,15 @@ namespace DropletsInMotion.Domain
         {
             return $"Wait(Time: {Time})";
         }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { };
+        }
     }
 }

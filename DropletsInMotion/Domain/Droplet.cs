@@ -1,6 +1,6 @@
 ﻿namespace DropletsInMotion.Domain
 {
-    public class Droplet : ICommand
+    public class Droplet
     {
         public string Name { get; }
         public int PositionX { get; set; }

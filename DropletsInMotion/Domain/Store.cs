@@ -25,5 +25,15 @@ namespace DropletsInMotion.Domain
         {
             return $"Store(DropletName: {DropletName}, NewPositionX: {NewPositionX}, NewPositionY: {NewPositionY}, Time: {Time})";
         }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
     }
 }

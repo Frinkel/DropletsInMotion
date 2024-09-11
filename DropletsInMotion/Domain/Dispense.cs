@@ -8,7 +8,7 @@ namespace DropletsInMotion.Domain
 {
     public class Dispense : ICommand
     {
-        public string Name { get; }
+        public string DropletName { get; }
 
         public string InputName { get; }
     
@@ -16,14 +16,24 @@ namespace DropletsInMotion.Domain
 
         public Dispense(string name, string inputName, double volume)
         {
-            Name = name;
+            DropletName = name;
             InputName = inputName;
             Volume = volume;
         }
 
         public override string ToString()
         {
-            return $"Dispense(Name: {Name}, InputName: {InputName}, Volume: {Volume})";
+            return $"Dispense(DropletName: {DropletName}, InputName: {InputName}, Volume: {Volume})";
+        }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { DropletName };
         }
     }
 }

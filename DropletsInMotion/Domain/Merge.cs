@@ -27,5 +27,15 @@ namespace DropletsInMotion.Domain
         {
             return $"Merge(InputName1: {InputName1}, InputName2: {InputName2}, OutputName: {OutputName}, PositionX: {PositionX}, PositionY: {PositionY})";
         }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { InputName1, InputName2 };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { OutputName };
+        }
     }
 }

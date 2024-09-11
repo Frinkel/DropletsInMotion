@@ -34,5 +34,15 @@ namespace DropletsInMotion.Domain
         {
             return $"SplitByVolume(InputName: {InputName}, OutputName1: {OutputName1}, OutputName2: {OutputName2}, PositionX1: {PositionX1}, PositionY1: {PositionY1}, PositionX2: {PositionX2}, PositionY2: {PositionY2}, Volume: {Volume})";
         }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { InputName };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { OutputName1, OutputName2 };
+        }
     }
 }

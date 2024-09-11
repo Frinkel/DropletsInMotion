@@ -114,6 +114,8 @@ namespace DropletsInMotion
                                 Console.WriteLine(elem.ToString());
                             }
 
+                            Compiler compiler = new Compiler(listener.Commands, CommunicationEngine,
+                                consoleController.PlatformPath);
                             // Compile the program
                             //Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);
                             //await compiler.Compile();

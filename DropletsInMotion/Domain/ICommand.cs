@@ -8,5 +8,7 @@ namespace DropletsInMotion.Domain
 {
     public interface ICommand
     {
+        List<string> GetInputDroplets();
+        List<string> GetOutputDroplets();
     }
 }

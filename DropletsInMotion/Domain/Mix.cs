@@ -31,5 +31,15 @@ namespace DropletsInMotion.Domain
             return $"Mix(Name: {Name}, PositionX: {PositionX}, PositionY: {PositionY}), DistanceX: {DistanceX}, DistanceY: {DistanceY}), RepeatTimes: {RepeatTimes}";
         }
 
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { Name };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { Name };
+        }
+
     }
 }

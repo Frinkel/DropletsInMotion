@@ -14,9 +14,7 @@ namespace DropletsInMotion.Language
             int positionY = int.Parse(context.INT(1).GetText());
             double volume = double.Parse(context.FLOAT().GetText());
 
-            ICommand command = new Droplet(name, positionX, positionY, volume);
             Droplets.Add(new Droplet(name, positionX, positionY, volume));
-            Commands.Add(command);
         }
 
         public override void ExitMoveDroplet(MicrofluidicsParser.MoveDropletContext context)
