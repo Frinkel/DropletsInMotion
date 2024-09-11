@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Compilers;
+﻿using System.Net;
+using DropletsInMotion.Compilers;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Communication;
@@ -6,6 +7,9 @@ using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Controllers.ConsoleController;
+using DropletsInMotion.Routers;
+using DropletsInMotion.Compilers.Services;
+using DropletsInMotion.Compilers.Models;
 
 
 namespace DropletsInMotion
@@ -113,6 +117,21 @@ namespace DropletsInMotion
                             {
                                 Console.WriteLine(elem.ToString());
                             }
+
+                            PlatformService platformService = new PlatformService(consoleController.PlatformPath);
+
+                            Router router = new Router(platformService.Board);
+                            var boardActions = router.Route(listener.Droplets, listener.Commands, 0);
+                            boardActions = boardActions.OrderBy(b => b.Time).ToList();
+
+                            Console.WriteLine("\nPRINTING ACTIONS\n");
+                            foreach (var action in boardActions)
+                            {
+                                Console.WriteLine(action.ToString());
+                            }
+
+                            await CommunicationEngine.SendActions(boardActions);
+
 
                             // Compile the program
                             //Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);

@@ -69,8 +69,8 @@ namespace DropletsInMotion.Compilers
 
             int currentX = droplet.PositionX;
             int currentY = droplet.PositionY;
-            int targetX = move.NewPositionX;
-            int targetY = move.NewPositionY;
+            int targetX = move.PositionX;
+            int targetY = move.PositionY;
 
             double time = compileTime;
 

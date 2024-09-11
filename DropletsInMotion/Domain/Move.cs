@@ -3,19 +3,19 @@
     public class Move : ICommand
     {
         public string DropletName { get; }
-        public int NewPositionX { get; }
-        public int NewPositionY { get; }
+        public int PositionX { get; }
+        public int PositionY { get; }
 
-        public Move(string dropletName, int newPositionX, int newPositionY)
+        public Move(string dropletName, int positionX, int positionY)
         {
             DropletName = dropletName;
-            NewPositionX = newPositionX;
-            NewPositionY = newPositionY;
+            PositionX = positionX;
+            PositionY = positionY;
         }
 
         public override string ToString()
         {
-            return $"Move(DropletName: {DropletName}, NewPositionX: {NewPositionX}, NewPositionY: {NewPositionY})";
+            return $"Move(DropletName: {DropletName}, PositionX: {PositionX}, PositionY: {PositionY})";
         }
     }
 }
