@@ -118,21 +118,9 @@ namespace DropletsInMotion
                                 Console.WriteLine(elem.ToString());
                             }
 
-                            Compiler compiler = new Compiler(listener.Commands, CommunicationEngine,
+                            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, CommunicationEngine,
                                 consoleController.PlatformPath);
-                            PlatformService platformService = new PlatformService(consoleController.PlatformPath);
-
-                            Router router = new Router(platformService.Board);
-                            var boardActions = router.Route(listener.Droplets, listener.Commands, 0);
-                            boardActions = boardActions.OrderBy(b => b.Time).ToList();
-
-                            Console.WriteLine("\nPRINTING ACTIONS\n");
-                            foreach (var action in boardActions)
-                            {
-                                Console.WriteLine(action.ToString());
-                            }
-
-                            await CommunicationEngine.SendActions(boardActions);
+                            await compiler.Compile();
 
 
                             // Compile the program

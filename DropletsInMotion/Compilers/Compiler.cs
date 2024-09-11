@@ -3,6 +3,8 @@ using DropletsInMotion.Domain;
 using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Compilers.Services;
 using DropletsInMotion.Controllers;
+using DropletsInMotion.Controllers.ConsoleController;
+using DropletsInMotion.Routers;
 
 
 namespace DropletsInMotion.Compilers
@@ -21,11 +23,12 @@ namespace DropletsInMotion.Compilers
 
         private DependencyGraph DependencyGraph;
 
-        public Compiler(List<ICommand> commands, CommunicationEngine communicationEngine, string platformPath)
+        private Router Router;
+
+        public Compiler(List<ICommand> commands, List<Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
         {
             CommunicationEngine = communicationEngine;
 
-            Droplets = initializeDroplets();
             PlatformService = new PlatformService(platformPath);
 
             Board = PlatformService.Board;
@@ -34,8 +37,31 @@ namespace DropletsInMotion.Compilers
             TemplateHandler = new TemplateHandler(Board);
 
             DependencyGraph = new DependencyGraph(commands);
+
+            Router = new Router(Board);
+
+            Droplets = droplets;
+
+
+
+
+
+
+            //Console.WriteLine("\nPRINTING ACTIONS\n");
+            //foreach (var action in boardActions)
+            //{
+            //    Console.WriteLine(action.ToString());
+            //}
+
+
+        }
+
+        public async Task Compile()
+        {
+
+            List<BoardAction> boardActions = new List<BoardAction>();
             int i = 0;
-            while (DependencyGraph.GetExecutableNodes() != null && DependencyGraph.GetExecutableNodes().Count > 0)
+            while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
@@ -46,41 +72,22 @@ namespace DropletsInMotion.Compilers
                     Console.WriteLine(command);
                 }
 
+                boardActions.AddRange(Router.Route(Droplets, commandsToExecute, time));
+                boardActions = boardActions.OrderBy(b => b.Time).ToList();
+                time = boardActions.Last().Time;
+
                 foreach (DependencyNode node in executableNodes)
                 {
                     DependencyGraph.MarkNodeAsExecuted(node.NodeId);
                 }
-
                 i += 1;
 
+                await CommunicationEngine.SendActions(boardActions);
+
             }
+
+
         }
-
-        private List<Droplet> initializeDroplets()
-        {
-            return null;
-        }
-
-        //public async Task Compile()
-        //{
-        //    List <BoardAction> boardActions = new List <BoardAction >();
-
-        //    foreach (Move move in Moves)
-        //    {
-        //        boardActions.AddRange(CompileMove(move, time));
-        //        if (boardActions.Count > 0)
-        //        {
-        //            time = boardActions.Last().Time + 0;
-        //        }
-        //    }
-
-        //    boardActions.OrderBy(b => b.Time).ToList();
-
-        //    await CommunicationEngine.SendActions(boardActions);
-
-        //    //Console.WriteLine("\nSending sensor request");
-        //    //await CommunicationEngine.SendRequest(new BoardSensorRequest(725, time + 1m));
-        //}
 
         //public List<BoardAction> CompileMove(Move move, double compileTime)
         //{
@@ -156,8 +163,8 @@ namespace DropletsInMotion.Compilers
         //    return boardActions;
         //}
 
-        
 
 
-}
+
+    }
 }

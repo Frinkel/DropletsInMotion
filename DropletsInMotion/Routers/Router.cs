@@ -171,7 +171,7 @@ public class Router
     private void HandleDispenseCommand(Dispense dispenseCommand)
     {
         // Add logic for processing the Dispense command
-        Console.WriteLine($"Dispensing droplet at {dispenseCommand.Name}");
+        Console.WriteLine($"Dispensing droplet at {dispenseCommand.DropletName}");
     }
 
 }
