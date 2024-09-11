@@ -123,7 +123,7 @@ namespace DropletsInMotion.Controllers
         {
             foreach (var template in templates)
             {
-                Console.WriteLine($"Template Name: {template.Item1}");
+                Console.WriteLine($"Template DropletName: {template.Item1}");
                 Console.WriteLine("Actions:");
                 foreach (var action in template.Item2)
                 {

@@ -42,18 +42,6 @@ namespace DropletsInMotion.Compilers
 
             Droplets = droplets;
 
-
-
-
-
-
-            //Console.WriteLine("\nPRINTING ACTIONS\n");
-            //foreach (var action in boardActions)
-            //{
-            //    Console.WriteLine(action.ToString());
-            //}
-
-
         }
 
         public async Task Compile()
@@ -74,7 +62,13 @@ namespace DropletsInMotion.Compilers
 
                 boardActions.AddRange(Router.Route(Droplets, commandsToExecute, time));
                 boardActions = boardActions.OrderBy(b => b.Time).ToList();
-                time = boardActions.Last().Time;
+                time = boardActions.Any() ? boardActions.Last().Time : time;
+                
+                //Console.WriteLine("\nPRINTING ACTIONS\n");
+                //foreach (var action in boardActions)
+                //{
+                //    Console.WriteLine(action.ToString());
+                //}
 
                 foreach (DependencyNode node in executableNodes)
                 {
@@ -83,6 +77,7 @@ namespace DropletsInMotion.Compilers
                 i += 1;
 
                 await CommunicationEngine.SendActions(boardActions);
+                boardActions.Clear();
 
             }
 
@@ -93,7 +88,7 @@ namespace DropletsInMotion.Compilers
         //{
         //    List<BoardAction> boardActions = new List<BoardAction>();
         //    string dropletName = move.DropletName;
-        //    Droplet droplet = Droplets.Find(d => d.Name == dropletName);
+        //    Droplet droplet = Droplets.Find(d => d.DropletName == dropletName);
 
         //    if (droplet == null)
         //    {

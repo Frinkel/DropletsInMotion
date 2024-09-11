@@ -1,4 +1,2 @@
 Droplet(d1, 5, 6, 1.2);
-SplitByRatio(d1, d2, d3, 0, 6, 8, 6, 0.5);
-Move(d2,0,0);
-Move(d3,8,0);
+Mix(d1, 5, 6, 2, 2, 20);

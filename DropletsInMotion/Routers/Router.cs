@@ -48,7 +48,7 @@ public class Router
         Console.WriteLine("\n\n\nRunning router.....\n");
         
         
-        foreach (var command in commands)
+        foreach (var command in Commands)
         {
             switch (command)
             {
@@ -56,19 +56,16 @@ public class Router
                     boardActions.AddRange(HandleMoveCommand(moveCommand));
                     break;
                 case Merge mergeCommand:
-                    HandleMergeCommand(mergeCommand);
-                    break;
-                case Mix mixCommand:
-                    HandleMixCommand(mixCommand);
+                    boardActions.AddRange(HandleMergeCommand(mergeCommand));
                     break;
                 case SplitByRatio splitByRatioCommand:
                     boardActions.AddRange(HandleSplitByRatioCommand(splitByRatioCommand));
                     break;
                 case SplitByVolume splitByVolumeCommand:
-                    HandleSplitByVolumeCommand(splitByVolumeCommand);
+                    boardActions.AddRange(HandleSplitByVolumeCommand(splitByVolumeCommand));
                     break;
-                case Store storeCommand:
-                    HandleStoreCommand(storeCommand);
+                case Mix mixCommand:
+                    boardActions.AddRange(HandleMixCommand(mixCommand));
                     break;
                 case Dispense dispenseCommand:
                     HandleDispenseCommand(dispenseCommand);
@@ -87,7 +84,7 @@ public class Router
     {
         Console.WriteLine($"Moving droplet to ({moveCommand.PositionX}, {moveCommand.PositionY})");
 
-        Droplet droplet = Droplets.Find(d => d.Name == moveCommand.DropletName)
+        Droplet droplet = Droplets.Find(d => d.DropletName == moveCommand.DropletName)
                             ?? throw new InvalidOperationException($"No droplet found with name {moveCommand.DropletName}.");
         if (droplet == null)
         {
@@ -99,10 +96,38 @@ public class Router
         return _moveHandler.MoveDroplet(droplet, moveCommand.PositionX, moveCommand.PositionY, ref time);
     }
 
-    private void HandleMergeCommand(Merge mergeCommand)
+    private List<BoardAction> HandleMergeCommand(Merge mergeCommand)
     {
         // Add logic for processing the Merge command
         Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
+
+        Droplet inputDroplet1 = Droplets.Find(d => d.DropletName == mergeCommand.InputName1)
+                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+
+        Droplet inputDroplet2 = Droplets.Find(d => d.DropletName == mergeCommand.InputName2)
+                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
+
+        List<BoardAction> mergeActions = new List<BoardAction>();
+
+        double time1 = Time;
+        double time2 = Time;
+        mergeActions.AddRange(_moveHandler.MoveDroplet(inputDroplet1, mergeCommand.PositionX - 1, mergeCommand.PositionY, ref time1));
+        mergeActions.AddRange(_moveHandler.MoveDroplet(inputDroplet2, mergeCommand.PositionX + 1, mergeCommand.PositionY, ref time2));
+
+        Droplet outputDroplet = new Droplet(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY,
+            inputDroplet1.Volume + inputDroplet2.Volume);
+
+        Droplets.Remove(inputDroplet1);
+        Droplets.Remove(inputDroplet2);
+        Droplets.Add(outputDroplet);
+
+        mergeActions = mergeActions.OrderBy(b => b.Time).ToList();
+
+        double time = mergeActions.Any() ? mergeActions.Last().Time : Time;
+
+        mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
+
+        return mergeActions;
     }
 
     private List<BoardAction> HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand)
@@ -111,7 +136,7 @@ public class Router
         Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
 
 
-        Droplet inputDroplet = Droplets.Find(d => d.Name == splitByRatioCommand.InputName)
+        Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByRatioCommand.InputName)
                                ?? throw new InvalidOperationException($"No droplet found with name {splitByRatioCommand.InputName}.");
         
 
@@ -130,46 +155,75 @@ public class Router
 
         splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
 
-        double time1 = splitActions.Last().Time;
-        double time2 = splitActions.Last().Time;
+        double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
+        double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
         splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1, ref time1));
         splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2, ref time2));
 
         return splitActions;
     }
 
-    private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
+    private List<BoardAction> HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
     {
         // Add logic for processing the SplitByVolume command
         Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
+
+        Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByVolumeCommand.InputName)
+                               ?? throw new InvalidOperationException($"No droplet found with name {splitByVolumeCommand.InputName}.");
+
+
+        // Create the new droplets
+        Droplet outputDroplet1 = new Droplet(splitByVolumeCommand.OutputName1, inputDroplet.PositionX - 1,
+            inputDroplet.PositionY, inputDroplet.Volume - splitByVolumeCommand.Volume);
+
+        Droplet outputDroplet2 = new Droplet(splitByVolumeCommand.OutputName2, inputDroplet.PositionX + 1,
+            inputDroplet.PositionY, splitByVolumeCommand.Volume);
+
+        Droplets.Remove(inputDroplet);
+        Droplets.Add(outputDroplet1);
+        Droplets.Add(outputDroplet2);
+
+        List<BoardAction> splitActions = new List<BoardAction>();
+
+        splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
+
+        double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
+        double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
+        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByVolumeCommand.PositionX1, splitByVolumeCommand.PositionY1, ref time1));
+        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByVolumeCommand.PositionX2, splitByVolumeCommand.PositionY2, ref time2));
+
+        return splitActions;
     }
 
-    private void HandleMixCommand(Mix mixCommand)
+    private List<BoardAction> HandleMixCommand(Mix mixCommand)
     {
         // Add logic for processing the Mix command
         Console.WriteLine("Mixing droplets...");
-    }
 
-    private void HandleStoreCommand(Store storeCommand)
-    {
-        // Add logic for processing the Store command
-        Console.WriteLine($"Storing droplet in {storeCommand.PositionX}, {storeCommand.PositionY} for {storeCommand.Time} seconds...");
-    }
+        Droplet inputDroplet = Droplets.Find(d => d.DropletName == mixCommand.DropletName)
+                               ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
 
-    private void HandleWaitCommand(Wait waitCommand)
-    {
-        // Add logic for processing the Wait command
-        Console.WriteLine($"Waiting for {waitCommand.Time} seconds...");
-    }
+        List<BoardAction> mixActions = new List<BoardAction>();
 
-    private void HandleWaitForUserInputCommand(WaitForUserInput waitForUserInputCommand)
-    {
-        // Add logic for processing the WaitForUserInput command
-        Console.WriteLine("Waiting for user input...");
+        double time = Time;
+        mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, mixCommand.PositionX, mixCommand.PositionY, ref time));
+
+        double time1 = mixActions.Any() ? mixActions.Last().Time : Time;
+
+        for (int i = 0; i < mixCommand.RepeatTimes; i++)
+        {
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1));
+        }
+        
+        return mixActions;
     }
 
     private void HandleDispenseCommand(Dispense dispenseCommand)
     {
+        throw new NotImplementedException();
         // Add logic for processing the Dispense command
         Console.WriteLine($"Dispensing droplet at {dispenseCommand.DropletName}");
     }

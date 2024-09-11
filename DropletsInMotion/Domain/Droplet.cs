@@ -2,14 +2,14 @@
 {
     public class Droplet
     {
-        public string Name { get; }
+        public string DropletName { get; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public double Volume { get; set; }
 
-        public Droplet(string name, int positionX, int positionY, double volume)
+        public Droplet(string dropletName, int positionX, int positionY, double volume)
         {
-            Name = name;
+            DropletName = dropletName;
             PositionX = positionX;
             PositionY = positionY;
             Volume = volume;
@@ -17,7 +17,7 @@
 
         public override string ToString()
         {
-            return $"Droplet(Name: {Name}, PositionX: {PositionX}, PositionY: {PositionY}, Volume: {Volume})";
+            return $"Droplet(DropletName: {DropletName}, PositionX: {PositionX}, PositionY: {PositionY}, Volume: {Volume})";
         }
     }
 }
