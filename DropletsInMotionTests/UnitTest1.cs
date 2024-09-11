@@ -28,7 +28,7 @@ namespace DropletsInMotionTests
 
             // Get the root of the parse tree (starting with 'program')
             var tree = parser.program();
-            Assert.AreEqual(tree.ToStringTree(parser), "(program (statement (dropletDeclaration Droplet ( d1 , 15 , 15 , 0.2 ))) ; (statement (moveDroplet Move ( d1 , 3 , 3 ))) ; <EOF>)");
+            Assert.AreEqual(tree.ToStringTree(parser), "(program (command (dropletDeclaration Droplet ( d1 , 15 , 15 , 0.2 ))) ; (command (moveDroplet Move ( d1 , 3 , 3 ))) ; <EOF>)");
         }
 
         [Test]
