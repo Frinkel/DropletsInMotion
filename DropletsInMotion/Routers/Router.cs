@@ -21,7 +21,7 @@ namespace DropletsInMotion.Routers;
 public class Router
 {
     private Electrode[][] Board { get; set; }
-    private List<Droplet> Droplets { get; set; }
+    public Dictionary<string, Droplet> Droplets { get; set; }
     private List<ICommand> Commands { get; set; }
     private double Time { get; set; }
 
@@ -37,7 +37,7 @@ public class Router
         _moveHandler = new MoveHandler(_templateHandler);
     }
 
-    public List<BoardAction> Route(List<Droplet> droplets, List<ICommand> commands, double time)
+    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
     {
         Droplets = droplets;
         Commands = commands;
@@ -84,7 +84,7 @@ public class Router
     {
         Console.WriteLine($"Moving droplet to ({moveCommand.PositionX}, {moveCommand.PositionY})");
 
-        Droplet droplet = Droplets.Find(d => d.DropletName == moveCommand.DropletName)
+        Droplet droplet = Droplets[moveCommand.DropletName]
                             ?? throw new InvalidOperationException($"No droplet found with name {moveCommand.DropletName}.");
         if (droplet == null)
         {
@@ -101,10 +101,10 @@ public class Router
         // Add logic for processing the Merge command
         Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
 
-        Droplet inputDroplet1 = Droplets.Find(d => d.DropletName == mergeCommand.InputName1)
+        Droplet inputDroplet1 = Droplets[mergeCommand.InputName1]
                                 ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
 
-        Droplet inputDroplet2 = Droplets.Find(d => d.DropletName == mergeCommand.InputName2)
+        Droplet inputDroplet2 = Droplets[mergeCommand.InputName2]
                                 ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
 
         List<BoardAction> mergeActions = new List<BoardAction>();
@@ -117,9 +117,9 @@ public class Router
         Droplet outputDroplet = new Droplet(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY,
             inputDroplet1.Volume + inputDroplet2.Volume);
 
-        Droplets.Remove(inputDroplet1);
-        Droplets.Remove(inputDroplet2);
-        Droplets.Add(outputDroplet);
+        Droplets.Remove(inputDroplet1.DropletName);
+        Droplets.Remove(inputDroplet2.DropletName);
+        Droplets[outputDroplet.DropletName] = outputDroplet;
 
         mergeActions = mergeActions.OrderBy(b => b.Time).ToList();
 
@@ -136,7 +136,7 @@ public class Router
         Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
 
 
-        Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByRatioCommand.InputName)
+        Droplet inputDroplet = Droplets[splitByRatioCommand.InputName]
                                ?? throw new InvalidOperationException($"No droplet found with name {splitByRatioCommand.InputName}.");
         
 
@@ -147,9 +147,9 @@ public class Router
         Droplet outputDroplet2 = new Droplet(splitByRatioCommand.OutputName2, inputDroplet.PositionX + 1,
             inputDroplet.PositionY, inputDroplet.Volume * splitByRatioCommand.Ratio);
 
-        Droplets.Remove(inputDroplet);
-        Droplets.Add(outputDroplet1);
-        Droplets.Add(outputDroplet2);
+        Droplets.Remove(inputDroplet.DropletName);
+        Droplets[outputDroplet1.DropletName] = outputDroplet1;
+        Droplets[outputDroplet2.DropletName] = outputDroplet2;
 
         List<BoardAction> splitActions = new List<BoardAction>();
 
@@ -168,7 +168,7 @@ public class Router
         // Add logic for processing the SplitByVolume command
         Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
 
-        Droplet inputDroplet = Droplets.Find(d => d.DropletName == splitByVolumeCommand.InputName)
+        Droplet inputDroplet = Droplets[splitByVolumeCommand.InputName]
                                ?? throw new InvalidOperationException($"No droplet found with name {splitByVolumeCommand.InputName}.");
 
 
@@ -179,9 +179,9 @@ public class Router
         Droplet outputDroplet2 = new Droplet(splitByVolumeCommand.OutputName2, inputDroplet.PositionX + 1,
             inputDroplet.PositionY, splitByVolumeCommand.Volume);
 
-        Droplets.Remove(inputDroplet);
-        Droplets.Add(outputDroplet1);
-        Droplets.Add(outputDroplet2);
+        Droplets.Remove(inputDroplet.DropletName);
+        Droplets[outputDroplet1.DropletName] = outputDroplet1;
+        Droplets[outputDroplet2.DropletName] = outputDroplet2;
 
         List<BoardAction> splitActions = new List<BoardAction>();
 
@@ -200,7 +200,7 @@ public class Router
         // Add logic for processing the Mix command
         Console.WriteLine("Mixing droplets...");
 
-        Droplet inputDroplet = Droplets.Find(d => d.DropletName == mixCommand.DropletName)
+        Droplet inputDroplet = Droplets[mixCommand.DropletName]
                                ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
 
         List<BoardAction> mixActions = new List<BoardAction>();

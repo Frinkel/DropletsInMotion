@@ -81,6 +81,7 @@ namespace DropletsInMotion.Compilers.Models
             {
                 node.MarkAsExecuted();
             }
+            // remove dependency for all nodes? for speedup or no gain?
         }
 
         public override string ToString()
@@ -91,6 +92,28 @@ namespace DropletsInMotion.Compilers.Models
                 sb.AppendLine(node.ToString());
             }
             return sb.ToString();
+        }
+
+        public void PrintGraph()
+        {
+            foreach (var node in nodes)
+            {
+                Console.WriteLine($"Node {node.NodeId}: {node.Command}");
+
+                if (node.Dependencies.Count > 0)
+                {
+                    Console.Write("  Dependencies: ");
+                    foreach (var dependency in node.Dependencies)
+                    {
+                        Console.Write($"{dependency.NodeId} ");
+                    }
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("  Dependencies: None");
+                }
+            }
         }
     }
 

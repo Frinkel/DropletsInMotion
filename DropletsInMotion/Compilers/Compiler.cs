@@ -14,7 +14,9 @@ namespace DropletsInMotion.Compilers
         public CommunicationEngine CommunicationEngine;
 
         public Electrode[][] Board { get; set; }
-        public List<Droplet> Droplets { get; } = new List<Droplet>(); 
+
+        public Dictionary<string, Droplet> Droplets { get; set; } = new Dictionary<string, Droplet>();
+
         public double time = 0;
 
         private TemplateHandler TemplateHandler;
@@ -25,7 +27,7 @@ namespace DropletsInMotion.Compilers
 
         private Router Router;
 
-        public Compiler(List<ICommand> commands, List<Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
+        public Compiler(List<ICommand> commands, Dictionary<string, Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
         {
             CommunicationEngine = communicationEngine;
 
@@ -37,6 +39,8 @@ namespace DropletsInMotion.Compilers
             TemplateHandler = new TemplateHandler(Board);
 
             DependencyGraph = new DependencyGraph(commands);
+
+            DependencyGraph.PrintGraph();
 
             Router = new Router(Board);
 
@@ -83,83 +87,6 @@ namespace DropletsInMotion.Compilers
 
 
         }
-
-        //public List<BoardAction> CompileMove(Move move, double compileTime)
-        //{
-        //    List<BoardAction> boardActions = new List<BoardAction>();
-        //    string dropletName = move.DropletName;
-        //    Droplet droplet = Droplets.Find(d => d.DropletName == dropletName);
-
-        //    if (droplet == null)
-        //    {
-        //        throw new InvalidOperationException($"Droplet with name {dropletName} not found.");
-        //    }
-
-        //    int currentX = droplet.PositionX;
-        //    int currentY = droplet.PositionY;
-        //    int targetX = move.NewPositionX;
-        //    int targetY = move.NewPositionY;
-
-        //    double time = compileTime;
-
-        //    // Move horizontally first (if needed)
-        //    while (currentX != targetX)
-        //    {
-        //        if (currentX < targetX)
-        //        {
-        //            currentX++;
-        //            List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveRight", droplet, time);
-        //            boardActions.AddRange(appliedMove);
-        //            droplet.PositionX = currentX;
-        //            time = appliedMove.Last().Time;
-        //        }
-        //        else
-        //        {
-
-        //            currentX--;
-        //            List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveLeft", droplet, time);
-        //            boardActions.AddRange(appliedMove);
-        //            droplet.PositionX = currentX;
-        //            time = appliedMove.Last().Time;
-        //        }
-
-
-        //    }
-
-        //    // Move vertically (if needed)
-        //    while (currentY != targetY)
-        //    {
-        //        if (currentY < targetY)
-        //        {
-        //            currentY++;
-        //            List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveDown", droplet, time);
-        //            boardActions.AddRange(appliedMove);
-        //            droplet.PositionY = currentY;
-        //            time = appliedMove.Last().Time;
-        //        }
-        //        else
-        //        {
-        //            currentY--;
-        //            List<BoardAction> appliedMove = TemplateHandler.ApplyTemplate("moveUp", droplet, time);
-        //            boardActions.AddRange(appliedMove);
-        //            droplet.PositionY = currentY;
-        //            time = appliedMove.Last().Time;
-        //        }
-        //    }
-
-        //    // Update the droplet's final position
-        //    droplet.PositionX = targetX;
-        //    droplet.PositionY = targetY;
-
-        //    foreach (var action in boardActions)
-        //    {
-        //        Console.WriteLine(action);
-        //    }
-        //    return boardActions;
-        //}
-
-
-
 
     }
 }

@@ -6,7 +6,7 @@ namespace DropletsInMotion.Language
     public class MicrofluidicsCustomListener : MicrofluidicsBaseListener
     {
         public List<ICommand> Commands { get; } = new List<ICommand>();
-        public List<Droplet> Droplets { get; } = new List<Droplet>();
+        public Dictionary<string, Droplet> Droplets { get; } = new Dictionary<string, Droplet>();
         public override void ExitDropletDeclaration(MicrofluidicsParser.DropletDeclarationContext context)
         {
             string name = context.IDENTIFIER().GetText();
@@ -14,7 +14,8 @@ namespace DropletsInMotion.Language
             int positionY = int.Parse(context.INT(1).GetText());
             double volume = double.Parse(context.FLOAT().GetText());
 
-            Droplets.Add(new Droplet(name, positionX, positionY, volume));
+            Droplet droplet = new Droplet(name, positionX, positionY, volume);
+            Droplets[name] = droplet;
         }
 
         public override void ExitMoveDroplet(MicrofluidicsParser.MoveDropletContext context)
