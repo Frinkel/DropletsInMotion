@@ -41,7 +41,7 @@ namespace DropletsInMotion.Routers.Functions
             foreach (var otherAgentKvp in agents )
             {
                 var otherAgent = otherAgentKvp.Value;
-                if (otherAgent.SubstanceId != agent.SubstanceId) continue;
+                if (otherAgent.SubstanceId != agent.SubstanceId || otherAgent.DropletName == agent.DropletName) continue;
                 if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 || Math.Abs(otherAgent.PositionY - deltaY) <= 1)
                 {
                     return false;
