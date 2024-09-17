@@ -6,7 +6,6 @@ namespace DropletsInMotion.Routers.Models
     {
         private static byte _nextSubstanceId = 1;
         public byte SubstanceId;
-        public ICommand Command;
 
         public Agent(string dropletName, int positionX, int positionY, double volume) : base(dropletName, positionX, positionY, volume)
         {
@@ -26,6 +25,29 @@ namespace DropletsInMotion.Routers.Models
         public override string ToString()
         {
             return $"Agent({base.ToString()}, SubstanceId: {SubstanceId})";
+        }
+
+        public object Clone()
+        {
+            return new Agent(DropletName, PositionX, PositionY, Volume)
+            {
+                SubstanceId = SubstanceId, 
+            };
+        }
+
+        internal void Execute(Types.RouteAction action)
+        {
+            switch (action.Type)
+            {
+                case (Types.ActionType.NoOp):
+                    break;
+                case (Types.ActionType.Move):
+                    PositionX += action.DropletXDelta;
+                    PositionY += action.DropletYDelta;
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid action tried to be executed! (Agent.cs)");
+            }
         }
     }
 }

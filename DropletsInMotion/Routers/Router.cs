@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using DropletsInMotion.Routers.Functions;
 
 namespace DropletsInMotion.Routers;
 public class Router
@@ -25,7 +26,7 @@ public class Router
     private Electrode[][] Board { get; set; }
 
 
-    private byte[,] Contamination { get; set; }
+    private byte[,] ContaminationMap { get; set; }
 
 
     private readonly MoveHandler _moveHandler;
@@ -36,13 +37,14 @@ public class Router
         Board = board;
         _templateHandler = new TemplateHandler(Board);
         _moveHandler = new MoveHandler(_templateHandler);
-        Contamination = new byte[Board.Length, Board[0].Length];
+        ContaminationMap = new byte[Board.Length, Board[0].Length];
+
 
         foreach (var droplet in droplets)
         {
             Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
             Agents.Add(droplet.Key, agent);
-            ApplyContamination(agent);
+            ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
         }
 
         //PrintContaminationState();
@@ -51,48 +53,39 @@ public class Router
     public void Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
     {
 
-        Dictionary<string, Agent> routableAgents = new Dictionary<string, Agent>();
+        // TODO: Should happen by triggering a function?
+        // Create all new agents and add their contamination
+        //foreach (var dropletKvp in droplets)
+        //{
+        //    var droplet = dropletKvp.Value;
+
+        //    if (!Agents.ContainsKey(dropletKvp.Key))
+        //    {
+        //        Agent agent = new Agent(droplet.DropletName, droplet.PositionX, droplet.PositionY, droplet.Volume);
+        //        Agents.Add(dropletKvp.Key, agent);
+        //        ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
+        //    }
+        //}
+
+
+        List<string> routableAgents = new List<string>();
 
         foreach (var command in commands)
         {
-            foreach (var droplet in command.GetInputDroplets())
-            {
-                Agent agent = new Agent(Agents[droplet].DropletName, Agents[droplet].PositionX, Agents[droplet].PositionY, Agents[droplet].Volume);
-                routableAgents.Add(droplet, agent);
-            }
+            routableAgents.AddRange(command.GetInputDroplets());
+
+            //foreach (var droplet in command.GetInputDroplets())
+            //{
+            //    Agent agent = new Agent(Agents[droplet].DropletName, Agents[droplet].PositionX, Agents[droplet].PositionY, Agents[droplet].Volume);
+            //    routableAgents.Add(droplet);
+            //}
         }
 
-        
+        State s0 = new State(routableAgents, Agents, ContaminationMap, commands);
     }
 
 
-    private void ApplyContamination(Agent agent)
-    {
-        var x = agent.PositionX;
-        var y = agent.PositionY;
-
-        int rowCount = Contamination.GetLength(0);
-        int colCount = Contamination.GetLength(1);
-
-        void ApplyIfInBounds(int xPos, int yPos)
-        {
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                Contamination[xPos, yPos] = (byte)(Contamination[xPos, yPos] == 0 ? agent.SubstanceId : 255);
-            }
-        }
-
-        ApplyIfInBounds(x, y);
-        ApplyIfInBounds(x + 1, y);
-        ApplyIfInBounds(x - 1, y);
-        ApplyIfInBounds(x, y + 1);
-        ApplyIfInBounds(x, y - 1);
-
-        ApplyIfInBounds(x + 1, y + 1);
-        ApplyIfInBounds(x + 1, y - 1);
-        ApplyIfInBounds(x - 1, y + 1);
-        ApplyIfInBounds(x - 1, y - 1);
-    }
+    
 
 
 
@@ -102,14 +95,14 @@ public class Router
         // Determine the maximum number of digits for proper alignment
         int maxDigits = 3;
 
-        int rowCount = Contamination.GetLength(0);
-        int colCount = Contamination.GetLength(1);
+        int rowCount = ContaminationMap.GetLength(0);
+        int colCount = ContaminationMap.GetLength(1);
 
         for (int j = 0; j < colCount; j++)
         {
             for (int i = 0; i < rowCount; i++)
             {
-                byte value = Contamination[i, j];
+                byte value = ContaminationMap[i, j];
 
                 // Set the color based on the value using a hash function
                 SetColorForValue(value);
