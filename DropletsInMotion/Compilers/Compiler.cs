@@ -58,6 +58,7 @@ namespace DropletsInMotion.Compilers
             int i = 0;
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
+
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
                 //print the commands

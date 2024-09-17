@@ -81,7 +81,7 @@ public class Router
             //}
         }
 
-        State s0 = new State(routableAgents, Agents, ContaminationMap, commands);
+        State s0 = new State(routableAgents, Agents, ContaminationMap, commands, _templateHandler);
     }
 
 

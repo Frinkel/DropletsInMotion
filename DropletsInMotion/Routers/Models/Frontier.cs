@@ -11,7 +11,7 @@ public class Frontier
 
     public void Add(State state)
     {
-        _queue.Enqueue(state, state.Heuristic);
+        _queue.Enqueue(state, state.GetHeuristic());
     }
 
     public State Pop()

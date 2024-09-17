@@ -23,12 +23,32 @@ namespace DropletsInMotion.Routers.Functions
 
             return false;
         }
-        private static bool IsMoveApplicable(Types.RouteAction action, Agent agent, Dictionary<string, Agent> agents, byte[,] contamination)
+        public static bool IsMoveApplicable(Types.RouteAction action, Agent agent, Dictionary<string, Agent> agents, byte[,] contamination)
         {
             var deltaX = agent.PositionX + action.DropletXDelta;
             var deltaY = agent.PositionY + action.DropletYDelta;
-
-            return false;
+            //Check out of bounds
+            if (deltaX < 0 || deltaX >= contamination.GetLength(0) || deltaY < 0 || deltaY >= contamination.GetLength(1))
+            {
+                return false;
+            }
+            // check for contaminations
+            if (contamination[deltaX, deltaY] != 0 && contamination[deltaX, deltaY] != agent.SubstanceId)
+            {
+                return false;
+            }
+            //Check for going near other agents of the same substance
+            foreach (var otherAgentKvp in agents )
+            {
+                var otherAgent = otherAgentKvp.Value;
+                if (otherAgent.SubstanceId != agent.SubstanceId) continue;
+                if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 || Math.Abs(otherAgent.PositionY - deltaY) <= 1)
+                {
+                    return false;
+                }
+            }
+            //returns true
+            return true;
         }
 
         public static byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
