@@ -1,3 +1,4 @@
+using System.Runtime.Intrinsics.X86;
 using Antlr4.Runtime;
 using DropletsInMotion;
 using DropletsInMotion.Compilers;
@@ -7,6 +8,7 @@ using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Controllers;
 using NUnit.Framework;
 using DropletsInMotion.Compilers.Services;
+using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
@@ -85,5 +87,27 @@ namespace DropletsInMotionTests
 
         //    Assert.AreEqual(8, actions.Count());
         //}
+
+
+        [Test]
+        public void stateExtractTest()
+        {
+            byte[,] contamination = new byte[20, 32];
+
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var agent = new Agent("d1", 1, 1, 1);
+            agents.Add("d1", agent);
+
+            State s1 = new State(contamination, agents);
+            List<BoardAction> actions = new List<BoardAction>();
+            actions.Add(new BoardAction(22, 1, 1));
+
+
+            State s2 = new State(s1, actions);
+            State s3 = new State(s2, actions);
+
+            Assert.That(2, Is.EqualTo(s3.ExtractActions().Count));
+        }
     }
 }

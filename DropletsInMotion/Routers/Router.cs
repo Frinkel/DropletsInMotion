@@ -1,232 +1,191 @@
-﻿using DropletsInMotion.Compilers.Models;
-using DropletsInMotion.Controllers;
+﻿using DropletsInMotion.Controllers;
 using DropletsInMotion.Domain;
+using DropletsInMotion.Routers.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DropletsInMotion.Routers;
-
-/*
- * Assumption:
- * The electrode under a droplet will always be on, until the droplet is wasted or outputted
- * The movement is only as good as the design of the templates
- */
-
-/*
- * In: Board, Droplets, List<ICommand>
- * Out: List<BoardAction>
- *
- * Droplets is the state
- */
-
-
 public class Router
 {
+
+    /*
+     *  Actions:
+     *  Move, SplitByVolume, SplitByRatio, Merge
+     *
+     *  Constraints:
+     *  Single droplet routing
+     *  
+     */
+
+    private Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
     private Electrode[][] Board { get; set; }
-    public Dictionary<string, Droplet> Droplets { get; set; }
-    private List<ICommand> Commands { get; set; }
-    private double Time { get; set; }
+
+
+    private byte[,] Contamination { get; set; }
 
 
     private readonly MoveHandler _moveHandler;
     private readonly TemplateHandler _templateHandler;
 
-
-    public Router(Electrode[][] board)
+    public Router(Electrode[][] board, Dictionary<string, Droplet> droplets)
     {
         Board = board;
         _templateHandler = new TemplateHandler(Board);
         _moveHandler = new MoveHandler(_templateHandler);
+        Contamination = new byte[Board.Length, Board[0].Length];
+
+        foreach (var droplet in droplets)
+        {
+            Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
+            Agents.Add(droplet.Key, agent);
+            ApplyContamination(agent);
+        }
+
+        //PrintContaminationState();
     }
 
-    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
+    public void Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
     {
-        Droplets = droplets;
-        Commands = commands;
-        Time = time;
-        List<BoardAction> boardActions = new List<BoardAction>();
 
+        Dictionary<string, Agent> routableAgents = new Dictionary<string, Agent>();
 
-        //Console.WriteLine("\n\n\nRunning router.....\n");
-        
-        
-        foreach (var command in Commands)
+        foreach (var command in commands)
         {
-            switch (command)
+            foreach (var droplet in command.GetInputDroplets())
             {
-                case Move moveCommand:
-                    boardActions.AddRange(HandleMoveCommand(moveCommand));
-                    break;
-                case Merge mergeCommand:
-                    boardActions.AddRange(HandleMergeCommand(mergeCommand));
-                    break;
-                case SplitByRatio splitByRatioCommand:
-                    boardActions.AddRange(HandleSplitByRatioCommand(splitByRatioCommand));
-                    break;
-                case SplitByVolume splitByVolumeCommand:
-                    boardActions.AddRange(HandleSplitByVolumeCommand(splitByVolumeCommand));
-                    break;
-                case Mix mixCommand:
-                    boardActions.AddRange(HandleMixCommand(mixCommand));
-                    break;
-                case Dispense dispenseCommand:
-                    HandleDispenseCommand(dispenseCommand);
-                    break;
-                default:
-                    Console.WriteLine("Unknown command");
-                    break;
+                Agent agent = new Agent(Agents[droplet].DropletName, Agents[droplet].PositionX, Agents[droplet].PositionY, Agents[droplet].Volume);
+                routableAgents.Add(droplet, agent);
             }
         }
 
-        return boardActions;
+        
     }
 
 
-    private List<BoardAction> HandleMoveCommand(Move moveCommand)
+    private void ApplyContamination(Agent agent)
     {
-        //Console.WriteLine($"Moving droplet to ({moveCommand.PositionX}, {moveCommand.PositionY})");
+        var x = agent.PositionX;
+        var y = agent.PositionY;
 
-        Droplet droplet = Droplets[moveCommand.DropletName]
-                            ?? throw new InvalidOperationException($"No droplet found with name {moveCommand.DropletName}.");
-        if (droplet == null)
+        int rowCount = Contamination.GetLength(0);
+        int colCount = Contamination.GetLength(1);
+
+        void ApplyIfInBounds(int xPos, int yPos)
         {
-            throw new InvalidOperationException($"Droplet with name {moveCommand.DropletName} not found.");
+            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
+            {
+                Contamination[xPos, yPos] = (byte)(Contamination[xPos, yPos] == 0 ? agent.SubstanceId : 255);
+            }
         }
 
-        double time = Time;
+        ApplyIfInBounds(x, y);
+        ApplyIfInBounds(x + 1, y);
+        ApplyIfInBounds(x - 1, y);
+        ApplyIfInBounds(x, y + 1);
+        ApplyIfInBounds(x, y - 1);
 
-        return _moveHandler.MoveDroplet(droplet, moveCommand.PositionX, moveCommand.PositionY, ref time);
+        ApplyIfInBounds(x + 1, y + 1);
+        ApplyIfInBounds(x + 1, y - 1);
+        ApplyIfInBounds(x - 1, y + 1);
+        ApplyIfInBounds(x - 1, y - 1);
     }
 
-    private List<BoardAction> HandleMergeCommand(Merge mergeCommand)
+
+
+    // TEMP FUNCTIONS
+    public void PrintContaminationState()
     {
-        // Add logic for processing the Merge command
-        //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
+        // Determine the maximum number of digits for proper alignment
+        int maxDigits = 3;
 
-        Droplet inputDroplet1 = Droplets[mergeCommand.InputName1]
-                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+        int rowCount = Contamination.GetLength(0);
+        int colCount = Contamination.GetLength(1);
 
-        Droplet inputDroplet2 = Droplets[mergeCommand.InputName2]
-                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
-
-        List<BoardAction> mergeActions = new List<BoardAction>();
-
-        double time1 = Time;
-        double time2 = Time;
-        mergeActions.AddRange(_moveHandler.MoveDroplet(inputDroplet1, mergeCommand.PositionX - 1, mergeCommand.PositionY, ref time1));
-        mergeActions.AddRange(_moveHandler.MoveDroplet(inputDroplet2, mergeCommand.PositionX + 1, mergeCommand.PositionY, ref time2));
-
-        Droplet outputDroplet = new Droplet(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY,
-            inputDroplet1.Volume + inputDroplet2.Volume);
-
-        Droplets.Remove(inputDroplet1.DropletName);
-        Droplets.Remove(inputDroplet2.DropletName);
-        Droplets[outputDroplet.DropletName] = outputDroplet;
-
-        mergeActions = mergeActions.OrderBy(b => b.Time).ToList();
-
-        double time = mergeActions.Any() ? mergeActions.Last().Time : Time;
-
-        mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
-
-        return mergeActions;
-    }
-
-    private List<BoardAction> HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand)
-    {
-        // Add logic for processing the SplitByRatio command
-        //Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
-
-
-        Droplet inputDroplet = Droplets[splitByRatioCommand.InputName]
-                               ?? throw new InvalidOperationException($"No droplet found with name {splitByRatioCommand.InputName}.");
-        
-
-        // Create the new droplets
-        Droplet outputDroplet1 = new Droplet(splitByRatioCommand.OutputName1, inputDroplet.PositionX - 1,
-            inputDroplet.PositionY, inputDroplet.Volume * (1 - splitByRatioCommand.Ratio));
-
-        Droplet outputDroplet2 = new Droplet(splitByRatioCommand.OutputName2, inputDroplet.PositionX + 1,
-            inputDroplet.PositionY, inputDroplet.Volume * splitByRatioCommand.Ratio);
-
-        Droplets.Remove(inputDroplet.DropletName);
-        Droplets[outputDroplet1.DropletName] = outputDroplet1;
-        Droplets[outputDroplet2.DropletName] = outputDroplet2;
-
-        List<BoardAction> splitActions = new List<BoardAction>();
-
-        splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
-
-        double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
-        double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
-        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1, ref time1));
-        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2, ref time2));
-
-        return splitActions;
-    }
-
-    private List<BoardAction> HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
-    {
-        // Add logic for processing the SplitByVolume command
-        //Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
-
-        Droplet inputDroplet = Droplets[splitByVolumeCommand.InputName]
-                               ?? throw new InvalidOperationException($"No droplet found with name {splitByVolumeCommand.InputName}.");
-
-
-        // Create the new droplets
-        Droplet outputDroplet1 = new Droplet(splitByVolumeCommand.OutputName1, inputDroplet.PositionX - 1,
-            inputDroplet.PositionY, inputDroplet.Volume - splitByVolumeCommand.Volume);
-
-        Droplet outputDroplet2 = new Droplet(splitByVolumeCommand.OutputName2, inputDroplet.PositionX + 1,
-            inputDroplet.PositionY, splitByVolumeCommand.Volume);
-
-        Droplets.Remove(inputDroplet.DropletName);
-        Droplets[outputDroplet1.DropletName] = outputDroplet1;
-        Droplets[outputDroplet2.DropletName] = outputDroplet2;
-
-        List<BoardAction> splitActions = new List<BoardAction>();
-
-        splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
-
-        double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
-        double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
-        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByVolumeCommand.PositionX1, splitByVolumeCommand.PositionY1, ref time1));
-        splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByVolumeCommand.PositionX2, splitByVolumeCommand.PositionY2, ref time2));
-
-        return splitActions;
-    }
-
-    private List<BoardAction> HandleMixCommand(Mix mixCommand)
-    {
-        // Add logic for processing the Mix command
-        //Console.WriteLine("Mixing droplets...");
-
-        Droplet inputDroplet = Droplets[mixCommand.DropletName]
-                               ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
-
-        List<BoardAction> mixActions = new List<BoardAction>();
-
-        double time = Time;
-        mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, mixCommand.PositionX, mixCommand.PositionY, ref time));
-
-        double time1 = mixActions.Any() ? mixActions.Last().Time : Time;
-
-        for (int i = 0; i < mixCommand.RepeatTimes; i++)
+        for (int j = 0; j < colCount; j++)
         {
-            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1));
-            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1));
-            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1));
-            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1));
+            for (int i = 0; i < rowCount; i++)
+            {
+                byte value = Contamination[i, j];
+
+                // Set the color based on the value using a hash function
+                SetColorForValue(value);
+
+                // Print each ElectrodeId with a fixed width
+                Console.Write(value.ToString().PadLeft(maxDigits) + " ");
+
+                // Reset color after printing
+                Console.ResetColor();
+            }
+            Console.WriteLine();
         }
-        
-        return mixActions;
     }
 
-    private void HandleDispenseCommand(Dispense dispenseCommand)
+    private void SetColorForValue(byte value)
     {
-        throw new NotImplementedException();
-        // Add logic for processing the Dispense command
-        Console.WriteLine($"Dispensing droplet at {dispenseCommand.DropletName}");
+        // Handle 0 as a special case
+        if (value == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+        else
+        {
+            // Get a unique color for each value using a hash function
+            var rgbColor = GetRGBFromHash(value);
+
+            // Convert RGB to closest ConsoleColor
+            var consoleColor = GetConsoleColorFromRGB(rgbColor.R, rgbColor.G, rgbColor.B);
+            Console.BackgroundColor = consoleColor;
+        }
     }
 
+    // Method to generate an RGB color from a hash of the value
+    private (byte R, byte G, byte B) GetRGBFromHash(byte value)
+    {
+        // Hash the value (using a simple hash function for demonstration)
+        int hash = (int)(value * 2654435761); // A simple, fast hash function
+
+        // Extract RGB components from the hash
+        byte r = (byte)((hash >> 16) & 0xFF);
+        byte g = (byte)((hash >> 8) & 0xFF);
+        byte b = (byte)(hash & 0xFF);
+
+        return (r, g, b);
+    }
+
+    // Convert RGB to a ConsoleColor (approximation due to limited colors in Console)
+    private ConsoleColor GetConsoleColorFromRGB(byte r, byte g, byte b)
+    {
+        // Use a simple mapping of RGB to the nearest ConsoleColor
+        if (r > 128)
+        {
+            if (g > 128)
+            {
+                if (b > 128) return ConsoleColor.DarkRed;
+                else return ConsoleColor.Yellow;
+            }
+            else
+            {
+                if (b > 128) return ConsoleColor.Magenta;
+                else return ConsoleColor.Red;
+            }
+        }
+        else
+        {
+            if (g > 128)
+            {
+                if (b > 128) return ConsoleColor.Cyan;
+                else return ConsoleColor.Green;
+            }
+            else
+            {
+                if (b > 128) return ConsoleColor.Blue;
+                else return ConsoleColor.DarkCyan;
+            }
+        }
+    }
 }
 
