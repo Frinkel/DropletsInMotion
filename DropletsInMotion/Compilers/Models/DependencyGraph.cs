@@ -115,6 +115,81 @@ namespace DropletsInMotion.Compilers.Models
                 }
             }
         }
+
+        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets)
+        {
+            foreach (DependencyNode node in nodes)
+            {
+                switch (node.Command)
+                {
+                    case Move moveCommand:
+                        if (droplets.TryGetValue(moveCommand.DropletName, out var moveDroplet))
+                        {
+                            if (moveDroplet.PositionX == moveCommand.PositionX &&
+                                moveDroplet.PositionY == moveCommand.PositionY)
+                            {
+                                Console.WriteLine("REMOVEMOVE");
+                                MarkNodeAsExecuted(node.NodeId);
+                            }
+                        }
+                        break;
+                    case Merge mergeCommand:
+                        if (droplets.TryGetValue(mergeCommand.OutputName, out var mergeDroplet) && 
+                            (mergeCommand.OutputName == mergeCommand.InputName1 || !droplets.ContainsKey(mergeCommand.InputName1)) &&
+                            (mergeCommand.OutputName == mergeCommand.InputName2 || !droplets.ContainsKey(mergeCommand.InputName2)) )
+                        {
+                            if (mergeDroplet.PositionX == mergeCommand.PositionX &&
+                                mergeDroplet.PositionY == mergeCommand.PositionY)
+                            {
+                                Console.WriteLine("REMOVE MERGRE");
+                                MarkNodeAsExecuted(node.NodeId);
+                            }
+                        }
+
+                        break;
+                    case SplitByRatio splitByRatio:
+                        if (droplets.TryGetValue(splitByRatio.OutputName1, out var splitDroplet1) &&
+                            droplets.TryGetValue(splitByRatio.OutputName2, out var splitDroplet2) &&
+                            (splitByRatio.OutputName1 == splitByRatio.InputName || !droplets.ContainsKey(splitByRatio.InputName)) &&
+                            (splitByRatio.OutputName2 == splitByRatio.InputName || !droplets.ContainsKey(splitByRatio.InputName)))
+                        {
+                            if (splitDroplet1.PositionX == splitByRatio.PositionX1 &&
+                                splitDroplet1.PositionY == splitByRatio.PositionY1 &&
+                                splitDroplet2.PositionX == splitByRatio.PositionX2 &&
+                                splitDroplet2.PositionY == splitByRatio.PositionY2)
+                            {
+                                Console.WriteLine("REMOVE SPLIT!");
+                                MarkNodeAsExecuted(node.NodeId);
+                            }
+                        }
+
+                        break;
+                    case SplitByVolume splitByVolume:
+                        if (droplets.TryGetValue(splitByVolume.OutputName1, out var splitDroplet1v) &&
+                            droplets.TryGetValue(splitByVolume.OutputName2, out var splitDroplet2v) &&
+                            (splitByVolume.OutputName1 == splitByVolume.InputName || !droplets.ContainsKey(splitByVolume.InputName)) &&
+                            (splitByVolume.OutputName2 == splitByVolume.InputName || !droplets.ContainsKey(splitByVolume.InputName)))
+                        {
+                            if (splitDroplet1v.PositionX == splitByVolume.PositionX1 &&
+                                splitDroplet1v.PositionY == splitByVolume.PositionY1 &&
+                                splitDroplet2v.PositionX == splitByVolume.PositionX2 &&
+                                splitDroplet2v.PositionY == splitByVolume.PositionY2)
+                            {
+                                MarkNodeAsExecuted(node.NodeId);
+                            }
+                        }
+
+                        break;
+                    case Mix mixCommand:
+                        throw new NotSupportedException($"Command type {node.Command.GetType()} is not supported.");
+
+
+                    default:
+                        throw new NotSupportedException($"Command type {node.Command.GetType()} is not supported.");
+                }
+            }
+
+        }
     }
 
 

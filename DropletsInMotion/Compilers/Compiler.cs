@@ -73,12 +73,13 @@ namespace DropletsInMotion.Compilers
                 //{
                 //    Console.WriteLine(action.ToString());
                 //}
+                DependencyGraph.updateExecutedNodes(executableNodes, Droplets);
 
-                foreach (DependencyNode node in executableNodes)
-                {
-                    DependencyGraph.MarkNodeAsExecuted(node.NodeId);
-                }
-                i += 1;
+                //foreach (DependencyNode node in executableNodes)
+                //{
+                //    DependencyGraph.MarkNodeAsExecuted(node.NodeId);
+                //}
+                //i += 1;
 
                 await CommunicationEngine.SendActions(boardActions);
                 boardActions.Clear();
