@@ -267,52 +267,117 @@ public class State
     private int CalculateHeuristic()
     {
         int h = 0;
-
-        // Iterate over each command to calculate the heuristic contribution
         foreach (ICommand command in Commands)
         {
-            switch (command)
+            if (command is Move moveCommand)
             {
-                case Move moveCommand:
-                    int hTemp = 0;
+                Agent agent = Agents[moveCommand.GetInputDroplets().First()];
+                int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) + Math.Abs(moveCommand.PositionY - agent.PositionY);
 
-                    Agent agent = Agents[moveCommand.GetInputDroplets().First()];
+                // Check if path is blocked
+                if (PathIsBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
+                {
+                    manhattanDistance += 10;  // Increase the heuristic by a penalty if the path is blocked
+                }
+                if (manhattanDistance != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+                {
+                    manhattanDistance += 5;
+                }
 
-                    // Manhattan Distance to the goal
-                    hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
-                    hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
+                h += manhattanDistance;
+            }
+            else
+            {
+                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+            }
+        }
+        return h;
+    }
 
+    private bool PathIsBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
+    {
+        int dx = Math.Abs(endX - startX);
+        int dy = -Math.Abs(endY - startY);
+        int sx = startX < endX ? 1 : -1;
+        int sy = startY < endY ? 1 : -1;
+        int err = dx + dy, e2;
+        int steps = 0;
 
-                    // Penalize for NoOp actions
-                    if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
-                    {
-                        hTemp += 10; // Penalize idling agents
-                    }
+        while (true)
+        {
+            if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
+                return true;
 
-                    // Additional heuristic penalties
+            if (startX == endX && startY == endY) break;
+            if (steps++ > maxDepth) break; // Limit the lookahead depth
 
-                    // Penalty for contamination proximity
-                    if (IsNearContamination(agent.PositionX, agent.PositionY, agent))
-                    {
-                        hTemp += 2; // Increase penalty if near contamination
-                    }
-
-                    // Penalty for agent conflicts
-                    //if (IsNearOtherAgent(agent))
-                    //{
-                    //    hTemp += 3; // Penalize potential conflicts
-                    //}
-
-                    h += hTemp;
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+            e2 = 2 * err;
+            if (e2 >= dy)
+            {
+                err += dy;
+                startX += sx;
+            }
+            if (e2 <= dx)
+            {
+                err += dx;
+                startY += sy;
             }
         }
 
-        return h;
+        return false; // No contamination within the lookahead limit
     }
+
+
+
+    //private int CalculateHeuristic()
+    //{
+    //    int h = 0;
+
+    //    // Iterate over each command to calculate the heuristic contribution
+    //    foreach (ICommand command in Commands)
+    //    {
+    //        switch (command)
+    //        {
+    //            case Move moveCommand:
+    //                int hTemp = 0;
+
+    //                Agent agent = Agents[moveCommand.GetInputDroplets().First()];
+
+    //                // Manhattan Distance to the goal
+    //                hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
+    //                hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
+
+
+    //                // Penalize for NoOp actions
+    //                if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+    //                {
+    //                    hTemp += 10; // Penalize idling agents
+    //                }
+
+    //                // Additional heuristic penalties
+
+    //                // Penalty for contamination proximity
+    //                if (IsNearContamination(agent.PositionX, agent.PositionY, agent))
+    //                {
+    //                    hTemp += 2; // Increase penalty if near contamination
+    //                }
+
+    //                // Penalty for agent conflicts
+    //                //if (IsNearOtherAgent(agent))
+    //                //{
+    //                //    hTemp += 3; // Penalize potential conflicts
+    //                //}
+
+    //                h += hTemp;
+    //                break;
+
+    //            default:
+    //                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+    //        }
+    //    }
+
+    //    return h;
+    //}
 
     // Helper method to check if an agent is near contamination
     private bool IsNearContamination(int x, int y, Agent agent)

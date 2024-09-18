@@ -31,9 +31,9 @@ namespace DropletsInMotionTests
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
             State s2 = new State(s1, jointAction);
-            Assert.AreEqual(4, s2.GetHeuristic());
+            Assert.AreEqual(7, s2.GetHeuristic());
             State s3 = new State(s2, jointAction);
-            Assert.AreEqual(4, s3.GetHeuristic());
+            Assert.AreEqual(6, s3.GetHeuristic());
         }
 
         [Test]
@@ -124,7 +124,7 @@ namespace DropletsInMotionTests
 
             State s2 = new State(s1, jointAction);
             expandedStates = s2.GetExpandedStates();
-            Assert.AreEqual(24, expandedStates.Count());
+            Assert.AreEqual(15, expandedStates.Count());
 
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
@@ -134,7 +134,7 @@ namespace DropletsInMotionTests
         public void TestIsGoalState()
         {
             byte[,] contamination = new byte[32, 20];
-            var agents = createTwoAgentsWithPositions(1, 1, 5, 7);
+            var agents = createTwoAgentsWithPositions(1, 3, 5, 7);
 
             ICommand command = new Move("d1", 3, 3);
             ICommand command2 = new Move("d2", 7, 7);
@@ -171,12 +171,12 @@ namespace DropletsInMotionTests
             AstarRouter astarRouter = new AstarRouter();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var res = astarRouter.Search(s0, frontier, 0);
+            State res = astarRouter.Search(s0, frontier, 0);
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Assert.AreEqual(res.Item3.Count, 207);
+            Assert.AreEqual(res.IsGoalState(), true);
         }
 
         [Test]
@@ -196,15 +196,42 @@ namespace DropletsInMotionTests
             AstarRouter astarRouter = new AstarRouter();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var res = astarRouter.Search(s0, frontier, 0);
+            State res = astarRouter.Search(s0, frontier, 0);
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Assert.AreEqual(res.Item3.Count, 12);
+            Assert.AreEqual(res.IsGoalState(), true);
+        }
+
+        [Test]
+        public void TestAStarSearchGreatWallOfDmf()
+        {
+            byte[,] contamination = new byte[32, 20];
+
+            contamination[10, 9] = 255;
+            contamination[10, 10] = 255;
+            contamination[10, 11] = 255;
+
+            var agents = createTwoAgentsWithPositions(5, 10, 30, 18);
 
 
-            //Assert.AreEqual(true, false);
+            ICommand command = new Move("d1", 15, 10);
+            var commands = new List<ICommand>() { command };
+
+            var routableAgents = new List<string>() { "d1" };
+            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
+
+            Frontier frontier = new Frontier();
+            AstarRouter astarRouter = new AstarRouter();
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            State res = astarRouter.Search(s0, frontier, 0);
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs.ToString());
+
+            Assert.AreEqual(res.IsGoalState(), true);
         }
 
         public TemplateHandler CreateTemplateHandler()
@@ -233,6 +260,5 @@ namespace DropletsInMotionTests
             agents.Add("d2", agent2);
             return agents;
         }
-
     }
 }

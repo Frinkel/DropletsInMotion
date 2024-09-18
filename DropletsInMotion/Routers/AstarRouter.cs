@@ -18,7 +18,7 @@ namespace DropletsInMotion.Routers
 
         }
 
-        public Tuple<byte[,], Dictionary<string, Agent>, List<BoardAction>> Search(State initialState, Frontier frontier, double time)
+        public State Search(State initialState, Frontier frontier, double time)
         {
             frontier.Add(initialState);
             HashSet<State> explored = new HashSet<State>();
@@ -29,17 +29,13 @@ namespace DropletsInMotion.Routers
                 State state = frontier.Pop();
 
                 // Reached goal state
-                if (state.IsGoalState() || state.G >= 10)
+                if (state.IsGoalState() || state.G >= 60)
                 {
                     Console.WriteLine($"We reached a goal state at depth {state.G}");
+                    //TODO REMOVE WHEN NO PIRNTOUTS
                     var actions = state.ExtractActions(time);
                     var agents = state.Agents;
                     var contaminationMap = state.ContaminationMap;
-
-                    //foreach (var action in actions)
-                    //{
-                    //    Console.WriteLine(action);
-                    //}
 
                     foreach (var agent in agents)
                     {
@@ -48,28 +44,28 @@ namespace DropletsInMotion.Routers
 
                     ApplicableFunctions.PrintContaminationState(state.ContaminationMap);
 
-                    //List<State> chosenStates = new List<State>();
-                    //State currentState = state;
-                    //while (currentState.Parent != null)
-                    //{
-                    //    chosenStates.Add(currentState);
-                    //    currentState = currentState.Parent;
-                    //}
+                    List<State> chosenStates = new List<State>();
+                    State currentState = state;
+                    while (currentState.Parent != null)
+                    {
+                        chosenStates.Add(currentState);
+                        currentState = currentState.Parent;
+                    }
 
-                    //chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+                    chosenStates = chosenStates.OrderBy(s => s.G).ToList();
 
-                    //foreach (var cstate in chosenStates)
-                    //{
-                    //    Console.WriteLine($"State Depth: {cstate.G}");
-                    //    Console.WriteLine(state.GetHeuristic());
-                    //    //foreach (var action in cstate.JointAction)
-                    //    //{
-                    //    //    Console.WriteLine();
-                    //    //    //Console.WriteLine($"Agent {action.Key} - {action.Value.Name}");
-                    //    //}
-                    //}
+                    foreach (var cstate in chosenStates)
+                    {
+                        Console.WriteLine($"State Depth: {cstate.G}");
+                        //Console.WriteLine(state.GetHeuristic());
+                        foreach (var action in cstate.JointAction)
+                        {
+                            Console.WriteLine($"Agent {action.Key} - {action.Value.Name}");
+                        }
+                    }
 
-                    return new Tuple<byte[,], Dictionary<string, Agent>, List<BoardAction>>(contaminationMap, agents, actions);
+                    return state;
+                    //return new Tuple<byte[,], Dictionary<string, Agent>, List<BoardAction>>(contaminationMap, agents, actions);
                 }
 
                 // Add the current state to explored states
