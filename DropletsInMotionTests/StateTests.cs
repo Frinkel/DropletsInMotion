@@ -205,6 +205,35 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public void TestAStarSearchAroundEachotherSameSubstance()
+        {
+            var agents = createTwoAgentsWithPositions(5, 5, 12, 5);
+            foreach (var agent in agents)
+            {
+                agent.Value.SubstanceId = 1;
+            }
+            byte[,] contamination = new byte[32, 20];
+
+            ICommand command = new Move("d1", 20, 5);
+            ICommand command2 = new Move("d2", 1, 5);
+            var commands = new List<ICommand>() { command, command2 };
+
+            var routableAgents = new List<string>() { "d1", "d2" };
+            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
+
+            Frontier frontier = new Frontier();
+            AstarRouter astarRouter = new AstarRouter();
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            State res = astarRouter.Search(s0, frontier, 0);
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs.ToString());
+
+            Assert.AreEqual(res.IsGoalState(), true);
+        }
+
+        [Test]
         public void TestAStarSearchGreatWallOfDmf()
         {
             byte[,] contamination = new byte[32, 20];
