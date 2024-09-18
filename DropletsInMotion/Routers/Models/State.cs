@@ -255,6 +255,19 @@ public class State
         return h;
     }
 
+    public bool IsGoalState(List<ICommand> commands, Dictionary<string, Agent> agents)
+    {
+        foreach (var command in commands)
+        {
+            if (IsGoalState(command, agents))
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
     public bool IsGoalState(ICommand command, Dictionary<string, Agent> agents)
     {
         switch (command)
