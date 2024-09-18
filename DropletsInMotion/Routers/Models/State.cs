@@ -168,5 +168,19 @@ public class State
         }
         return h;
     }
+
+    public bool IsGoalState(ICommand command, Dictionary<string, Agent> agents)
+    {
+        switch (command)
+        {
+            case Move moveCommand:
+                var agent = agents[moveCommand.GetInputDroplets().First()];
+                return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
+            default:
+                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+                break;
+        }
+        
+    }
 }
 
