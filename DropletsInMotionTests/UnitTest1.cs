@@ -34,10 +34,9 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void templateTester()
+        public void TemplateTester()
         {
-            Electrode[][] board = new Electrode[32][];
-            board = new Electrode[32][];
+            var board = new Electrode[32][];
             for (int i = 0; i < 32; i++)
             {
                 board[i] = new Electrode[20];
@@ -56,7 +55,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void platformServiceTester()
+        public void PlatformServiceTester()
         {
             string workingDirectory = Environment.CurrentDirectory;
             string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";

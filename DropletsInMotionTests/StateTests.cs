@@ -8,6 +8,7 @@ using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Controllers;
 using NUnit.Framework;
 using DropletsInMotion.Compilers.Services;
+using DropletsInMotion.Routers;
 using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
@@ -18,7 +19,7 @@ namespace DropletsInMotionTests
         [Test]
         public void CalculateHeuristic()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
 
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
@@ -38,7 +39,7 @@ namespace DropletsInMotionTests
         [Test]
         public void ExtractActionsTest()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
 
 
             var agents = createTwoAgentsWithPositions(1, 1, 5, 5);
@@ -59,7 +60,7 @@ namespace DropletsInMotionTests
         [Test]
         public void TestExpandedStates()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
 
             var agents = createTwoAgentsWithPositions(1,1,5,5);
             ICommand command = new Move("d1", 3, 3);
@@ -81,7 +82,7 @@ namespace DropletsInMotionTests
         [Test]
         public void TestIsMoveApplicable()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
 
 
             var agents = createTwoAgentsWithPositions(1, 1, 5, 1);
@@ -98,7 +99,7 @@ namespace DropletsInMotionTests
 
             State s2 = new State(s1, jointAction);
             expandedStates = s2.GetExpandedStates();
-            Assert.AreEqual(16, expandedStates.Count());
+            Assert.AreEqual(9, expandedStates.Count());
 
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
@@ -106,7 +107,7 @@ namespace DropletsInMotionTests
         [Test]
         public void TestIsConflicting()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
 
 
             var agents = createTwoAgentsWithPositions(1, 1, 6, 1);
@@ -132,7 +133,7 @@ namespace DropletsInMotionTests
 
         public void TestIsGoalState()
         {
-            byte[,] contamination = new byte[20, 32];
+            byte[,] contamination = new byte[32, 20];
             var agents = createTwoAgentsWithPositions(1, 1, 5, 7);
 
             ICommand command = new Move("d1", 3, 3);
@@ -151,6 +152,59 @@ namespace DropletsInMotionTests
             Assert.AreEqual(true, s3.IsGoalState());
 
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
+        }
+
+        [Test]
+        public void TestAStarSearchSimpleRoute()
+        {
+            byte[,] contamination = new byte[32, 20];
+            var agents = createTwoAgentsWithPositions(1, 1, 5, 7);
+
+            ICommand command = new Move("d1", 31, 18);
+            ICommand command2 = new Move("d2", 17, 17);
+            var commands = new List<ICommand>() { command, command2 };
+
+            var routableAgents = new List<string>() { "d1", "d2" };
+            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
+
+            Frontier frontier = new Frontier();
+            AstarRouter astarRouter = new AstarRouter();
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var res = astarRouter.Search(s0, frontier, 0);
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs.ToString());
+
+            Assert.AreEqual(res.Item3.Count, 207);
+        }
+
+        [Test]
+        public void TestAStarSearchAroundEachother()
+        {
+            byte[,] contamination = new byte[32, 20];
+            var agents = createTwoAgentsWithPositions(5, 5, 12, 5);
+
+            ICommand command = new Move("d1", 20, 5);
+            ICommand command2 = new Move("d2", 1, 5);
+            var commands = new List<ICommand>() { command, command2 };
+
+            var routableAgents = new List<string>() { "d1", "d2" };
+            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
+
+            Frontier frontier = new Frontier();
+            AstarRouter astarRouter = new AstarRouter();
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var res = astarRouter.Search(s0, frontier, 0);
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs.ToString());
+
+            Assert.AreEqual(res.Item3.Count, 12);
+
+
+            //Assert.AreEqual(true, false);
         }
 
         public TemplateHandler CreateTemplateHandler()

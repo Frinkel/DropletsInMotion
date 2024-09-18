@@ -15,16 +15,17 @@ namespace DropletsInMotion.Routers.Models;
 
 public class State
 {
+
+    public byte[,] ContaminationMap { get; private set; }
+    public Dictionary<string, Agent> Agents { get; private set; }
+    public int G { get; private set; }
+    public State? Parent { get; private set; }
+    public Dictionary<string, Types.RouteAction>? JointAction { get; private set; }
+
+
     private int H { get; set; }
-    private int G { get; set; }
-    private byte[,] ContaminationMap { get; set; }
-    private State? Parent { get; set; }
-
     private List<string> RoutableAgents { get; set; }
-    private Dictionary<string, Agent> Agents { get; set; }
     private List<ICommand> Commands { get; set; }
-    private Dictionary<string, Types.RouteAction>? JointAction { get; set; }
-
     private TemplateHandler _templateHandler;
 
     // Initial state
@@ -70,13 +71,9 @@ public class State
 
 
         H = CalculateHeuristic();
+        //Console.WriteLine(H);
 
 
-    }
-
-    public int GetHeuristic()
-    {
-        return H + G;
     }
 
     public List<BoardAction> ExtractActions(double time)
@@ -138,7 +135,7 @@ public class State
 
             foreach (Types.RouteAction action in possibleActions)
             {
-                if (ApplicableFunctions.IsMoveApplicable(action, agent, Agents, ContaminationMap))
+                if (ApplicableFunctions.IsMoveApplicable(action, agent, this))
                 {
                     agentActions.Add(action);
                 }
@@ -158,12 +155,9 @@ public class State
             }
         }
 
-        //foreach (var state in expandedStates)
-        //{
-        //    Console.WriteLine(state.JointAction["d1"].Name);
-        //    Console.WriteLine(state.JointAction["d2"].Name);
+        Random random = new Random();
+        expandedStates = expandedStates.OrderBy(x => random.Next()).ToList();
 
-        //}
         return expandedStates;
     }
 
@@ -235,39 +229,144 @@ public class State
     }
 
 
+    //private int CalculateHeuristic()
+    //{
+    //    int h = 0;
+    //    foreach (ICommand command in Commands)
+    //    {
+    //        switch (command)
+    //        {
+    //            case Move moveCommand:
+    //                int hTemp = 0;
+
+    //                Agent agent = Agents[moveCommand.GetInputDroplets().First()];
+    //                hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
+    //                hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
+
+    //                if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+    //                {
+    //                    hTemp += 1;
+    //                }
+
+    //                h += hTemp;
+
+    //                break;
+    //            default:
+    //                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+    //                break;
+    //        }
+    //    }
+    //    return h;
+    //}
+
+    public int GetHeuristic()
+    {
+        return H*2 + G;
+    }
+
     private int CalculateHeuristic()
     {
         int h = 0;
+
+        // Iterate over each command to calculate the heuristic contribution
         foreach (ICommand command in Commands)
         {
             switch (command)
             {
                 case Move moveCommand:
+                    int hTemp = 0;
+
                     Agent agent = Agents[moveCommand.GetInputDroplets().First()];
-                    h +=  Math.Abs(moveCommand.PositionX - agent.PositionX);
-                    h += Math.Abs(moveCommand.PositionY - agent.PositionY);
+
+                    // Manhattan Distance to the goal
+                    hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
+                    hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
+
+
+                    // Penalize for NoOp actions
+                    if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+                    {
+                        hTemp += 10; // Penalize idling agents
+                    }
+
+                    // Additional heuristic penalties
+
+                    // Penalty for contamination proximity
+                    if (IsNearContamination(agent.PositionX, agent.PositionY, agent))
+                    {
+                        hTemp += 2; // Increase penalty if near contamination
+                    }
+
+                    // Penalty for agent conflicts
+                    //if (IsNearOtherAgent(agent))
+                    //{
+                    //    hTemp += 3; // Penalize potential conflicts
+                    //}
+
+                    h += hTemp;
                     break;
+
                 default:
                     throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
-                    break;
             }
         }
+
         return h;
     }
+
+    // Helper method to check if an agent is near contamination
+    private bool IsNearContamination(int x, int y, Agent agent)
+    {
+        // Check surrounding cells for contamination
+        for (int dx = -2; dx <= 2; dx++)
+        {
+            for (int dy = -2; dy <= 2; dy++)
+            {
+                if (x + dx >= 0 && x + dx < ContaminationMap.GetLength(0) &&
+                    y + dy >= 0 && y + dy < ContaminationMap.GetLength(1) &&
+                    ContaminationMap[x + dx, y + dy] != 0 && ContaminationMap[x + dx, y + dy] != agent.SubstanceId)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Helper method to check if an agent is near another agent
+    private bool IsNearOtherAgent(Agent agent)
+    {
+        foreach (var otherAgent in Agents.Values)
+        {
+            if (agent != otherAgent)
+            {
+                int distX = Math.Abs(agent.PositionX - otherAgent.PositionX);
+                int distY = Math.Abs(agent.PositionY - otherAgent.PositionY);
+
+                if (distX <= 2 && distY <= 2)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     public bool IsGoalState()
     {
         foreach (var command in Commands)
         {
-            if (IsGoalState(command))
+            if (!IsGoalState(command))
             {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
 
     }
 
+    
     public bool IsGoalState(ICommand command)
     {
         switch (command)
