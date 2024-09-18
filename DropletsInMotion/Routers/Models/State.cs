@@ -128,12 +128,13 @@ public class State
         List<State> expandedStates = new List<State>();
 
         Dictionary<string, List<Types.RouteAction>> applicableActions = new Dictionary<string, List<Types.RouteAction>>();
-
+        
         foreach (string agentName in RoutableAgents)
         {
             Agent agent = Agents[agentName];
             List<Types.RouteAction> possibleActions = Types.RouteAction.PossiblActions;
             List<Types.RouteAction> agentActions = new List<Types.RouteAction>();
+
             foreach (Types.RouteAction action in possibleActions)
             {
                 if (ApplicableFunctions.IsMoveApplicable(action, agent, Agents, ContaminationMap))
@@ -144,8 +145,56 @@ public class State
             applicableActions.Add(agentName,agentActions);
         }
 
+        var jointActions = GetActionPermutations(applicableActions);
+
+
+        foreach (var jointAction in jointActions)
+        {
+            if (!IsConflicting(jointAction))
+            {
+                State newState = new State(this, jointAction);
+                expandedStates.Add(newState);
+            }
+        }
+
 
         return expandedStates;
+    }
+
+    private bool IsConflicting(Dictionary<string, Types.RouteAction> jointAction)
+    {
+        return false;
+    }
+
+    static List<Dictionary<string, Types.RouteAction>> GetActionPermutations(Dictionary<string, List<Types.RouteAction>> agentActions)
+    {
+        var agents = agentActions.Keys.ToList();
+
+        List<Dictionary<string, Types.RouteAction>> result = new List<Dictionary<string, Types.RouteAction>>();
+        GeneratePermutations(agentActions, new Dictionary<string, Types.RouteAction>(), agents, 0, result);
+        return result;
+    }
+
+    static void GeneratePermutations(
+        Dictionary<string, List<Types.RouteAction>> agentActions,
+        Dictionary<string, Types.RouteAction> current,
+        List<string> agents,
+        int depth,
+        List<Dictionary<string, Types.RouteAction>> result)
+    {
+        if (depth == agents.Count)
+        {
+            result.Add(new Dictionary<string, Types.RouteAction>(current));
+            return;
+        }
+        string agent = agents[depth];
+
+        foreach (var action in agentActions[agent])
+        {
+            current[agent] = action;
+
+            GeneratePermutations(agentActions, current, agents, depth + 1, result);
+        }
     }
 
 
