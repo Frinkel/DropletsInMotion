@@ -16,7 +16,7 @@ namespace DropletsInMotionTests
     {
  
         [Test]
-        public void calculateHeuristic()
+        public void CalculateHeuristic()
         {
             byte[,] contamination = new byte[20, 32];
 
@@ -36,7 +36,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void extractActionsTest()
+        public void ExtractActionsTest()
         {
             byte[,] contamination = new byte[20, 32];
 
@@ -57,7 +57,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void testExpandedStates()
+        public void TestExpandedStates()
         {
             byte[,] contamination = new byte[20, 32];
 
@@ -79,7 +79,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void testIsMoveApplicable()
+        public void TestIsMoveApplicable()
         {
             byte[,] contamination = new byte[20, 32];
 
@@ -104,7 +104,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void testIsConflicting()
+        public void TestIsConflicting()
         {
             byte[,] contamination = new byte[20, 32];
 
@@ -124,6 +124,31 @@ namespace DropletsInMotionTests
             State s2 = new State(s1, jointAction);
             expandedStates = s2.GetExpandedStates();
             Assert.AreEqual(24, expandedStates.Count());
+
+            //Assert.AreEqual(12, s3.ExtractActions(0).Count);
+        }
+
+        [Test]
+
+        public void TestIsGoalState()
+        {
+            byte[,] contamination = new byte[20, 32];
+            var agents = createTwoAgentsWithPositions(1, 1, 5, 7);
+
+            ICommand command = new Move("d1", 3, 3);
+            ICommand command2 = new Move("d2", 7, 7);
+
+            State s1 = new State(new List<string>() { "d1", "d2" }, agents, contamination, new List<ICommand>() { command, command2 }, CreateTemplateHandler());
+            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+            jointAction.Add("d1", Types.RouteAction.MoveRight);
+            jointAction.Add("d2", Types.RouteAction.MoveRight);
+            Assert.AreEqual(false, s1.IsGoalState());
+
+            State s2 = new State(s1, jointAction);
+            Assert.AreEqual(false, s2.IsGoalState());
+
+            State s3 = new State(s2, jointAction);
+            Assert.AreEqual(true, s3.IsGoalState());
 
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
@@ -154,5 +179,6 @@ namespace DropletsInMotionTests
             agents.Add("d2", agent2);
             return agents;
         }
+
     }
 }

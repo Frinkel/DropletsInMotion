@@ -12,6 +12,11 @@ namespace DropletsInMotion.Routers.Models
             SubstanceId = GetNextSubstanceId();
         }
 
+        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId) : base(dropletName, positionX, positionY, volume)
+        {
+            SubstanceId = substanceId;
+        }
+
         private static byte GetNextSubstanceId()
         {
             if (_nextSubstanceId == 254)
@@ -29,10 +34,7 @@ namespace DropletsInMotion.Routers.Models
 
         public object Clone()
         {
-            return new Agent(DropletName, PositionX, PositionY, Volume)
-            {
-                SubstanceId = SubstanceId, 
-            };
+            return new Agent(DropletName, PositionX, PositionY, Volume, SubstanceId);
         }
 
         internal void Execute(Types.RouteAction action)
