@@ -68,6 +68,7 @@ public class State
             ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
         }
 
+
         H = CalculateHeuristic();
 
 
@@ -157,12 +158,48 @@ public class State
             }
         }
 
+        //foreach (var state in expandedStates)
+        //{
+        //    Console.WriteLine(state.JointAction["d1"].Name);
+        //    Console.WriteLine(state.JointAction["d2"].Name);
 
+        //}
         return expandedStates;
     }
 
     private bool IsConflicting(Dictionary<string, Types.RouteAction> jointAction)
     {
+        Dictionary<string, Tuple<int, int>> agentDestinations = new Dictionary<string, Tuple<int, int>>();
+        foreach (var action in jointAction)
+        {
+            var agent = Agents[action.Key];
+            agentDestinations.Add(action.Key, new Tuple<int, int>(agent.PositionX + action.Value.DropletXDelta, agent.PositionY + action.Value.DropletYDelta));
+        }
+
+        foreach (var action in jointAction)
+        {
+            if (action.Value.Type == Types.ActionType.NoOp)
+            {
+                continue;
+            }
+
+            foreach (var otherAction in jointAction)
+            {
+                if (action.Key == otherAction.Key || otherAction.Value.Type == Types.ActionType.NoOp)
+                {
+                    continue;
+                }
+
+                if (Math.Abs(agentDestinations[action.Key].Item1 - agentDestinations[otherAction.Key].Item1) <= 1 &&
+                    Math.Abs(agentDestinations[action.Key].Item2 - agentDestinations[otherAction.Key].Item2) <= 1)
+                {
+                    return true;
+                }
+            }
+
+
+        }
+
         return false;
     }
 
@@ -226,10 +263,10 @@ public class State
                 var agent = agents[moveCommand.GetInputDroplets().First()];
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
-                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+                throw new InvalidOperationException("Trying to determine goalstate for unknown command!");
                 break;
         }
-        
+
     }
 }
 

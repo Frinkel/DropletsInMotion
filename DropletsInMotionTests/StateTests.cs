@@ -41,11 +41,8 @@ namespace DropletsInMotionTests
             byte[,] contamination = new byte[20, 32];
 
 
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var agent = new Agent("d1", 1, 1, 1);
-            var agent2 = new Agent("d2", 5, 5, 1);
-            agents.Add("d1", agent);
-            agents.Add("d2", agent2);
+            var agents = createTwoAgentsWithPositions(1, 1, 5, 5);
+
             ICommand command = new Move("d1", 3, 3);
             ICommand command2 = new Move("d2", 7, 7);
 
@@ -64,12 +61,7 @@ namespace DropletsInMotionTests
         {
             byte[,] contamination = new byte[20, 32];
 
-
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var agent = new Agent("d1", 1, 1, 1);
-            var agent2 = new Agent("d2", 5, 5, 1);
-            agents.Add("d1", agent);
-            agents.Add("d2", agent2);
+            var agents = createTwoAgentsWithPositions(1,1,5,5);
             ICommand command = new Move("d1", 3, 3);
             ICommand command2 = new Move("d2", 7, 7);
 
@@ -79,9 +71,59 @@ namespace DropletsInMotionTests
             jointAction.Add("d2", Types.RouteAction.MoveRight);
             List<State> expandedStates = s1.GetExpandedStates();
 
-            Assert.AreEqual(12, expandedStates.Count());
+            Assert.AreEqual(25, expandedStates.Count());
             //State s2 = new State(s1, jointAction);
             //State s3 = new State(s2, jointAction);
+
+            //Assert.AreEqual(12, s3.ExtractActions(0).Count);
+        }
+
+        [Test]
+        public void testIsMoveApplicable()
+        {
+            byte[,] contamination = new byte[20, 32];
+
+
+            var agents = createTwoAgentsWithPositions(1, 1, 5, 1);
+
+            ICommand command = new Move("d1", 3, 3);
+            ICommand command2 = new Move("d2", 7, 7);
+
+            State s1 = new State(new List<string>() { "d1", "d2" }, agents, contamination, new List<ICommand>() { command, command2 }, CreateTemplateHandler());
+            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+            jointAction.Add("d1", Types.RouteAction.MoveRight);
+            jointAction.Add("d2", Types.RouteAction.MoveLeft);
+            List<State> expandedStates = s1.GetExpandedStates();
+            Assert.AreEqual(25, expandedStates.Count());
+
+            State s2 = new State(s1, jointAction);
+            expandedStates = s2.GetExpandedStates();
+            Assert.AreEqual(16, expandedStates.Count());
+
+            //Assert.AreEqual(12, s3.ExtractActions(0).Count);
+        }
+
+        [Test]
+        public void testIsConflicting()
+        {
+            byte[,] contamination = new byte[20, 32];
+
+
+            var agents = createTwoAgentsWithPositions(1, 1, 6, 1);
+
+            ICommand command = new Move("d1", 3, 3);
+            ICommand command2 = new Move("d2", 7, 7);
+
+            State s1 = new State(new List<string>() { "d1", "d2" }, agents, contamination, new List<ICommand>() { command, command2 }, CreateTemplateHandler());
+            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+            jointAction.Add("d1", Types.RouteAction.MoveRight);
+            jointAction.Add("d2", Types.RouteAction.MoveLeft);
+            List<State> expandedStates = s1.GetExpandedStates();
+            Assert.AreEqual(25, expandedStates.Count());
+
+            State s2 = new State(s1, jointAction);
+            expandedStates = s2.GetExpandedStates();
+            Assert.AreEqual(24, expandedStates.Count());
 
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
@@ -101,6 +143,16 @@ namespace DropletsInMotionTests
 
             TemplateHandler templateHandler = new TemplateHandler(board);
             return templateHandler;
+        }
+
+        public Dictionary<string, Agent> createTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
+        {
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var agent = new Agent("d1", agent1X, agent1Y, 1);
+            var agent2 = new Agent("d2", agent2X, agent2Y, 1);
+            agents.Add("d1", agent);
+            agents.Add("d2", agent2);
+            return agents;
         }
     }
 }
