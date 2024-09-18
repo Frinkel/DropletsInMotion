@@ -255,11 +255,11 @@ public class State
         return h;
     }
 
-    public bool IsGoalState(List<ICommand> commands, Dictionary<string, Agent> agents)
+    public bool IsGoalState()
     {
-        foreach (var command in commands)
+        foreach (var command in Commands)
         {
-            if (IsGoalState(command, agents))
+            if (IsGoalState(command))
             {
                 return true;
             }
@@ -268,12 +268,12 @@ public class State
 
     }
 
-    public bool IsGoalState(ICommand command, Dictionary<string, Agent> agents)
+    public bool IsGoalState(ICommand command)
     {
         switch (command)
         {
             case Move moveCommand:
-                var agent = agents[moveCommand.GetInputDroplets().First()];
+                var agent = Agents[moveCommand.GetInputDroplets().First()];
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
                 throw new InvalidOperationException("Trying to determine goalstate for unknown command!");
