@@ -44,25 +44,25 @@ namespace DropletsInMotion.Routers
 
                     ApplicableFunctions.PrintContaminationState(state.ContaminationMap);
 
-                    List<State> chosenStates = new List<State>();
-                    State currentState = state;
-                    while (currentState.Parent != null)
-                    {
-                        chosenStates.Add(currentState);
-                        currentState = currentState.Parent;
-                    }
+                    //List<State> chosenStates = new List<State>();
+                    //State currentState = state;
+                    //while (currentState.Parent != null)
+                    //{
+                    //    chosenStates.Add(currentState);
+                    //    currentState = currentState.Parent;
+                    //}
 
-                    chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+                    //chosenStates = chosenStates.OrderBy(s => s.G).ToList();
 
-                    foreach (var cstate in chosenStates)
-                    {
-                        Console.WriteLine($"State Depth: {cstate.G}");
-                        //Console.WriteLine(state.GetHeuristic());
-                        foreach (var action in cstate.JointAction)
-                        {
-                            Console.WriteLine($"Agent {action.Key} - {action.Value.Name}");
-                        }
-                    }
+                    //foreach (var cstate in chosenStates)
+                    //{
+                    //    Console.WriteLine($"State Depth: {cstate.G}");
+                    //    //Console.WriteLine(state.GetHeuristic());
+                    //    foreach (var action in cstate.JointAction)
+                    //    {
+                    //        Console.WriteLine($"Agent {action.Key} - {action.Value.Name}");
+                    //    }
+                    //}
 
                     return state;
                     //return new Tuple<byte[,], Dictionary<string, Agent>, List<BoardAction>>(contaminationMap, agents, actions);
@@ -77,7 +77,13 @@ namespace DropletsInMotion.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
+                        ApplicableFunctions.IncrementStateAmount(1);
                         frontier.Add(expandedState);
+                    }
+                    else
+                    {
+                        ApplicableFunctions.StateAmountExists += 1;
+                        //Console.WriteLine($"State already exists {expandedState.GetHashCode()}");
                     }
                 }
 

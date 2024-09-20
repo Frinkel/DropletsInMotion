@@ -9,6 +9,7 @@ using DropletsInMotion.Controllers;
 using NUnit.Framework;
 using DropletsInMotion.Compilers.Services;
 using DropletsInMotion.Routers;
+using DropletsInMotion.Routers.Functions;
 using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
@@ -200,6 +201,8 @@ namespace DropletsInMotionTests
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
+            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
             Assert.AreEqual(res.IsGoalState(), true);
         }
@@ -238,9 +241,12 @@ namespace DropletsInMotionTests
         {
             byte[,] contamination = new byte[32, 20];
 
+            contamination[10, 8] = 255;
             contamination[10, 9] = 255;
             contamination[10, 10] = 255;
             contamination[10, 11] = 255;
+            contamination[10, 12] = 255;
+            contamination[10, 13] = 255;
 
             var agents = createTwoAgentsWithPositions(5, 10, 30, 18);
 
@@ -259,6 +265,8 @@ namespace DropletsInMotionTests
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
+            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
             Assert.AreEqual(res.IsGoalState(), true);
         }

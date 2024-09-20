@@ -46,10 +46,16 @@ namespace DropletsInMotion.Routers.Models
                 case (Types.ActionType.Move):
                     PositionX += action.DropletXDelta;
                     PositionY += action.DropletYDelta;
+                    //Move(action.DropletXDelta, action.DropletYDelta);
                     break;
                 default:
                     throw new InvalidOperationException("Invalid action tried to be executed! (Agent.cs)");
             }
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(PositionX, PositionY);
         }
     }
 }
