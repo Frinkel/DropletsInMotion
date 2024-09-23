@@ -100,11 +100,99 @@ public class Router
         return sFinal.ExtractActions(time);
     }
 
+    public List<BoardAction> Merge(Dictionary<string, Droplet> droplets, Merge mergeCommand, double time)
+    {
+        // Add logic for processing the Merge command
+        //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
 
-    
+
+        //Merge
+        Droplet inputDroplet1 = droplets[mergeCommand.InputName1]
+                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+
+        Droplet inputDroplet2 = droplets[mergeCommand.InputName2]
+                                ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
+
+
+        List<BoardAction> mergeActions = new List<BoardAction>();
+        Droplet outputDroplet = new Droplet(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY,
+            inputDroplet1.Volume + inputDroplet2.Volume);
+
+        //check that droplets are not more than 1 away from merge position
+        if (Math.Abs(inputDroplet1.PositionX - mergeCommand.PositionX) > 1 
+            || Math.Abs(inputDroplet1.PositionY - mergeCommand.PositionY) > 1
+            || Math.Abs(inputDroplet2.PositionX - mergeCommand.PositionX) > 1
+            || Math.Abs(inputDroplet2.PositionY - mergeCommand.PositionY) > 1)
+        {
+            throw new InvalidOperationException("Droplets is not in position to merge they are too far");
+        }
+
+        if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY)
+        {
+            mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
+
+        }
+        else if (Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) == 2 && inputDroplet1.PositionX == inputDroplet2.PositionX)
+        {
+            mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeVertical", outputDroplet, time));
+        }
+        else
+        {
+            throw new InvalidOperationException("Droplets are not in position to merge");
+        }
+
+        Agents.Remove(inputDroplet1.DropletName);
+        Agents.Remove(inputDroplet2.DropletName);
+        droplets.Remove(inputDroplet1.DropletName);
+        droplets.Remove(inputDroplet2.DropletName);
+        droplets[outputDroplet.DropletName] = outputDroplet;
+        Agent newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume);
+        Agents.Add(outputDroplet.DropletName, newAgent);
+
+        mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
+        ApplicableFunctions.ApplyContaminationMerge(newAgent, ContaminationMap);
+
+        return mergeActions;
+    }
+
+    //public List<BoardAction> SplitByVolume(Dictionary<string, Droplet> droplets, Merge mergeCommand, double time)
+    //{
+    //    // Add logic for processing the SplitByRatio command
+    //    //Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
+
+
+    //    Droplet inputDroplet = Droplets[splitByRatioCommand.InputName]
+    //                           ?? throw new InvalidOperationException($"No droplet found with name {splitByRatioCommand.InputName}.");
+
+
+    //    // Create the new droplets
+    //    Droplet outputDroplet1 = new Droplet(splitByRatioCommand.OutputName1, inputDroplet.PositionX - 1,
+    //        inputDroplet.PositionY, inputDroplet.Volume * (1 - splitByRatioCommand.Ratio));
+
+    //    Droplet outputDroplet2 = new Droplet(splitByRatioCommand.OutputName2, inputDroplet.PositionX + 1,
+    //        inputDroplet.PositionY, inputDroplet.Volume * splitByRatioCommand.Ratio);
+
+    //    Droplets.Remove(inputDroplet.DropletName);
+    //    Droplets[outputDroplet1.DropletName] = outputDroplet1;
+    //    Droplets[outputDroplet2.DropletName] = outputDroplet2;
+
+    //    List<BoardAction> splitActions = new List<BoardAction>();
+
+    //    splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
+
+    //    double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
+    //    double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
+    //    splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1, ref time1));
+    //    splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2, ref time2));
+
+    //    return splitActions;
+    //}
 
 
 
-    
+
+
+
+
 }
 

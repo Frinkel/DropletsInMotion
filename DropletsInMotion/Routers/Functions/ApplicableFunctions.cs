@@ -77,6 +77,36 @@ namespace DropletsInMotion.Routers.Functions
             return contaminationMap;
         }
 
+        public static byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap)
+        {
+            var x = agent.PositionX;
+            var y = agent.PositionY;
+
+            int rowCount = contaminationMap.GetLength(0);
+            int colCount = contaminationMap.GetLength(1);
+
+            void ApplyIfInBounds(int xPos, int yPos)
+            {
+                if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
+                {
+                    contaminationMap[xPos, yPos] = agent.SubstanceId;
+                }
+            }
+
+            ApplyIfInBounds(x, y);
+            ApplyIfInBounds(x + 1, y);
+            ApplyIfInBounds(x - 1, y);
+            ApplyIfInBounds(x, y + 1);
+            ApplyIfInBounds(x, y - 1);
+
+            ApplyIfInBounds(x + 1, y + 1);
+            ApplyIfInBounds(x + 1, y - 1);
+            ApplyIfInBounds(x - 1, y + 1);
+            ApplyIfInBounds(x - 1, y - 1);
+
+            return contaminationMap;
+        }
+
         public static byte[,] ApplyContaminationWithHashing(Agent agent, byte[,] contaminationMap, ref int contaminationMapHash)
         {
             var x = agent.PositionX;

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using DropletsInMotion.Domain;
 
 namespace DropletsInMotion.Compilers.Models
@@ -114,6 +114,24 @@ namespace DropletsInMotion.Compilers.Models
                     Console.WriteLine("  Dependencies: None");
                 }
             }
+        }
+
+        public void GenerateDotFile()
+        {
+            Console.WriteLine("digraph DependencyGraph {");
+            foreach (var node in nodes)
+            {
+                // Define the node
+                Console.WriteLine($"  Node{node.NodeId} [label=\"{node.Command}\"];");
+
+                // Define the edges (dependencies)
+                foreach (var dependency in node.Dependencies)
+                {
+                    Console.WriteLine($"  Node{dependency.NodeId} -> Node{node.NodeId};");
+                }
+            }
+            Console.WriteLine("}");
+            
         }
 
         public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets)
