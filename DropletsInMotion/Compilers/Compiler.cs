@@ -9,7 +9,8 @@ using DropletsInMotion.Routers;
 
 namespace DropletsInMotion.Compilers
 {
-    public class Compiler
+    public class 
+        Compiler
     {
         public CommunicationEngine CommunicationEngine;
 
@@ -25,7 +26,8 @@ namespace DropletsInMotion.Compilers
 
         private DependencyGraph DependencyGraph;
 
-        private Router Router;
+        private readonly SimpleRouter _simpleRouter;
+        private Router _router;
 
         public Compiler(List<ICommand> commands, Dictionary<string, Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
         {
@@ -42,9 +44,10 @@ namespace DropletsInMotion.Compilers
 
             DependencyGraph.PrintGraph();
 
-            Router = new Router(Board);
-
             Droplets = droplets;
+
+            _simpleRouter = new SimpleRouter(Board);
+            _router = new Router(Board, Droplets);
 
         }
 
@@ -55,6 +58,7 @@ namespace DropletsInMotion.Compilers
             int i = 0;
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
+
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
                 //print the commands
@@ -63,8 +67,9 @@ namespace DropletsInMotion.Compilers
                 //{
                 //    Console.WriteLine(command);
                 //}
+                _router.Route(Droplets, commandsToExecute, time);
 
-                boardActions.AddRange(Router.Route(Droplets, commandsToExecute, time));
+                boardActions.AddRange(_simpleRouter.Route(Droplets, commandsToExecute, time));
                 boardActions = boardActions.OrderBy(b => b.Time).ToList();
                 time = boardActions.Any() ? boardActions.Last().Time : time;
                 

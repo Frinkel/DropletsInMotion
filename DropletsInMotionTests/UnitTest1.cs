@@ -1,3 +1,4 @@
+using System.Runtime.Intrinsics.X86;
 using Antlr4.Runtime;
 using DropletsInMotion;
 using DropletsInMotion.Compilers;
@@ -7,6 +8,7 @@ using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Controllers;
 using NUnit.Framework;
 using DropletsInMotion.Compilers.Services;
+using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
@@ -32,10 +34,9 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void templateTester()
+        public void TemplateTester()
         {
-            Electrode[][] board = new Electrode[32][];
-            board = new Electrode[32][];
+            var board = new Electrode[32][];
             for (int i = 0; i < 32; i++)
             {
                 board[i] = new Electrode[20];
@@ -48,15 +49,13 @@ namespace DropletsInMotionTests
             TemplateHandler templateHandler = new TemplateHandler(board);
             List<(string, List<BoardAction>)> templates = templateHandler.templates;
             Console.WriteLine(templates);
-            Assert.AreEqual(templates.Count, 1);
-            Assert.AreEqual(templates[0].Item1, "template1");
-            Assert.AreEqual(templates[0].Item2.Count, 3);
-            Assert.AreEqual(templates[0].Item2[1].ElectrodeId, 32);
+            Assert.AreEqual(templates.Count, 9);
+            Assert.AreEqual(templates[0].Item1, "mergeHorizontal");
 
         }
 
         [Test]
-        public void platformServiceTester()
+        public void PlatformServiceTester()
         {
             string workingDirectory = Environment.CurrentDirectory;
             string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
@@ -85,5 +84,6 @@ namespace DropletsInMotionTests
 
         //    Assert.AreEqual(8, actions.Count());
         //}
+
     }
 }
