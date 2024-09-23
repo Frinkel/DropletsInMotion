@@ -52,19 +52,11 @@ public class Router
 
     public void Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
     {
-
-        // TODO: Should happen by triggering a function?
-        // Create all new agents and add their contamination
-        //foreach (var dropletKvp in droplets)
+        //foreach (var droplet in droplets)
         //{
-        //    var droplet = dropletKvp.Value;
-
-        //    if (!Agents.ContainsKey(dropletKvp.Key))
-        //    {
-        //        Agent agent = new Agent(droplet.DropletName, droplet.PositionX, droplet.PositionY, droplet.Volume);
-        //        Agents.Add(dropletKvp.Key, agent);
-        //        ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
-        //    }
+        //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
+        //    Agents.Add(droplet.Key, agent);
+        //    ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
         //}
 
 
@@ -73,15 +65,30 @@ public class Router
         foreach (var command in commands)
         {
             routableAgents.AddRange(command.GetInputDroplets());
-
-            //foreach (var droplet in command.GetInputDroplets())
-            //{
-            //    Agent agent = new Agent(Agents[droplet].DropletName, Agents[droplet].PositionX, Agents[droplet].PositionY, Agents[droplet].Volume);
-            //    routableAgents.Add(droplet);
-            //}
         }
 
         State s0 = new State(routableAgents, Agents, ContaminationMap, commands, _templateHandler);
+        Frontier f = new Frontier();
+        AstarRouter astarRouter = new AstarRouter();
+        State sFinal = astarRouter.Search(s0, f, time);
+
+        Agents = sFinal.Agents;
+        ContaminationMap = sFinal.ContaminationMap;
+
+
+        foreach (var agentKvp in Agents)
+        {
+            if (droplets.ContainsKey(agentKvp.Key))
+            {
+                var agent = agentKvp.Value;
+                droplets[agentKvp.Key].PositionX = agent.PositionX;
+                droplets[agentKvp.Key].PositionY = agent.PositionY;
+            }
+            else
+            {
+                Console.WriteLine($"Agent {agentKvp.Key} did NOT exist in droplets!");
+            }
+        }
     }
 
 

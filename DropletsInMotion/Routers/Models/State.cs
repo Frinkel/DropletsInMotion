@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Antlr4.Runtime.Atn;
-using DropletsInMotion.Compilers.Models;
+﻿using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Controllers;
 using DropletsInMotion.Domain;
 using DropletsInMotion.Routers.Functions;
-using DropletsInMotion.Routers.Models;
-using static System.Collections.Specialized.BitVector32;
 
 namespace DropletsInMotion.Routers.Models;
 
@@ -92,7 +84,7 @@ public class State
         chosenStates = chosenStates.OrderBy(s => s.G).ToList();
 
         List<BoardAction> finalActions = new List<BoardAction>();
-        double currenTime = time;
+        double currentTime = time;
 
         foreach (State state in chosenStates)
         {
@@ -106,13 +98,13 @@ public class State
                 string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
 
-                List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currenTime);
+                List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currentTime);
 
                 finalActions.AddRange(translatedActions);
 
             }
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
-            currenTime = finalActions.Last().Time;
+            currentTime = finalActions.Last().Time;
         }
 
         //Console.WriteLine("______---------_________");

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Compilers.Models;
-using DropletsInMotion.Domain;
-using DropletsInMotion.Routers.Functions;
+﻿using DropletsInMotion.Routers.Functions;
 using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotion.Routers
