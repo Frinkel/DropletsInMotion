@@ -21,7 +21,6 @@ public class State
     private TemplateHandler _templateHandler;
 
     private int? CachedHash = null;
-    private int ContaminationMapHash;
 
     // Initial state
     public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, TemplateHandler templateHandler, int? seed = null)
@@ -275,21 +274,18 @@ public class State
         int dy = -Math.Abs(endY - startY);
         int sx = startX < endX ? 1 : -1;
         int sy = startY < endY ? 1 : -1;
-        int err = dx + dy;
+        int err = dx + dy, e2;
         int steps = 0;
 
-        while (startX != endX || startY != endY)
+        while (true)
         {
-            // Early return if the current position is blocked
             if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
                 return true;
 
-            // Exit if maxDepth is reached
-            if (++steps > maxDepth) break;
+            if (startX == endX && startY == endY) break;
+            if (steps++ > maxDepth) break;
 
-            int e2 = 2 * err;
-
-            // Update coordinates based on error calculations
+            e2 = 2 * err;
             if (e2 >= dy)
             {
                 err += dy;
@@ -301,41 +297,8 @@ public class State
                 startY += sy;
             }
         }
-
         return false;
     }
-
-    //private bool PathIsBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
-    //{
-    //    int dx = Math.Abs(endX - startX);
-    //    int dy = -Math.Abs(endY - startY);
-    //    int sx = startX < endX ? 1 : -1;
-    //    int sy = startY < endY ? 1 : -1;
-    //    int err = dx + dy, e2;
-    //    int steps = 0;
-
-    //    while (true)
-    //    {
-    //        if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
-    //            return true;
-
-    //        if (startX == endX && startY == endY) break;
-    //        if (steps++ > maxDepth) break;
-
-    //        e2 = 2 * err;
-    //        if (e2 >= dy)
-    //        {
-    //            err += dy;
-    //            startX += sx;
-    //        }
-    //        if (e2 <= dx)
-    //        {
-    //            err += dx;
-    //            startY += sy;
-    //        }
-    //    }
-    //    return false;
-    //}
 
 
     // Helper method to check if an agent is near contamination

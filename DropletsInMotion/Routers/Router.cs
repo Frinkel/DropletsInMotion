@@ -50,7 +50,7 @@ public class Router
             ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
         }
 
-        //PrintContaminationState();
+        //ApplicableFunctions.PrintContaminationState(ContaminationMap);
     }
 
     public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
@@ -74,7 +74,6 @@ public class Router
         Frontier f = new Frontier();
         AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);
-        Console.WriteLine(sFinal.ToString());
         Agents = sFinal.Agents;
         ContaminationMap = sFinal.ContaminationMap;
 
