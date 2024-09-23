@@ -24,8 +24,26 @@ namespace DropletsInMotion.Routers
                 if (state.IsGoalState() || state.G >= 60)
                 {
                     Console.WriteLine($"We reached a goal state at depth {state.G}");
-                    
-                    ApplicableFunctions.PrintContaminationState(state.ContaminationMap); // TODO: this can be removed after debug
+
+                    //ApplicableFunctions.PrintContaminationState(state.ContaminationMap); // TODO: this can be removed after debug
+
+
+                    List<State> chosenStates = new List<State>();
+                    State currentState = state;
+                    while (currentState.Parent != null)
+                    {
+                        chosenStates.Add(currentState);
+                        currentState = currentState.Parent;
+                    }
+                    chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+                    foreach (var returnState in chosenStates)
+                    {
+                        if (returnState.IsOneGoalState())
+                        {
+                            return returnState;
+                        }
+                    }
 
                     return state;
                 }

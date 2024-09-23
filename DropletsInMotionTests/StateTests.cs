@@ -14,7 +14,7 @@ using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
-    public class StateTests
+    public class AStarTest
     {
  
         [Test]
@@ -177,7 +177,7 @@ namespace DropletsInMotionTests
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Assert.AreEqual(res.IsGoalState(), true);
+            Assert.AreEqual(res.IsOneGoalState(), true);
         }
 
         [Test]
@@ -204,7 +204,7 @@ namespace DropletsInMotionTests
             Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
             Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
-            Assert.AreEqual(res.IsGoalState(), true);
+            Assert.AreEqual(res.IsOneGoalState(), true);
         }
 
         [Test]

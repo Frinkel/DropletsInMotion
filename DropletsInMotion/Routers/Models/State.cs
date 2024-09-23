@@ -103,6 +103,8 @@ public class State
                 finalActions.AddRange(translatedActions);
 
             }
+
+
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
             currentTime = finalActions.Last().Time;
         }
@@ -345,7 +347,20 @@ public class State
 
     }
 
-    
+    public bool IsOneGoalState()
+    {
+        foreach (var command in Commands)
+        {
+            if (IsGoalState(command))
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+
     public bool IsGoalState(ICommand command)
     {
         switch (command)

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using DropletsInMotion.Compilers.Models;
 using DropletsInMotion.Routers.Functions;
 
 namespace DropletsInMotion.Routers;
@@ -50,7 +51,7 @@ public class Router
         //PrintContaminationState();
     }
 
-    public void Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
+    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
     {
         //foreach (var droplet in droplets)
         //{
@@ -89,6 +90,14 @@ public class Router
                 Console.WriteLine($"Agent {agentKvp.Key} did NOT exist in droplets!");
             }
         }
+
+        ApplicableFunctions.PrintContaminationState(sFinal.ContaminationMap);
+        foreach (var agent in Agents)
+        {
+            Console.WriteLine(agent);
+
+        }
+        return sFinal.ExtractActions(time);
     }
 
 
