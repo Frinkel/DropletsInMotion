@@ -47,6 +47,7 @@ namespace DropletsInMotion.Routers.Functions
             return true;
         }
 
+
         public static byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
         {
             var x = agent.PositionX;
@@ -55,20 +56,24 @@ namespace DropletsInMotion.Routers.Functions
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
 
+            // Helper function to apply contamination and update the hash
             void ApplyIfInBounds(int xPos, int yPos)
             {
                 if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
                 {
-                    contaminationMap[xPos, yPos] = (byte)(contaminationMap[xPos, yPos] == 0 || (byte)(contaminationMap[xPos, yPos]) == agent.SubstanceId ? agent.SubstanceId : 255);
+                    byte oldValue = contaminationMap[xPos, yPos];
+                    byte newValue = (byte)(oldValue == 0 || oldValue == agent.SubstanceId ? agent.SubstanceId : 255);
+
+                    contaminationMap[xPos, yPos] = newValue;
                 }
             }
 
+            // Apply contamination to the agent's position and its 8 neighbors
             ApplyIfInBounds(x, y);
             ApplyIfInBounds(x + 1, y);
             ApplyIfInBounds(x - 1, y);
             ApplyIfInBounds(x, y + 1);
             ApplyIfInBounds(x, y - 1);
-
             ApplyIfInBounds(x + 1, y + 1);
             ApplyIfInBounds(x + 1, y - 1);
             ApplyIfInBounds(x - 1, y + 1);
@@ -243,10 +248,6 @@ namespace DropletsInMotion.Routers.Functions
         public static int StateAmount { get; set; }
         public static int StateAmountExists { get; set; }
 
-        public static void IncrementStateAmount(int amount)
-        {
-            StateAmount += amount;
-        }
     }
 
 

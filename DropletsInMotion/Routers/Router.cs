@@ -23,6 +23,8 @@ public class Router
      *  
      */
 
+    public int? Seed = null;
+
     private Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
     private Electrode[][] Board { get; set; }
 
@@ -68,11 +70,11 @@ public class Router
             routableAgents.AddRange(command.GetInputDroplets());
         }
 
-        State s0 = new State(routableAgents, Agents, ContaminationMap, commands, _templateHandler);
+        State s0 = new State(routableAgents, Agents, ContaminationMap, commands, _templateHandler, Seed);
         Frontier f = new Frontier();
         AstarRouter astarRouter = new AstarRouter();
-        State sFinal = astarRouter.Search(s0, f, time);
-
+        State sFinal = astarRouter.Search(s0, f);
+        Console.WriteLine(sFinal.ToString());
         Agents = sFinal.Agents;
         ContaminationMap = sFinal.ContaminationMap;
 
@@ -191,6 +193,11 @@ public class Router
 
 
 
+    public void UpdateContaminationMap(int x, int y, byte value)
+    {
+        ContaminationMap[x, y] = value;
+    }
+    
 
 
 
