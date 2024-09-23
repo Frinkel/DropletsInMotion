@@ -42,7 +42,7 @@ namespace DropletsInMotion.Compilers
 
             DependencyGraph = new DependencyGraph(commands);
 
-            //DependencyGraph.GenerateDotFile();
+            DependencyGraph.GenerateDotFile();
 
             Droplets = droplets;
 
@@ -90,12 +90,18 @@ namespace DropletsInMotion.Compilers
                             {
                                 boardActions.AddRange(_router.Merge(Droplets, mergeCommand, time));
                             }
+                            time = boardActions.Any() ? boardActions.Last().Time : time;
                             break;
                         case SplitByRatio splitByRatioCommand:
                             boardActions.AddRange(HandleSplitByRatioCommand(splitByRatioCommand));
                             break;
                         case SplitByVolume splitByVolumeCommand:
-                            boardActions.AddRange(HandleSplitByVolumeCommand(splitByVolumeCommand));
+                            if (!hasSplit(splitByVolumeCommand, movesToExecute))
+                            {
+                                boardActions.AddRange(_router.SplitByVolume(Droplets, splitByVolumeCommand, time, 1));
+
+                            }
+                            time = boardActions.Any() ? boardActions.Last().Time : time;
                             break;
                         default:
                             Console.WriteLine("Unknown command");
@@ -103,29 +109,12 @@ namespace DropletsInMotion.Compilers
                     }
                 }
 
-
-
-
-
                 boardActions.AddRange(_router.Route(Droplets, movesToExecute, time));
                 boardActions = boardActions.OrderBy(b => b.Time).ToList();
                 time = boardActions.Any() ? boardActions.Last().Time : time;
-                
-
-                //Console.WriteLine("\nPRINTING ACTIONS\n");
-                //foreach (var action in boardActions)
-                //{
-                //    Console.WriteLine(action.ToString());
-                //}
-
 
                 DependencyGraph.updateExecutedNodes(executableNodes, Droplets);
 
-                //foreach (DependencyNode node in executableNodes)
-                //{
-                //    DependencyGraph.MarkNodeAsExecuted(node.NodeId);
-                //}
-                //i += 1;
 
                 await CommunicationEngine.SendActions(boardActions);
                 boardActions.Clear();
@@ -138,6 +127,53 @@ namespace DropletsInMotion.Compilers
 
 
         }
+
+        private bool hasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
+        {
+            foreach (var d in Droplets)
+            {
+               Console.WriteLine(d); 
+            }
+            bool splitOccurred = true;
+
+            if (splitCommand.InputName != splitCommand.OutputName1 &&
+                splitCommand.InputName != splitCommand.OutputName1)
+            {
+                if (Droplets.ContainsKey(splitCommand.InputName)) return false;
+            }
+
+            if (splitCommand.InputName == splitCommand.OutputName1)
+            {
+                if (!Droplets.ContainsKey(splitCommand.OutputName2)) return false;
+            }
+
+            if (splitCommand.InputName == splitCommand.OutputName2)
+            {
+                if (!Droplets.ContainsKey(splitCommand.OutputName1)) return false;
+            }
+
+            if (splitOccurred)
+            {
+                if (Droplets.TryGetValue(splitCommand.OutputName1, out Droplet outputDroplet1))
+                {
+                    if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
+                    {
+                        movesToExecute.Add(new Move(splitCommand.OutputName1, splitCommand.PositionX1, splitCommand.PositionY1));
+                        splitOccurred = true;
+                    }
+                }
+                if (Droplets.TryGetValue(splitCommand.OutputName2, out Droplet outputDroplet2))
+                {
+                    if (outputDroplet2.PositionX != splitCommand.PositionX2 || outputDroplet2.PositionY != splitCommand.PositionY2)
+                    {
+                        movesToExecute.Add(new Move(splitCommand.OutputName2, splitCommand.PositionX2, splitCommand.PositionY2));
+                        splitOccurred = true;
+                    }
+                }
+            }
+            return splitOccurred;
+        }
+
 
         private bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute)
         {

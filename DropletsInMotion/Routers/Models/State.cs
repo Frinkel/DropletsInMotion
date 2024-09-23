@@ -131,6 +131,53 @@ public class State
 
     }
 
+    public List<BoardAction> ExtractActionsToTime(double time)
+    {
+        List<State> chosenStates = new List<State>();
+        State currentState = this;
+        while (currentState.Parent != null)
+        {
+            chosenStates.Add(currentState);
+            currentState = currentState.Parent;
+        }
+
+        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+        List<BoardAction> finalActions = new List<BoardAction>();
+        double currentTime = time;
+
+        foreach (State state in chosenStates)
+        {
+            foreach (var actionKvp in state.JointAction)
+            {
+                if (actionKvp.Value == Types.RouteAction.NoOp)
+                {
+                    continue;
+                }
+                string dropletName = actionKvp.Key;
+                string routeAction = actionKvp.Value.Name;
+                var agents = state.Parent.Agents;
+
+                List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currentTime);
+
+                finalActions.AddRange(translatedActions);
+
+            }
+
+
+            finalActions = finalActions.OrderBy(b => b.Time).ToList();
+            currentTime = finalActions.Last().Time;
+        }
+
+        //Console.WriteLine("______---------_________");
+        //foreach (var action in finalActions)
+        //{
+        //    Console.WriteLine(action.ToString());
+        //}
+        return finalActions;
+
+    }
+
     public List<State> GetExpandedStates(){
 
         List<State> expandedStates = new List<State>();

@@ -53,7 +53,7 @@ public class Router
         //ApplicableFunctions.PrintContaminationState(ContaminationMap);
     }
 
-    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
+    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time, double? boundTime = null)
     {
         List<string> routableAgents = new List<string>();
 
@@ -66,6 +66,52 @@ public class Router
         Frontier f = new Frontier();
         AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);
+
+
+        if (boundTime != null)
+        {
+            List<State> chosenStates = new List<State>();
+            State currentState = sFinal;
+            while (currentState.Parent != null)
+            {
+                chosenStates.Add(currentState);
+                currentState = currentState.Parent;
+            }
+
+            chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+            List<BoardAction> finalActions = new List<BoardAction>();
+            double currentTime = time;
+
+            foreach (State state in chosenStates)
+            {
+                foreach (var actionKvp in state.JointAction)
+                {
+                    if (actionKvp.Value == Types.RouteAction.NoOp)
+                    {
+                        continue;
+                    }
+                    string dropletName = actionKvp.Key;
+                    string routeAction = actionKvp.Value.Name;
+                    var agents = state.Parent.Agents;
+
+                    List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currentTime);
+
+                    finalActions.AddRange(translatedActions);
+
+                }
+
+                finalActions = finalActions.OrderBy(b => b.Time).ToList();
+                currentTime = finalActions.Last().Time;
+                if (currentTime >= boundTime)
+                {
+                    sFinal = state;
+                    break;
+                }
+            }
+        }
+
+
         Agents = sFinal.Agents;
         ContaminationMap = sFinal.ContaminationMap;
 
@@ -90,6 +136,7 @@ public class Router
             Console.WriteLine(agent);
 
         }
+
         return sFinal.ExtractActions(time);
     }
 
@@ -148,38 +195,84 @@ public class Router
         return mergeActions;
     }
 
-    //public List<BoardAction> SplitByVolume(Dictionary<string, Droplet> droplets, Merge mergeCommand, double time)
-    //{
-    //    // Add logic for processing the SplitByRatio command
-    //    //Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
+    public List<BoardAction> SplitByVolume(Dictionary<string, Droplet> droplets, SplitByVolume splitCommand, double time, int direction)
+    {
+        // Retrieve the input droplet
+        Droplet inputDroplet = droplets[splitCommand.InputName]
+                               ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
+
+        Droplet outputDroplet1, outputDroplet2;
+        string templateName;
+
+        // Handle splitting based on direction
+        switch (direction)
+        {
+            case 1: // Horizontal split, output 1 on the left (x-1) and output 2 on the right (x+1)
+                outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX - 1,
+                    inputDroplet.PositionY, inputDroplet.Volume - splitCommand.Volume);
+
+                outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX + 1,
+                    inputDroplet.PositionY, splitCommand.Volume);
+
+                templateName = "splitHorizontal";
+                break;
+
+            case 3: // Horizontal split, but output 1 on the right (x+1) and output 2 on the left (x-1)
+                outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX + 1,
+                    inputDroplet.PositionY, inputDroplet.Volume - splitCommand.Volume);
+
+                outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX - 1,
+                    inputDroplet.PositionY, splitCommand.Volume);
+
+                templateName = "splitHorizontal";
+                break;
+
+            case 2: // Vertical split, output 1 above (y-1) and output 2 below (y+1)
+                outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX,
+                    inputDroplet.PositionY - 1, inputDroplet.Volume - splitCommand.Volume);
+
+                outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX,
+                    inputDroplet.PositionY + 1, splitCommand.Volume);
+
+                templateName = "splitVertical";
+                break;
+
+            case 4: // Vertical split, output 1 below (y+1) and output 2 above (y-1)
+                outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX,
+                    inputDroplet.PositionY + 1, inputDroplet.Volume - splitCommand.Volume);
+
+                outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX,
+                    inputDroplet.PositionY - 1, splitCommand.Volume);
+
+                templateName = "splitVertical";
+                break;
+
+            default:
+                throw new InvalidOperationException($"Invalid direction {direction}. Allowed values are 1, 2, 3, or 4.");
+        }
+
+        // Remove the input droplet and add the new droplets to the dictionary
+        droplets.Remove(inputDroplet.DropletName);
+        droplets[outputDroplet1.DropletName] = outputDroplet1;
+        droplets[outputDroplet2.DropletName] = outputDroplet2;
+        Agent newAgent1 = new Agent(outputDroplet1.DropletName, outputDroplet1.PositionX, outputDroplet1.PositionY, outputDroplet1.Volume, Agents[inputDroplet.DropletName].SubstanceId);
+        Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, Agents[inputDroplet.DropletName].SubstanceId);
+        Agents.Remove(inputDroplet.DropletName);
+
+        Agents.Add(outputDroplet1.DropletName, newAgent1);
+        Agents.Add(outputDroplet2.DropletName, newAgent2);
+        ApplicableFunctions.ApplyContamination(newAgent1, ContaminationMap);
+        ApplicableFunctions.ApplyContamination(newAgent2, ContaminationMap);
 
 
-    //    Droplet inputDroplet = Droplets[splitByRatioCommand.InputName]
-    //                           ?? throw new InvalidOperationException($"No droplet found with name {splitByRatioCommand.InputName}.");
 
+        // Apply the appropriate template based on direction
+        List<BoardAction> splitActions = new List<BoardAction>();
+        splitActions.AddRange(_templateHandler.ApplyTemplate(templateName, inputDroplet, time));
 
-    //    // Create the new droplets
-    //    Droplet outputDroplet1 = new Droplet(splitByRatioCommand.OutputName1, inputDroplet.PositionX - 1,
-    //        inputDroplet.PositionY, inputDroplet.Volume * (1 - splitByRatioCommand.Ratio));
+        return splitActions;
+    }
 
-    //    Droplet outputDroplet2 = new Droplet(splitByRatioCommand.OutputName2, inputDroplet.PositionX + 1,
-    //        inputDroplet.PositionY, inputDroplet.Volume * splitByRatioCommand.Ratio);
-
-    //    Droplets.Remove(inputDroplet.DropletName);
-    //    Droplets[outputDroplet1.DropletName] = outputDroplet1;
-    //    Droplets[outputDroplet2.DropletName] = outputDroplet2;
-
-    //    List<BoardAction> splitActions = new List<BoardAction>();
-
-    //    splitActions.AddRange(_templateHandler.ApplyTemplate("splitHorizontal", inputDroplet, Time));
-
-    //    double time1 = splitActions.Any() ? splitActions.Last().Time : Time;
-    //    double time2 = splitActions.Any() ? splitActions.Last().Time : Time;
-    //    splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet1, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1, ref time1));
-    //    splitActions.AddRange(_moveHandler.MoveDroplet(outputDroplet2, splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2, ref time2));
-
-    //    return splitActions;
-    //}
 
 
 
