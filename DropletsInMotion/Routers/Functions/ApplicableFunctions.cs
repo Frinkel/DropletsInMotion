@@ -4,25 +4,6 @@ namespace DropletsInMotion.Routers.Functions
 {
     public static class ApplicableFunctions
     {
-        //public static bool IsApplicable(Tuple<Types.RouteAction, List<string>> action, Dictionary<string, Agent> agents, byte[,] contamination)
-        //{
-        //    switch (action.Item1.Type)
-        //    {
-        //        case Types.ActionType.NoOp:
-        //            return true;
-
-        //        case Types.ActionType.Move:
-        //            Agent agent = agents[action.Item2.First()];
-        //            return IsMoveApplicable(action.Item1, agent, agents, contamination);
-        //            break;
-
-
-        //        default:
-        //            throw new InvalidOperationException("An illegal action was tried!");
-        //    }
-
-        //    return false;
-        //}
 
         public static bool IsMoveApplicable(Types.RouteAction action, Agent agent, State state)
         {
@@ -63,7 +44,6 @@ namespace DropletsInMotion.Routers.Functions
                 }
             }
 
-            //returns true
             return true;
         }
 
@@ -113,9 +93,9 @@ namespace DropletsInMotion.Routers.Functions
                     byte oldValue = contaminationMap[xPos, yPos];
                     byte newValue = (byte)(oldValue == 0 || oldValue == agent.SubstanceId ? agent.SubstanceId : 255);
 
-                    // Update the hash by removing the old value and adding the new value
-                    contaminationMapHash -= oldValue * 31;
-                    contaminationMapHash += newValue * 31;
+                    //// Update the hash by removing the old value and adding the new value
+                    //contaminationMapHash -= oldValue * 31;
+                    //contaminationMapHash += newValue * 31;
 
                     //Console.WriteLine($"Old {contaminationMapHash}");
 

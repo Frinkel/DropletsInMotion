@@ -232,36 +232,6 @@ public class State
     }
 
 
-    //private int CalculateHeuristic()
-    //{
-    //    int h = 0;
-    //    foreach (ICommand command in Commands)
-    //    {
-    //        switch (command)
-    //        {
-    //            case Move moveCommand:
-    //                int hTemp = 0;
-
-    //                Agent agent = Agents[moveCommand.GetInputDroplets().First()];
-    //                hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
-    //                hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
-
-    //                if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
-    //                {
-    //                    hTemp += 1;
-    //                }
-
-    //                h += hTemp;
-
-    //                break;
-    //            default:
-    //                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
-    //                break;
-    //        }
-    //    }
-    //    return h;
-    //}
-
     public int GetHeuristic()
     {
         return H*2 + G;
@@ -327,60 +297,9 @@ public class State
             }
         }
 
-        return false; // No contamination within the lookahead limit
+        return false;
     }
 
-
-
-    //private int CalculateHeuristic()
-    //{
-    //    int h = 0;
-
-    //    // Iterate over each command to calculate the heuristic contribution
-    //    foreach (ICommand command in Commands)
-    //    {
-    //        switch (command)
-    //        {
-    //            case Move moveCommand:
-    //                int hTemp = 0;
-
-    //                Agent agent = Agents[moveCommand.GetInputDroplets().First()];
-
-    //                // Manhattan Distance to the goal
-    //                hTemp += Math.Abs(moveCommand.PositionX - agent.PositionX);
-    //                hTemp += Math.Abs(moveCommand.PositionY - agent.PositionY);
-
-
-    //                // Penalize for NoOp actions
-    //                if (hTemp != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
-    //                {
-    //                    hTemp += 10; // Penalize idling agents
-    //                }
-
-    //                // Additional heuristic penalties
-
-    //                // Penalty for contamination proximity
-    //                if (IsNearContamination(agent.PositionX, agent.PositionY, agent))
-    //                {
-    //                    hTemp += 2; // Increase penalty if near contamination
-    //                }
-
-    //                // Penalty for agent conflicts
-    //                //if (IsNearOtherAgent(agent))
-    //                //{
-    //                //    hTemp += 3; // Penalize potential conflicts
-    //                //}
-
-    //                h += hTemp;
-    //                break;
-
-    //            default:
-    //                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
-    //        }
-    //    }
-
-    //    return h;
-    //}
 
     // Helper method to check if an agent is near contamination
     private bool IsNearContamination(int x, int y, Agent agent)
@@ -450,54 +369,6 @@ public class State
     }
 
 
-    public override bool Equals(object obj)
-    {
-        //Console.WriteLine("We check");
-        if (obj is State otherState)
-        {
-
-            //if (!ContaminationMap.Equals(otherState.ContaminationMap))
-            //{
-            //    Console.WriteLine("HTI");
-            //}
-
-            //if (AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
-            //{
-            //    Console.WriteLine("Not equal"+ ContaminationMap.Equals(otherState.ContaminationMap));
-            //}
-
-            //if (!ContaminationMap.Equals(otherState.ContaminationMap))
-            //{
-            //    Console.WriteLine($"{!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap)} {!ContaminationMap.Equals(otherState.ContaminationMap)}");
-            //    return false;
-            //}
-            if (!AreAgentsEqual(Agents, otherState.Agents))
-            {
-                //Console.WriteLine($"equals2 {false}");
-                return false;
-            }
-
-            //// Compare contamination maps
-            if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
-            {
-                //Console.WriteLine($"equals1 {false}");
-                //Console.WriteLine("In here");
-                return false;
-            }
-            //Console.WriteLine("Past");
-
-            // Compare agent positions
-            
-
-            //Console.WriteLine($"equals3 {true}");
-            //Console.WriteLine("They are equal");
-            return true;
-        }
-
-        //Console.WriteLine($"equals4 {false}");
-        return false;
-    }
-
     public override int GetHashCode()
     {
         if (CachedHash != null)
@@ -512,69 +383,39 @@ public class State
             hash = hash * 31 + value;
         }
 
-        //foreach (var agent in Agents.Values)
-        //{
-        //    int x = agent.PositionX;
-        //    int y = agent.PositionY;
 
-        //    // Hash neighboring cells
-        //    for (int i = Math.Max(0, x - 2); i <= Math.Min(ContaminationMap.GetLength(0) - 2, x + 2); i++)
-        //    {
-        //        for (int j = Math.Max(0, y - 2); j <= Math.Min(ContaminationMap.GetLength(1) - 2, y + 2); j++)
-        //        {
-        //            hash = hash * 31 + ContaminationMap[i, j];
-        //        }
-        //    }
-
-        //    hash = hash * 31 + x.GetHashCode();
-        //    hash = hash * 31 + y.GetHashCode();
-        //}
-
-
-
-        //foreach (var agent in Agents.Values)
-        //{
-        //    hash = hash * 31 + agent.PositionX.GetHashCode();
-        //    hash = hash * 31 + agent.PositionY.GetHashCode();
-        //}
+        foreach (var agent in Agents.Values)
+        {
+            hash = hash * 31 + agent.PositionX.GetHashCode();
+            hash = hash * 31 + agent.PositionY.GetHashCode();
+        }
 
         CachedHash = hash;
         return hash;
     }
 
-    // TODO: Maybe this is fine
-    //public override int GetHashCode()
-    //{
-    //    unchecked // Overflow is fine
-    //    {
-    //        const int fnvOffsetBasis = unchecked((int)2166136261);
-    //        const int fnvPrime = 16777619;
+    public override bool Equals(object obj)
+    {
+        if (obj is State otherState)
+        {
+            if (!AreAgentsEqual(Agents, otherState.Agents))
+            {
+                return false;
+            }
 
-    //        int hash = fnvOffsetBasis;
+            if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
+            {
+                return false;
+            }
 
-    //        // Hash contamination map using FNV-1a
-    //        foreach (var value in ContaminationMap)
-    //        {
-    //            hash = (hash ^ value) * fnvPrime;
-    //        }
+            return true;
+        }
 
-    //        // Combine agent positions into the hash
-    //        foreach (var agent in Agents.Values)
-    //        {
-    //            hash = (hash ^ agent.PositionX.GetHashCode()) * fnvPrime;
-    //            hash = (hash ^ agent.PositionY.GetHashCode()) * fnvPrime;
-    //        }
+        return false;
+    }
 
-    //        return hash;
-    //    }
-    //}
-
-    // Helper function to compare contamination maps
     private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
     {
-        //if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
-        //    return false;
-
         for (int i = 0; i < map1.GetLength(0); i++)
         {
             for (int j = 0; j < map1.GetLength(1); j++)
@@ -586,25 +427,20 @@ public class State
         return true;
     }
 
-    // Helper function to compare agent positions
     private bool AreAgentsEqual(Dictionary<string, Agent> agents1, Dictionary<string, Agent> agents2)
     {
-        // Check if the number of agents is the same
         if (agents1.Count != agents2.Count)
         {
             return false;
         }
 
-        // Loop through each agent in agents1
         foreach (var key in agents1.Keys)
         {
-            // Check if agents2 contains the same key
             if (!agents2.ContainsKey(key))
             {
                 return false;
             }
 
-            // Compare the positions of the agents with the same key
             var agent1 = agents1[key];
             var agent2 = agents2[key];
 
