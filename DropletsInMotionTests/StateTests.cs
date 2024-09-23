@@ -172,7 +172,7 @@ namespace DropletsInMotionTests
             AstarRouter astarRouter = new AstarRouter();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier, 0);
+            State res = astarRouter.Search(s0, frontier);
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
@@ -197,7 +197,7 @@ namespace DropletsInMotionTests
             AstarRouter astarRouter = new AstarRouter();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier, 0);
+            State res = astarRouter.Search(s0, frontier);
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
@@ -228,16 +228,16 @@ namespace DropletsInMotionTests
             AstarRouter astarRouter = new AstarRouter();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier, 0);
+            State res = astarRouter.Search(s0, frontier);
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Assert.AreEqual(res.IsGoalState(), true);
+            Assert.AreEqual(res.IsOneGoalState(), true);
         }
 
         [Test]
-        public void TestAStarSearchGreatWallOfDmf()
+        public void TestAStarSearchGreatWallOfDmf2()
         {
             byte[,] contamination = new byte[32, 20];
 
@@ -260,11 +260,8 @@ namespace DropletsInMotionTests
             Frontier frontier = new Frontier();
             AstarRouter astarRouter = new AstarRouter();
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier, 0);
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
+            State res = astarRouter.Search(s0, frontier);
+
             Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
             Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
@@ -286,6 +283,21 @@ namespace DropletsInMotionTests
 
             TemplateHandler templateHandler = new TemplateHandler(board);
             return templateHandler;
+        }
+
+        public Electrode[][] CreateBoard()
+        {
+            Electrode[][] board = new Electrode[32][];
+            board = new Electrode[32][];
+            for (int i = 0; i < 32; i++)
+            {
+                board[i] = new Electrode[20];
+                for (int j = 0; j < 20; j++)
+                {
+                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+                }
+            }
+            return board;
         }
 
         public Dictionary<string, Agent> createTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)

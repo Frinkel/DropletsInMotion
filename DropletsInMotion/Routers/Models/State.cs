@@ -7,13 +7,13 @@ namespace DropletsInMotion.Routers.Models;
 
 public class State
 {
+    private int? Seed = null;
 
     public byte[,] ContaminationMap { get; private set; }
     public Dictionary<string, Agent> Agents { get; private set; }
     public int G { get; private set; }
     public State? Parent { get; private set; }
     public Dictionary<string, Types.RouteAction>? JointAction { get; private set; }
-
 
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
@@ -24,8 +24,10 @@ public class State
     private int ContaminationMapHash;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, TemplateHandler templateHandler)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, TemplateHandler templateHandler, int? seed = null)
     {
+        Seed = seed;
+
         RoutableAgents = routableAgents;
         Agents = agents;
         ContaminationMap = contaminationMap;
@@ -35,12 +37,14 @@ public class State
 
         Parent = null;
         G = 0;
-        //H = CalculateHeuristic();
-        //Console.WriteLine($"Heuristic: {H+G}");
+
+        Seed = seed;
     }
 
     public State(State parent, Dictionary<string, Types.RouteAction> jointAction)
     {
+        Seed = parent.Seed;
+
         Parent = parent;
         RoutableAgents = Parent.RoutableAgents;
         ContaminationMap = (byte[,]) Parent.ContaminationMap.Clone();
@@ -64,10 +68,7 @@ public class State
             ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
         }
 
-
         H = CalculateHeuristic();
-        //Console.WriteLine(H);
-
 
     }
 
@@ -152,7 +153,10 @@ public class State
             }
         }
 
-        Random random = new Random();
+        Random random;
+
+        random = Seed != null ? new Random((int)Seed) : new Random();
+
         expandedStates = expandedStates.OrderBy(x => random.Next()).ToList();
 
         return expandedStates;
@@ -239,13 +243,17 @@ public class State
             if (command is Move moveCommand)
             {
                 Agent agent = Agents[moveCommand.GetInputDroplets().First()];
-                int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) + Math.Abs(moveCommand.PositionY - agent.PositionY);
 
-                // Check if path is blocked
+                int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
+                                        Math.Abs(moveCommand.PositionY - agent.PositionY);
+
+                // Penalize states where the path to the goal is blocked
                 if (PathIsBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
-                    manhattanDistance += 10;  // Increase the heuristic by a penalty if the path is blocked
+                    manhattanDistance += 10;
                 }
+
+                // Penalize the act of standing still
                 if (manhattanDistance != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
                 {
                     manhattanDistance += 5;
@@ -267,18 +275,21 @@ public class State
         int dy = -Math.Abs(endY - startY);
         int sx = startX < endX ? 1 : -1;
         int sy = startY < endY ? 1 : -1;
-        int err = dx + dy, e2;
+        int err = dx + dy;
         int steps = 0;
 
-        while (true)
+        while (startX != endX || startY != endY)
         {
+            // Early return if the current position is blocked
             if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
                 return true;
 
-            if (startX == endX && startY == endY) break;
-            if (steps++ > maxDepth) break; // Limit the lookahead depth
+            // Exit if maxDepth is reached
+            if (++steps > maxDepth) break;
 
-            e2 = 2 * err;
+            int e2 = 2 * err;
+
+            // Update coordinates based on error calculations
             if (e2 >= dy)
             {
                 err += dy;
@@ -293,6 +304,38 @@ public class State
 
         return false;
     }
+
+    //private bool PathIsBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
+    //{
+    //    int dx = Math.Abs(endX - startX);
+    //    int dy = -Math.Abs(endY - startY);
+    //    int sx = startX < endX ? 1 : -1;
+    //    int sy = startY < endY ? 1 : -1;
+    //    int err = dx + dy, e2;
+    //    int steps = 0;
+
+    //    while (true)
+    //    {
+    //        if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
+    //            return true;
+
+    //        if (startX == endX && startY == endY) break;
+    //        if (steps++ > maxDepth) break;
+
+    //        e2 = 2 * err;
+    //        if (e2 >= dy)
+    //        {
+    //            err += dy;
+    //            startX += sx;
+    //        }
+    //        if (e2 <= dx)
+    //        {
+    //            err += dx;
+    //            startY += sy;
+    //        }
+    //    }
+    //    return false;
+    //}
 
 
     // Helper method to check if an agent is near contamination
@@ -389,7 +432,7 @@ public class State
         {
             hash = hash * 31 + value;
         }
-
+        //hash = hash * 31 + ContaminationMapHash;
 
         foreach (var agent in Agents.Values)
         {
@@ -403,26 +446,26 @@ public class State
 
     public override bool Equals(object obj)
     {
-        if (obj is State otherState)
-        {
-            if (!AreAgentsEqual(Agents, otherState.Agents))
-            {
-                return false;
-            }
-
-            if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
-            {
-                return false;
-            }
-
+        if (ReferenceEquals(this, obj))
             return true;
-        }
 
-        return false;
+        if (obj is not State otherState)
+            return false;
+
+        if (!AreAgentsEqual(Agents, otherState.Agents))
+            return false;
+
+        if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
+            return false;
+
+        return true;
     }
 
     private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
     {
+        if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
+            return false;
+
         for (int i = 0; i < map1.GetLength(0); i++)
         {
             for (int j = 0; j < map1.GetLength(1); j++)
@@ -431,35 +474,27 @@ public class State
                     return false;
             }
         }
+
         return true;
     }
 
     private bool AreAgentsEqual(Dictionary<string, Agent> agents1, Dictionary<string, Agent> agents2)
     {
         if (agents1.Count != agents2.Count)
-        {
             return false;
-        }
 
-        foreach (var key in agents1.Keys)
+        foreach (var kvp in agents1)
         {
-            if (!agents2.ContainsKey(key))
-            {
+            if (!agents2.TryGetValue(kvp.Key, out var agent2))
                 return false;
-            }
 
-            var agent1 = agents1[key];
-            var agent2 = agents2[key];
-
+            var agent1 = kvp.Value;
             if (agent1.PositionX != agent2.PositionX || agent1.PositionY != agent2.PositionY)
-            {
                 return false;
-            }
         }
 
         return true;
     }
-
 }
 
 

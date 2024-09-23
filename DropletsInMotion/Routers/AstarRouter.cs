@@ -11,22 +11,19 @@ namespace DropletsInMotion.Routers
 
         }
 
-        public State Search(State initialState, Frontier frontier, double time)
+        public State Search(State initialState, Frontier frontier)
         {
             frontier.Add(initialState);
             HashSet<State> explored = new HashSet<State>();
 
             while (true)
             {
-                if (frontier.IsEmpty()) return null; // TODO: Do we want to return null? 
+                if (frontier.IsEmpty()) return initialState; // TODO: Do we want to return null? 
                 State state = frontier.Pop();
 
-                if (state.IsGoalState() || state.G >= 60)
+                if (state.IsGoalState())
                 {
                     Console.WriteLine($"We reached a goal state at depth {state.G}");
-
-                    //ApplicableFunctions.PrintContaminationState(state.ContaminationMap); // TODO: this can be removed after debug
-
 
                     List<State> chosenStates = new List<State>();
                     State currentState = state;
@@ -46,6 +43,10 @@ namespace DropletsInMotion.Routers
                     }
 
                     return state;
+                } else if (state.G >= 60)
+                {
+                    Console.WriteLine("This");
+                    return state;
                 }
 
                 explored.Add(state);
@@ -55,7 +56,7 @@ namespace DropletsInMotion.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        ApplicableFunctions.IncrementStateAmount(1);
+                        ApplicableFunctions.StateAmount += 1;
                         frontier.Add(expandedState);
                     }
                     else
