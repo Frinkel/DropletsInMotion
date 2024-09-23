@@ -168,7 +168,7 @@ namespace DropletsInMotion.Compilers
             int mergePositionY = mergeCommand.PositionY;
 
             // Move inputDroplet1 to be next to the merge position
-            if (Math.Abs(inputDroplet1.PositionX - mergePositionX) > 1 || Math.Abs(inputDroplet1.PositionY - mergePositionY) > 1)
+            if (Math.Abs(inputDroplet1.PositionX - mergePositionX) + Math.Abs(inputDroplet1.PositionY - mergePositionY) > 1)
             {
                 var moveCommand = new Move(inputDroplet1.DropletName, mergePositionX - 1, mergePositionY);
                 movesToExecute.Add(moveCommand);
@@ -176,7 +176,7 @@ namespace DropletsInMotion.Compilers
             }
 
             // Move inputDroplet2 to be next to the merge position
-            if (Math.Abs(inputDroplet2.PositionX - mergePositionX) > 1 || Math.Abs(inputDroplet2.PositionY - mergePositionY) > 1)
+            if (Math.Abs(inputDroplet2.PositionX - mergePositionX) + Math.Abs(inputDroplet2.PositionY - mergePositionY) > 1)
             {
                 var moveCommand = new Move(inputDroplet2.DropletName, mergePositionX + 1, mergePositionY);
                 movesToExecute.Add(moveCommand);

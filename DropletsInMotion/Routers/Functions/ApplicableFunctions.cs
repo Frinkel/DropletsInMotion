@@ -175,34 +175,49 @@ namespace DropletsInMotion.Routers.Functions
         // Convert RGB to a ConsoleColor (approximation due to limited colors in Console)
         private static ConsoleColor GetConsoleColorFromRGB(byte r, byte g, byte b)
         {
-            // Use a simple mapping of RGB to the nearest ConsoleColor
-            if (r > 128)
+            // Calculate the brightness level as an average of the RGB components
+            int brightness = (r + g + b) / 3;
+
+            // Check which ranges each component falls into to decide on the color
+            if (brightness < 64)
             {
-                if (g > 128)
-                {
-                    if (b > 128) return ConsoleColor.DarkRed;
-                    else return ConsoleColor.Yellow;
-                }
-                else
-                {
-                    if (b > 128) return ConsoleColor.Magenta;
-                    else return ConsoleColor.Red;
-                }
+                if (r > g && r > b) return ConsoleColor.DarkRed;
+                if (g > r && g > b) return ConsoleColor.DarkGreen;
+                if (b > r && b > g) return ConsoleColor.DarkBlue;
+                return ConsoleColor.Black;
+            }
+            else if (brightness < 128)
+            {
+                if (r > g && r > b) return ConsoleColor.Red;
+                if (g > r && g > b) return ConsoleColor.Green;
+                if (b > r && b > g) return ConsoleColor.Blue;
+                if (r == g && r > b) return ConsoleColor.Yellow;
+                if (r == b && r > g) return ConsoleColor.Magenta;
+                if (g == b && g > r) return ConsoleColor.Cyan;
+                return ConsoleColor.DarkGray;
+            }
+            else if (brightness < 192)
+            {
+                if (r > g && r > b) return ConsoleColor.DarkYellow;
+                if (g > r && g > b) return ConsoleColor.DarkGreen;
+                if (b > r && b > g) return ConsoleColor.DarkBlue;
+                if (r == g && r > b) return ConsoleColor.Yellow;
+                if (r == b && r > g) return ConsoleColor.Magenta;
+                if (g == b && g > r) return ConsoleColor.Cyan;
+                return ConsoleColor.Gray;
             }
             else
             {
-                if (g > 128)
-                {
-                    if (b > 128) return ConsoleColor.Cyan;
-                    else return ConsoleColor.Green;
-                }
-                else
-                {
-                    if (b > 128) return ConsoleColor.Blue;
-                    else return ConsoleColor.DarkCyan;
-                }
+                if (r > g && r > b) return ConsoleColor.Red;
+                if (g > r && g > b) return ConsoleColor.Green;
+                if (b > r && b > g) return ConsoleColor.Blue;
+                if (r == g && r > b) return ConsoleColor.Yellow;
+                if (r == b && r > g) return ConsoleColor.Magenta;
+                if (g == b && g > r) return ConsoleColor.Cyan;
+                return ConsoleColor.White;
             }
         }
+
 
 
         public static int StateAmount { get; set; }

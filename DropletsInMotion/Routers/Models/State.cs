@@ -45,7 +45,7 @@ public class State
         Seed = parent.Seed;
 
         Parent = parent;
-        RoutableAgents = Parent.RoutableAgents;
+        RoutableAgents = new List<string>(Parent.RoutableAgents);
         ContaminationMap = (byte[,]) Parent.ContaminationMap.Clone();
         Commands = Parent.Commands;
         JointAction = jointAction;
@@ -65,6 +65,19 @@ public class State
             Agent agent = Agents[actionKvp.Key];
             agent.Execute(actionKvp.Value);
             ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
+
+
+            // If a droplet is in its goal position we do not need to route it for child states
+            foreach (var command in Commands)
+            {
+                if (command is Move moveCommand)
+                {
+                    if (agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY)
+                    {
+                        RoutableAgents.Remove(agent.DropletName);
+                    }
+                }
+            }
         }
 
         H = CalculateHeuristic();
@@ -246,6 +259,19 @@ public class State
                 int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
                                         Math.Abs(moveCommand.PositionY - agent.PositionY);
 
+                //// Remove from routable agents, so that we do not expand states for agents that have finished
+                //if (manhattanDistance == 0)
+                //{
+                //    if (RoutableAgents.Contains(agent.DropletName))
+                //    {
+                //        RoutableAgents.Remove(agent.DropletName);
+                //        // Consider replacing with a logging statement
+                //        Console.WriteLine($"Agent {agent.DropletName} was removed {manhattanDistance} - {(agent.PositionX, agent.PositionY)}");
+                //    }
+                //    continue;
+                //}
+
+
                 // Penalize states where the path to the goal is blocked
                 if (PathIsBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
@@ -259,6 +285,7 @@ public class State
                 }
 
                 h += manhattanDistance;
+
             }
             else
             {

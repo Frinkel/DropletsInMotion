@@ -50,7 +50,7 @@ namespace DropletsInMotionTests
             Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
             Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
-            Assert.AreEqual(true, true);
+            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
         }
        
         [Test]
@@ -89,27 +89,33 @@ namespace DropletsInMotionTests
             Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
             Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
 
-            Assert.AreEqual(true, true);
+
+            
+
+            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
 
 
         }
 
-
-        public TemplateHandler CreateTemplateHandler()
+        public bool IsOneGoalState(List<ICommand> commands, Dictionary<string, Droplet> droplets)
         {
-            Electrode[][] board = new Electrode[32][];
-            board = new Electrode[32][];
-            for (int i = 0; i < 32; i++)
+            foreach (var command in commands)
             {
-                board[i] = new Electrode[20];
-                for (int j = 0; j < 20; j++)
+                Droplet droplet;
+                switch (command)
                 {
-                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+                    case Move moveCommand:
+                        droplet = droplets[moveCommand.GetInputDroplets().First()];
+                        if (droplet.PositionX == moveCommand.PositionX && droplet.PositionY == moveCommand.PositionY)
+                            return true;
+                        break;
+                    default:
+                        return false;
+                        break;
                 }
             }
 
-            TemplateHandler templateHandler = new TemplateHandler(board);
-            return templateHandler;
+            return false;
         }
 
         public Electrode[][] CreateBoard()
@@ -125,16 +131,6 @@ namespace DropletsInMotionTests
                 }
             }
             return board;
-        }
-
-        public Dictionary<string, Agent> createTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
-        {
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var agent = new Agent("d1", agent1X, agent1Y, 1);
-            var agent2 = new Agent("d2", agent2X, agent2Y, 1);
-            agents.Add("d1", agent);
-            agents.Add("d2", agent2);
-            return agents;
         }
     }
 }
