@@ -81,6 +81,8 @@ namespace DropletsInMotion.Compilers
                     }
                 }
 
+                double mergeTime = time;
+
                 foreach (ICommand command in commandsToExecute)
                 {
                     switch (command)
@@ -89,8 +91,8 @@ namespace DropletsInMotion.Compilers
                             if (InPositionToMerge(mergeCommand, movesToExecute))
                             {
                                 boardActions.AddRange(_router.Merge(Droplets, mergeCommand, time));
+                                mergeTime = boardActions.Any() ? boardActions.Last().Time > mergeTime ? boardActions.Last().Time : time : time;
                             }
-                            time = boardActions.Any() ? boardActions.Last().Time : time;
                             break;
                         case SplitByRatio splitByRatioCommand:
                             boardActions.AddRange(HandleSplitByRatioCommand(splitByRatioCommand));
@@ -109,7 +111,9 @@ namespace DropletsInMotion.Compilers
                     }
                 }
 
-                boardActions.AddRange(_router.Route(Droplets, movesToExecute, time));
+                double? boundTime = mergeTime > time ? mergeTime : null;
+
+                boardActions.AddRange(_router.Route(Droplets, movesToExecute, time, boundTime));
                 boardActions = boardActions.OrderBy(b => b.Time).ToList();
                 time = boardActions.Any() ? boardActions.Last().Time : time;
 
@@ -130,10 +134,6 @@ namespace DropletsInMotion.Compilers
 
         private bool hasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
         {
-            foreach (var d in Droplets)
-            {
-               Console.WriteLine(d); 
-            }
             bool splitOccurred = true;
 
             if (splitCommand.InputName != splitCommand.OutputName1 &&

@@ -195,6 +195,11 @@ public class Router
         droplets.Remove(inputDroplet2.DropletName);
         droplets[outputDroplet.DropletName] = outputDroplet;
         Agent newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume);
+        if (Agents[inputDroplet1.DropletName].SubstanceId == Agents[inputDroplet2.DropletName].SubstanceId)
+        {
+            newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume, Agents[inputDroplet1.DropletName].SubstanceId);
+        }
+        
         Agents.Add(outputDroplet.DropletName, newAgent);
 
         mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
