@@ -5,6 +5,3 @@ Droplet(d4, 17, 9, 1.2);
 Droplet(d5, 17, 12, 1.2);
 
 Merge(d1, d2, d6, 10, 10);
-Move(d3, 18, 6);
-Move(d4, 19, 9);
-Move(d5, 20, 12);

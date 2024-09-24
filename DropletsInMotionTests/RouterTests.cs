@@ -14,7 +14,7 @@ using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
-    public class RouterTest
+    public class RouterTests
     {
         
         [Test]
