@@ -140,6 +140,51 @@ namespace DropletsInMotion.Routers.Functions
             }
         }
 
+        public static bool IsAreaContaminated(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
+        {
+            int rowCount = contaminationMap.GetLength(0);
+            int colCount = contaminationMap.GetLength(1);
+
+            int endX = Math.Min(rowCount - 1, startX + width - 1);
+            int endY = Math.Min(colCount - 1, startY + height - 1);
+
+
+            // Iterate over the rectangular area and check for contamination
+            for (int x = Math.Max(0, startX); x <= endX; x++)
+            {
+                for (int y = Math.Max(0, startY); y <= endY; y++)
+                {
+                    // Check if the cell is contaminated
+                    if (contaminationMap[x, y] != 0 && contaminationMap[x, y] != substanceId)
+                    {
+                        return true; // Contamination detected
+                    }
+                }
+            }
+
+            return false; // No contamination found
+        }
+
+        public static void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
+        {
+            
+            int rowCount = contaminationMap.GetLength(0);
+            int colCount = contaminationMap.GetLength(1);
+
+            int endX = Math.Min(rowCount - 1, startX + width);
+            int endY = Math.Min(colCount - 1, startY + height);
+            // Iterate over the rectangular area and update the contamination map
+            for (int x = Math.Max(0, startX); x <= endX; x++)
+            {
+                for (int y = Math.Max(0, startY); y <= endY; y++)
+                {   
+                        byte oldValue = contaminationMap[x, y];
+                        byte newValue = (byte)(oldValue == 0 || oldValue == substanceId ? substanceId : 255);
+                        contaminationMap[x, y] = newValue;
+                }
+            }
+        }
+
         private static void SetColorForValue(byte value)
         {
             // Handle 0 as a special case

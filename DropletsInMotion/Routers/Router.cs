@@ -131,11 +131,11 @@ public class Router
         }
 
         ApplicableFunctions.PrintContaminationState(sFinal.ContaminationMap);
-        foreach (var agent in Agents)
-        {
-            Console.WriteLine(agent);
+        //foreach (var agent in Agents)
+        //{
+        //    Console.WriteLine(agent);
 
-        }
+        //}
 
         return sFinal.ExtractActions(time);
     }
@@ -208,6 +208,19 @@ public class Router
         Droplet inputDroplet = droplets[splitCommand.InputName]
                                ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
 
+        if (droplets.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
+        {
+            throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
+        }
+        if (droplets.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
+        {
+            throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+        }
+        if (splitCommand.OutputName2 == splitCommand.OutputName1)
+        {
+            throw new InvalidOperationException($"Droplet with the same names can not be split.");
+        }
+
         Droplet outputDroplet1, outputDroplet2;
         string templateName;
 
@@ -266,8 +279,8 @@ public class Router
         Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, Agents[inputDroplet.DropletName].SubstanceId);
         Agents.Remove(inputDroplet.DropletName);
 
-        Agents.Add(outputDroplet1.DropletName, newAgent1);
-        Agents.Add(outputDroplet2.DropletName, newAgent2);
+        Agents[outputDroplet1.DropletName] = newAgent1;
+        Agents[outputDroplet2.DropletName] = newAgent2;
         ApplicableFunctions.ApplyContamination(newAgent1, ContaminationMap);
         ApplicableFunctions.ApplyContamination(newAgent2, ContaminationMap);
 
@@ -278,6 +291,35 @@ public class Router
         splitActions.AddRange(_templateHandler.ApplyTemplate(templateName, inputDroplet, time));
 
         return splitActions;
+    }
+
+    public List<BoardAction> Mix(Dictionary<string, Droplet> droplets, Mix mixCommand, double compilerTime)
+    {
+        Agent inputDroplet = Agents[mixCommand.DropletName]
+                               ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
+        if (ApplicableFunctions.IsAreaContaminated(ContaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX,
+                mixCommand.PositionY, mixCommand.Width, mixCommand.Height))
+        {
+            throw new InvalidOperationException($"Mix not possible Area is contaminated.");
+        }
+
+        List<BoardAction> mixActions = new List<BoardAction>();
+
+        double time1 = compilerTime;
+
+        for (int i = 0; i < mixCommand.RepeatTimes; i++)
+        {
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1));
+        }
+        Console.WriteLine("-----------------------------------------------------");
+        ApplicableFunctions.PrintContaminationState(ContaminationMap);
+        ApplicableFunctions.UpdateContaminationArea(ContaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX-1,
+            mixCommand.PositionY-1, mixCommand.Width+2, mixCommand.Height+2);
+        ApplicableFunctions.PrintContaminationState(ContaminationMap);
+        return mixActions;
     }
 
 

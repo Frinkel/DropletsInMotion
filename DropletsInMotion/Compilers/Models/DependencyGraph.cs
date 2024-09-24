@@ -134,7 +134,7 @@ namespace DropletsInMotion.Compilers.Models
             
         }
 
-        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets)
+        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets, StoreManager storeManager, SplitManager splitManager, double currentTime)
         {
             foreach (DependencyNode node in nodes)
             {
@@ -168,15 +168,17 @@ namespace DropletsInMotion.Compilers.Models
                     case SplitByRatio splitByRatio:
                         if (droplets.TryGetValue(splitByRatio.OutputName1, out var splitDroplet1) &&
                             droplets.TryGetValue(splitByRatio.OutputName2, out var splitDroplet2) &&
-                            (splitByRatio.OutputName1 == splitByRatio.InputName || !droplets.ContainsKey(splitByRatio.InputName)) &&
-                            (splitByRatio.OutputName2 == splitByRatio.InputName || !droplets.ContainsKey(splitByRatio.InputName)))
+                            ((splitByRatio.OutputName1 == splitByRatio.InputName || splitByRatio.OutputName2 == splitByRatio.InputName) ||
+                            !droplets.ContainsKey(splitByRatio.InputName)))
                         {
                             if (splitDroplet1.PositionX == splitByRatio.PositionX1 &&
                                 splitDroplet1.PositionY == splitByRatio.PositionY1 &&
                                 splitDroplet2.PositionX == splitByRatio.PositionX2 &&
                                 splitDroplet2.PositionY == splitByRatio.PositionY2)
                             {
+
                                 Console.WriteLine("REMOVE SPLIT!");
+                                splitManager.RemoveSplit(node.Command);
                                 MarkNodeAsExecuted(node.NodeId);
                             }
                         }
@@ -185,21 +187,42 @@ namespace DropletsInMotion.Compilers.Models
                     case SplitByVolume splitByVolume:
                         if (droplets.TryGetValue(splitByVolume.OutputName1, out var splitDroplet1v) &&
                             droplets.TryGetValue(splitByVolume.OutputName2, out var splitDroplet2v) &&
-                            (splitByVolume.OutputName1 == splitByVolume.InputName || !droplets.ContainsKey(splitByVolume.InputName)) &&
-                            (splitByVolume.OutputName2 == splitByVolume.InputName || !droplets.ContainsKey(splitByVolume.InputName)))
+                            ((splitByVolume.OutputName1 == splitByVolume.InputName || splitByVolume.OutputName2 == splitByVolume.InputName) || 
+                             !droplets.ContainsKey(splitByVolume.InputName)))
                         {
                             if (splitDroplet1v.PositionX == splitByVolume.PositionX1 &&
                                 splitDroplet1v.PositionY == splitByVolume.PositionY1 &&
                                 splitDroplet2v.PositionX == splitByVolume.PositionX2 &&
                                 splitDroplet2v.PositionY == splitByVolume.PositionY2)
                             {
+                                splitManager.RemoveSplit(node.Command);
                                 MarkNodeAsExecuted(node.NodeId);
                             }
                         }
 
                         break;
+                    case Store storeCommand:
+                        if (storeManager.IsStoreComplete(storeCommand.DropletName, currentTime))
+                        {
+                            Console.WriteLine($"Droplet {storeCommand.DropletName} has completed its store time.");
+                            MarkNodeAsExecuted(node.NodeId);
+                        }
+                        break;
+                    case WaitForUserInput command:
+                        Console.WriteLine("REMOVE WAIT FOR USER!");
+                        MarkNodeAsExecuted(node.NodeId);
+                        break;
+                    case Wait command:
+                        Console.WriteLine("REMOVE WAIT!");
+                        MarkNodeAsExecuted(node.NodeId);
+                        break;
                     case Mix mixCommand:
-                        throw new NotSupportedException($"Command type {node.Command.GetType()} is not supported.");
+                        if (storeManager.IsStoreComplete(mixCommand.DropletName, currentTime))
+                        {
+                            Console.WriteLine($"Droplet {mixCommand.DropletName} has completed its mix.");
+                            MarkNodeAsExecuted(node.NodeId);
+                        }
+                        break;
 
 
                     default:
