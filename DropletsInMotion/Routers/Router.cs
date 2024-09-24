@@ -55,14 +55,6 @@ public class Router
 
     public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time, double? boundTime = null)
     {
-        //foreach (var droplet in droplets)
-        //{
-        //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
-        //    Agents.Add(droplet.Key, agent);
-        //    ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
-        //}
-
-
         List<string> routableAgents = new List<string>();
 
         foreach (var command in commands)
