@@ -208,6 +208,19 @@ public class Router
         Droplet inputDroplet = droplets[splitCommand.InputName]
                                ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
 
+        if (droplets.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
+        {
+            throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
+        }
+        if (droplets.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
+        {
+            throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+        }
+        if (splitCommand.OutputName2 == splitCommand.OutputName1)
+        {
+            throw new InvalidOperationException($"Droplet with the same names can not be split.");
+        }
+
         Droplet outputDroplet1, outputDroplet2;
         string templateName;
 
@@ -266,8 +279,8 @@ public class Router
         Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, Agents[inputDroplet.DropletName].SubstanceId);
         Agents.Remove(inputDroplet.DropletName);
 
-        Agents.Add(outputDroplet1.DropletName, newAgent1);
-        Agents.Add(outputDroplet2.DropletName, newAgent2);
+        Agents[outputDroplet1.DropletName] = newAgent1;
+        Agents[outputDroplet2.DropletName] = newAgent2;
         ApplicableFunctions.ApplyContamination(newAgent1, ContaminationMap);
         ApplicableFunctions.ApplyContamination(newAgent2, ContaminationMap);
 

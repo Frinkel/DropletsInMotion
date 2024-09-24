@@ -167,22 +167,17 @@ namespace DropletsInMotion.Routers.Functions
 
         public static void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
         {
-            Console.WriteLine($"StartX{startX}");
-            Console.WriteLine($"StartY{startY}");
-
+            
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
 
             int endX = Math.Min(rowCount - 1, startX + width);
             int endY = Math.Min(colCount - 1, startY + height);
-            Console.WriteLine($"endX{endX}");
-            Console.WriteLine($"endY{endY}");
             // Iterate over the rectangular area and update the contamination map
             for (int x = Math.Max(0, startX); x <= endX; x++)
             {
                 for (int y = Math.Max(0, startY); y <= endY; y++)
                 {   
-                        Console.WriteLine($"X{x} Y{y}");
                         byte oldValue = contaminationMap[x, y];
                         byte newValue = (byte)(oldValue == 0 || oldValue == substanceId ? substanceId : 255);
                         contaminationMap[x, y] = newValue;

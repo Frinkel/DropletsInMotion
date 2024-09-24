@@ -31,7 +31,8 @@ namespace DropletsInMotion.Compilers
         private readonly SimpleRouter _simpleRouter;
         private Router _router;
 
-        private StoreManager StoreManager = new StoreManager();
+        private StoreManager _storeManager = new StoreManager();
+        private SplitManager _splitManager = new SplitManager();
 
         public Compiler(List<ICommand> commands, Dictionary<string, Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
         {
@@ -73,6 +74,7 @@ namespace DropletsInMotion.Compilers
                 //print the commands
 
                 Console.WriteLine($"Commands to execute iteration {i}:");
+                i++;
                 foreach (ICommand command in commandsToExecute)
                 {
                     Console.WriteLine(command);
@@ -100,25 +102,26 @@ namespace DropletsInMotion.Compilers
                                 splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1, 
                                 splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2, 
                                 Droplets.ContainsKey(splitByRatioCommand.InputName) ? Droplets[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
-                            if (!hasSplit(splitByVolumeCommand2, movesToExecute))
+                            if (!HasSplit(splitByVolumeCommand2, movesToExecute))
                             {
+                                _splitManager.StoreSplit(splitByVolumeCommand2);
                                 boardActions.AddRange(_router.SplitByVolume(Droplets, splitByVolumeCommand2, time, 1));
                                 executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
 
                             }
                             break;
                         case SplitByVolume splitByVolumeCommand:
-                            if (!hasSplit(splitByVolumeCommand, movesToExecute))
+                            if (!HasSplit(splitByVolumeCommand, movesToExecute))
                             {
+                                _splitManager.StoreSplit(command);
                                 boardActions.AddRange(_router.SplitByVolume(Droplets, splitByVolumeCommand, time, 1));
                                 executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
-
                             }
                             break;
                         case Store storeCommand:
                             if (InPositionToStore(storeCommand, movesToExecute))
                             {
-                                StoreManager.StoreDroplet(storeCommand, time);
+                                _storeManager.StoreDroplet(storeCommand, time);
                             }
                             break;
                         case Mix mixCommand:
@@ -126,8 +129,13 @@ namespace DropletsInMotion.Compilers
                             {
                                 List<BoardAction> mixActions = new List<BoardAction>();
                                 mixActions.AddRange(_router.Mix(Droplets, mixCommand, time));
-                                StoreManager.StoreDropletWithNameAndTime(mixCommand.DropletName, time + mixActions.Last().Time);
-                                await CommunicationEngine.SendActions(mixActions);
+                                _storeManager.StoreDropletWithNameAndTime(mixCommand.DropletName, time + mixActions.Last().Time);
+                                if (CommunicationEngine != null)
+                                {
+                                    await CommunicationEngine.SendActions(mixActions);
+
+                                }
+
                             }
                             break;
                         case WaitForUserInput waitForUserInputCommand:
@@ -161,9 +169,9 @@ namespace DropletsInMotion.Compilers
 
 
                 
-                DependencyGraph.updateExecutedNodes(executableNodes, Droplets, StoreManager, time);
+                DependencyGraph.updateExecutedNodes(executableNodes, Droplets, _storeManager, _splitManager, time);
 
-                if (boardActions.Count > 0)
+                if (boardActions.Count > 0 && CommunicationEngine != null)
                 {
                     await CommunicationEngine.SendActions(boardActions);
                 }
@@ -182,7 +190,7 @@ namespace DropletsInMotion.Compilers
 
         private bool InPositionToMix(Mix mixCommand, List<ICommand> movesToExecute)
         {
-            if (StoreManager.ContainsDroplet(mixCommand.DropletName))
+            if (_storeManager.ContainsDroplet(mixCommand.DropletName))
             {
                 return false;
             }
@@ -202,9 +210,9 @@ namespace DropletsInMotion.Compilers
 
         private double? CalculateBoundTime(double currentTime, double? boundTime)
         {
-            if (StoreManager.HasStoredDroplets())
+            if (_storeManager.HasStoredDroplets())
             {
-                double nextStoreTime = StoreManager.PeekClosestTime();
+                double nextStoreTime = _storeManager.PeekClosestTime();
                 return boundTime > time ? boundTime > nextStoreTime ? nextStoreTime : boundTime : nextStoreTime;
             }
 
@@ -227,46 +235,64 @@ namespace DropletsInMotion.Compilers
 
         }
 
-        private bool hasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
+        private bool HasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
         {
-            bool splitOccurred = true;
 
-            if (splitCommand.InputName != splitCommand.OutputName1 &&
-                splitCommand.InputName != splitCommand.OutputName1)
+            if (_splitManager.CanSplit(splitCommand))
             {
-                if (Droplets.ContainsKey(splitCommand.InputName)) return false;
-            }
-
-            if (splitCommand.InputName == splitCommand.OutputName1)
-            {
-                if (!Droplets.ContainsKey(splitCommand.OutputName2)) return false;
-            }
-
-            if (splitCommand.InputName == splitCommand.OutputName2)
-            {
-                if (!Droplets.ContainsKey(splitCommand.OutputName1)) return false;
-            }
-
-            if (splitOccurred)
-            {
-                if (Droplets.TryGetValue(splitCommand.OutputName1, out Droplet outputDroplet1))
+                if (Droplets.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
                 {
-                    if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
-                    {
-                        movesToExecute.Add(new Move(splitCommand.OutputName1, splitCommand.PositionX1, splitCommand.PositionY1));
-                        splitOccurred = true;
-                    }
+                    throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
                 }
-                if (Droplets.TryGetValue(splitCommand.OutputName2, out Droplet outputDroplet2))
+                if (Droplets.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
                 {
-                    if (outputDroplet2.PositionX != splitCommand.PositionX2 || outputDroplet2.PositionY != splitCommand.PositionY2)
-                    {
-                        movesToExecute.Add(new Move(splitCommand.OutputName2, splitCommand.PositionX2, splitCommand.PositionY2));
-                        splitOccurred = true;
-                    }
+                    throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+                }
+                if (splitCommand.OutputName2 == splitCommand.OutputName1)
+                {
+                    throw new InvalidOperationException($"Droplet with the same names can not be split.");
+                }
+
+                return false;
+            }
+
+            
+            //bool splitOccurred = true;
+
+            //if (splitCommand.InputName != splitCommand.OutputName1 &&
+            //    splitCommand.InputName != splitCommand.OutputName2)
+            //{
+            //    if (Droplets.ContainsKey(splitCommand.InputName)) return false;
+            //}
+
+            //if (splitCommand.InputName == splitCommand.OutputName1)
+            //{
+            //    if (!Droplets.ContainsKey(splitCommand.OutputName2)) return false;
+            //}
+
+            //if (splitCommand.InputName == splitCommand.OutputName2)
+            //{
+            //    if (!Droplets.ContainsKey(splitCommand.OutputName1)) return false;
+            //}
+
+
+
+            if (Droplets.TryGetValue(splitCommand.OutputName1, out Droplet outputDroplet1))
+            {
+                if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
+                {
+                    movesToExecute.Add(new Move(splitCommand.OutputName1, splitCommand.PositionX1, splitCommand.PositionY1));
                 }
             }
-            return splitOccurred;
+            if (Droplets.TryGetValue(splitCommand.OutputName2, out Droplet outputDroplet2))
+            {
+                if (outputDroplet2.PositionX != splitCommand.PositionX2 || outputDroplet2.PositionY != splitCommand.PositionY2)
+                {
+                    movesToExecute.Add(new Move(splitCommand.OutputName2, splitCommand.PositionX2, splitCommand.PositionY2));
+                }
+            }
+            
+            return true;
         }
 
 
