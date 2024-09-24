@@ -181,16 +181,18 @@ public class Router
             throw new InvalidOperationException("Droplets are not in position to merge");
         }
 
-        Agents.Remove(inputDroplet1.DropletName);
-        Agents.Remove(inputDroplet2.DropletName);
-        droplets.Remove(inputDroplet1.DropletName);
-        droplets.Remove(inputDroplet2.DropletName);
-        droplets[outputDroplet.DropletName] = outputDroplet;
         Agent newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume);
         if (Agents[inputDroplet1.DropletName].SubstanceId == Agents[inputDroplet2.DropletName].SubstanceId)
         {
             newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume, Agents[inputDroplet1.DropletName].SubstanceId);
         }
+
+        Agents.Remove(inputDroplet1.DropletName);
+        Agents.Remove(inputDroplet2.DropletName);
+        droplets.Remove(inputDroplet1.DropletName);
+        droplets.Remove(inputDroplet2.DropletName);
+        droplets[outputDroplet.DropletName] = outputDroplet;
+
         
         Agents.Add(outputDroplet.DropletName, newAgent);
 
