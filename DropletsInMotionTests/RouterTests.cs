@@ -14,11 +14,11 @@ using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
-    public class RouterTest
+    public class RouterTests
     {
         
         [Test]
-        public void TestAStarSearchAroundEachother()
+        public void AStarSearchAroundEachother()
         {
             ApplicableFunctions.StateAmount = 0;
             ApplicableFunctions.StateAmountExists = 0;
@@ -35,13 +35,12 @@ namespace DropletsInMotionTests
 
             var board = CreateBoard();
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-
-
             Router router = new Router(board, droplets);
             router.Seed = 123;
-            var boardActions = router.Route(droplets, commands, 0);
 
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var boardActions = router.Route(droplets, commands, 0);
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
@@ -52,9 +51,75 @@ namespace DropletsInMotionTests
 
             Assert.AreEqual(IsOneGoalState(commands, droplets), true);
         }
-       
+
         [Test]
-        public void TestAStarSearchGreatWallOfDmf()
+        public void AStarSearchAroundEachotherSameSubstance()
+        {
+            ApplicableFunctions.StateAmount = 0;
+            ApplicableFunctions.StateAmountExists = 0;
+
+            ICommand command = new Move("d1", 20, 5);
+            ICommand command2 = new Move("d2", 1, 5);
+            var commands = new List<ICommand>() { command, command2 };
+
+            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
+            var d1 = new Droplet("d1", 5, 5, 1);
+            var d2 = new Droplet("d2", 12, 5, 1);
+            droplets.Add("d1", d1);
+            droplets.Add("d2", d2);
+
+            var board = CreateBoard();
+
+            Router router = new Router(board, droplets);
+            router.Seed = 123;
+            byte substanceId = router.GetAgentSubstanceId("d1");
+            router.UpdateAgentSubstanceId("d2", substanceId);
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var boardActions = router.Route(droplets, commands, 0);
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs.ToString());
+
+            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
+
+            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
+        }
+
+        //[Test]
+        //public void TestAStarSearchAroundEachotherSameSubstance()
+        //{
+        //    var agents = createTwoAgentsWithPositions(5, 5, 12, 5);
+        //    foreach (var agent in agents)
+        //    {
+        //        agent.Value.SubstanceId = 1;
+        //    }
+        //    byte[,] contamination = new byte[32, 20];
+
+        //    ICommand command = new Move("d1", 20, 5);
+        //    ICommand command2 = new Move("d2", 1, 5);
+        //    var commands = new List<ICommand>() { command, command2 };
+
+        //    var routableAgents = new List<string>() { "d1", "d2" };
+        //    State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
+
+        //    Frontier frontier = new Frontier();
+        //    AstarRouter astarRouter = new AstarRouter();
+
+        //    var watch = System.Diagnostics.Stopwatch.StartNew();
+        //    State res = astarRouter.Search(s0, frontier);
+        //    watch.Stop();
+        //    var elapsedMs = watch.ElapsedMilliseconds;
+        //    Console.WriteLine(elapsedMs.ToString());
+
+        //    Assert.AreEqual(res.IsOneGoalState(), true);
+        //}
+
+        [Test]
+        public void AStarSearchGreatWallOfDmf()
         {
             ApplicableFunctions.StateAmount = 0;
             ApplicableFunctions.StateAmountExists = 0;

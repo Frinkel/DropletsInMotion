@@ -306,19 +306,6 @@ public class State
                 int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
                                         Math.Abs(moveCommand.PositionY - agent.PositionY);
 
-                //// Remove from routable agents, so that we do not expand states for agents that have finished
-                //if (manhattanDistance == 0)
-                //{
-                //    if (RoutableAgents.Contains(agent.DropletName))
-                //    {
-                //        RoutableAgents.Remove(agent.DropletName);
-                //        // Consider replacing with a logging statement
-                //        Console.WriteLine($"Agent {agent.DropletName} was removed {manhattanDistance} - {(agent.PositionX, agent.PositionY)}");
-                //    }
-                //    continue;
-                //}
-
-
                 // Penalize states where the path to the goal is blocked
                 if (PathIsBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
