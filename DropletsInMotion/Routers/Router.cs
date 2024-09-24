@@ -282,8 +282,19 @@ public class Router
 
 
 
+    // USED ONLY FOR TEST
+    public void UpdateAgentSubstanceId(string agent, byte substanceId)
+    {
+        Agents[agent].SubstanceId = substanceId;
+        ContaminationMap = ApplicableFunctions.ApplyContaminationMerge(Agents[agent], ContaminationMap);
 
-
+    }
+    // USED ONLY FOR TEST
+    public byte GetAgentSubstanceId(string agent)
+    {
+        return Agents[agent].SubstanceId;
+    }
+    // USED ONLY FOR TEST
     public void UpdateContaminationMap(int x, int y, byte value)
     {
         ContaminationMap[x, y] = value;

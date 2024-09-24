@@ -14,7 +14,7 @@ using DropletsInMotion.Routers.Models;
 
 namespace DropletsInMotionTests
 {
-    public class AStarTest
+    public class StateTests
     {
  
         [Test]
@@ -155,119 +155,6 @@ namespace DropletsInMotionTests
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
 
-        [Test]
-        public void TestAStarSearchSimpleRoute()
-        {
-            byte[,] contamination = new byte[32, 20];
-            var agents = createTwoAgentsWithPositions(1, 1, 5, 7);
-
-            ICommand command = new Move("d1", 31, 18);
-            ICommand command2 = new Move("d2", 17, 17);
-            var commands = new List<ICommand>() { command, command2 };
-
-            var routableAgents = new List<string>() { "d1", "d2" };
-            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
-
-            Frontier frontier = new Frontier();
-            AstarRouter astarRouter = new AstarRouter();
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier);
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
-
-            Assert.AreEqual(res.IsOneGoalState(), true);
-        }
-
-        [Test]
-        public void TestAStarSearchAroundEachother()
-        {
-            byte[,] contamination = new byte[32, 20];
-            var agents = createTwoAgentsWithPositions(5, 5, 12, 5);
-
-            ICommand command = new Move("d1", 20, 5);
-            ICommand command2 = new Move("d2", 1, 5);
-            var commands = new List<ICommand>() { command, command2 };
-
-            var routableAgents = new List<string>() { "d1", "d2" };
-            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
-
-            Frontier frontier = new Frontier();
-            AstarRouter astarRouter = new AstarRouter();
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier);
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
-            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
-
-            Assert.AreEqual(res.IsOneGoalState(), true);
-        }
-
-        [Test]
-        public void TestAStarSearchAroundEachotherSameSubstance()
-        {
-            var agents = createTwoAgentsWithPositions(5, 5, 12, 5);
-            foreach (var agent in agents)
-            {
-                agent.Value.SubstanceId = 1;
-            }
-            byte[,] contamination = new byte[32, 20];
-
-            ICommand command = new Move("d1", 20, 5);
-            ICommand command2 = new Move("d2", 1, 5);
-            var commands = new List<ICommand>() { command, command2 };
-
-            var routableAgents = new List<string>() { "d1", "d2" };
-            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
-
-            Frontier frontier = new Frontier();
-            AstarRouter astarRouter = new AstarRouter();
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            State res = astarRouter.Search(s0, frontier);
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
-
-            Assert.AreEqual(res.IsOneGoalState(), true);
-        }
-
-        [Test]
-        public void TestAStarSearchGreatWallOfDmf2()
-        {
-            byte[,] contamination = new byte[32, 20];
-
-            contamination[10, 8] = 255;
-            contamination[10, 9] = 255;
-            contamination[10, 10] = 255;
-            contamination[10, 11] = 255;
-            contamination[10, 12] = 255;
-            contamination[10, 13] = 255;
-
-            var agents = createTwoAgentsWithPositions(5, 10, 30, 18);
-
-
-            ICommand command = new Move("d1", 15, 10);
-            var commands = new List<ICommand>() { command };
-
-            var routableAgents = new List<string>() { "d1" };
-            State s0 = new State(routableAgents, agents, contamination, commands, CreateTemplateHandler());
-
-            Frontier frontier = new Frontier();
-            AstarRouter astarRouter = new AstarRouter();
-
-            State res = astarRouter.Search(s0, frontier);
-
-            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
-
-            Assert.AreEqual(res.IsGoalState(), true);
-        }
-
         public TemplateHandler CreateTemplateHandler()
         {
             Electrode[][] board = new Electrode[32][];
@@ -283,21 +170,6 @@ namespace DropletsInMotionTests
 
             TemplateHandler templateHandler = new TemplateHandler(board);
             return templateHandler;
-        }
-
-        public Electrode[][] CreateBoard()
-        {
-            Electrode[][] board = new Electrode[32][];
-            board = new Electrode[32][];
-            for (int i = 0; i < 32; i++)
-            {
-                board[i] = new Electrode[20];
-                for (int j = 0; j < 20; j++)
-                {
-                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
-                }
-            }
-            return board;
         }
 
         public Dictionary<string, Agent> createTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
