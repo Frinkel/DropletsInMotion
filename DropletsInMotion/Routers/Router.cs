@@ -294,6 +294,14 @@ public class Router
     {
         return Agents[agent].SubstanceId;
     }
+    public byte[,] GetContaminationMap()
+    {
+        return ContaminationMap;
+    }
+    public Dictionary<string, Agent> GetAgents()
+    {
+        return Agents;
+    }
     // USED ONLY FOR TEST
     public void UpdateContaminationMap(int x, int y, byte value)
     {
