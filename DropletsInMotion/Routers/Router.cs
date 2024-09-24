@@ -131,11 +131,11 @@ public class Router
         }
 
         ApplicableFunctions.PrintContaminationState(sFinal.ContaminationMap);
-        foreach (var agent in Agents)
-        {
-            Console.WriteLine(agent);
+        //foreach (var agent in Agents)
+        //{
+        //    Console.WriteLine(agent);
 
-        }
+        //}
 
         return sFinal.ExtractActions(time);
     }
@@ -278,6 +278,35 @@ public class Router
         splitActions.AddRange(_templateHandler.ApplyTemplate(templateName, inputDroplet, time));
 
         return splitActions;
+    }
+
+    public List<BoardAction> Mix(Dictionary<string, Droplet> droplets, Mix mixCommand, double compilerTime)
+    {
+        Agent inputDroplet = Agents[mixCommand.DropletName]
+                               ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
+        if (ApplicableFunctions.IsAreaContaminated(ContaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX,
+                mixCommand.PositionY, mixCommand.Width, mixCommand.Height))
+        {
+            throw new InvalidOperationException($"Mix not possible Area is contaminated.");
+        }
+
+        List<BoardAction> mixActions = new List<BoardAction>();
+
+        double time1 = compilerTime;
+
+        for (int i = 0; i < mixCommand.RepeatTimes; i++)
+        {
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1));
+            mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1));
+        }
+        Console.WriteLine("-----------------------------------------------------");
+        ApplicableFunctions.PrintContaminationState(ContaminationMap);
+        ApplicableFunctions.UpdateContaminationArea(ContaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX-1,
+            mixCommand.PositionY-1, mixCommand.Width+2, mixCommand.Height+2);
+        ApplicableFunctions.PrintContaminationState(ContaminationMap);
+        return mixActions;
     }
 
 

@@ -134,7 +134,7 @@ namespace DropletsInMotion.Compilers.Models
             
         }
 
-        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets)
+        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets, StoreManager storeManager, double currentTime)
         {
             foreach (DependencyNode node in nodes)
             {
@@ -198,8 +198,28 @@ namespace DropletsInMotion.Compilers.Models
                         }
 
                         break;
+                    case Store storeCommand:
+                        if (storeManager.IsStoreComplete(storeCommand.DropletName, currentTime))
+                        {
+                            Console.WriteLine($"Droplet {storeCommand.DropletName} has completed its store time.");
+                            MarkNodeAsExecuted(node.NodeId);
+                        }
+                        break;
+                    case WaitForUserInput command:
+                        Console.WriteLine("REMOVE WAIT FOR USER!");
+                        MarkNodeAsExecuted(node.NodeId);
+                        break;
+                    case Wait command:
+                        Console.WriteLine("REMOVE WAIT!");
+                        MarkNodeAsExecuted(node.NodeId);
+                        break;
                     case Mix mixCommand:
-                        throw new NotSupportedException($"Command type {node.Command.GetType()} is not supported.");
+                        if (storeManager.IsStoreComplete(mixCommand.DropletName, currentTime))
+                        {
+                            Console.WriteLine($"Droplet {mixCommand.DropletName} has completed its mix.");
+                            MarkNodeAsExecuted(node.NodeId);
+                        }
+                        break;
 
 
                     default:
