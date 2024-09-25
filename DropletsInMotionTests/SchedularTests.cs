@@ -36,7 +36,7 @@ namespace DropletsInMotionTests
 
             ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
 
-            scheduler.Tester(commands, droplets, router.GetAgents(), router.GetContaminationMap());
+            scheduler.ScheduleCommand(commands, droplets, router.GetAgents(), router.GetContaminationMap());
 
             Assert.AreEqual(true, true);
 

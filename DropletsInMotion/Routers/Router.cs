@@ -159,10 +159,8 @@ public class Router
             inputDroplet1.Volume + inputDroplet2.Volume);
 
         //check that droplets are not more than 1 away from merge position
-        if (Math.Abs(inputDroplet1.PositionX - mergeCommand.PositionX) > 1 
-            || Math.Abs(inputDroplet1.PositionY - mergeCommand.PositionY) > 1
-            || Math.Abs(inputDroplet2.PositionX - mergeCommand.PositionX) > 1
-            || Math.Abs(inputDroplet2.PositionY - mergeCommand.PositionY) > 1)
+        if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) >= 5
+            || Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) >= 5)
         {
             throw new InvalidOperationException("Droplets is not in position to merge they are too far");
         }
@@ -181,10 +179,14 @@ public class Router
             throw new InvalidOperationException("Droplets are not in position to merge");
         }
 
-        Agent newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume);
+        int outPutDropletX = (inputDroplet1.PositionX + inputDroplet2.PositionX) / 2;
+        int outPutDropletY = (inputDroplet1.PositionY + inputDroplet2.PositionY) / 2;
+
+
+        Agent newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
         if (Agents[inputDroplet1.DropletName].SubstanceId == Agents[inputDroplet2.DropletName].SubstanceId)
         {
-            newAgent = new Agent(outputDroplet.DropletName, outputDroplet.PositionX, outputDroplet.PositionY, outputDroplet.Volume, Agents[inputDroplet1.DropletName].SubstanceId);
+            newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, Agents[inputDroplet1.DropletName].SubstanceId);
         }
 
         Agents.Remove(inputDroplet1.DropletName);

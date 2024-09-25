@@ -8,6 +8,7 @@ using DropletsInMotion.Controllers;
 using DropletsInMotion.Controllers.ConsoleController;
 using DropletsInMotion.Routers;
 using DropletsInMotion.Routers.Models;
+using DropletsInMotion.Schedulers;
 
 namespace DropletsInMotion.Compilers
 {
@@ -30,6 +31,7 @@ namespace DropletsInMotion.Compilers
 
         private readonly SimpleRouter _simpleRouter;
         private Router _router;
+        private Scheduler _scheduler;
 
         private StoreManager _storeManager = new StoreManager();
         private SplitManager _splitManager = new SplitManager();
@@ -53,7 +55,7 @@ namespace DropletsInMotion.Compilers
 
             _simpleRouter = new SimpleRouter(Board);
             _router = new Router(Board, Droplets);
-
+            _scheduler = new Scheduler();
         }
 
         public async Task Compile()
@@ -309,9 +311,12 @@ namespace DropletsInMotion.Compilers
                 throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
             }
 
+            var mergePositions =_scheduler.ScheduleCommand(new List<ICommand>() { mergeCommand }, Droplets, _router.GetAgents(),
+                _router.GetContaminationMap());
             // Check if the droplets are in position for the merge (1 space apart horizontally or vertically)
-            bool areInPosition = (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY) ||
-                                 (Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) == 2 && inputDroplet1.PositionX == inputDroplet2.PositionX);
+
+
+            bool areInPosition = (inputDroplet1.PositionX == mergePositions.Value.Item1.d1OptimalX && inputDroplet1.PositionY == mergePositions.Value.Item1.d1OptimalY && inputDroplet2.PositionX == mergePositions.Value.Item2.d2OptimalX && inputDroplet2.PositionY == mergePositions.Value.Item2.d2OptimalY);
 
             // If the droplets are already in position, return true
             if (areInPosition)
@@ -324,17 +329,17 @@ namespace DropletsInMotion.Compilers
             int mergePositionY = mergeCommand.PositionY;
 
             // Move inputDroplet1 to be next to the merge position
-            if (Math.Abs(inputDroplet1.PositionX - mergePositionX) + Math.Abs(inputDroplet1.PositionY - mergePositionY) > 1)
+            if (inputDroplet1.PositionX != mergePositions.Value.Item1.d1OptimalX || inputDroplet1.PositionY != mergePositions.Value.Item1.d1OptimalY )
             {
-                var moveCommand = new Move(inputDroplet1.DropletName, mergePositionX - 1, mergePositionY);
+                var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Value.Item1.d1OptimalX, mergePositions.Value.Item1.d1OptimalY);
                 movesToExecute.Add(moveCommand);
                 Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
             }
 
             // Move inputDroplet2 to be next to the merge position
-            if (Math.Abs(inputDroplet2.PositionX - mergePositionX) + Math.Abs(inputDroplet2.PositionY - mergePositionY) > 1)
+            if (inputDroplet2.PositionX != mergePositions.Value.Item2.d2OptimalX || inputDroplet2.PositionY != mergePositions.Value.Item2.d2OptimalY)
             {
-                var moveCommand = new Move(inputDroplet2.DropletName, mergePositionX + 1, mergePositionY);
+                var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Value.Item2.d2OptimalX, mergePositions.Value.Item2.d2OptimalY);
                 movesToExecute.Add(moveCommand);
                 Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
 
@@ -344,23 +349,6 @@ namespace DropletsInMotion.Compilers
             Console.WriteLine("Droplets are NOT in position to merge");
             return false;
         }
-
-
-        private IEnumerable<BoardAction> HandleMixCommand(Mix mixCommand)
-        {
-            throw new NotImplementedException();
-        }
-
-        private IEnumerable<BoardAction> HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
-        {
-            throw new NotImplementedException();
-        }
-
-        private IEnumerable<BoardAction> HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand)
-        {
-            throw new NotImplementedException();
-        }
-
 
     }
 }

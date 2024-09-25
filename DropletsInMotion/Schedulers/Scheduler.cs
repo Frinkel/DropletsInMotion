@@ -28,7 +28,7 @@ namespace DropletsInMotion.Schedulers
 
         }
 
-        public ((int d1OptimalX, int d1OptimalY), (int d2OptimalX, int d2OptimalY))? Tester(List<ICommand> commandsToBeScheduled, Dictionary<string, Droplet> droplets,
+        public ((int d1OptimalX, int d1OptimalY), (int d2OptimalX, int d2OptimalY))? ScheduleCommand(List<ICommand> commandsToBeScheduled, Dictionary<string, Droplet> droplets,
             Dictionary<string, Agent> agents, byte[,] contaminationMap)
         {
             foreach (var command in commandsToBeScheduled)
