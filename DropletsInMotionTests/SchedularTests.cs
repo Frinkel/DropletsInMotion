@@ -36,9 +36,60 @@ namespace DropletsInMotionTests
 
             ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
 
-            scheduler.ScheduleCommand(commands, droplets, router.GetAgents(), router.GetContaminationMap());
+            var optimalPostion = scheduler.ScheduleCommand(commands, droplets, router.GetAgents(), router.GetContaminationMap());
 
-            Assert.AreEqual(true, true);
+            Assert.AreEqual(optimalPostion.Value.Item1.optimalX, 6);
+            Assert.AreEqual(optimalPostion.Value.Item1.optimalY, 1);
+            Assert.AreEqual(optimalPostion.Value.Item2.optimalX, 4);
+            Assert.AreEqual(optimalPostion.Value.Item2.optimalY, 1);
+
+        }
+
+        [Test]
+        public void MergePositionCloseToEachother()
+        {
+            ICommand mergeCommand = new Merge("d1", "d2", "d3", 5, 5);
+            var commands = new List<ICommand>() { mergeCommand };
+
+            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
+            var d1 = new Droplet("d1", 6, 0, 1);
+            var d2 = new Droplet("d2", 4, 0, 1);
+
+            droplets.Add("d1", d1);
+            droplets.Add("d2", d2);
+
+            Scheduler scheduler = new Scheduler();
+            //var mergePositions = scheduler.ScheduleCommand(mergeCommand, droplets);
+
+            var board = CreateBoard();
+
+            Router router = new Router(board, droplets);
+            //router.UpdateContaminationMap(0, 1, 2);
+            //router.UpdateContaminationMap(1, 1, 2);
+            //router.UpdateContaminationMap(2, 1, 2);
+            //router.UpdateContaminationMap(3, 1, 2);
+            //router.UpdateContaminationMap(0, 1, 2);
+            //router.UpdateContaminationMap(1, 1, 2);
+            //router.UpdateContaminationMap(2, 1, 2);
+            //router.UpdateContaminationMap(3, 1, 2);
+
+            //router.UpdateContaminationMap(5, 0, 1);
+            //router.UpdateContaminationMap(6, 0, 1);
+            //router.UpdateContaminationMap(7, 0, 1);
+            //router.UpdateContaminationMap(5, 1, 1);
+            //router.UpdateContaminationMap(6, 1, 1);
+            //router.UpdateContaminationMap(7, 1, 1);
+
+
+
+            ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
+
+            var optimalPostion = scheduler.ScheduleCommand(commands, droplets, router.GetAgents(), router.GetContaminationMap());
+
+            Assert.AreEqual(optimalPostion.Value.Item1.optimalX, 6);
+            Assert.AreEqual(optimalPostion.Value.Item1.optimalY, 0);
+            Assert.AreEqual(optimalPostion.Value.Item2.optimalX, 4);
+            Assert.AreEqual(optimalPostion.Value.Item2.optimalY, 0);
 
         }
 

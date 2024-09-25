@@ -34,7 +34,7 @@ namespace DropletsInMotion.Compilers
         private Scheduler _scheduler;
 
         private StoreManager _storeManager = new StoreManager();
-        private SplitManager _splitManager = new SplitManager();
+        private CommandManager _commandManager = new CommandManager();
 
         public Compiler(List<ICommand> commands, Dictionary<string, Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
         {
@@ -95,6 +95,7 @@ namespace DropletsInMotion.Compilers
                         case Merge mergeCommand:
                             if (InPositionToMerge(mergeCommand, movesToExecute))
                             {
+                                _commandManager.StoreCommand(mergeCommand);
                                 boardActions.AddRange(_router.Merge(Droplets, mergeCommand, time));
                                 executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
                             }
@@ -106,7 +107,7 @@ namespace DropletsInMotion.Compilers
                                 Droplets.ContainsKey(splitByRatioCommand.InputName) ? Droplets[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
                             if (!HasSplit(splitByVolumeCommand2, movesToExecute))
                             {
-                                _splitManager.StoreSplit(splitByVolumeCommand2);
+                                _commandManager.StoreCommand(splitByVolumeCommand2);
                                 boardActions.AddRange(_router.SplitByVolume(Droplets, splitByVolumeCommand2, time, 1));
                                 executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
 
@@ -115,7 +116,7 @@ namespace DropletsInMotion.Compilers
                         case SplitByVolume splitByVolumeCommand:
                             if (!HasSplit(splitByVolumeCommand, movesToExecute))
                             {
-                                _splitManager.StoreSplit(command);
+                                _commandManager.StoreCommand(command);
                                 boardActions.AddRange(_router.SplitByVolume(Droplets, splitByVolumeCommand, time, 1));
                                 executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
                             }
@@ -171,14 +172,13 @@ namespace DropletsInMotion.Compilers
 
 
                 
-                DependencyGraph.updateExecutedNodes(executableNodes, Droplets, _storeManager, _splitManager, time);
+                DependencyGraph.updateExecutedNodes(executableNodes, Droplets, _storeManager, _commandManager, time);
 
                 if (boardActions.Count > 0 && CommunicationEngine != null)
                 {
                     await CommunicationEngine.SendActions(boardActions);
                 }
                 Console.WriteLine($"Compiler time {time}");
-
                 boardActions.Clear();
 
             }
@@ -240,7 +240,7 @@ namespace DropletsInMotion.Compilers
         private bool HasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
         {
 
-            if (_splitManager.CanSplit(splitCommand))
+            if (_commandManager.CanExecuteCommand(splitCommand))
             {
                 if (Droplets.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
                 {
@@ -257,28 +257,7 @@ namespace DropletsInMotion.Compilers
 
                 return false;
             }
-
             
-            //bool splitOccurred = true;
-
-            //if (splitCommand.InputName != splitCommand.OutputName1 &&
-            //    splitCommand.InputName != splitCommand.OutputName2)
-            //{
-            //    if (Droplets.ContainsKey(splitCommand.InputName)) return false;
-            //}
-
-            //if (splitCommand.InputName == splitCommand.OutputName1)
-            //{
-            //    if (!Droplets.ContainsKey(splitCommand.OutputName2)) return false;
-            //}
-
-            //if (splitCommand.InputName == splitCommand.OutputName2)
-            //{
-            //    if (!Droplets.ContainsKey(splitCommand.OutputName1)) return false;
-            //}
-
-
-
             if (Droplets.TryGetValue(splitCommand.OutputName1, out Droplet outputDroplet1))
             {
                 if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
@@ -300,54 +279,68 @@ namespace DropletsInMotion.Compilers
 
         private bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute)
         {
-            // Retrieve the two droplets involved in the merge
-            if (!Droplets.TryGetValue(mergeCommand.InputName1, out var inputDroplet1))
+            if (_commandManager.CanExecuteCommand(mergeCommand))
             {
-                throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+                if (!Droplets.TryGetValue(mergeCommand.InputName1, out var inputDroplet1))
+                {
+                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+                }
+
+                if (!Droplets.TryGetValue(mergeCommand.InputName2, out var inputDroplet2))
+                {
+                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
+                }
+
+                var mergePositions = _scheduler.ScheduleCommand(new List<ICommand>() { mergeCommand }, Droplets, _router.GetAgents(),
+                    _router.GetContaminationMap());
+                // Check if the droplets are in position for the merge (1 space apart horizontally or vertically)
+
+
+                bool areInPosition = (inputDroplet1.PositionX == mergePositions.Value.Item1.optimalX && inputDroplet1.PositionY == mergePositions.Value.Item1.optimalY && inputDroplet2.PositionX == mergePositions.Value.Item2.optimalX && inputDroplet2.PositionY == mergePositions.Value.Item2.optimalY);
+
+                // If the droplets are already in position, return true
+                if (areInPosition)
+                {
+                    return true;
+                }
+
+                // Move inputDroplet1 to be next to the merge position
+                if (inputDroplet1.PositionX != mergePositions.Value.Item1.optimalX || inputDroplet1.PositionY != mergePositions.Value.Item1.optimalY)
+                {
+                    var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Value.Item1.optimalX, mergePositions.Value.Item1.optimalY);
+                    movesToExecute.Add(moveCommand);
+                    Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
+                }
+
+                // Move inputDroplet2 to be next to the merge position
+                if (inputDroplet2.PositionX != mergePositions.Value.Item2.optimalX || inputDroplet2.PositionY != mergePositions.Value.Item2.optimalY)
+                {
+                    var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Value.Item2.optimalX, mergePositions.Value.Item2.optimalY);
+                    movesToExecute.Add(moveCommand);
+                    Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
+
+                }
+
+                // Return false because the droplets are not yet in position and need to move
+                Console.WriteLine("Droplets are NOT in position to merge");
+                return false;
+
             }
-
-            if (!Droplets.TryGetValue(mergeCommand.InputName2, out var inputDroplet2))
+            else
             {
-                throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
-            }
+                if (!Droplets.TryGetValue(mergeCommand.OutputName, out var outDroplet))
+                {
+                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.OutputName}.");
+                }
 
-            var mergePositions =_scheduler.ScheduleCommand(new List<ICommand>() { mergeCommand }, Droplets, _router.GetAgents(),
-                _router.GetContaminationMap());
-            // Check if the droplets are in position for the merge (1 space apart horizontally or vertically)
-
-
-            bool areInPosition = (inputDroplet1.PositionX == mergePositions.Value.Item1.d1OptimalX && inputDroplet1.PositionY == mergePositions.Value.Item1.d1OptimalY && inputDroplet2.PositionX == mergePositions.Value.Item2.d2OptimalX && inputDroplet2.PositionY == mergePositions.Value.Item2.d2OptimalY);
-
-            // If the droplets are already in position, return true
-            if (areInPosition)
-            {
-                return true;
-            }
-
-            // If they are not in position, generate move commands to bring them to the target position
-            int mergePositionX = mergeCommand.PositionX;
-            int mergePositionY = mergeCommand.PositionY;
-
-            // Move inputDroplet1 to be next to the merge position
-            if (inputDroplet1.PositionX != mergePositions.Value.Item1.d1OptimalX || inputDroplet1.PositionY != mergePositions.Value.Item1.d1OptimalY )
-            {
-                var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Value.Item1.d1OptimalX, mergePositions.Value.Item1.d1OptimalY);
-                movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
-            }
-
-            // Move inputDroplet2 to be next to the merge position
-            if (inputDroplet2.PositionX != mergePositions.Value.Item2.d2OptimalX || inputDroplet2.PositionY != mergePositions.Value.Item2.d2OptimalY)
-            {
-                var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Value.Item2.d2OptimalX, mergePositions.Value.Item2.d2OptimalY);
+                var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
                 movesToExecute.Add(moveCommand);
                 Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
 
+
+                return false;
             }
 
-            // Return false because the droplets are not yet in position and need to move
-            Console.WriteLine("Droplets are NOT in position to merge");
-            return false;
         }
 
     }

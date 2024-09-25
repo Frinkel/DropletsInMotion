@@ -134,7 +134,7 @@ namespace DropletsInMotion.Compilers.Models
             
         }
 
-        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets, StoreManager storeManager, SplitManager splitManager, double currentTime)
+        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Droplet> droplets, StoreManager storeManager, CommandManager commandManager, double currentTime)
         {
             foreach (DependencyNode node in nodes)
             {
@@ -159,6 +159,7 @@ namespace DropletsInMotion.Compilers.Models
                             if (mergeDroplet.PositionX == mergeCommand.PositionX &&
                                 mergeDroplet.PositionY == mergeCommand.PositionY)
                             {
+                                commandManager.RemoveCommand(node.Command);
                                 Console.WriteLine("REMOVE MERGRE");
                                 MarkNodeAsExecuted(node.NodeId);
                             }
@@ -178,7 +179,7 @@ namespace DropletsInMotion.Compilers.Models
                             {
 
                                 Console.WriteLine("REMOVE SPLIT!");
-                                splitManager.RemoveSplit(node.Command);
+                                commandManager.RemoveCommand(node.Command);
                                 MarkNodeAsExecuted(node.NodeId);
                             }
                         }
@@ -195,7 +196,7 @@ namespace DropletsInMotion.Compilers.Models
                                 splitDroplet2v.PositionX == splitByVolume.PositionX2 &&
                                 splitDroplet2v.PositionY == splitByVolume.PositionY2)
                             {
-                                splitManager.RemoveSplit(node.Command);
+                                commandManager.RemoveCommand(node.Command);
                                 MarkNodeAsExecuted(node.NodeId);
                             }
                         }

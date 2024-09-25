@@ -155,15 +155,11 @@ public class Router
 
 
         List<BoardAction> mergeActions = new List<BoardAction>();
-        Droplet outputDroplet = new Droplet(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY,
-            inputDroplet1.Volume + inputDroplet2.Volume);
 
-        //check that droplets are not more than 1 away from merge position
-        if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) >= 5
-            || Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) >= 5)
-        {
-            throw new InvalidOperationException("Droplets is not in position to merge they are too far");
-        }
+        int outPutDropletX = (inputDroplet1.PositionX + inputDroplet2.PositionX) / 2;
+        int outPutDropletY = (inputDroplet1.PositionY + inputDroplet2.PositionY) / 2;
+        Droplet outputDroplet = new Droplet(mergeCommand.OutputName, outPutDropletX, outPutDropletY,
+            inputDroplet1.Volume + inputDroplet2.Volume);
 
         if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY)
         {
@@ -179,11 +175,9 @@ public class Router
             throw new InvalidOperationException("Droplets are not in position to merge");
         }
 
-        int outPutDropletX = (inputDroplet1.PositionX + inputDroplet2.PositionX) / 2;
-        int outPutDropletY = (inputDroplet1.PositionY + inputDroplet2.PositionY) / 2;
-
 
         Agent newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
+
         if (Agents[inputDroplet1.DropletName].SubstanceId == Agents[inputDroplet2.DropletName].SubstanceId)
         {
             newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, Agents[inputDroplet1.DropletName].SubstanceId);
@@ -193,14 +187,15 @@ public class Router
         Agents.Remove(inputDroplet2.DropletName);
         droplets.Remove(inputDroplet1.DropletName);
         droplets.Remove(inputDroplet2.DropletName);
-        droplets[outputDroplet.DropletName] = outputDroplet;
+        droplets[newAgent.DropletName] = newAgent;
 
         
-        Agents.Add(outputDroplet.DropletName, newAgent);
+        Agents.Add(newAgent.DropletName, newAgent);
 
-        mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", outputDroplet, time));
+        mergeActions.AddRange(_templateHandler.ApplyTemplate("mergeHorizontal", newAgent, time));
         ApplicableFunctions.ApplyContaminationMerge(newAgent, ContaminationMap);
-
+        ApplicableFunctions.PrintContaminationState(ContaminationMap);
+        Console.WriteLine(outputDroplet);
         return mergeActions;
     }
 

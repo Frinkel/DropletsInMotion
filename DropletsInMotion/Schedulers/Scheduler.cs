@@ -28,7 +28,7 @@ namespace DropletsInMotion.Schedulers
 
         }
 
-        public ((int d1OptimalX, int d1OptimalY), (int d2OptimalX, int d2OptimalY))? ScheduleCommand(List<ICommand> commandsToBeScheduled, Dictionary<string, Droplet> droplets,
+        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(List<ICommand> commandsToBeScheduled, Dictionary<string, Droplet> droplets,
             Dictionary<string, Agent> agents, byte[,] contaminationMap)
         {
             foreach (var command in commandsToBeScheduled)
@@ -42,11 +42,8 @@ namespace DropletsInMotion.Schedulers
                         byte d1SubstanceId = agents[d1.DropletName].SubstanceId;
                         byte d2SubstanceId = agents[d2.DropletName].SubstanceId;
 
-                        byte? subtanceId = d1SubstanceId == d2SubstanceId ? d1SubstanceId : null;
-                        Console.WriteLine($"SubstanceId {subtanceId}");
-
                         var optimalPositions = FindOptimalPositions(mergeCommand.PositionX, mergeCommand.PositionY,
-                            d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, subtanceId);
+                            d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId);
                         return optimalPositions;
 
                     case SplitByVolume splitByVolumeCommand:
@@ -66,12 +63,12 @@ namespace DropletsInMotion.Schedulers
         }
 
 
-        public ((int d1OptimalX, int d1OptimalY), (int d2OptimalX, int d2OptimalY))? FindOptimalPositions(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, byte[,] contaminationMap, byte? substanceId = null)
+        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, byte d1SubstanceId, byte d2SubstanceId)
         {
-            int minBoundingX = Math.Min(originX, Math.Min(target1X, target2X));
-            int minBoundingY = Math.Min(originY, Math.Min(target1Y, target2Y));
-            int maxBoundingX = Math.Max(originX, Math.Max(target1X, target2X));
-            int maxBoundingY = Math.Max(originY, Math.Max(target1Y, target2Y));
+            int minBoundingX = Math.Min(commandX, Math.Min(d1X, d2X));
+            int minBoundingY = Math.Min(commandY, Math.Min(d1Y, d2Y));
+            int maxBoundingX = Math.Max(commandX, Math.Max(d1X, d2X));
+            int maxBoundingY = Math.Max(commandY, Math.Max(d1Y, d2Y));
 
             Console.WriteLine($"Bounding box: {((minBoundingX, minBoundingY), (maxBoundingX, maxBoundingY))}");
 
@@ -82,25 +79,21 @@ namespace DropletsInMotion.Schedulers
             {
                 for (int y = minBoundingY; y <= maxBoundingY; y++)
                 {
-                    if (contaminationMap[x, y] == 255)
+                    byte contamination = contaminationMap[x, y];
+                    if (contamination != 0 && contamination != 255 &&
+                        contamination != d1SubstanceId && contamination != d2SubstanceId)
                     {
                         continue;
                     }
 
-                    if ((substanceId == null && contaminationMap[x, y] != 0) || (substanceId != null &&
-                            (contaminationMap[x, y] != 0 || contaminationMap[x, y] != substanceId)))
-                    {
-                        continue;
-                    }
 
-
-                    int estimatedMinScore = Math.Abs(x - originX) + Math.Abs(y - originY);
+                    int estimatedMinScore = Math.Abs(x - commandX) + Math.Abs(y - commandY);
                     if (estimatedMinScore >= bestScore)
                     {
                         continue;
                     }
 
-                    var optimalPositions = FindOptimalDirections(x, y, target1X, target1Y, target2X, target2Y);
+                    var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y);
 
 
                     // Out of bounds
@@ -112,15 +105,17 @@ namespace DropletsInMotion.Schedulers
                         continue;
                     }
 
-
-                    if ((substanceId == null && contaminationMap[optimalPositions.Item1.d1OptimalX, optimalPositions.Item1.d1OptimalY] != 0) || (substanceId != null &&
-                            (contaminationMap[optimalPositions.Item1.d1OptimalX, optimalPositions.Item1.d1OptimalY] != 0 || contaminationMap[optimalPositions.Item1.d1OptimalX, optimalPositions.Item1.d1OptimalY] != substanceId)))
+                    byte d1OptimalPositionContamination = contaminationMap[optimalPositions.Item1.d1OptimalX,
+                        optimalPositions.Item1.d1OptimalY];
+                    byte d2OptimalPositionContamination = contaminationMap[optimalPositions.Item2.d2OptimalX,
+                        optimalPositions.Item2.d2OptimalY];
+                    if (d1OptimalPositionContamination == 255 || (d1OptimalPositionContamination != 0 &&
+                        d1OptimalPositionContamination != d1SubstanceId))
                     {
                         continue;
                     }
-
-                    if ((substanceId == null && contaminationMap[optimalPositions.Item2.d2OptimalX, optimalPositions.Item2.d2OptimalY] != 0) || (substanceId != null &&
-                            (contaminationMap[optimalPositions.Item2.d2OptimalX, optimalPositions.Item2.d2OptimalY] != 0 || contaminationMap[optimalPositions.Item2.d2OptimalX, optimalPositions.Item2.d2OptimalY] != substanceId)))
+                    if (d2OptimalPositionContamination == 255 || (d2OptimalPositionContamination != 0 &&
+                        d2OptimalPositionContamination != d2SubstanceId))
                     {
                         continue;
                     }
@@ -131,14 +126,14 @@ namespace DropletsInMotion.Schedulers
                         continue;
                     }
 
-                    int d1DistanceToOrigin = Math.Abs(optimalPositions.Item1.d1OptimalX - target1X) +
-                                             Math.Abs(optimalPositions.Item1.d1OptimalY - target1Y);
+                    int d1DistanceToOrigin = Math.Abs(optimalPositions.Item1.d1OptimalX - d1X) +
+                                             Math.Abs(optimalPositions.Item1.d1OptimalY - d1Y);
 
-                    int d2DistanceToOrigin = Math.Abs(optimalPositions.Item2.d2OptimalX - target2X) +
-                                             Math.Abs(optimalPositions.Item2.d2OptimalY - target2Y);
+                    int d2DistanceToOrigin = Math.Abs(optimalPositions.Item2.d2OptimalX - d2X) +
+                                             Math.Abs(optimalPositions.Item2.d2OptimalY - d2Y);
 
-                    int distanceToTarget = Math.Abs(x - originX) +
-                                           Math.Abs(y- originY);
+                    int distanceToTarget = Math.Abs(x - commandX) +
+                                           Math.Abs(y- commandY);
 
 
 
@@ -147,15 +142,15 @@ namespace DropletsInMotion.Schedulers
                     int totalScore = d1DistanceToOrigin + d2DistanceToOrigin + distanceToTarget;
 
 
-                    bool d1CrossesD2 = (target1X < target2X && optimalPositions.Item1.d1OptimalX > optimalPositions.Item2.d2OptimalX) ||
-                                       (target1X > target2X && optimalPositions.Item1.d1OptimalX < optimalPositions.Item2.d2OptimalX) ||
-                                       (target1Y < target2Y && optimalPositions.Item1.d1OptimalY > optimalPositions.Item2.d2OptimalY) ||
-                                       (target1Y > target2Y && optimalPositions.Item1.d1OptimalY < optimalPositions.Item2.d2OptimalY);
+                    bool d1CrossesD2 = (d1X < d2X && optimalPositions.Item1.d1OptimalX > optimalPositions.Item2.d2OptimalX) ||
+                                       (d1X > d2X && optimalPositions.Item1.d1OptimalX < optimalPositions.Item2.d2OptimalX) ||
+                                       (d1Y < d2Y && optimalPositions.Item1.d1OptimalY > optimalPositions.Item2.d2OptimalY) ||
+                                       (d1Y > d2Y && optimalPositions.Item1.d1OptimalY < optimalPositions.Item2.d2OptimalY);
 
-                    bool d2CrossesD1 = (target2X < target1X && optimalPositions.Item2.d2OptimalX > optimalPositions.Item1.d1OptimalX) ||
-                                       (target2X > target1X && optimalPositions.Item2.d2OptimalX < optimalPositions.Item1.d1OptimalX) ||
-                                       (target2Y < target1Y && optimalPositions.Item2.d2OptimalY > optimalPositions.Item1.d1OptimalY) ||
-                                       (target2Y > target1Y && optimalPositions.Item2.d2OptimalY < optimalPositions.Item1.d1OptimalY);
+                    bool d2CrossesD1 = (d2X < d1X && optimalPositions.Item2.d2OptimalX > optimalPositions.Item1.d1OptimalX) ||
+                                       (d2X > d1X && optimalPositions.Item2.d2OptimalX < optimalPositions.Item1.d1OptimalX) ||
+                                       (d2Y < d1Y && optimalPositions.Item2.d2OptimalY > optimalPositions.Item1.d1OptimalY) ||
+                                       (d2Y > d1Y && optimalPositions.Item2.d2OptimalY < optimalPositions.Item1.d1OptimalY);
 
                     if (d1CrossesD2 || d2CrossesD1)
                     {
