@@ -25,7 +25,7 @@ namespace DropletsInMotion
             var serviceProvider = Setup();
 
             // Get the consoleController
-            var consoleController = serviceProvider.GetRequiredService<ConsoleController>();
+            var consoleController = serviceProvider.GetRequiredService<ConsoleService>();
 
 
             // Title
@@ -210,10 +210,11 @@ namespace DropletsInMotion
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            Configuration = builder.Build();
-            serviceCollection.AddSingleton(Configuration);
 
-            serviceCollection.AddTransient<ConsoleController>();
+            Configuration = builder.Build();
+
+            serviceCollection.AddSingleton(Configuration);
+            serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
 
             return serviceCollection.BuildServiceProvider();
         }

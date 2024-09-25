@@ -2,7 +2,7 @@
 
 namespace DropletsInMotion.Controllers.ConsoleController
 {
-    internal class ConsoleController
+    public class ConsoleService : IConsoleService
     {
         public IConfiguration _configuration;
 
@@ -14,7 +14,7 @@ namespace DropletsInMotion.Controllers.ConsoleController
         public string? DevelopmentProgram { get; private set; }
         public string? DevelopmentPlatform { get; private set; }
 
-        public ConsoleController(IConfiguration configuration)
+        public ConsoleService(IConfiguration configuration)
         {
             _configuration = configuration;
             IsDevelopment = _configuration.GetValue<bool>("Development:IsDevelopment");
