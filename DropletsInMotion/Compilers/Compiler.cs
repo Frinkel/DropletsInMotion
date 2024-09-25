@@ -93,11 +93,14 @@ namespace DropletsInMotion.Compilers
                             movesToExecute.Add(moveCommand);
                             break;
                         case Merge mergeCommand:
+
+                            //TODO: create scheduler here
+
                             if (InPositionToMerge(mergeCommand, movesToExecute))
                             {
                                 _commandManager.StoreCommand(mergeCommand);
                                 boardActions.AddRange(_router.Merge(Droplets, mergeCommand, time));
-                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
+                                executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : time;
                             }
                             break;
                         case SplitByRatio splitByRatioCommand:
@@ -114,6 +117,9 @@ namespace DropletsInMotion.Compilers
                             }
                             break;
                         case SplitByVolume splitByVolumeCommand:
+
+                            //TODO: create scheduler here
+
                             if (!HasSplit(splitByVolumeCommand, movesToExecute))
                             {
                                 _commandManager.StoreCommand(command);
@@ -237,25 +243,45 @@ namespace DropletsInMotion.Compilers
 
         }
 
+        // TODO: Maybe into movehandler
         private bool HasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
         {
 
             if (_commandManager.CanExecuteCommand(splitCommand))
             {
+
                 if (Droplets.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
                 {
                     throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
                 }
+
                 if (Droplets.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
                 {
                     throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
                 }
+
                 if (splitCommand.OutputName2 == splitCommand.OutputName1)
                 {
                     throw new InvalidOperationException($"Droplet with the same names can not be split.");
                 }
 
-                return false;
+                var splitPositions = _scheduler.ScheduleCommand(splitCommand, Droplets, _router.GetAgents(),
+                    _router.GetContaminationMap());
+                
+                // TODO: ALEX MAKE THIS MORE READABLE
+                int splitPositionX = (splitPositions.Value.Item1.optimalX + splitPositions.Value.Item2.optimalX) / 2;
+                int splitPositionY = (splitPositions.Value.Item1.optimalY + splitPositions.Value.Item2.optimalY) / 2;
+
+                Droplet splitDroplet = Droplets[splitCommand.InputName];
+
+                if (splitDroplet.PositionX == splitPositionX && splitDroplet.PositionY == splitPositionY)
+                {
+                    return false;
+                }
+
+                movesToExecute.Add(new Move(splitCommand.InputName, splitPositionX, splitPositionY));
+
+                return true;
             }
             
             if (Droplets.TryGetValue(splitCommand.OutputName1, out Droplet outputDroplet1))
@@ -276,7 +302,7 @@ namespace DropletsInMotion.Compilers
             return true;
         }
 
-
+        // TODO: Maybe into movehandler
         private bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute)
         {
             if (_commandManager.CanExecuteCommand(mergeCommand))
@@ -291,12 +317,15 @@ namespace DropletsInMotion.Compilers
                     throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
                 }
 
-                var mergePositions = _scheduler.ScheduleCommand(new List<ICommand>() { mergeCommand }, Droplets, _router.GetAgents(),
+                var mergePositions = _scheduler.ScheduleCommand(mergeCommand, Droplets, _router.GetAgents(),
                     _router.GetContaminationMap());
                 // Check if the droplets are in position for the merge (1 space apart horizontally or vertically)
 
 
-                bool areInPosition = (inputDroplet1.PositionX == mergePositions.Value.Item1.optimalX && inputDroplet1.PositionY == mergePositions.Value.Item1.optimalY && inputDroplet2.PositionX == mergePositions.Value.Item2.optimalX && inputDroplet2.PositionY == mergePositions.Value.Item2.optimalY);
+                bool areInPosition = (inputDroplet1.PositionX == mergePositions.Value.Item1.optimalX && 
+                                      inputDroplet1.PositionY == mergePositions.Value.Item1.optimalY && 
+                                      inputDroplet2.PositionX == mergePositions.Value.Item2.optimalX && 
+                                      inputDroplet2.PositionY == mergePositions.Value.Item2.optimalY);
 
                 // If the droplets are already in position, return true
                 if (areInPosition)

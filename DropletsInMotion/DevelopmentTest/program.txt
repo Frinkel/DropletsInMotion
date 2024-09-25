@@ -1,3 +1,2 @@
-Droplet(d1, 8, 0, 1.2);
-Droplet(d2, 0, 0, 1.2);
-Merge(d1, d2, d3, 5, 5);
+Droplet(d1, 5, 5, 1.2);
+SplitByVolume(d1, d2, d3, 0, 0, 8, 0, 0.5);

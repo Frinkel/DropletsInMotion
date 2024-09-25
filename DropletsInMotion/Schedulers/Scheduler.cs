@@ -28,11 +28,9 @@ namespace DropletsInMotion.Schedulers
 
         }
 
-        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(List<ICommand> commandsToBeScheduled, Dictionary<string, Droplet> droplets,
+        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(ICommand command, Dictionary<string, Droplet> droplets,
             Dictionary<string, Agent> agents, byte[,] contaminationMap)
         {
-            foreach (var command in commandsToBeScheduled)
-            {
                 switch (command)
                 {
                     case Merge mergeCommand:
@@ -48,6 +46,39 @@ namespace DropletsInMotion.Schedulers
 
                     case SplitByVolume splitByVolumeCommand:
                         // Implement logic for SplitByVolume if needed
+
+                        Droplet dInput = droplets[splitByVolumeCommand.InputName];
+                        int dOutput1PositionX = splitByVolumeCommand.PositionX1;
+                        int dOutput1PositionY = splitByVolumeCommand.PositionY1;
+
+                        int dOutput2PositionX = splitByVolumeCommand.PositionX2;
+                        int dOutput2PositionY = splitByVolumeCommand.PositionY2;
+
+
+                        d1SubstanceId = agents[splitByVolumeCommand.InputName].SubstanceId;
+                        d2SubstanceId = agents[splitByVolumeCommand.InputName].SubstanceId;
+
+
+                        optimalPositions = FindOptimalPositions(dInput.PositionX, dInput.PositionY,
+                            dOutput1PositionX, dOutput1PositionY, dOutput2PositionX, dOutput2PositionY, contaminationMap, d1SubstanceId, d2SubstanceId);
+                        return optimalPositions;
+                        /*
+                         Droplet dInput = droplets[splitByVolumeCommand.InputName];
+
+                           int splitPosX = dInput.PositionX;
+                           int splitPosY = dInput.PositionY;
+
+                           int dOutput1PositionX = splitByVolumeCommand.PositionX1;
+                           int dOutput1PositionY = splitByVolumeCommand.PositionY1;
+
+                           int dOutput2PositionX = splitByVolumeCommand.PositionX2;
+                           int dOutput2PositionY = splitByVolumeCommand.PositionY2;
+
+                           var optimalPositions = FindOptimalPositions(splitPosX, splitPosY, dOutput1PositionX, dOutput1PositionY, dOutput2PositionX,
+                               dOutput2PositionY);
+
+                           return optimalPositions;
+                         */
                         break;
 
                     case SplitByRatio splitByRatioCommand:
@@ -57,7 +88,6 @@ namespace DropletsInMotion.Schedulers
                     default:
                         throw new InvalidOperationException("Tried to schedule a non-schedulable command!");
                 }
-            }
 
             return null;
         }
@@ -162,15 +192,14 @@ namespace DropletsInMotion.Schedulers
                         continue;
                     }
 
-                    Console.WriteLine($"Position {(x, y)} with droplets at {optimalPositions} has a score of {totalScore}");
-                    
                     bestScore = totalScore;
                     bestPositions = optimalPositions;
                 }
             }
 
-            Console.WriteLine($"Optimal merge positions: Droplet 1 at ({bestPositions.Item1.d1OptimalX}, {bestPositions.Item1.d1OptimalY}), " +
-                              $"Droplet 2 at ({bestPositions.Item2.d2OptimalX}, {bestPositions.Item2.d2OptimalY}) with a score of {bestScore}");
+            Console.WriteLine($"Optimal positions at ({bestPositions.Item1.d1OptimalX}, {bestPositions.Item1.d1OptimalY}), " +
+                              $"and ({bestPositions.Item2.d2OptimalX}, {bestPositions.Item2.d2OptimalY}) with a score of {bestScore}");
+
             return bestPositions;
         }
 

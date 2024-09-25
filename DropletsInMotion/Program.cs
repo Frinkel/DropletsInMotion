@@ -24,8 +24,8 @@ namespace DropletsInMotion
             // Register services in setup
             var serviceProvider = Setup();
 
-            // Get the consoleController
-            var consoleController = serviceProvider.GetRequiredService<ConsoleService>();
+            // Get the consoleController    
+            var consoleController = serviceProvider.GetRequiredService<IConsoleService>();
 
 
             // Title

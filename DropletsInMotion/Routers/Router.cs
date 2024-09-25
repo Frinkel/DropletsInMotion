@@ -281,8 +281,6 @@ public class Router
         ApplicableFunctions.ApplyContamination(newAgent1, ContaminationMap);
         ApplicableFunctions.ApplyContamination(newAgent2, ContaminationMap);
 
-
-
         // Apply the appropriate template based on direction
         List<BoardAction> splitActions = new List<BoardAction>();
         splitActions.AddRange(_templateHandler.ApplyTemplate(templateName, inputDroplet, time));
