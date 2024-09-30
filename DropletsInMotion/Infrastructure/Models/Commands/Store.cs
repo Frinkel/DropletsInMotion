@@ -1,0 +1,33 @@
+﻿namespace DropletsInMotion.Infrastructure.Models.Commands
+{
+    public class Store : ICommand
+    {
+        public string DropletName { get; }
+        public int PositionX { get; }
+        public int PositionY { get; }
+        public double Time { get; }
+
+        public Store(string dropletName, int newPositionX, int newPositionY, double time)
+        {
+            DropletName = dropletName;
+            PositionX = newPositionX;
+            PositionY = newPositionY;
+            Time = time;
+        }
+
+        public override string ToString()
+        {
+            return $"Store(DropletName: {DropletName}, PositionX: {PositionX}, PositionY: {PositionY}, Time: {Time})";
+        }
+
+        public List<string> GetInputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
+
+        public List<string> GetOutputDroplets()
+        {
+            return new List<string> { DropletName };
+        }
+    }
+}

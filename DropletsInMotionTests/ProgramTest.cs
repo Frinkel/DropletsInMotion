@@ -1,18 +1,9 @@
-using System.Runtime.Intrinsics.X86;
 using Antlr4.Runtime;
-using DropletsInMotion;
-using DropletsInMotion.Compilers;
-using DropletsInMotion.Domain;
-using System.Xml.Linq;
-using DropletsInMotion.Compilers.Models;
-using DropletsInMotion.Controllers;
-using NUnit.Framework;
-using DropletsInMotion.Compilers.Services;
-using DropletsInMotion.Routers.Models;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Communication;
-using DropletsInMotion.Language;
 using static MicrofluidicsParser;
+using DropletsInMotion.Application.ExecutionEngine;
+using DropletsInMotion.Presentation.Language;
 
 namespace DropletsInMotionTests
 {

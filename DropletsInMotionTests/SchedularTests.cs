@@ -1,7 +1,7 @@
-﻿using DropletsInMotion.Domain;
-using DropletsInMotion.Routers;
-using DropletsInMotion.Routers.Functions;
-using DropletsInMotion.Schedulers;
+﻿using DropletsInMotion.Application.Services;
+using DropletsInMotion.Application.Services.Routers;
+using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotionTests
 {

@@ -1,14 +1,8 @@
-using System.Runtime.Intrinsics.X86;
 using Antlr4.Runtime;
-using DropletsInMotion;
-using DropletsInMotion.Compilers;
-using DropletsInMotion.Domain;
-using System.Xml.Linq;
-using DropletsInMotion.Compilers.Models;
-using DropletsInMotion.Controllers;
-using NUnit.Framework;
-using DropletsInMotion.Compilers.Services;
-using DropletsInMotion.Routers.Models;
+using DropletsInMotion.Application.ExecutionEngine.Models;
+using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Application.ExecutionEngine.Services;
 
 namespace DropletsInMotionTests
 {

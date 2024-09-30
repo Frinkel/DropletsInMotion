@@ -1,15 +1,12 @@
-﻿using System.Net;
-using DropletsInMotion.Compilers;
-using Antlr4.Runtime;
+﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DropletsInMotion.Communication;
-using DropletsInMotion.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DropletsInMotion.Controllers.ConsoleController;
-using DropletsInMotion.Routers;
-using DropletsInMotion.Compilers.Services;
-using DropletsInMotion.Compilers.Models;
+using DropletsInMotion.Application.ExecutionEngine;
+using DropletsInMotion.Presentation.Language;
+using DropletsInMotion.UI;
+using DropletsInMotion.UI.Models;
 
 
 namespace DropletsInMotion
@@ -30,7 +27,7 @@ namespace DropletsInMotion
 
             // Title
             string projectDirectory = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? "";
-            string asciiTitle = File.ReadAllText(projectDirectory + "/ascii_title.txt");
+            string asciiTitle = File.ReadAllText(projectDirectory + "/assets/ascii_title.txt");
             consoleController.WriteColor(asciiTitle, ConsoleColor.Blue);
             Console.WriteLine();
 
