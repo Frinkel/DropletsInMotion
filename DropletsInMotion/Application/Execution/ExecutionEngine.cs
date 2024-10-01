@@ -117,32 +117,13 @@ namespace DropletsInMotion.Application.ExecutionEngine
                             movesToExecute.Add(moveCommand);
                             break;
                         case Merge mergeCommand:
-                            //TODO: create scheduler here
-                            await HandleMergeCommand(mergeCommand, movesToExecute, boardActions, executionTime);
+                            HandleMergeCommand(mergeCommand, movesToExecute, boardActions, executionTime, Agents);
                             break;
                         case SplitByRatio splitByRatioCommand:
-                            SplitByVolume splitByVolumeCommand2 = new SplitByVolume(splitByRatioCommand.InputName, splitByRatioCommand.OutputName1,
-                                splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,
-                                splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2,
-                                Agents.ContainsKey(splitByRatioCommand.InputName) ? Agents[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
-                            if (!HasSplit(splitByVolumeCommand2, movesToExecute))
-                            {
-                                _commandManager.StoreCommand(splitByVolumeCommand2);
-                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand2, ContaminationMap, time, 1));
-                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
-
-                            }
+                            HandleSplitByRatioCommand(splitByRatioCommand, movesToExecute, boardActions, executionTime, Agents);
                             break;
                         case SplitByVolume splitByVolumeCommand:
-
-                            //TODO: create scheduler here
-
-                            if (!HasSplit(splitByVolumeCommand, movesToExecute))
-                            {
-                                _commandManager.StoreCommand(command);
-                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, time, 1));
-                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
-                            }
+                            HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, executionTime, Agents);
                             break;
                         case Store storeCommand:
                             if (_actionService.InPositionToStore(storeCommand, Agents, movesToExecute))
@@ -213,171 +194,51 @@ namespace DropletsInMotion.Application.ExecutionEngine
             }
         }
 
-
-
-        
-
-        // TODO: Maybe into movehandler
-        private bool HasSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute)
+        private void HandleMergeCommand(Merge mergeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
         {
-
-            if (_commandManager.CanExecuteCommand(splitCommand))
+            if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
             {
-
-                if (Agents.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
-                {
-                    throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
-                }
-
-                if (Agents.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
-                {
-                    throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
-                }
-
-                if (splitCommand.OutputName2 == splitCommand.OutputName1)
-                {
-                    throw new InvalidOperationException($"Droplet with the same names can not be split.");
-                }
-
-                //TODO change scheduler to take agents instead of droplets
-                var droplets = new Dictionary<string, Droplet>();
-                foreach (var agentLKvp in Agents)
-                {
-                    var agent = agentLKvp.Value;
-                    droplets.Add(agent.DropletName, new Droplet(agent.DropletName, agent.PositionX, agent.PositionY, agent.Volume));
-                }
-
-                var splitPositions = _scheduler.ScheduleCommand(splitCommand, droplets, Agents,
+                var mergePositions = _scheduler.ScheduleCommand(mergeCommand, agents,
                     ContaminationMap);
-
-                // TODO: ALEX MAKE THIS MORE READABLE
-                int splitPositionX = (splitPositions.Value.Item1.optimalX + splitPositions.Value.Item2.optimalX) / 2;
-                int splitPositionY = (splitPositions.Value.Item1.optimalY + splitPositions.Value.Item2.optimalY) / 2;
-
-                Droplet splitDroplet = Agents[splitCommand.InputName];
-
-                if (splitDroplet.PositionX == splitPositionX && splitDroplet.PositionY == splitPositionY)
-                {
-                    return false;
-                }
-
-                movesToExecute.Add(new Move(splitCommand.InputName, splitPositionX, splitPositionY));
-
-                return true;
-            }
-
-            if (Agents.TryGetValue(splitCommand.OutputName1, out Agent outputDroplet1))
-            {
-                if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
-                {
-                    movesToExecute.Add(new Move(splitCommand.OutputName1, splitCommand.PositionX1, splitCommand.PositionY1));
-                }
-            }
-            if (Agents.TryGetValue(splitCommand.OutputName2, out Agent outputDroplet2))
-            {
-                if (outputDroplet2.PositionX != splitCommand.PositionX2 || outputDroplet2.PositionY != splitCommand.PositionY2)
-                {
-                    movesToExecute.Add(new Move(splitCommand.OutputName2, splitCommand.PositionX2, splitCommand.PositionY2));
-                }
-            }
-
-            return true;
-        }
-
-        // TODO: Maybe into movehandler
-
-        private async Task HandleMergeCommand(Merge mergeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime)
-        {
-
-                if (InPositionToMerge(mergeCommand, movesToExecute))
+                if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions.Value, agents))
                 {
                     _commandManager.StoreCommand(mergeCommand);
-                    boardActions.AddRange(_actionService.Merge(Agents, mergeCommand, ContaminationMap, time));
+                    boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, time));
                     executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : time;
                 }
-            
-
-
-        }
-
-        private bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute)
-        {
-
-
-
-
-            if (_commandManager.CanExecuteCommand(mergeCommand))
-            {
-                if (!Agents.TryGetValue(mergeCommand.InputName1, out var inputDroplet1))
-                {
-                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
-                }
-
-                if (!Agents.TryGetValue(mergeCommand.InputName2, out var inputDroplet2))
-                {
-                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
-                }
-
-                var droplets = new Dictionary<string, Droplet>();
-                foreach (var agentLKvp in Agents)
-                {
-                    var  agent = agentLKvp.Value;
-                    droplets.Add(agent.DropletName, new Droplet(agent.DropletName, agent.PositionX, agent.PositionY, agent.Volume));
-                }
-
-                var mergePositions = _scheduler.ScheduleCommand(mergeCommand, droplets, Agents,
-                    ContaminationMap);
-                // Check if the droplets are in position for the merge (1 space apart horizontally or vertically)
-
-
-                bool areInPosition = inputDroplet1.PositionX == mergePositions.Value.Item1.optimalX &&
-                                      inputDroplet1.PositionY == mergePositions.Value.Item1.optimalY &&
-                                      inputDroplet2.PositionX == mergePositions.Value.Item2.optimalX &&
-                                      inputDroplet2.PositionY == mergePositions.Value.Item2.optimalY;
-
-                // If the droplets are already in position, return true
-                if (areInPosition)
-                {
-                    return true;
-                }
-
-                // Move inputDroplet1 to be next to the merge position
-                if (inputDroplet1.PositionX != mergePositions.Value.Item1.optimalX || inputDroplet1.PositionY != mergePositions.Value.Item1.optimalY)
-                {
-                    var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Value.Item1.optimalX, mergePositions.Value.Item1.optimalY);
-                    movesToExecute.Add(moveCommand);
-                    Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
-                }
-
-                // Move inputDroplet2 to be next to the merge position
-                if (inputDroplet2.PositionX != mergePositions.Value.Item2.optimalX || inputDroplet2.PositionY != mergePositions.Value.Item2.optimalY)
-                {
-                    var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Value.Item2.optimalX, mergePositions.Value.Item2.optimalY);
-                    movesToExecute.Add(moveCommand);
-                    Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
-
-                }
-
-                // Return false because the droplets are not yet in position and need to move
-                Console.WriteLine("Droplets are NOT in position to merge");
-                return false;
-
             }
             else
             {
-                if (!Agents.TryGetValue(mergeCommand.OutputName, out var outDroplet))
-                {
-                    throw new InvalidOperationException($"No droplet found with name {mergeCommand.OutputName}.");
-                }
-
-                var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
-                movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
-
-
-                return false;
+                _actionService.MoveMergeDropletToPosition(mergeCommand, movesToExecute, agents);
             }
+        }
 
+        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        {
+            if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
+            {
+                var splitPositions = _scheduler.ScheduleCommand(splitByVolumeCommand, agents,
+                    ContaminationMap);
+                if (_actionService.InPositionToSplit(splitByVolumeCommand, movesToExecute, splitPositions.Value, agents))
+                {
+                    _commandManager.StoreCommand(splitByVolumeCommand);
+                    boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, time, splitPositions.Value));
+                    executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
+                }
+            }
+            else
+            {
+                _actionService.MoveToSplitToFinalPositions(splitByVolumeCommand, movesToExecute, agents);
+            }
+        }
+
+        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        {
+            SplitByVolume splitByVolumeCommand2 = new SplitByVolume(splitByRatioCommand.InputName, splitByRatioCommand.OutputName1,
+                splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,
+                splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2,
+                Agents.ContainsKey(splitByRatioCommand.InputName) ? Agents[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
+            HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, executionTime, agents);
         }
 
     }

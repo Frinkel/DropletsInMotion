@@ -124,11 +124,11 @@ public class State
             currentTime = finalActions.Last().Time;
         }
 
-        //Console.WriteLine("______---------_________");
-        //foreach (var action in finalActions)
-        //{
-        //    Console.WriteLine(action.ToString());
-        //}
+        Console.WriteLine("______---------_________");
+        foreach (var action in finalActions)
+        {
+            Console.WriteLine(action.ToString());
+        }
         return finalActions;
 
     }

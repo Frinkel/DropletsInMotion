@@ -24,14 +24,13 @@ namespace DropletsInMotion.Application.Services
 
         }
 
-        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(ICommand command, Dictionary<string, Droplet> droplets,
-            Dictionary<string, Agent> agents, byte[,] contaminationMap)
+        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(ICommand command, Dictionary<string, Agent> agents, byte[,] contaminationMap)
         {
             switch (command)
             {
                 case Merge mergeCommand:
-                    Droplet d1 = droplets[mergeCommand.InputName1];
-                    Droplet d2 = droplets[mergeCommand.InputName2];
+                    Agent d1 = agents[mergeCommand.InputName1];
+                    Agent d2 = agents[mergeCommand.InputName2];
 
                     byte d1SubstanceId = agents[d1.DropletName].SubstanceId;
                     byte d2SubstanceId = agents[d2.DropletName].SubstanceId;
@@ -43,7 +42,7 @@ namespace DropletsInMotion.Application.Services
                 case SplitByVolume splitByVolumeCommand:
                     // Implement logic for SplitByVolume if needed
 
-                    Droplet dInput = droplets[splitByVolumeCommand.InputName];
+                    Agent dInput = agents[splitByVolumeCommand.InputName];
                     int dOutput1PositionX = splitByVolumeCommand.PositionX1;
                     int dOutput1PositionY = splitByVolumeCommand.PositionY1;
 
