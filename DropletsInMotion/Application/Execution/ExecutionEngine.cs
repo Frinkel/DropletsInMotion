@@ -27,9 +27,9 @@ namespace DropletsInMotion.Application.Execution
         //private SimpleRouter _simpleRouter;
         private readonly IRouterService _router;
         private readonly IContaminationService _contaminationService;
-        private readonly ISchedulerService _scheduler;
-        private readonly IStoreService _storeManager;
-        private readonly ICommandLifetimeService _commandManager;
+        private readonly ISchedulerService _schedulerService;
+        private readonly IStoreService _storeService;
+        private readonly ICommandLifetimeService _commandLifetimeService;
         private readonly ITimeService _timeService;
         private readonly IActionService _actionService;
         private readonly ITemplateService _templateService;
@@ -43,9 +43,9 @@ namespace DropletsInMotion.Application.Execution
                                 ITemplateService templateService, ICommunicationService communicationService)
         {
             _contaminationService = contaminationService;
-            _scheduler = schedulerService;
-            _storeManager = storeService;
-            _commandManager = commandLifetimeService;
+            _schedulerService = schedulerService;
+            _storeService = storeService;
+            _commandLifetimeService = commandLifetimeService;
             _timeService = timeService;
             _actionService = actionService;
             _router = routerService;
@@ -60,26 +60,26 @@ namespace DropletsInMotion.Application.Execution
 
             Board = PlatformService.Board;
 
+            Time = 0;
+
             Console.WriteLine(Board[0][1]);
-            _templateService.Initialize(Board);
 
             DependencyGraph = new DependencyGraph(commands);
 
             DependencyGraph.GenerateDotFile();
 
-            //Droplets = droplets;
-            foreach (var dropleKvp in droplets)
-            {
-                var droplet = dropleKvp.Value;
-                Agents.Add(dropleKvp.Key, new Agent(droplet.DropletName, droplet.PositionX, droplet.PositionY, droplet.Volume));
-            }
-
             ContaminationMap = new byte[Board.Length, Board[0].Length];
 
+            foreach (var droplet in droplets)
+            {
+                Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
+                Agents.Add(droplet.Key, agent);
+                ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+            }
 
-
+            
             //_simpleRouter = new SimpleRouter(Board);
-            _router.Initialize(Board, Agents);
+            _router.Initialize(Board);
             //_router = new RouterService(Board, Droplets, _contamination);
 
 
@@ -93,6 +93,12 @@ namespace DropletsInMotion.Application.Execution
 
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
+                foreach (var agent in Agents)
+                {
+                    Console.WriteLine(agent.Value);
+                }
+
+
 
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
@@ -116,18 +122,18 @@ namespace DropletsInMotion.Application.Execution
                             movesToExecute.Add(moveCommand);
                             break;
                         case Merge mergeCommand:
-                            HandleMergeCommand(mergeCommand, movesToExecute, boardActions, executionTime, Agents);
+                            HandleMergeCommand(mergeCommand, movesToExecute, boardActions, ref executionTime, Agents);
                             break;
                         case SplitByRatio splitByRatioCommand:
                             HandleSplitByRatioCommand(splitByRatioCommand, movesToExecute, boardActions, executionTime, Agents);
                             break;
                         case SplitByVolume splitByVolumeCommand:
-                            HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, executionTime, Agents);
+                            HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, ref executionTime, Agents);
                             break;
                         case Store storeCommand:
                             if (_actionService.InPositionToStore(storeCommand, Agents, movesToExecute))
                             {
-                                _storeManager.StoreDroplet(storeCommand, Time);
+                                _storeService.StoreDroplet(storeCommand, Time);
                             }
                             break;
                         case Mix mixCommand:
@@ -186,24 +192,24 @@ namespace DropletsInMotion.Application.Execution
             {
                 List<BoardAction> mixActions = new List<BoardAction>();
                 mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, Time));
-                _storeManager.StoreDropletWithNameAndTime(mixCommand.DropletName, Time + mixActions.Last().Time);
+                _storeService.StoreDropletWithNameAndTime(mixCommand.DropletName, Time + mixActions.Last().Time);
                 
                 await _communicationService.SendActions(mixActions);
                 
             }
         }
 
-        private void HandleMergeCommand(Merge mergeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleMergeCommand(Merge mergeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
             {
-                var mergePositions = _scheduler.ScheduleCommand(mergeCommand, agents,
+                var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents,
                     ContaminationMap);
                 if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions.Value, agents))
                 {
-                    _commandManager.StoreCommand(mergeCommand);
-                    boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, time));
-                    executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : time;
+                    _commandLifetimeService.StoreCommand(mergeCommand);
+                    boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, Time));
+                    executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
                 }
             }
             else
@@ -212,17 +218,17 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
             {
-                var splitPositions = _scheduler.ScheduleCommand(splitByVolumeCommand, agents,
+                var splitPositions = _schedulerService.ScheduleCommand(splitByVolumeCommand, agents,
                     ContaminationMap);
                 if (_actionService.InPositionToSplit(splitByVolumeCommand, movesToExecute, splitPositions.Value, agents))
                 {
-                    _commandManager.StoreCommand(splitByVolumeCommand);
-                    boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, time, splitPositions.Value));
-                    executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
+                    _commandLifetimeService.StoreCommand(splitByVolumeCommand);
+                    boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, Time, splitPositions.Value));
+                    executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time : Time;
                 }
             }
             else
@@ -230,6 +236,7 @@ namespace DropletsInMotion.Application.Execution
                 _actionService.MoveToSplitToFinalPositions(splitByVolumeCommand, movesToExecute, agents);
             }
         }
+        
 
         private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
         {
@@ -237,7 +244,7 @@ namespace DropletsInMotion.Application.Execution
                 splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,
                 splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2,
                 Agents.ContainsKey(splitByRatioCommand.InputName) ? Agents[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
-            HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, executionTime, agents);
+            HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, ref executionTime, agents);
         }
 
     }

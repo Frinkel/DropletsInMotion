@@ -19,7 +19,7 @@ public class RouterService : IRouterService
 
     public int? Seed = null;
 
-    private Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
+    //private Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
     private Electrode[][] Board { get; set; }
     
 
@@ -37,15 +37,17 @@ public class RouterService : IRouterService
         //ApplicableFunctions.PrintContaminationState(ContaminationMap);
     }
 
-    public void Initialize(Electrode[][] board, Dictionary<string, Agent> agents)
+    public void Initialize(Electrode[][] board)
     {
         Board = board;
+        _templateService.Initialize(Board);
+
 
 
         //_templateService = new TemplateService(Board);
 
         //ContaminationMap = new byte[Board.Length, Board[0].Length];
-        Agents = agents;
+        //Agents = agents;
 
         //foreach (var droplet in droplets)
         //{
@@ -58,7 +60,7 @@ public class RouterService : IRouterService
 
     public List<BoardAction> Route(Dictionary<string, Agent> agents, List<ICommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
     {
-        Agents = agents;
+        //Agents = agents;
 
         List<string> routableAgents = new List<string>();
 
@@ -69,7 +71,7 @@ public class RouterService : IRouterService
 
         //ContaminationMap = contaminationMap;
 
-        State s0 = new State(routableAgents, Agents, contaminationMap, commands, _templateService, _contaminationService, Seed);
+        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, Seed);
         Frontier f = new Frontier();
         AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);
@@ -118,12 +120,10 @@ public class RouterService : IRouterService
             }
         }
 
-
-        Agents = sFinal.Agents;
         _contaminationService.CopyContaminationMap(sFinal.ContaminationMap, contaminationMap);
 
 
-        foreach (var agentKvp in Agents)
+        foreach (var agentKvp in sFinal.Agents)
         {
             if (agents.ContainsKey(agentKvp.Key))
             {

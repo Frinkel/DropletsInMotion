@@ -77,7 +77,6 @@ namespace DropletsInMotion.Application.Services
 
             agents.Add(newAgent.DropletName, newAgent);
 
-            mergeActions.AddRange(_templateService.ApplyTemplate("mergeHorizontal", newAgent, time));
             _contaminationService.ApplyContaminationMerge(newAgent, contaminationMap);
             _contaminationService.PrintContaminationState(contaminationMap);
             Console.WriteLine(outputDroplet);
