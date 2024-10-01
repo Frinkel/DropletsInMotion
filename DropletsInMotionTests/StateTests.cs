@@ -1,8 +1,8 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Application.ExecutionEngine.Services;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Application.Services;
 
 namespace DropletsInMotionTests
 {
@@ -147,7 +147,7 @@ namespace DropletsInMotionTests
             //Assert.AreEqual(12, s3.ExtractActions(0).Count);
         }
 
-        public TemplateHandler CreateTemplateHandler()
+        public TemplateService CreateTemplateHandler()
         {
             Electrode[][] board = new Electrode[32][];
             board = new Electrode[32][];
@@ -160,7 +160,7 @@ namespace DropletsInMotionTests
                 }
             }
 
-            TemplateHandler templateHandler = new TemplateHandler(board);
+            TemplateService templateHandler = new TemplateService(board);
             return templateHandler;
         }
 

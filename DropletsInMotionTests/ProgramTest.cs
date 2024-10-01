@@ -33,8 +33,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(1, compiler.Droplets.Count);
@@ -53,8 +53,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(1, compiler.Droplets.Count);
@@ -73,8 +73,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(1, compiler.Droplets.Count);
@@ -93,8 +93,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(2, compiler.Droplets.Count);
@@ -115,8 +115,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(1, compiler.Droplets.Count);
@@ -135,8 +135,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(2, compiler.Droplets.Count);
@@ -157,8 +157,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(2, compiler.Droplets.Count);
@@ -179,8 +179,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(2, compiler.Droplets.Count);
@@ -201,8 +201,8 @@ namespace DropletsInMotionTests
             ParseTreeWalker.Default.Walk(listener, tree);
 
             // Initialize the compiler with listener data and platform path
-            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, null, platformPath);
-            await compiler.Compile();
+            ExecutionEngine compiler = new ExecutionEngine(listener.Commands, listener.Droplets, null, platformPath);
+            await compiler.Execute();
 
             // Assertions
             Assert.AreEqual(4, compiler.Droplets.Count);

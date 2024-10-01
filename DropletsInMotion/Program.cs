@@ -4,6 +4,8 @@ using DropletsInMotion.Communication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.ExecutionEngine;
+using DropletsInMotion.Application.Services;
+using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Presentation.Language;
 using DropletsInMotion.UI;
 using DropletsInMotion.UI.Models;
@@ -19,7 +21,7 @@ namespace DropletsInMotion
         static async Task Main(string[] args)
         {
             // Register services in setup
-            var serviceProvider = Setup();
+            using (var serviceProvider = Setup()){
 
             // Get the consoleController    
             var consoleController = serviceProvider.GetRequiredService<IConsoleService>();
@@ -115,14 +117,14 @@ namespace DropletsInMotion
                                 Console.WriteLine(elem.ToString());
                             }
 
-                            Compiler compiler = new Compiler(listener.Commands, listener.Droplets, CommunicationEngine,
+                            ExecutionEngine compiler = serviceProvider.GetRequiredService<ExecutionEngine>();
+                            await compiler.Execute(listener.Commands, listener.Droplets, CommunicationEngine,
                                 consoleController.PlatformPath);
-                            await compiler.Compile();
 
 
-                            // Compile the program
+                            // Execute the program
                             //Compiler compiler = new Compiler(listener.Droplets, listener.Moves, CommunicationEngine, consoleController.PlatformPath);
-                            //await compiler.Compile();
+                            //await compiler.Execute();
                             // TODO: Maybe the compiler should return a status code for the compilation.
 
                             currentState = ProgramState.Completed;
@@ -146,6 +148,7 @@ namespace DropletsInMotion
                     await CommunicationEngine.StopCommunication();
                     throw;
                 }
+            }
             }
         }
 
@@ -212,6 +215,18 @@ namespace DropletsInMotion
 
             serviceCollection.AddSingleton(Configuration);
             serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
+            serviceCollection.AddSingleton<ITimeService, TimeService>();
+            serviceCollection.AddSingleton<IStoreService, StoreService>();
+            serviceCollection.AddSingleton<ICommandLifetimeService, CommandLifetimeService>();
+            serviceCollection.AddSingleton<ISchedulerService, SchedulerService>();
+            serviceCollection.AddSingleton<IContaminationService, ContaminationService>();
+            serviceCollection.AddSingleton<IActionService, ActionService>();
+            serviceCollection.AddSingleton<IRouterService, RouterService>();
+            serviceCollection.AddSingleton<IDependencyService, DependencyService>();
+            serviceCollection.AddSingleton<ITemplateService, TemplateService>();
+
+            serviceCollection.AddSingleton<ExecutionEngine>();
+
 
             return serviceCollection.BuildServiceProvider();
         }

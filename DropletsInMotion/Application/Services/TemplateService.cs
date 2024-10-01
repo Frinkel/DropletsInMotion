@@ -2,21 +2,24 @@
 using DropletsInMotion.Infrastructure.Models.Domain;
 using System.Globalization;
 
-namespace DropletsInMotion.Application.ExecutionEngine.Services
+namespace DropletsInMotion.Application.Services
 {
-    public class TemplateHandler
+    public class TemplateService : ITemplateService
     {
-        public List<(string, List<BoardAction>)> templates { get; private set; } = new List<(string, List<BoardAction>)>();
+        public List<(string, List<BoardAction>)> Templates { get; private set; } = new List<(string, List<BoardAction>)>();
         public Electrode[][] Board { get; set; }
 
-        public TemplateHandler(Electrode[][] board)
+        public TemplateService()
+        {
+        }
+
+        public void Initialize(Electrode[][] board)
         {
             Board = board;
             string workingDirectory = Environment.CurrentDirectory;
             string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
             string templatesPath = Path.Combine(projectDirectory, "Assets", "Templates");
             LoadTemplatesFromFiles(templatesPath);
-            //PrintAllTemplates();
         }
 
         public void LoadTemplatesFromFiles(string folderPath)
@@ -31,7 +34,7 @@ namespace DropletsInMotion.Application.ExecutionEngine.Services
 
                 if (boardActions != null)
                 {
-                    templates.Add((templateName, boardActions));
+                    Templates.Add((templateName, boardActions));
                 }
             }
         }
@@ -106,7 +109,7 @@ namespace DropletsInMotion.Application.ExecutionEngine.Services
 
         public List<BoardAction> ApplyTemplate(string templateName, Droplet droplet, double time)
         {
-            List<BoardAction> template = templates.Find(t => t.Item1 == templateName).Item2;
+            List<BoardAction> template = Templates.Find(t => t.Item1 == templateName).Item2;
             int relativePosition = Board[droplet.PositionX][droplet.PositionY].Id;
             List<BoardAction> finalActionDtos = new List<BoardAction>();
             foreach (BoardAction boardAction in template)
@@ -118,10 +121,10 @@ namespace DropletsInMotion.Application.ExecutionEngine.Services
         }
 
 
-        // Method to print all templates
+        // Method to print all Templates
         public void PrintAllTemplates()
         {
-            foreach (var template in templates)
+            foreach (var template in Templates)
             {
                 Console.WriteLine($"Template Name: {template.Item1}");
                 Console.WriteLine("Actions:");

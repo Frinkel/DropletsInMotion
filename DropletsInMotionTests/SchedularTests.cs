@@ -19,12 +19,12 @@ namespace DropletsInMotionTests
             droplets.Add("d1", d1);
             droplets.Add("d2", d2);
 
-            Scheduler scheduler = new Scheduler();
+            SchedulerService scheduler = new SchedulerService();
             //var mergePositions = scheduler.ScheduleCommand(mergeCommand, droplets);
 
             var board = CreateBoard();
 
-            Router router = new Router(board, droplets);
+            RouterService router = new Router(board, droplets);
 
             router.UpdateContaminationMap(2, 0, 2);
             router.UpdateContaminationMap(3, 0, 2);
@@ -33,7 +33,6 @@ namespace DropletsInMotionTests
             router.UpdateContaminationMap(6, 0, 2);
 
 
-            ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
 
             var optimalPostion = scheduler.ScheduleCommand(mergeCommand, droplets, router.GetAgents(), router.GetContaminationMap());
 
@@ -56,15 +55,14 @@ namespace DropletsInMotionTests
             droplets.Add("d1", d1);
             droplets.Add("d2", d2);
 
-            Scheduler scheduler = new Scheduler();
+            SchedulerService scheduler = new SchedulerService();
             //var mergePositions = scheduler.ScheduleCommand(mergeCommand, droplets);
 
             var board = CreateBoard();
 
-            Router router = new Router(board, droplets);
+            RouterService router = new Router(board, droplets);
 
 
-            ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
 
             var optimalPostion = scheduler.ScheduleCommand(mergeCommand, droplets, router.GetAgents(), router.GetContaminationMap());
 
@@ -86,14 +84,12 @@ namespace DropletsInMotionTests
 
             droplets.Add("d1", d1);
 
-            Scheduler scheduler = new Scheduler();
+            SchedulerService scheduler = new SchedulerService();
             //var mergePositions = scheduler.ScheduleCommand(mergeCommand, droplets);
 
             var board = CreateBoard();
 
-            Router router = new Router(board, droplets);
-
-            ApplicableFunctions.PrintContaminationState(router.GetContaminationMap());
+            RouterService router = new Router(board, droplets);
 
             var optimalPostion = scheduler.ScheduleCommand(splitCommand, droplets, router.GetAgents(), router.GetContaminationMap());
 

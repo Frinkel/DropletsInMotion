@@ -1,5 +1,4 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Application.ExecutionEngine.Services;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 
@@ -18,15 +17,17 @@ public class State
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
     private List<ICommand> Commands { get; set; }
-    private TemplateHandler _templateHandler;
+    private ITemplateService _templateHandler;
 
     private int? CachedHash = null;
 
+    private readonly IContaminationService _contaminationService;
+
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, TemplateHandler templateHandler, int? seed = null)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, int? seed = null)
     {
         Seed = seed;
-
+        _contaminationService = contaminationService;
         RoutableAgents = routableAgents;
         Agents = agents;
         ContaminationMap = contaminationMap;
@@ -50,6 +51,7 @@ public class State
         Commands = Parent.Commands;
         JointAction = jointAction;
         _templateHandler = Parent._templateHandler;
+        _contaminationService = Parent._contaminationService;
 
         G = Parent.G + 1;
 
@@ -64,7 +66,7 @@ public class State
         {
             Agent agent = Agents[actionKvp.Key];
             agent.Execute(actionKvp.Value);
-            ContaminationMap = ApplicableFunctions.ApplyContamination(agent, ContaminationMap);
+            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
 
 
             // If a droplet is in its goal position we do not need to route it for child states
@@ -193,7 +195,7 @@ public class State
 
             foreach (Types.RouteAction action in possibleActions)
             {
-                if (ApplicableFunctions.IsMoveApplicable(action, agent, this))
+                if (_contaminationService.IsMoveApplicable(action, agent, this))
                 {
                     agentActions.Add(action);
                 }
@@ -486,6 +488,7 @@ public class State
         return true;
     }
 
+    // TODO do we move this into the contamination service?
     private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
     {
         if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
