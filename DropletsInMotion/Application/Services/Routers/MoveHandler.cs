@@ -1,14 +1,13 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Application.ExecutionEngine.Services;
 using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotion.Application.Services.Routers;
 
 public class MoveHandler
 {
-    private readonly TemplateHandler _templateHandler;
+    private readonly ITemplateService _templateHandler;
 
-    public MoveHandler(TemplateHandler templateHandler)
+    public MoveHandler(ITemplateService templateHandler)
     {
         _templateHandler = templateHandler;
     }

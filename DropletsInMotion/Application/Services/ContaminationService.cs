@@ -3,10 +3,11 @@ using DropletsInMotion.Application.Services.Routers.Models;
 
 namespace DropletsInMotion.Application.Services
 {
-    public static class ApplicableFunctions
+    public class ContaminationService : IContaminationService
     {
 
-        public static bool IsMoveApplicable(Types.RouteAction action, Agent agent, State state)
+        // TODO move out of here
+        public bool IsMoveApplicable(Types.RouteAction action, Agent agent, State state)
         {
             var contamination = state.ContaminationMap;
             var agents = state.Agents;
@@ -49,7 +50,7 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public static byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
+        public byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
         {
             var x = agent.PositionX;
             var y = agent.PositionY;
@@ -83,7 +84,7 @@ namespace DropletsInMotion.Application.Services
             return contaminationMap;
         }
 
-        public static byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap)
+        public byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap)
         {
             var x = agent.PositionX;
             var y = agent.PositionY;
@@ -114,7 +115,7 @@ namespace DropletsInMotion.Application.Services
         }
 
         // TEMP FUNCTIONS
-        public static void PrintContaminationState(byte[,] contaminationMap)
+        public void PrintContaminationState(byte[,] contaminationMap)
         {
             // Determine the maximum number of digits for proper alignment
             int maxDigits = 3;
@@ -141,7 +142,7 @@ namespace DropletsInMotion.Application.Services
             }
         }
 
-        public static bool IsAreaContaminated(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
+        public bool IsAreaContaminated(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
         {
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
@@ -166,7 +167,7 @@ namespace DropletsInMotion.Application.Services
             return false; // No contamination found
         }
 
-        public static void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
+        public void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
         {
 
             int rowCount = contaminationMap.GetLength(0);
@@ -264,10 +265,22 @@ namespace DropletsInMotion.Application.Services
             }
         }
 
+        public void CopyContaminationMap(byte[,] source, byte[,] destination)
+        {
+            for (int i = 0; i < source.GetLength(0); i++)
+            {
+                for (int j = 0; j < source.GetLength(1); j++)
+                {
+                    destination[i, j] = source[i, j];
+                }
+            }
+        }
 
 
-        public static int StateAmount { get; set; }
-        public static int StateAmountExists { get; set; }
+
+
+        //public static int StateAmount { get; set; }
+        //public static int StateAmountExists { get; set; }
 
     }
 

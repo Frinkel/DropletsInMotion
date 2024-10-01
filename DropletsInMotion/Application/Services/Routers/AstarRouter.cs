@@ -56,12 +56,12 @@ namespace DropletsInMotion.Application.Services.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        ApplicableFunctions.StateAmount += 1;
+                        //ContaminationService.StateAmount += 1;
                         frontier.Add(expandedState);
                     }
                     else
                     {
-                        ApplicableFunctions.StateAmountExists += 1;
+                        //ContaminationService.StateAmountExists += 1;
                         //Console.WriteLine($"State already exists {expandedState.GetHashCode()}");
                     }
                 }

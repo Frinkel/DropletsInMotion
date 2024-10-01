@@ -4,6 +4,8 @@ using DropletsInMotion.Communication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.ExecutionEngine;
+using DropletsInMotion.Application.Services;
+using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Presentation.Language;
 using DropletsInMotion.UI;
 using DropletsInMotion.UI.Models;
@@ -45,6 +47,7 @@ namespace DropletsInMotion
                 }
                
             }
+            }
         }
 
 
@@ -71,6 +74,18 @@ namespace DropletsInMotion
 
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<ITimeService, TimeService>();
+            serviceCollection.AddSingleton<IStoreService, StoreService>();
+            serviceCollection.AddSingleton<ICommandLifetimeService, CommandLifetimeService>();
+            serviceCollection.AddSingleton<ISchedulerService, SchedulerService>();
+            serviceCollection.AddSingleton<IContaminationService, ContaminationService>();
+            serviceCollection.AddSingleton<IActionService, ActionService>();
+            serviceCollection.AddSingleton<IRouterService, RouterService>();
+            serviceCollection.AddSingleton<IDependencyService, DependencyService>();
+            serviceCollection.AddSingleton<ITemplateService, TemplateService>();
+
+            serviceCollection.AddSingleton<ExecutionEngine>();
+
 
             return serviceCollection.BuildServiceProvider();
         }

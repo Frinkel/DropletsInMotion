@@ -4,7 +4,7 @@ using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotion.Application.Services
 {
-    public class Scheduler
+    public class SchedulerService : ISchedulerService
     {
         //private ICommand Command { get; set; }
         //private List<ICommand> CommandList { get; set; }
@@ -19,7 +19,7 @@ namespace DropletsInMotion.Application.Services
             DownUp
         }
 
-        public Scheduler()
+        public SchedulerService()
         {
 
         }

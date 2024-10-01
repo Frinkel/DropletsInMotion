@@ -11,8 +11,8 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarSearchAroundEachother()
         {
-            ApplicableFunctions.StateAmount = 0;
-            ApplicableFunctions.StateAmountExists = 0;
+            ContaminationService.StateAmount = 0;
+            ContaminationService.StateAmountExists = 0;
 
             ICommand command = new Move("d1", 20, 5);
             ICommand command2 = new Move("d2", 1, 5);
@@ -26,7 +26,7 @@ namespace DropletsInMotionTests
 
             var board = CreateBoard();
 
-            Router router = new Router(board, droplets);
+            RouterService router = new Router(board, droplets);
             router.Seed = 123;
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -37,8 +37,8 @@ namespace DropletsInMotionTests
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
+            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
 
             Assert.AreEqual(IsOneGoalState(commands, droplets), true);
         }
@@ -46,8 +46,8 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarSearchAroundEachotherSameSubstance()
         {
-            ApplicableFunctions.StateAmount = 0;
-            ApplicableFunctions.StateAmountExists = 0;
+            ContaminationService.StateAmount = 0;
+            ContaminationService.StateAmountExists = 0;
 
             ICommand command = new Move("d1", 20, 5);
             ICommand command2 = new Move("d2", 1, 5);
@@ -61,7 +61,7 @@ namespace DropletsInMotionTests
 
             var board = CreateBoard();
 
-            Router router = new Router(board, droplets);
+            RouterService router = new Router(board, droplets);
             router.Seed = 123;
             byte substanceId = router.GetAgentSubstanceId("d1");
             router.UpdateAgentSubstanceId("d2", substanceId);
@@ -74,8 +74,8 @@ namespace DropletsInMotionTests
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
+            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
 
             Assert.AreEqual(IsOneGoalState(commands, droplets), true);
         }
@@ -83,8 +83,8 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarSearchGreatWallOfDmf()
         {
-            ApplicableFunctions.StateAmount = 0;
-            ApplicableFunctions.StateAmountExists = 0;
+            ContaminationService.StateAmount = 0;
+            ContaminationService.StateAmountExists = 0;
 
             ICommand command = new Move("d1", 15, 10);
             var commands = new List<ICommand>() { command };
@@ -94,7 +94,7 @@ namespace DropletsInMotionTests
             droplets.Add("d1", d1);
 
             var board = CreateBoard();
-            Router router = new Router(board, droplets);
+            RouterService router = new Router(board, droplets);
             router.UpdateContaminationMap(10, 7, 255);
             router.UpdateContaminationMap(10, 8, 255);
             router.UpdateContaminationMap(10, 9, 255);
@@ -113,8 +113,8 @@ namespace DropletsInMotionTests
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
-            Console.WriteLine($"Amount of states {ApplicableFunctions.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ApplicableFunctions.StateAmountExists}");
+            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
 
 
             
