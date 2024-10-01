@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Communication;
+﻿using DropletsInMotion.Application.Execution;
+using DropletsInMotion.Communication;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Presentation.Services;
@@ -9,10 +10,9 @@ using DropletsInMotion.Application.Services;
 
 namespace DropletsInMotion.Application.ExecutionEngine
 {
-    public class
-        ExecutionEngine
+    public class ExecutionEngine : IExecutionEngine
     {
-        public CommunicationEngine CommunicationEngine;
+        //public CommunicationEngine CommunicationEngine;
 
         public Electrode[][] Board { get; set; }
 
@@ -35,9 +35,13 @@ namespace DropletsInMotion.Application.ExecutionEngine
         private readonly IActionService _actionService;
         private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
+        private readonly ICommunicationService _communicationService;
 
 
-        public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, IActionService actionService, IRouterService routerService, IDependencyService dependencyService, ITemplateService templateService)
+        public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
+                                IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
+                                IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
+                                ITemplateService templateService, ICommunicationService communicationService)
         {
             _contaminationService = contaminationService;
             _scheduler = schedulerService;
@@ -48,13 +52,11 @@ namespace DropletsInMotion.Application.ExecutionEngine
             _router = routerService;
             _templateService = templateService;
             _dependencyService = dependencyService;
+            _communicationService = communicationService;
         }
 
-        public async Task Execute(List<ICommand> commands, Dictionary<string, Droplet> droplets, CommunicationEngine communicationEngine, string platformPath)
+        public async Task Execute(List<ICommand> commands, Dictionary<string, Droplet> droplets, string platformPath)
         {
-
-            CommunicationEngine = communicationEngine;
-
             PlatformService = new PlatformService(platformPath);
 
             Board = PlatformService.Board;
@@ -184,9 +186,9 @@ namespace DropletsInMotion.Application.ExecutionEngine
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, time);
 
-                if (boardActions.Count > 0 && CommunicationEngine != null)
+                if (boardActions.Count > 0)
                 {
-                    await CommunicationEngine.SendActions(boardActions);
+                    await _communicationService.SendActions(boardActions);
                 }
                 Console.WriteLine($"Compiler time {time}");
                 boardActions.Clear();
@@ -205,10 +207,9 @@ namespace DropletsInMotion.Application.ExecutionEngine
                 List<BoardAction> mixActions = new List<BoardAction>();
                 mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, time));
                 _storeManager.StoreDropletWithNameAndTime(mixCommand.DropletName, time + mixActions.Last().Time);
-                if (CommunicationEngine != null)
-                {
-                    await CommunicationEngine.SendActions(mixActions);
-                }
+                
+                await _communicationService.SendActions(mixActions);
+                
             }
         }
 

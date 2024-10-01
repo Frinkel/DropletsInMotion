@@ -11,14 +11,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Application.Execution;
 using DropletsInMotion.Infrastructure.Services;
+using Microsoft.Extensions.DependencyInjection;
 using static MicrofluidicsParser;
 
 namespace DropletsInMotion.UI
 {
     public class StateManager
     {
-
+        private readonly IServiceProvider _serviceProvider;
         private readonly IConsoleService _consoleService;
         private readonly ICommunicationService _communicationService;
         private readonly IUserService _userService;
@@ -29,8 +31,9 @@ namespace DropletsInMotion.UI
 
         private string? _programContent;
 
-        public StateManager(IConsoleService consoleService, ICommunicationService communicationService, IUserService userService, IFileService fileService, IConfiguration configuration)
+        public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationService communicationService, IUserService userService, IFileService fileService, IConfiguration configuration)
         {
+            _serviceProvider = serviceProvider;
             _consoleService = consoleService;
             _communicationService = communicationService;
             _userService = userService;
@@ -41,6 +44,9 @@ namespace DropletsInMotion.UI
         public async Task Start()
         {
             PrintCommands();
+
+            _consoleService.WriteColor("Booting up the communication...");
+            await _communicationService.StartCommunication();
 
             while (true)
             {
@@ -68,7 +74,6 @@ namespace DropletsInMotion.UI
                             break;
 
                         case (ProgramState.CompilingProgram):
-                            throw new NotImplementedException("Something here went wrong!");
                             _currentState = await HandleCompilation();
                             break;
 
@@ -99,6 +104,7 @@ namespace DropletsInMotion.UI
 
                     _consoleService.WriteEmptyLine(2);
                     _currentState = ProgramState.WaitingForUserInput;
+                    throw;
                 }
             }
         }
@@ -122,17 +128,17 @@ namespace DropletsInMotion.UI
             }
 
             // TODO: Maybe the compiler should return a status code for the compilation.
-            //Compiler compiler = new Compiler(listener.Commands, listener.Droplets, CommunicationEngine,
-            //    consoleController.PlatformPath);
-            //await compiler.Compile();
+            IExecutionEngine executionEngine = _serviceProvider.GetRequiredService<IExecutionEngine>();
+            await executionEngine.Execute(listener.Commands, listener.Droplets, _userService.PlatformPath);
+
 
             return ProgramState.Completed;
         }
 
         private async Task<ProgramState> HandleCommunication()
         {
-            _consoleService.WriteColor("Booting up the communication...");
-            await _communicationService.StartCommunication();
+            //_consoleService.WriteColor("Booting up the communication...");
+            //await _communicationService.StartCommunication();
 
             if (await _communicationService.IsClientConnected())
             {

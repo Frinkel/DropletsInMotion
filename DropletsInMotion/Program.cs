@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using DropletsInMotion.Application.Execution;
 using DropletsInMotion.Communication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +48,6 @@ namespace DropletsInMotion
                 }
                
             }
-            }
         }
 
 
@@ -64,16 +64,13 @@ namespace DropletsInMotion
 
             _configuration = builder.Build();
 
+            // Services
             serviceCollection.AddSingleton(_configuration);
             serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
             serviceCollection.AddSingleton<IFileService, FileService>();
             serviceCollection.AddSingleton<ICommunicationService, CommunicationService>();
             serviceCollection.AddSingleton<IWebsocketService, WebsocketService>();
             serviceCollection.AddSingleton<IUserService, UserService>();
-
-
-            serviceCollection.AddSingleton<StateManager>();
-            serviceCollection.AddSingleton<SimulationCommunicationService>();
             serviceCollection.AddSingleton<ITimeService, TimeService>();
             serviceCollection.AddSingleton<IStoreService, StoreService>();
             serviceCollection.AddSingleton<ICommandLifetimeService, CommandLifetimeService>();
@@ -84,7 +81,11 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<IDependencyService, DependencyService>();
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
 
-            serviceCollection.AddSingleton<ExecutionEngine>();
+
+            // Classes
+            serviceCollection.AddSingleton<StateManager>();
+            serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
 
             return serviceCollection.BuildServiceProvider();
