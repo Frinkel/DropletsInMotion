@@ -77,19 +77,23 @@ namespace DropletsInMotion.Application.Services
 
             agents.Add(newAgent.DropletName, newAgent);
 
-            mergeActions.AddRange(_templateService.ApplyTemplate("mergeHorizontal", newAgent, time));
             _contaminationService.ApplyContaminationMerge(newAgent, contaminationMap);
             _contaminationService.PrintContaminationState(contaminationMap);
             Console.WriteLine(outputDroplet);
             return mergeActions;
         }
 
-        public List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, byte[,] contaminationMap, double time, int direction)
+        public List<BoardAction> SplitByVolume(
+             Dictionary<string, Agent> agents,
+             SplitByVolume splitCommand,
+             byte[,] contaminationMap,
+             double time,
+             ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions)
         {
-            // Retrieve the input droplet
             Droplet inputDroplet = agents[splitCommand.InputName]
                                    ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
 
+            // Ensure that the output droplet names are valid and unique
             if (agents.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
             {
                 throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
@@ -100,60 +104,39 @@ namespace DropletsInMotion.Application.Services
             }
             if (splitCommand.OutputName2 == splitCommand.OutputName1)
             {
-                throw new InvalidOperationException($"Droplet with the same names can not be split.");
+                throw new InvalidOperationException($"Droplets with the same names cannot be split.");
             }
 
-            Droplet outputDroplet1, outputDroplet2;
-            string templateName;
+            var (firstSplitPosition, secondSplitPosition) = splitPositions;
 
-            // Handle splitting based on direction
-            switch (direction)
+            bool isBetweenHorizontally = (inputDroplet.PositionX == (firstSplitPosition.optimalX + secondSplitPosition.optimalX) / 2) &&
+                                         (inputDroplet.PositionY == firstSplitPosition.optimalY && inputDroplet.PositionY == secondSplitPosition.optimalY);
+
+            bool isBetweenVertically = (inputDroplet.PositionY == (firstSplitPosition.optimalY + secondSplitPosition.optimalY) / 2) &&
+                                       (inputDroplet.PositionX == firstSplitPosition.optimalX && inputDroplet.PositionX == secondSplitPosition.optimalX);
+
+            if (!isBetweenHorizontally && !isBetweenVertically)
             {
-                case 1: // Horizontal split, output 1 on the left (x-1) and output 2 on the right (x+1)
-                    outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX - 1,
-                        inputDroplet.PositionY, inputDroplet.Volume - splitCommand.Volume);
-
-                    outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX + 1,
-                        inputDroplet.PositionY, splitCommand.Volume);
-
-                    templateName = "splitHorizontal";
-                    break;
-
-                case 3: // Horizontal split, but output 1 on the right (x+1) and output 2 on the left (x-1)
-                    outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX + 1,
-                        inputDroplet.PositionY, inputDroplet.Volume - splitCommand.Volume);
-
-                    outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX - 1,
-                        inputDroplet.PositionY, splitCommand.Volume);
-
-                    templateName = "splitHorizontal";
-                    break;
-
-                case 2: // Vertical split, output 1 above (y-1) and output 2 below (y+1)
-                    outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX,
-                        inputDroplet.PositionY - 1, inputDroplet.Volume - splitCommand.Volume);
-
-                    outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX,
-                        inputDroplet.PositionY + 1, splitCommand.Volume);
-
-                    templateName = "splitVertical";
-                    break;
-
-                case 4: // Vertical split, output 1 below (y+1) and output 2 above (y-1)
-                    outputDroplet1 = new Droplet(splitCommand.OutputName1, inputDroplet.PositionX,
-                        inputDroplet.PositionY + 1, inputDroplet.Volume - splitCommand.Volume);
-
-                    outputDroplet2 = new Droplet(splitCommand.OutputName2, inputDroplet.PositionX,
-                        inputDroplet.PositionY - 1, splitCommand.Volume);
-
-                    templateName = "splitVertical";
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"Invalid direction {direction}. Allowed values are 1, 2, 3, or 4.");
+                throw new InvalidOperationException("Input droplet is not positioned between the specified split positions.");
             }
 
-            // Remove the input droplet and add the new droplets to the dictionary
+            Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, firstSplitPosition.optimalX, firstSplitPosition.optimalY, inputDroplet.Volume - splitCommand.Volume);
+            Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, secondSplitPosition.optimalX, secondSplitPosition.optimalY, splitCommand.Volume);
+
+            string templateName;
+            if (isBetweenHorizontally)
+            {
+                templateName = "splitHorizontal";
+            }
+            else if (isBetweenVertically)
+            {
+                templateName = "splitVertical";
+            }
+            else
+            {
+                throw new InvalidOperationException("The split could not be determined to be horizontal or vertical.");
+            }
+
             Agent newAgent1 = new Agent(outputDroplet1.DropletName, outputDroplet1.PositionX, outputDroplet1.PositionY, outputDroplet1.Volume, agents[inputDroplet.DropletName].SubstanceId);
             Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, agents[inputDroplet.DropletName].SubstanceId);
             agents.Remove(inputDroplet.DropletName);
@@ -163,7 +146,6 @@ namespace DropletsInMotion.Application.Services
             _contaminationService.ApplyContamination(newAgent1, contaminationMap);
             _contaminationService.ApplyContamination(newAgent2, contaminationMap);
 
-            // Apply the appropriate template based on direction
             List<BoardAction> splitActions = new List<BoardAction>();
             splitActions.AddRange(_templateService.ApplyTemplate(templateName, inputDroplet, time));
 
@@ -231,9 +213,132 @@ namespace DropletsInMotion.Application.Services
             }
             movesToExecute.Add(new Move(storeCommand.DropletName, storeCommand.PositionX, storeCommand.PositionY));
             return false;
-
         }
 
+
+        public bool DropletsExistAndCommandInProgress(ICommand command, Dictionary<string, Agent> agents)
+        {
+            if (_commandLifetimeService.CanExecuteCommand(command))
+            {
+                var inputDroplets = command.GetInputDroplets();
+                foreach (var inputDroplet in inputDroplets)
+                {
+                    if (!agents.ContainsKey(inputDroplet))
+                    {
+                        throw new InvalidOperationException($"No droplet found with name {inputDroplet} for command {command}.");
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        public void MoveMergeDropletToPosition(Merge mergeCommand, List<ICommand> movesToExecute, Dictionary<string, Agent> agents)
+        {
+
+            if (!agents.TryGetValue(mergeCommand.OutputName, out var outDroplet))
+            {
+                throw new InvalidOperationException($"No droplet found with name {mergeCommand.OutputName}.");
+            }
+
+            var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
+            movesToExecute.Add(moveCommand);
+            Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
+        }
+
+
+        public bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute, ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions, Dictionary<string, Agent> agents)
+        {
+            var inputDroplet1 = agents[mergeCommand.InputName1];
+            var inputDroplet2 = agents[mergeCommand.InputName2];
+
+            bool areInPosition = inputDroplet1.PositionX == mergePositions.Item1.optimalX &&
+                                 inputDroplet1.PositionY == mergePositions.Item1.optimalY &&
+                                 inputDroplet2.PositionX == mergePositions.Item2.optimalX &&
+                                 inputDroplet2.PositionY == mergePositions.Item2.optimalY;
+
+            // If the droplets are already in position, return true
+            if (areInPosition)
+            {
+                return true;
+            }
+
+            // Move inputDroplet1 to be next to the merge position
+            if (inputDroplet1.PositionX != mergePositions.Item1.optimalX || inputDroplet1.PositionY != mergePositions.Item1.optimalY)
+            {
+                var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Item1.optimalX, mergePositions.Item1.optimalY);
+                movesToExecute.Add(moveCommand);
+                Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
+            }
+
+            // Move inputDroplet2 to be next to the merge position
+            if (inputDroplet2.PositionX != mergePositions.Item2.optimalX || inputDroplet2.PositionY != mergePositions.Item2.optimalY)
+            {
+                var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Item2.optimalX, mergePositions.Item2.optimalY);
+                movesToExecute.Add(moveCommand);
+                Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
+
+            }
+
+            return false;
+        }
+
+        public bool InPositionToSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+            ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions,
+            Dictionary<string, Agent> agents)
+        {
+
+            if (agents.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
+            {
+                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
+            }
+
+            if (agents.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
+            {
+                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+            }
+
+            if (splitCommand.OutputName2 == splitCommand.OutputName1)
+            {
+                throw new InvalidOperationException($"Droplet with the same names can not be split.");
+            }
+
+            int splitPositionX = (splitPositions.Item1.optimalX + splitPositions.Item2.optimalX) / 2;
+            int splitPositionY = (splitPositions.Item1.optimalY + splitPositions.Item2.optimalY) / 2;
+
+            Droplet splitDroplet = agents[splitCommand.InputName];
+
+            if (splitDroplet.PositionX == splitPositionX && splitDroplet.PositionY == splitPositionY)
+            {
+                return true;
+            }
+
+            movesToExecute.Add(new Move(splitCommand.InputName, splitPositionX, splitPositionY));
+            return false;
+        }
+
+
+        public void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+            Dictionary<string, Agent> agents)
+        {
+
+            if (agents.TryGetValue(splitCommand.OutputName1, out Agent outputDroplet1))
+            {
+                if (outputDroplet1.PositionX != splitCommand.PositionX1 || outputDroplet1.PositionY != splitCommand.PositionY1)
+                {
+                    movesToExecute.Add(new Move(splitCommand.OutputName1, splitCommand.PositionX1, splitCommand.PositionY1));
+                }
+            }
+            if (agents.TryGetValue(splitCommand.OutputName2, out Agent outputDroplet2))
+            {
+                if (outputDroplet2.PositionX != splitCommand.PositionX2 || outputDroplet2.PositionY != splitCommand.PositionY2)
+                {
+                    movesToExecute.Add(new Move(splitCommand.OutputName2, splitCommand.PositionX2, splitCommand.PositionY2));
+                }
+            }
+
+        }
 
     }
 }

@@ -11,7 +11,7 @@ namespace DropletsInMotion.Application.Services.Routers
     {
         List<BoardAction> Route(Dictionary<string, Agent> agents, List<ICommand> commands, byte[,] contaminationMap, double time, double? boundTime = null);
 
-        void Initialize(Electrode[][] board, Dictionary<string, Agent> agents);
+        void Initialize(Electrode[][] board);
 
         //void UpdateAgentSubstanceId(string agent, byte substanceId);
         //byte GetAgentSubstanceId(string agent);

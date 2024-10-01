@@ -10,5 +10,5 @@ SplitByRatio(d1, d1, d4, 2, 13, 6, 13, 0.5);
 SplitByRatio(d2, d2, d5, 10, 14, 14, 14, 0.5);
 Mix(d3, 20, 6, 4, 4, 1);
 Merge(d5, d3, d3, 16, 14);
-Store(d3, 16, 14, 2000);
+Store(d3, 16, 14, 10);
 Move(d3, 18, 18);

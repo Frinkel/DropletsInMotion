@@ -29,7 +29,11 @@ public class State
         Seed = seed;
         _contaminationService = contaminationService;
         RoutableAgents = routableAgents;
-        Agents = agents;
+        Agents = new Dictionary<string, Agent>();
+        foreach (var kvp in agents)
+        {
+            Agents[kvp.Key] = (Agent)kvp.Value.Clone();
+        }
         ContaminationMap = contaminationMap;
         Commands = commands;
         JointAction = null;
@@ -124,11 +128,6 @@ public class State
             currentTime = finalActions.Last().Time;
         }
 
-        //Console.WriteLine("______---------_________");
-        //foreach (var action in finalActions)
-        //{
-        //    Console.WriteLine(action.ToString());
-        //}
         return finalActions;
 
     }
