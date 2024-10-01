@@ -11,7 +11,7 @@ namespace DropletsInMotionTests
     {
         private string projectDirectory;
         private string platformPath;
-        private CommunicationEngine communicationEngine;
+        //private CommunicationService communicationEngine;
 
         [SetUp]
         public void Setup()
@@ -19,7 +19,7 @@ namespace DropletsInMotionTests
             string workingDirectory = Environment.CurrentDirectory;
             projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
             platformPath = Path.Combine(projectDirectory, "Assets", "platform.json");
-            communicationEngine = new CommunicationEngine(true);
+            //communicationEngine = new CommunicationService(true);
         }
 
         [Test]

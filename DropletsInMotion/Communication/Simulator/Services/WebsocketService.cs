@@ -3,23 +3,34 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using DropletsInMotion.Communication.Simulator.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator.Services
 {
-    internal class WebsocketService
+    internal class WebsocketService : IWebsocketService
     {
-        private readonly HttpListener _httpListener;
-        private readonly string _prefix;
-        private readonly List<WebSocket> _connectedClients;
+        private readonly IConfiguration _configuration;
+
+
+        private HttpListener _httpListener;
+        public string? Prefix;
+        private List<WebSocket> _connectedClients;
         private readonly TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
-        private readonly Dictionary<string, TaskCompletionSource<WebSocketMessage<object>>> _pendingRequests = new();
+        private Dictionary<string, TaskCompletionSource<WebSocketMessage<object>>> _pendingRequests = new();
         private bool _isWebsocketRunning = false;
 
-        public WebsocketService(string prefix)
+        public WebsocketService(IConfiguration configuration)
         {
+            _configuration = configuration;
+            Prefix = _configuration["Development:WebsocketHost"];
+
+            if (Prefix == null)
+            {
+                throw new Exception("Websocket host cannot be null");
+            }
+
             _httpListener = new HttpListener();
-            _prefix = prefix;
-            _httpListener.Prefixes.Add(_prefix);
+            _httpListener.Prefixes.Add(Prefix);
             _connectedClients = new List<WebSocket>();
             _isWebsocketRunning = false;
         }
@@ -28,7 +39,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
         {
             _httpListener.Start();
             _isWebsocketRunning = true;
-            Console.WriteLine($"WebSocket started at {_prefix}");
+            Console.WriteLine($"WebSocket started at {Prefix}");
 
             try
             {
@@ -178,7 +189,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                 offset += chunkSize;
             }
         }
-
 
         public async Task<WebSocketMessage<object>> SendRequestAndWaitForResponseAsync(string requestId, string message, CancellationToken cancellationToken)
         {

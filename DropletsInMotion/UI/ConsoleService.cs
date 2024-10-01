@@ -1,32 +1,32 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using DropletsInMotion.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.UI
 {
     public class ConsoleService : IConsoleService
     {
-        public IConfiguration _configuration;
-
-        public string ProgramPath { get; set; }
-        public string PlatformPath { get; set; }
+        private IUserService _userService;
 
         public bool IsDevelopment { get; private set; }
         public string? DevelopmentPath { get; private set; }
         public string? DevelopmentProgram { get; private set; }
         public string? DevelopmentPlatform { get; private set; }
 
-        public ConsoleService(IConfiguration configuration)
+        public ConsoleService(IConfiguration configuration, IUserService userService)
         {
-            _configuration = configuration;
-            IsDevelopment = _configuration.GetValue<bool>("Development:IsDevelopment");
-            DevelopmentPath = _configuration["Development:Path"];
-            DevelopmentProgram = _configuration["Development:Program"];
-            DevelopmentPlatform = _configuration["Development:Platform"];
+            _userService = userService;
+
+            var configuration1 = configuration;
+            IsDevelopment = configuration1.GetValue<bool>("Development:IsDevelopment");
+            DevelopmentPath = configuration1["Development:Path"];
+            DevelopmentProgram = configuration1["Development:Program"];
+            DevelopmentPlatform = configuration1["Development:Platform"];
         }
 
         public void GetInitialInformation()
         {
-            PlatformPath = GetPathToBoardConfiguration();
-            ProgramPath = GetPathToProgram();
+            _userService.PlatformPath = GetPathToBoardConfiguration();
+            _userService.ProgramPath = GetPathToProgram();
         }
 
         public string GetPathToBoardConfiguration()
@@ -109,6 +109,14 @@ namespace DropletsInMotion.UI
         public void WriteSuccess(string message)
         {
             WriteColor(message, ConsoleColor.Green);
+        }
+
+        public void WriteEmptyLine(int number)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                WriteColor("");
+            }
         }
 
         public void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)

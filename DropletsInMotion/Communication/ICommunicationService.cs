@@ -2,7 +2,7 @@
 
 namespace DropletsInMotion.Communication
 {
-    internal interface ICommunication
+    public interface ICommunicationService
     {
         public Task StartCommunication();
         public Task StopCommunication();

@@ -2,48 +2,42 @@
 using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Communication.Simulator.Services;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator;
 
-internal class SimulationCommunicationEngine : ICommunication
+internal class SimulationCommunicationService : ICommunicationService
 {
-    private WebsocketService? _websocketService;
+    private readonly IWebsocketService _websocketService;
+
     private CancellationTokenSource? _cancellationTokenSource;
     public Task? WebSocketTask { get; private set; }
 
-    private WebsocketService WebsocketService
+    public SimulationCommunicationService(IWebsocketService websocketService)
     {
-        get
-        {
-            if (_websocketService == null)
-            {
-                throw new InvalidOperationException("Websocket service is not initialized.");
-            }
-            return _websocketService;
-        }
+        _websocketService = websocketService;
     }
 
     public async Task StartCommunication()
     {
         _cancellationTokenSource = new CancellationTokenSource();
-        _websocketService = new WebsocketService("http://localhost:5000/ws/");
 
         WebSocketTask = Task.Run(async () =>
         {
             await _websocketService.StartServerAsync(_cancellationTokenSource.Token);
         });
 
-        await Task.Delay(100);
+        await Task.Delay(100); 
     }
 
     public async Task StopCommunication()
     {
-        await WebsocketService.CloseAllConnectionsAsync();
+        await _websocketService.CloseAllConnectionsAsync();
     }
 
     public async Task WaitForConnection()
     {
-        await WebsocketService.WaitForClientConnectionAsync();
+        await _websocketService.WaitForClientConnectionAsync();
     }
 
     public async Task SendActions(List<BoardAction> boardActionDtoList)
@@ -62,7 +56,7 @@ internal class SimulationCommunicationEngine : ICommunication
             new WebSocketMessage<Queue<ActionQueueItem>>(WebSocketMessageTypes.Action, actionQueue);
 
         string serializedObject = JsonSerializer.Serialize(actionDto);
-        await WebsocketService.SendMessageToAllAsync(serializedObject, _cancellationTokenSource.Token);
+        await _websocketService.SendMessageToAllAsync(serializedObject, _cancellationTokenSource.Token);
     }
 
     // TODO: We should return something useful in this function!
@@ -77,7 +71,7 @@ internal class SimulationCommunicationEngine : ICommunication
         //Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
         Console.WriteLine(sensorRequestDto);
 
-        var response = await WebsocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+        var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
         
 
@@ -116,13 +110,13 @@ internal class SimulationCommunicationEngine : ICommunication
 
     public async Task<bool> IsClientConnected()
     {
-        var amountClients = WebsocketService.GetNumberOfConnectedClients();
+        var amountClients = _websocketService.GetNumberOfConnectedClients();
         //Console.WriteLine($"Amount: {amountClients}");
         return amountClients > 0;
     }
 
     public async Task<bool> IsConnectionOpen()
     {
-        return WebsocketService.IsWebsocketRunning();
+        return _websocketService.IsWebsocketRunning();
     }
 }
