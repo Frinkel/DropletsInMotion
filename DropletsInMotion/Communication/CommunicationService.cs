@@ -9,6 +9,8 @@ namespace DropletsInMotion.Communication
     {
         private ICommunicationService _communicationService;
 
+        private bool _isServerRunning = false;
+
         public CommunicationService(IServiceProvider serviceProvider, IUserService userService)
         {
             _communicationService = userService.Communication == IUserService.CommunicationType.Simulator
@@ -17,17 +19,24 @@ namespace DropletsInMotion.Communication
         }
 
         public async Task StartCommunication()
-        { 
+        {
+            _isServerRunning = true;
             await _communicationService.StartCommunication();
         }
 
         public async Task StopCommunication()
         {
+            _isServerRunning = false;
             await _communicationService.StopCommunication();
         }
 
         public async Task SendActions(List<BoardAction> boardActionDtoList)
         {
+            if (!_isServerRunning)
+            {
+                return;
+            }
+
             await _communicationService.SendActions(boardActionDtoList);
         }
 

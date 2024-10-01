@@ -45,9 +45,6 @@ namespace DropletsInMotion.UI
         {
             PrintCommands();
 
-            _consoleService.WriteColor("Booting up the communication...");
-            await _communicationService.StartCommunication();
-
             while (true)
             {
                 try
@@ -137,8 +134,8 @@ namespace DropletsInMotion.UI
 
         private async Task<ProgramState> HandleCommunication()
         {
-            //_consoleService.WriteColor("Booting up the communication...");
-            //await _communicationService.StartCommunication();
+            _consoleService.WriteColor("Booting up the communication...");
+            await _communicationService.StartCommunication();
 
             if (await _communicationService.IsClientConnected())
             {

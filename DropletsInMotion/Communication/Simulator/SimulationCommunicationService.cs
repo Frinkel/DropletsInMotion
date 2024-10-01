@@ -2,7 +2,6 @@
 using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Communication.Simulator.Services;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator;
 
