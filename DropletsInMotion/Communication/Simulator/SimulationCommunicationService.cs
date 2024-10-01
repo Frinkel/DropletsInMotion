@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace DropletsInMotion.Communication.Simulator;
 
-internal class SimulationCommunicationService : ICommunicationService
+public class SimulationCommunicationService : ICommunicationService
 {
     private readonly IWebsocketService _websocketService;
 

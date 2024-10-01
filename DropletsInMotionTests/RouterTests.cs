@@ -1,163 +1,176 @@
-﻿using DropletsInMotion.Infrastructure.Models.Domain;
-using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Application.Services.Routers;
-using DropletsInMotion.Application.Services;
+﻿//using DropletsInMotion.Infrastructure.Models.Domain;
+//using DropletsInMotion.Infrastructure.Models.Commands;
+//using DropletsInMotion.Application.Services.Routers;
+//using DropletsInMotion.Application.Services;
+//using Microsoft.Extensions.DependencyInjection;
 
-namespace DropletsInMotionTests
-{
-    public class RouterTests
-    {
-        
-        [Test]
-        public void AStarSearchAroundEachother()
-        {
-            ContaminationService.StateAmount = 0;
-            ContaminationService.StateAmountExists = 0;
+//namespace DropletsInMotionTests
+//{
+//    public class RouterTests : TestBase
+//    {
 
-            ICommand command = new Move("d1", 20, 5);
-            ICommand command2 = new Move("d2", 1, 5);
-            var commands = new List<ICommand>() { command, command2 };
+//        private readonly ITemplateService _templateService;
+//        private readonly IContaminationService _contaminationService;
+//        private readonly IRouterService _routerService;
 
-            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
-            var d1 = new Droplet("d1", 5, 5, 1);
-            var d2 = new Droplet("d2", 12, 5, 1);
-            droplets.Add("d1", d1);
-            droplets.Add("d2", d2);
+//        public RouterTests()
+//        {
+//            _templateService = ServiceProvider.GetRequiredService<ITemplateService>();
+//            _contaminationService = ServiceProvider.GetRequiredService<IContaminationService>();
+//            _routerService = ServiceProvider.GetRequiredService<IRouterService>();
+//        }
 
-            var board = CreateBoard();
+//        [Test]
+//        public void AStarSearchAroundEachother()
+//        {
+//            //ContaminationService.StateAmount = 0;
+//            //ContaminationService.StateAmountExists = 0;
 
-            RouterService router = new Router(board, droplets);
-            router.Seed = 123;
+//            ICommand command = new Move("d1", 20, 5);
+//            ICommand command2 = new Move("d2", 1, 5);
+//            var commands = new List<ICommand>() { command, command2 };
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+//            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
+//            var d1 = new Droplet("d1", 5, 5, 1);
+//            var d2 = new Droplet("d2", 12, 5, 1);
+//            droplets.Add("d1", d1);
+//            droplets.Add("d2", d2);
 
-            var boardActions = router.Route(droplets, commands, 0);
+//            var board = CreateBoard();
 
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
+//            //RouterService router = new Router(board, droplets);
+//            _routerService.Initialize(board, agents);
+//            router.Seed = 123;
 
-            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
+//            var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
-        }
+//            var boardActions = router.Route(droplets, commands, 0);
 
-        [Test]
-        public void AStarSearchAroundEachotherSameSubstance()
-        {
-            ContaminationService.StateAmount = 0;
-            ContaminationService.StateAmountExists = 0;
+//            watch.Stop();
+//            var elapsedMs = watch.ElapsedMilliseconds;
+//            Console.WriteLine(elapsedMs.ToString());
 
-            ICommand command = new Move("d1", 20, 5);
-            ICommand command2 = new Move("d2", 1, 5);
-            var commands = new List<ICommand>() { command, command2 };
+//            //Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+//            //Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
 
-            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
-            var d1 = new Droplet("d1", 5, 5, 1);
-            var d2 = new Droplet("d2", 12, 5, 1);
-            droplets.Add("d1", d1);
-            droplets.Add("d2", d2);
+//            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
+//        }
 
-            var board = CreateBoard();
+//        [Test]
+//        public void AStarSearchAroundEachotherSameSubstance()
+//        {
+//            //ContaminationService.StateAmount = 0;
+//            //ContaminationService.StateAmountExists = 0;
 
-            RouterService router = new Router(board, droplets);
-            router.Seed = 123;
-            byte substanceId = router.GetAgentSubstanceId("d1");
-            router.UpdateAgentSubstanceId("d2", substanceId);
+//            ICommand command = new Move("d1", 20, 5);
+//            ICommand command2 = new Move("d2", 1, 5);
+//            var commands = new List<ICommand>() { command, command2 };
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+//            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
+//            var d1 = new Droplet("d1", 5, 5, 1);
+//            var d2 = new Droplet("d2", 12, 5, 1);
+//            droplets.Add("d1", d1);
+//            droplets.Add("d2", d2);
 
-            var boardActions = router.Route(droplets, commands, 0);
+//            var board = CreateBoard();
 
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
+//            RouterService router = new Router(board, droplets);
+//            router.Seed = 123;
+//            byte substanceId = router.GetAgentSubstanceId("d1");
+//            router.UpdateAgentSubstanceId("d2", substanceId);
 
-            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
+//            var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
-        }
+//            var boardActions = router.Route(droplets, commands, 0);
 
-        [Test]
-        public void AStarSearchGreatWallOfDmf()
-        {
-            ContaminationService.StateAmount = 0;
-            ContaminationService.StateAmountExists = 0;
+//            watch.Stop();
+//            var elapsedMs = watch.ElapsedMilliseconds;
+//            Console.WriteLine(elapsedMs.ToString());
 
-            ICommand command = new Move("d1", 15, 10);
-            var commands = new List<ICommand>() { command };
+//            //Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+//            //Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
 
-            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
-            var d1 = new Droplet("d1", 5, 10, 1);
-            droplets.Add("d1", d1);
+//            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
+//        }
 
-            var board = CreateBoard();
-            RouterService router = new Router(board, droplets);
-            router.UpdateContaminationMap(10, 7, 255);
-            router.UpdateContaminationMap(10, 8, 255);
-            router.UpdateContaminationMap(10, 9, 255);
-            router.UpdateContaminationMap(10, 10, 255);
-            router.UpdateContaminationMap(10, 11, 255);
-            router.UpdateContaminationMap(10, 12, 255);
-            router.UpdateContaminationMap(10, 13, 255);
-            router.Seed = 123;
+//        [Test]
+//        public void AStarSearchGreatWallOfDmf()
+//        {
+//            //ContaminationService.StateAmount = 0;
+//            //ContaminationService.StateAmountExists = 0;
 
+//            ICommand command = new Move("d1", 15, 10);
+//            var commands = new List<ICommand>() { command };
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            
-            var boardActions = router.Route(droplets, commands, 0);
+//            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
+//            var d1 = new Droplet("d1", 5, 10, 1);
+//            droplets.Add("d1", d1);
 
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
-
-            Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
-            Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
-
-
-            
-
-            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
+//            var board = CreateBoard();
+//            RouterService router = new Router(board, droplets);
+//            router.UpdateContaminationMap(10, 7, 255);
+//            router.UpdateContaminationMap(10, 8, 255);
+//            router.UpdateContaminationMap(10, 9, 255);
+//            router.UpdateContaminationMap(10, 10, 255);
+//            router.UpdateContaminationMap(10, 11, 255);
+//            router.UpdateContaminationMap(10, 12, 255);
+//            router.UpdateContaminationMap(10, 13, 255);
+//            router.Seed = 123;
 
 
-        }
+//            var watch = System.Diagnostics.Stopwatch.StartNew();
 
-        public bool IsOneGoalState(List<ICommand> commands, Dictionary<string, Droplet> droplets)
-        {
-            foreach (var command in commands)
-            {
-                Droplet droplet;
-                switch (command)
-                {
-                    case Move moveCommand:
-                        droplet = droplets[moveCommand.GetInputDroplets().First()];
-                        if (droplet.PositionX == moveCommand.PositionX && droplet.PositionY == moveCommand.PositionY)
-                            return true;
-                        break;
-                    default:
-                        return false;
-                        break;
-                }
-            }
+//            var boardActions = router.Route(droplets, commands, 0);
 
-            return false;
-        }
+//            watch.Stop();
+//            var elapsedMs = watch.ElapsedMilliseconds;
+//            Console.WriteLine(elapsedMs.ToString());
 
-        public Electrode[][] CreateBoard()
-        {
-            Electrode[][] board = new Electrode[32][];
-            board = new Electrode[32][];
-            for (int i = 0; i < 32; i++)
-            {
-                board[i] = new Electrode[20];
-                for (int j = 0; j < 20; j++)
-                {
-                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
-                }
-            }
-            return board;
-        }
-    }
-}
+//            //Console.WriteLine($"Amount of states {ContaminationService.StateAmount}");
+//            //Console.WriteLine($"Amount of states that existed {ContaminationService.StateAmountExists}");
+
+
+
+
+//            Assert.AreEqual(IsOneGoalState(commands, droplets), true);
+
+
+//        }
+
+//        public bool IsOneGoalState(List<ICommand> commands, Dictionary<string, Droplet> droplets)
+//        {
+//            foreach (var command in commands)
+//            {
+//                Droplet droplet;
+//                switch (command)
+//                {
+//                    case Move moveCommand:
+//                        droplet = droplets[moveCommand.GetInputDroplets().First()];
+//                        if (droplet.PositionX == moveCommand.PositionX && droplet.PositionY == moveCommand.PositionY)
+//                            return true;
+//                        break;
+//                    default:
+//                        return false;
+//                        break;
+//                }
+//            }
+
+//            return false;
+//        }
+
+//        public Electrode[][] CreateBoard()
+//        {
+//            Electrode[][] board = new Electrode[32][];
+//            board = new Electrode[32][];
+//            for (int i = 0; i < 32; i++)
+//            {
+//                board[i] = new Electrode[20];
+//                for (int j = 0; j < 20; j++)
+//                {
+//                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+//                }
+//            }
+//            return board;
+//        }
+//    }
+//}

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator.Services
 {
-    internal class WebsocketService : IWebsocketService
+    public class WebsocketService : IWebsocketService
     {
         private readonly IConfiguration _configuration;
 
