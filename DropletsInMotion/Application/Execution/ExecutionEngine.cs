@@ -1,14 +1,13 @@
-﻿using DropletsInMotion.Application.Execution;
-using DropletsInMotion.Communication;
-using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Presentation.Services;
-using DropletsInMotion.Infrastructure.Models.Domain;
-using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Application.Services;
+using DropletsInMotion.Application.Services.Routers;
+using DropletsInMotion.Communication;
+using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Presentation.Services;
 
-namespace DropletsInMotion.Application.ExecutionEngine
+namespace DropletsInMotion.Application.Execution
 {
     public class ExecutionEngine : IExecutionEngine
     {
@@ -18,7 +17,7 @@ namespace DropletsInMotion.Application.ExecutionEngine
 
         public Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
 
-        public double time = 0;
+        public double Time { get; set; }
         private byte[,] ContaminationMap { get; set; }
 
         private PlatformService PlatformService;
@@ -108,7 +107,7 @@ namespace DropletsInMotion.Application.ExecutionEngine
 
                 List<ICommand> movesToExecute = new List<ICommand>();
 
-                double? executionTime = time;
+                double? executionTime = Time;
                 foreach (ICommand command in commandsToExecute)
                 {
                     switch (command)
@@ -128,8 +127,8 @@ namespace DropletsInMotion.Application.ExecutionEngine
                             if (!HasSplit(splitByVolumeCommand2, movesToExecute))
                             {
                                 _commandManager.StoreCommand(splitByVolumeCommand2);
-                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand2, ContaminationMap, time, 1));
-                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
+                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand2, ContaminationMap, Time, 1));
+                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time : Time;
 
                             }
                             break;
@@ -140,14 +139,14 @@ namespace DropletsInMotion.Application.ExecutionEngine
                             if (!HasSplit(splitByVolumeCommand, movesToExecute))
                             {
                                 _commandManager.StoreCommand(command);
-                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, time, 1));
-                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : time : time;
+                                boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, Time, 1));
+                                executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time : Time;
                             }
                             break;
                         case Store storeCommand:
                             if (_actionService.InPositionToStore(storeCommand, Agents, movesToExecute))
                             {
-                                _storeManager.StoreDroplet(storeCommand, time);
+                                _storeManager.StoreDroplet(storeCommand, Time);
                             }
                             break;
                         case Mix mixCommand:
@@ -161,7 +160,7 @@ namespace DropletsInMotion.Application.ExecutionEngine
                             Console.ReadLine();
                             break;
                         case Wait waitCommand:
-                            executionTime = waitCommand.Time + time;
+                            executionTime = waitCommand.Time + Time;
                             break;
                         default:
                             Console.WriteLine("Unknown command");
@@ -169,28 +168,28 @@ namespace DropletsInMotion.Application.ExecutionEngine
                     }
                 }
 
-                double? boundTime = _timeService.CalculateBoundTime(time, executionTime);
+                double? boundTime = _timeService.CalculateBoundTime(Time, executionTime);
                 if (movesToExecute.Count > 0)
                 {
-                    boardActions.AddRange(_router.Route(Agents, movesToExecute, ContaminationMap, time, boundTime));
+                    boardActions.AddRange(_router.Route(Agents, movesToExecute, ContaminationMap, Time, boundTime));
                     boardActions = boardActions.OrderBy(b => b.Time).ToList();
-                    time = boardActions.Any() ? boardActions.Last().Time : time;
+                    Time = boardActions.Any() ? boardActions.Last().Time : Time;
 
                 }
                 else
                 {
-                    time = boundTime != null ? (double)boundTime : time;
+                    Time = boundTime != null ? (double)boundTime : Time;
                 }
 
 
 
-                _dependencyService.updateExecutedNodes(executableNodes, Agents, time);
+                _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 if (boardActions.Count > 0)
                 {
                     await _communicationService.SendActions(boardActions);
                 }
-                Console.WriteLine($"Compiler time {time}");
+                Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
             }
 
@@ -205,8 +204,8 @@ namespace DropletsInMotion.Application.ExecutionEngine
             if (_actionService.InPositionToMix(mixCommand, Agents, movesToExecute))
             {
                 List<BoardAction> mixActions = new List<BoardAction>();
-                mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, time));
-                _storeManager.StoreDropletWithNameAndTime(mixCommand.DropletName, time + mixActions.Last().Time);
+                mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, Time));
+                _storeManager.StoreDropletWithNameAndTime(mixCommand.DropletName, Time + mixActions.Last().Time);
                 
                 await _communicationService.SendActions(mixActions);
                 
@@ -292,8 +291,8 @@ namespace DropletsInMotion.Application.ExecutionEngine
                 if (InPositionToMerge(mergeCommand, movesToExecute))
                 {
                     _commandManager.StoreCommand(mergeCommand);
-                    boardActions.AddRange(_actionService.Merge(Agents, mergeCommand, ContaminationMap, time));
-                    executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : time;
+                    boardActions.AddRange(_actionService.Merge(Agents, mergeCommand, ContaminationMap, Time));
+                    executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
                 }
             
 
