@@ -99,14 +99,12 @@ namespace DropletsInMotion.Application.Execution
 
                 foreach (var command in commandsToExecute3)
                 {
-                    Console.WriteLine($"NOT DROPLET COMMAND {command}" );
                     command.Evaluate(Variables);
 
                 }
 
                 foreach (IDropletCommand command in commandsToExecute)
                 {
-                    Console.WriteLine($"DROPLET COMMAND {command}");
                     command.Evaluate(Variables);
                 }
 
