@@ -33,14 +33,14 @@ namespace DropletsInMotion.Application.Execution
         private readonly IActionService _actionService;
         private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
-        private readonly ITranslator _iTranslator;
+        private readonly ITranslator _translator;
         private readonly ICommunicationEngine _communicationEngine;
 
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ITranslator translator ICommunicationEngine communicationEngine)
+                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -51,15 +51,15 @@ namespace DropletsInMotion.Application.Execution
             _router = routerService;
             _templateService = templateService;
             _dependencyService = dependencyService;
-            _iTranslator = translator;
+            _translator = translator;
             _communicationEngine = communicationEngine;
         }
 
         public async Task Execute()
         {
-            Board = _iTranslator.Board;
-            DependencyGraph = _iTranslator.DependencyGraph;
-            var droplets = _iTranslator.Droplets;
+            Board = _translator.Board;
+            DependencyGraph = _translator.DependencyGraph;
+            var droplets = _translator.Droplets;
 
             Time = 0;
 
