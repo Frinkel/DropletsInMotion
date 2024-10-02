@@ -1,5 +1,4 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using System;
 using System.Collections.Generic;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DropletsInMotion.Application.Models;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -47,7 +47,7 @@ namespace DropletsInMotion.Application.Services
                             if (mergeDroplet.PositionX == mergeCommand.PositionX &&
                                 mergeDroplet.PositionY == mergeCommand.PositionY)
                             {
-                                _commandLifetimeService.RemoveCommand(node.Command);
+                                _commandLifetimeService.RemoveCommand((IDropletCommand) node.Command);
                                 Console.WriteLine("REMOVE MERGRE");
                                 node.MarkAsExecuted();
                             }
@@ -67,7 +67,7 @@ namespace DropletsInMotion.Application.Services
                             {
 
                                 Console.WriteLine("REMOVE SPLIT!");
-                                _commandLifetimeService.RemoveCommand(node.Command);
+                                _commandLifetimeService.RemoveCommand((IDropletCommand)node.Command);
                                 node.MarkAsExecuted();
                             }
                         }
@@ -84,7 +84,7 @@ namespace DropletsInMotion.Application.Services
                                 splitDroplet2v.PositionX == splitByVolume.PositionX2 &&
                                 splitDroplet2v.PositionY == splitByVolume.PositionY2)
                             {
-                                _commandLifetimeService.RemoveCommand(node.Command);
+                                _commandLifetimeService.RemoveCommand((IDropletCommand)node.Command);
                                 node.MarkAsExecuted();
                             }
                         }
@@ -115,7 +115,8 @@ namespace DropletsInMotion.Application.Services
 
 
                     default:
-                        throw new NotSupportedException($"Command type {node.Command.GetType()} is not supported.");
+                        node.MarkAsExecuted();
+                        break;
                 }
             }
 

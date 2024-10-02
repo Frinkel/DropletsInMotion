@@ -10,7 +10,7 @@
 //        [Test]
 //        public void MergePosition()
 //        {
-//            ICommand mergeCommand = new Merge("d1", "d2", "d3", 5, 5);
+//            IDropletCommand mergeCommand = new Merge("d1", "d2", "d3", 5, 5);
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 8, 0, 1);
@@ -46,7 +46,7 @@
 //        [Test]
 //        public void MergePositionCloseToEachother()
 //        {
-//            ICommand mergeCommand = new Merge("d1", "d2", "d3", 5, 5);
+//            IDropletCommand mergeCommand = new Merge("d1", "d2", "d3", 5, 5);
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 6, 0, 1);
@@ -77,7 +77,7 @@
 //        [Test]
 //        public void SplitPosition()
 //        {
-//            ICommand splitCommand = new SplitByVolume("d1", "d2", "d3", 0, 0, 8, 0, 0.5);
+//            IDropletCommand splitCommand = new SplitByVolume("d1", "d2", "d3", 0, 0, 8, 0, 0.5);
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 5, 5, 1);
@@ -104,8 +104,8 @@
 //        //[Test]
 //        //public void SplitPosition()
 //        //{
-//        //    ICommand splitCommand = new SplitByVolume("d1", "d2", "d3", 1, 0, 18, 0, 2);
-//        //    var commands = new List<ICommand>() { splitCommand };
+//        //    IDropletCommand splitCommand = new SplitByVolume("d1", "d2", "d3", 1, 0, 18, 0, 2);
+//        //    var commands = new List<IDropletCommand>() { splitCommand };
 
 //        //    Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //        //    var d1 = new Droplet("d1", 2, 7, 1);

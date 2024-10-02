@@ -5,6 +5,7 @@ using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Execution;
 using Microsoft.Extensions.DependencyInjection;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotionTests
 {
@@ -28,8 +29,8 @@ namespace DropletsInMotionTests
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
             var agent = new Agent("d1", 1, 1, 1);
             agents.Add("d1", agent);
-            ICommand command = new Move("d1", 3, 3);
-            List<ICommand> commands = new List<ICommand>() { command };
+            IDropletCommand dropletCommand = new Move("d1", 3, 3);
+            List<IDropletCommand> commands = new List<IDropletCommand>() { dropletCommand };
             List<string> routeableAgents = new List<string>() { "d1" };
 
             State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService);
@@ -51,10 +52,10 @@ namespace DropletsInMotionTests
 
             var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
 
-            ICommand command1 = new Move("d1", 3, 3);
-            ICommand command2 = new Move("d2", 7, 7);
+            IDropletCommand command1 = new Move("d1", 3, 3);
+            IDropletCommand command2 = new Move("d2", 7, 7);
 
-            List<ICommand> commands = new List<ICommand>() { command1, command2 };
+            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
 
@@ -85,10 +86,10 @@ namespace DropletsInMotionTests
             byte[,] contamination = new byte[32, 20];
 
             var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
-            ICommand command1 = new Move("d1", 3, 3);
-            ICommand command2 = new Move("d2", 7, 7);
+            IDropletCommand command1 = new Move("d1", 3, 3);
+            IDropletCommand command2 = new Move("d2", 7, 7);
 
-            List<ICommand> commands = new List<ICommand>() { command1, command2 };
+            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
             State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService);
@@ -105,10 +106,10 @@ namespace DropletsInMotionTests
 
             var agents = CreateTwoAgentsWithPositions(1, 1, 5, 1);
 
-            ICommand command1 = new Move("d1", 3, 3);
-            ICommand command2 = new Move("d2", 7, 7);
+            IDropletCommand command1 = new Move("d1", 3, 3);
+            IDropletCommand command2 = new Move("d2", 7, 7);
 
-            List<ICommand> commands = new List<ICommand>() { command1, command2 };
+            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
             State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService);
@@ -132,10 +133,10 @@ namespace DropletsInMotionTests
 
             var agents = CreateTwoAgentsWithPositions(1, 1, 6, 1);
 
-            ICommand command1 = new Move("d1", 3, 3);
-            ICommand command2 = new Move("d2", 7, 7);
+            IDropletCommand command1 = new Move("d1", 3, 3);
+            IDropletCommand command2 = new Move("d2", 7, 7);
 
-            List<ICommand> commands = new List<ICommand>() { command1, command2 };
+            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
             State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService);
@@ -158,10 +159,10 @@ namespace DropletsInMotionTests
             byte[,] contamination = new byte[32, 20];
             var agents = CreateTwoAgentsWithPositions(1, 3, 5, 7);
 
-            ICommand command1 = new Move("d1", 3, 3);
-            ICommand command2 = new Move("d2", 7, 7);
+            IDropletCommand command1 = new Move("d1", 3, 3);
+            IDropletCommand command2 = new Move("d2", 7, 7);
 
-            List<ICommand> commands = new List<ICommand>() { command1, command2 };
+            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
             State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService);

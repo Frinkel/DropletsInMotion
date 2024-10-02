@@ -1,6 +1,6 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,21 +15,21 @@ namespace DropletsInMotion.Application.Services
         List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, byte[,] contaminationMap, 
             double time, ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions);
         List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime);
-        bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<ICommand> movesToExecute);
-        bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<ICommand> movesToExecute);
-        bool DropletsExistAndCommandInProgress(ICommand command, Dictionary<string, Agent> agents);
+        bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
+        bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
+        bool DropletsExistAndCommandInProgress(IDropletCommand dropletCommand, Dictionary<string, Agent> agents);
 
-        bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute,
+        bool InPositionToMerge(Merge mergeCommand, List<IDropletCommand> movesToExecute,
             ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions,
             Dictionary<string, Agent> agents);
-        void MoveMergeDropletToPosition(Merge mergeCommand, List<ICommand> movesToExecute, 
+        void MoveMergeDropletToPosition(Merge mergeCommand, List<IDropletCommand> movesToExecute, 
             Dictionary<string, Agent> agents);
 
-        bool InPositionToSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+        bool InPositionToSplit(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
             ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions,
             Dictionary<string, Agent> agents);
 
-        void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+        void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
             Dictionary<string, Agent> agents);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using DropletsInMotion.Application.Services;
-using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services
 {

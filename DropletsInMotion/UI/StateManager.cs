@@ -200,7 +200,7 @@ namespace DropletsInMotion.UI
                     return ProgramState.WaitingForUserInput;
 
                 default:
-                    _consoleService.WriteColor("Invalid command. Please try again.");
+                    _consoleService.WriteColor("Invalid dropletCommand. Please try again.");
                     return ProgramState.WaitingForUserInput;
             }
 

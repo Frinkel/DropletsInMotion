@@ -11,7 +11,7 @@
 // */
 
 ///*
-// * In: Board, Droplets, List<ICommand>
+// * In: Board, Droplets, List<IDropletCommand>
 // * Out: List<BoardAction>
 // *
 // * Droplets is the state
@@ -22,7 +22,7 @@
 //{
 //    private Electrode[][] Board { get; set; }
 //    public Dictionary<string, Droplet> Droplets { get; set; }
-//    private List<ICommand> Commands { get; set; }
+//    private List<IDropletCommand> Commands { get; set; }
 //    private double Time { get; set; }
 
 
@@ -37,7 +37,7 @@
 //        _moveHandler = new MoveHandler(_templateHandler);
 //    }
 
-//    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<ICommand> commands, double time)
+//    public List<BoardAction> Route(Dictionary<string, Droplet> droplets, List<IDropletCommand> commands, double time)
 //    {
 //        Droplets = droplets;
 //        Commands = commands;
@@ -48,9 +48,9 @@
 //        //Console.WriteLine("\n\n\nRunning router.....\n");
 
 
-//        foreach (var command in Commands)
+//        foreach (var dropletCommand in Commands)
 //        {
-//            switch (command)
+//            switch (dropletCommand)
 //            {
 //                case Move moveCommand:
 //                    boardActions.AddRange(HandleMoveCommand(moveCommand));
@@ -71,7 +71,7 @@
 //                    HandleDispenseCommand(dispenseCommand);
 //                    break;
 //                default:
-//                    Console.WriteLine("Unknown command");
+//                    Console.WriteLine("Unknown dropletCommand");
 //                    break;
 //            }
 //        }
@@ -98,7 +98,7 @@
 
 //    private List<BoardAction> HandleMergeCommand(Merge mergeCommand)
 //    {
-//        // Add logic for processing the Merge command
+//        // Add logic for processing the Merge dropletCommand
 //        //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
 
 //        Droplet inputDroplet1 = Droplets[mergeCommand.InputName1]
@@ -132,7 +132,7 @@
 
 //    private List<BoardAction> HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand)
 //    {
-//        // Add logic for processing the SplitByRatio command
+//        // Add logic for processing the SplitByRatio dropletCommand
 //        //Console.WriteLine($"Splitting droplet with ratio {splitByRatioCommand.Ratio}");
 
 
@@ -165,7 +165,7 @@
 
 //    private List<BoardAction> HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand)
 //    {
-//        // Add logic for processing the SplitByVolume command
+//        // Add logic for processing the SplitByVolume dropletCommand
 //        //Console.WriteLine($"Splitting droplet by volume {splitByVolumeCommand.Volume}");
 
 //        Droplet inputDroplet = Droplets[splitByVolumeCommand.InputName]
@@ -197,7 +197,7 @@
 
 //    private List<BoardAction> HandleMixCommand(Mix mixCommand)
 //    {
-//        // Add logic for processing the Mix command
+//        // Add logic for processing the Mix dropletCommand
 //        //Console.WriteLine("Mixing droplets...");
 
 //        Droplet inputDroplet = Droplets[mixCommand.DropletName]
@@ -224,7 +224,7 @@
 //    private void HandleDispenseCommand(Dispense dispenseCommand)
 //    {
 //        throw new NotImplementedException();
-//        // Add logic for processing the Dispense command
+//        // Add logic for processing the Dispense dropletCommand
 //        Console.WriteLine($"Dispensing droplet at {dispenseCommand.DropletName}");
 //    }
 

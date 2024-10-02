@@ -2,7 +2,6 @@
 {
     public interface ICommand
     {
-        List<string> GetInputDroplets();
-        List<string> GetOutputDroplets();
+        void Evaluate(Dictionary<string, double> variableValues);
     }
 }
