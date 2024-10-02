@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using DropletsInMotion.Communication.Simulator.Models;
+using DropletsInMotion.UI;
 using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator.Services
@@ -10,18 +11,23 @@ namespace DropletsInMotion.Communication.Simulator.Services
     public class WebsocketService : IWebsocketService
     {
         private readonly IConfiguration _configuration;
+        private readonly IConsoleService _consoleService;
 
 
         private HttpListener _httpListener;
         public string? Prefix;
         private List<WebSocket> _connectedClients;
-        private readonly TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
+        private TaskCompletionSource<bool> _clientConnectionTask = new TaskCompletionSource<bool>();
         private Dictionary<string, TaskCompletionSource<WebSocketMessage<object>>> _pendingRequests = new();
         private bool _isWebsocketRunning = false;
 
-        public WebsocketService(IConfiguration configuration)
+        public event EventHandler? ClientDisconnected;
+
+        public WebsocketService(IConfiguration configuration, IConsoleService consoleService)
         {
             _configuration = configuration;
+            _consoleService = consoleService;
+
             Prefix = _configuration["Development:WebsocketHost"];
 
             if (Prefix == null)
@@ -39,7 +45,8 @@ namespace DropletsInMotion.Communication.Simulator.Services
         {
             _httpListener.Start();
             _isWebsocketRunning = true;
-            Console.WriteLine($"WebSocket started at {Prefix}");
+
+            _consoleService.Info($"WebSocket started at {Prefix}");
 
             try
             {
@@ -51,7 +58,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                     {
                         if (_connectedClients.Count >= 1)
                         {
-                            //Console.WriteLine("Rejected new connection, only one client is allowed.");
                             httpContext.Response.StatusCode = 409;
                             httpContext.Response.Close();
                             continue;
@@ -63,12 +69,13 @@ namespace DropletsInMotion.Communication.Simulator.Services
                         _connectedClients.Add(webSocket);
                         _ = Task.Run(() => HandleConnectionAsync(webSocket, CancellationToken.None));  // Use a new cancellation token for client connections
 
-                        Console.WriteLine($"Client connected from {httpContext.Request.RemoteEndPoint}");
-
+                        _consoleService.Debug($"Client connected from {httpContext.Request.RemoteEndPoint}");
                         _clientConnectionTask.TrySetResult(true);
                     }
                     else
                     {
+                        _consoleService.Warning("Received non-WebSocket request, closing.");
+
                         httpContext.Response.StatusCode = 400;
                         httpContext.Response.Close();
                         Console.WriteLine("Received non-WebSocket request, responded with 400 Bad Request.");
@@ -77,14 +84,13 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error occurred in WebSocket server: {ex.Message}");
+                _consoleService.Error($"Error occurred in WebSocket server: {ex.Message}");
             }
             finally
             {
                 // Only stop the listener if explicitly shutting down
                 if (serverCancellationToken.IsCancellationRequested)
                 {
-                    //Console.WriteLine("Server cancellation was called");
                     _httpListener.Stop();
                     _isWebsocketRunning = false;
                 }
@@ -100,13 +106,11 @@ namespace DropletsInMotion.Communication.Simulator.Services
         private async Task HandleConnectionAsync(WebSocket webSocket, CancellationToken cancellationToken)
         {
             var buffer = new byte[1024 * 4];
-
             try
             {
                 while (webSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
                 {
                     var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by the WebSocket client", cancellationToken);
@@ -120,13 +124,25 @@ namespace DropletsInMotion.Communication.Simulator.Services
             catch (WebSocketException ex)
             {
                 Console.WriteLine($"WebSocket exception: {ex.Message}");
+                _clientConnectionTask = new TaskCompletionSource<bool>();
+                throw;
             }
             finally
             {
-                _connectedClients.Remove(webSocket);
-                Console.WriteLine("Client disconnected");
 
+                if (!_httpListener.IsListening)
+                {
+                    _consoleService.Warning("HttpListener stopped unexpectedly, restarting...");
+                    _httpListener.Start();
+                }
+
+                // Handle client disconnect and trigger events
+                _connectedClients.Remove(webSocket);
                 webSocket.Dispose();
+
+                _clientConnectionTask = new TaskCompletionSource<bool>();
+
+                ClientDisconnected?.Invoke(this, EventArgs.Empty);
             }
         }
 

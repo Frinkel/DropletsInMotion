@@ -20,12 +20,14 @@ namespace DropletsInMotion
         private static IConfiguration? _configuration;
         private static IConsoleService? _consoleService;
         private static IFileService? _fileService;
+        private static ICommunicationEngine? _communicationEngine;
 
         static async Task Main(string[] args)
         {
             using (var serviceProvider = Setup())
             {
                 _consoleService = serviceProvider.GetRequiredService<IConsoleService>();
+                _communicationEngine = serviceProvider.GetRequiredService<ICommunicationEngine>();
 
                 try
                 {
@@ -44,7 +46,6 @@ namespace DropletsInMotion
                     _consoleService.WriteColor(e.Message, ConsoleColor.DarkRed);
                     throw;
                 }
-               
             }
         }
 
@@ -64,7 +65,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton(_configuration);
             serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
             serviceCollection.AddSingleton<IFileService, FileService>();
-            serviceCollection.AddSingleton<ICommunicationService, CommunicationService>();
+            serviceCollection.AddSingleton<ICommunicationEngine, CommunicationEngine>();
             serviceCollection.AddSingleton<IWebsocketService, WebsocketService>();
             serviceCollection.AddSingleton<IUserService, UserService>();
             serviceCollection.AddSingleton<ITimeService, TimeService>();
