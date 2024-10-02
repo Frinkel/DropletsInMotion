@@ -1,14 +1,8 @@
-using System.Runtime.Intrinsics.X86;
 using Antlr4.Runtime;
-using DropletsInMotion;
-using DropletsInMotion.Compilers;
-using DropletsInMotion.Domain;
-using System.Xml.Linq;
-using DropletsInMotion.Compilers.Models;
-using DropletsInMotion.Controllers;
-using NUnit.Framework;
-using DropletsInMotion.Compilers.Services;
-using DropletsInMotion.Routers.Models;
+using DropletsInMotion.Application.ExecutionEngine.Models;
+using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Application.Services;
 
 namespace DropletsInMotionTests
 {
@@ -46,8 +40,9 @@ namespace DropletsInMotionTests
                 }
             }
 
-            TemplateHandler templateHandler = new TemplateHandler(board);
-            List<(string, List<BoardAction>)> templates = templateHandler.templates;
+            TemplateService templateHandler = new TemplateService();
+            templateHandler.Initialize(board);
+            List<(string, List<BoardAction>)> templates = templateHandler.Templates;
             Console.WriteLine(templates);
             Assert.AreEqual(templates.Count, 9);
             Assert.AreEqual(templates[0].Item1, "mergeHorizontal");
@@ -80,7 +75,7 @@ namespace DropletsInMotionTests
         //    string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
         //    string platformPath = Path.Combine(projectDirectory, "TestAssets", "platform.json");
         //    Compiler compiler = new Compiler(droplets, moves, null, platformPath);
-        //    List<BoardAction> actions = compiler.Compile();
+        //    List<BoardAction> actions = compiler.Execute();
 
         //    Assert.AreEqual(8, actions.Count());
         //}
