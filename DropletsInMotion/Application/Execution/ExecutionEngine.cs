@@ -34,13 +34,13 @@ namespace DropletsInMotion.Application.Execution
         private readonly IActionService _actionService;
         private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
-        private readonly ICommunicationService _communicationService;
+        private readonly ICommunicationEngine _communicationEngine;
 
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ICommunicationService communicationService)
+                                ITemplateService templateService, ICommunicationEngine communicationEngine)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -51,7 +51,7 @@ namespace DropletsInMotion.Application.Execution
             _router = routerService;
             _templateService = templateService;
             _dependencyService = dependencyService;
-            _communicationService = communicationService;
+            _communicationEngine = communicationEngine;
         }
 
         public async Task Execute(List<ICommand> commands, Dictionary<string, Droplet> droplets, string platformPath)
@@ -174,7 +174,7 @@ namespace DropletsInMotion.Application.Execution
 
                 if (boardActions.Count > 0)
                 {
-                    await _communicationService.SendActions(boardActions);
+                    await _communicationEngine.SendActions(boardActions);
                 }
                 Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
@@ -194,7 +194,7 @@ namespace DropletsInMotion.Application.Execution
                 mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, Time));
                 _storeService.StoreDropletWithNameAndTime(mixCommand.DropletName, Time + mixActions.Last().Time);
                 
-                await _communicationService.SendActions(mixActions);
+                await _communicationEngine.SendActions(mixActions);
                 
             }
         }

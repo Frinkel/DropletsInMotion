@@ -36,7 +36,7 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton(configuration);
             serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
             serviceCollection.AddSingleton<IFileService, FileService>();
-            serviceCollection.AddSingleton<ICommunicationService, CommunicationService>();
+            serviceCollection.AddSingleton<ICommunicationEngine, CommunicationEngine>();
             serviceCollection.AddSingleton<IWebsocketService, WebsocketService>();
             serviceCollection.AddSingleton<IUserService, UserService>();
             serviceCollection.AddSingleton<ITimeService, TimeService>();

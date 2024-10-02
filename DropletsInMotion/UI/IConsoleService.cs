@@ -15,5 +15,9 @@
         void WriteSuccess(string message);
         void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black);
         void WriteEmptyLine(int number);
+        void Error(string message);
+        void Info(string message);
+        void Warning(string message);
+        void Debug(string message);
     }
 }

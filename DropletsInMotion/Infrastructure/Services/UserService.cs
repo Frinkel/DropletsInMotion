@@ -1,17 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace DropletsInMotion.Infrastructure.Services;
 
-namespace DropletsInMotion.Infrastructure.Services
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private IUserService.CommunicationType _communication = IUserService.CommunicationType.NotSet;
+
+    public event EventHandler? CommunicationTypeChanged;
+
+    public required string PlatformPath { get; set; }
+    public required string ProgramPath { get; set; }
+
+    public IUserService.CommunicationType Communication
     {
+        get => _communication;
+        set
+        {
+            if (_communication != value)
+            {
+                _communication = value;
+                OnCommunicationTypeChanged();
+            }
+        }
+    }
 
-        public string? PlatformPath { get; set; }
-        public string? ProgramPath { get; set; }
-        public IUserService.CommunicationType Communication { get; set; } = IUserService.CommunicationType.Simulator;
-
+    public virtual void OnCommunicationTypeChanged()
+    {
+        CommunicationTypeChanged?.Invoke(this, EventArgs.Empty);
     }
 }
