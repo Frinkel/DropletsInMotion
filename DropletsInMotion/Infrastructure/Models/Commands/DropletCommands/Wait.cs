@@ -35,5 +35,9 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
         {
             Time = TimeExpression.Evaluate(variableValues);
         }
+        public List<string> GetVariables()
+        {
+            return TimeExpression.GetVariables();
+        }
     }
 }

@@ -18,5 +18,10 @@
         {
             return $"-({Operand})";
         }
+
+        public override List<string> GetVariables()
+        {
+            return Operand.GetVariables();
+        }
     }
 }

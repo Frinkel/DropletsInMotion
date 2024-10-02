@@ -65,7 +65,6 @@ namespace DropletsInMotion.Application.Execution
             Time = 0;
             Console.WriteLine(Board[0][1]);
 
-
             DependencyGraph.GenerateDotFile();
 
             ContaminationMap = new byte[Board.Length, Board[0].Length];

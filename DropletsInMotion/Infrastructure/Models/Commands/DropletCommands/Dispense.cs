@@ -44,5 +44,10 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
         {
             Volume = VolumeExpression.Evaluate(variableValues);
         }
+
+        public List<string> GetVariables()
+        {
+            return VolumeExpression.GetVariables();
+        }
     }
 }

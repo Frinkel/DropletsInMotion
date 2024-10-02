@@ -21,5 +21,9 @@
         public void Evaluate(Dictionary<string, double> variableValues)
         {
         }
+        public List<string> GetVariables()
+        {
+            return new List<string> { };
+        }
     }
 }

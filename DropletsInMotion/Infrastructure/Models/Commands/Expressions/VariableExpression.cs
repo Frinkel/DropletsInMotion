@@ -25,5 +25,10 @@
         {
             return VariableName;
         }
+
+        public override List<string> GetVariables()
+        {
+            return new List<string>() { VariableName };
+        }
     }
 }

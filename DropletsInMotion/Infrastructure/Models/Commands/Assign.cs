@@ -26,5 +26,12 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
         {
             return $"{VariableName} = {ValueExpression}";
         }
+
+        public List<string> GetVariables()
+        {
+            var res = ValueExpression.GetVariables();
+            res.Add(VariableName);
+            return res;
+        }
     }
 }

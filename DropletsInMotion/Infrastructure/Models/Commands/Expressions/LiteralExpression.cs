@@ -18,5 +18,10 @@
         {
             return Value.ToString();
         }
+
+        public override List<string> GetVariables()
+        {
+            return new List<string>();
+        }
     }
 }

@@ -3,5 +3,6 @@
     public interface ICommand
     {
         void Evaluate(Dictionary<string, double> variableValues);
+        public List<string> GetVariables();
     }
 }
