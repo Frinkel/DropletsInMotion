@@ -3,28 +3,27 @@ using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication;
+using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
 
 namespace DropletsInMotion.Application.Execution
 {
     public class ExecutionEngine : IExecutionEngine
     {
-        //public CommunicationEngine CommunicationEngine;
-
         public Electrode[][] Board { get; set; }
 
         public Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
 
+        public Dictionary<string, Double> Variable { get; set; } = new Dictionary<string, Double>();
+
         public double Time { get; set; }
         private byte[,] ContaminationMap { get; set; }
 
-        private PlatformService PlatformService;
-
         private DependencyGraph DependencyGraph;
 
-        //private SimpleRouter _simpleRouter;
         private readonly IRouterService _router;
         private readonly IContaminationService _contaminationService;
         private readonly ISchedulerService _schedulerService;
@@ -35,12 +34,13 @@ namespace DropletsInMotion.Application.Execution
         private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
         private readonly ICommunicationService _communicationService;
+        private readonly ITranslator _iTranslator;
 
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ICommunicationService communicationService)
+                                ITemplateService templateService, ICommunicationService communicationService, ITranslator iTranslator)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -52,19 +52,19 @@ namespace DropletsInMotion.Application.Execution
             _templateService = templateService;
             _dependencyService = dependencyService;
             _communicationService = communicationService;
+            _iTranslator = iTranslator;
         }
 
-        public async Task Execute(List<ICommand> commands, Dictionary<string, Droplet> droplets, string platformPath)
+        public async Task Execute()
         {
-            PlatformService = new PlatformService(platformPath);
-
-            Board = PlatformService.Board;
+            Board = _iTranslator.Board;
+            DependencyGraph = _iTranslator.DependencyGraph;
+            var droplets = _iTranslator.Droplets;
 
             Time = 0;
 
             Console.WriteLine(Board[0][1]);
 
-            DependencyGraph = new DependencyGraph(commands);
 
             DependencyGraph.GenerateDotFile();
 
@@ -77,20 +77,12 @@ namespace DropletsInMotion.Application.Execution
                 ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
             }
 
-            
-            //_simpleRouter = new SimpleRouter(Board);
             _router.Initialize(Board);
-            //_router = new RouterService(Board, Droplets, _contamination);
-
-
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-
-
+            
             List<BoardAction> boardActions = new List<BoardAction>();
-            int i = 0;
-
-
+            
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
                 foreach (var agent in Agents)
@@ -98,14 +90,9 @@ namespace DropletsInMotion.Application.Execution
                     Console.WriteLine(agent.Value);
                 }
 
-
-
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
-                //print the commands
 
-                Console.WriteLine($"Commands to execute iteration {i}:");
-                i++;
                 foreach (ICommand command in commandsToExecute)
                 {
                     Console.WriteLine(command);
@@ -161,14 +148,11 @@ namespace DropletsInMotion.Application.Execution
                     boardActions.AddRange(_router.Route(Agents, movesToExecute, ContaminationMap, Time, boundTime));
                     boardActions = boardActions.OrderBy(b => b.Time).ToList();
                     Time = boardActions.Any() ? boardActions.Last().Time : Time;
-
                 }
                 else
                 {
                     Time = boundTime != null ? (double)boundTime : Time;
                 }
-
-
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 

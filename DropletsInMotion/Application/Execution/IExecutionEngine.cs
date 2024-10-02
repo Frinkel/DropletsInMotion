@@ -11,7 +11,7 @@ namespace DropletsInMotion.Application.Execution
 {
     public interface IExecutionEngine
     {
-        Task Execute(List<ICommand> commands, Dictionary<string, Droplet> droplets, string platformPath);
+        Task Execute();
         Dictionary<string, Agent> Agents { get; }
         double Time { get; set; }
     }

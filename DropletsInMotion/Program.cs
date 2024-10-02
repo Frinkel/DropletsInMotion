@@ -9,6 +9,8 @@ using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Communication.Simulator.Services;
+using DropletsInMotion.Presentation;
+using DropletsInMotion.Presentation.Services;
 
 
 namespace DropletsInMotion
@@ -74,11 +76,14 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<IRouterService, RouterService>();
             serviceCollection.AddSingleton<IDependencyService, DependencyService>();
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
+            serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
+            serviceCollection.AddSingleton<IPlatformService, PlatformService>();
 
 
             // Classes
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
 

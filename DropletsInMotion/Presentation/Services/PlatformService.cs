@@ -4,15 +4,15 @@ using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotion.Presentation.Services
 {
-    public class PlatformService
+    public class PlatformService : IPlatformService
     {
         public Electrode[][] Board { get; set; }
 
-        public PlatformService(string jsonFilePath)
+        public PlatformService()
         {
-            LoadBoardFromJson(jsonFilePath);
+            
         }
-        private void LoadBoardFromJson(string jsonFilePath)
+        public void LoadBoardFromJson(string jsonFilePath)
         {
             string jsonContent = File.ReadAllText(jsonFilePath);
             RootObject rootObject = JsonSerializer.Deserialize<RootObject>(jsonContent);

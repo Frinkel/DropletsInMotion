@@ -127,7 +127,7 @@ namespace DropletsInMotion.UI
             // TODO: Maybe the compiler should return a status code for the compilation.
             IExecutionEngine executionEngine = _serviceProvider.GetRequiredService<IExecutionEngine>();
             executionEngine.Agents.Clear(); // TODO: We need to clear this because of persistance
-            await executionEngine.Execute(listener.Commands, listener.Droplets, _userService.PlatformPath);
+            await executionEngine.Execute();
 
 
             return ProgramState.Completed;
