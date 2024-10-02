@@ -11,12 +11,13 @@ namespace DropletsInMotion.Infrastructure.Services
         public enum CommunicationType
         {
             Simulator,
-            Physical
+            Physical,
+            NotSet,
         }
 
         string PlatformPath { get; set; }
         string ProgramPath { get; set; }
         public CommunicationType Communication { get; set; }
-
+        event EventHandler? CommunicationTypeChanged;
     }
 }

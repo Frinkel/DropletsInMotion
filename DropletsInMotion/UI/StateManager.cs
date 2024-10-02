@@ -15,14 +15,18 @@ using DropletsInMotion.Application.Execution;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using static MicrofluidicsParser;
+using System.Runtime.InteropServices;
 
 namespace DropletsInMotion.UI
 {
     public class StateManager
     {
+        CancellationTokenSource _cts = new CancellationTokenSource();
+
+
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsoleService _consoleService;
-        private readonly ICommunicationService _communicationService;
+        private readonly ICommunicationEngine _communicationEngine;
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
         private readonly IConfiguration _configuration;
@@ -30,21 +34,24 @@ namespace DropletsInMotion.UI
         private ProgramState _currentState = ProgramState.GettingInitialInformation;
 
         private string? _programContent;
+        private TaskCompletionSource<bool> _isClientConnected;
 
-        public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationService communicationService, IUserService userService, IFileService fileService, IConfiguration configuration)
+        public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationEngine communicationEngine, IUserService userService, IFileService fileService, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _consoleService = consoleService;
-            _communicationService = communicationService;
+            _communicationEngine = communicationEngine;
             _userService = userService;
             _fileService = fileService;
             _configuration = configuration;
+            _isClientConnected = new TaskCompletionSource<bool>();
+
+            _communicationEngine.ClientConnected += OnClientConnected;
+            _communicationEngine.ClientDisconnected += OnClientDisconnected;
         }
 
         public async Task Start()
         {
-            PrintCommands();
-
             while (true)
             {
                 try
@@ -53,6 +60,7 @@ namespace DropletsInMotion.UI
                     {
                         // Get the information that is necessary for the program to run
                         case (ProgramState.GettingInitialInformation):
+                            PrintCommands();
                             _consoleService.GetInitialInformation();
                             _currentState = ProgramState.ReadingInputFiles;
                             break;
@@ -67,7 +75,7 @@ namespace DropletsInMotion.UI
                             break;
 
                         case (ProgramState.WaitingForUserInput):
-                            _currentState = await HandleUserInput();
+                            _currentState = await HandleUserInput(_cts.Token);
                             break;
 
                         case (ProgramState.CompilingProgram):
@@ -87,17 +95,17 @@ namespace DropletsInMotion.UI
                 }
                 catch (Exception e)
                 {
-                    _consoleService.WriteColor("Stopping communication channels...");
-                    _consoleService.WriteEmptyLine(1);
-                    await _communicationService.StopCommunication();
+                    //_consoleService.WriteColor("Stopping communication channels...");
+                    //_consoleService.WriteEmptyLine(1);
+                    //await _communicationEngine.StopCommunication();
 
                     // TODO: Simplify this for user
                     //_consoleService.WriteColor(e.Message, ConsoleColor.DarkRed);
-                    _consoleService.WriteColor("An error occurred:", ConsoleColor.DarkRed);
-                    _consoleService.WriteColor($"Message: {e.Message}", ConsoleColor.DarkRed);
-                    _consoleService.WriteColor($"Source: {e.Source}", ConsoleColor.DarkRed);
-                    _consoleService.WriteColor($"TargetSite: {e.TargetSite}", ConsoleColor.DarkRed);
-                    _consoleService.WriteColor($"StackTrace: {e.StackTrace}", ConsoleColor.DarkRed);
+                    _consoleService.Error("An error occurred:");
+                    _consoleService.Error($"Message: {e.Message}");
+                    _consoleService.Error($"Source: {e.Source}");
+                    _consoleService.Error($"TargetSite: {e.TargetSite}");
+                    _consoleService.Error($"StackTrace: {e.StackTrace}");
 
                     _consoleService.WriteEmptyLine(2);
                     _currentState = ProgramState.WaitingForUserInput;
@@ -105,7 +113,6 @@ namespace DropletsInMotion.UI
                 }
             }
         }
-
 
         private async Task<ProgramState> HandleCompilation()
         {
@@ -133,20 +140,53 @@ namespace DropletsInMotion.UI
             return ProgramState.Completed;
         }
 
+        private void OnClientConnected(object? sender, EventArgs e)
+        {
+            _consoleService.Info("Client connection established!");
+            _isClientConnected.TrySetResult(true);
+        }
+
+        private async void OnClientDisconnected(object? sender, EventArgs e)
+        {
+            _consoleService.Warning("Client disconnected. Resetting the state to wait for a new connection...");
+            _currentState = ProgramState.WaitingForClientConnection;
+            _isClientConnected = new TaskCompletionSource<bool>();
+
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
+        }
+
         private async Task<ProgramState> HandleCommunication()
         {
-            _consoleService.WriteColor("Booting up the communication...");
-            await _communicationService.StartCommunication();
 
-            if (await _communicationService.IsClientConnected())
+            if (_configuration.GetValue<bool>("Development:SimulationCommunication"))
             {
-                return ProgramState.WaitingForUserInput;
+                _userService.Communication = IUserService.CommunicationType.Simulator;
             }
 
-            _consoleService.WriteColor("Waiting for a client to connect...");
-            await _communicationService.WaitForConnection();
-            await Task.Delay(100);
-            _consoleService.WriteEmptyLine(2);
+            if (_userService.Communication == IUserService.CommunicationType.NotSet)
+            {
+                _consoleService.WriteColor("Enter a communication type:");
+                _consoleService.WriteColor("   0 for Simulation");
+                _consoleService.WriteColor("   1 for Physical Biochip");
+                _consoleService.WriteEmptyLine(1);
+                string? userInput = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(userInput) || !userInput.Equals("1"))
+                {
+                    _userService.Communication = IUserService.CommunicationType.Simulator;
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            _consoleService.WriteEmptyLine(1);
+            _consoleService.Info("Waiting for a client to connect.");
+            await _isClientConnected.Task;
+            _consoleService.WriteEmptyLine(1);
+
 
             return ProgramState.WaitingForUserInput;
         }
@@ -162,49 +202,58 @@ namespace DropletsInMotion.UI
 
             // Switch states
             return _configuration.GetValue<bool>("Development:SkipCommunication")
-                ? ProgramState.CompilingProgram
+                ? ProgramState.WaitingForUserInput
                 : ProgramState.WaitingForClientConnection;
         }
 
 
-        private async Task<ProgramState> HandleUserInput()
+        private async Task<ProgramState> HandleUserInput(CancellationToken token)
         {
             _consoleService.WriteColor("User:");
-            string userInput = Console.ReadLine()?.ToLower() ?? "";
 
-            switch (userInput)
+            while (!token.IsCancellationRequested)
             {
-                case "start":
-                case "":
-                case null:
-                    return ProgramState.CompilingProgram;
+                if (Console.KeyAvailable)
+                {
+                    //_consoleService.WriteColor("User:", ConsoleColor.Blue, ConsoleColor.DarkGreen);
+                    string userInput = Console.ReadLine()?.ToLower() ?? "";
+                    switch (userInput)
+                    {
+                        case "start":
+                        case "":
+                        case null:
+                            return ProgramState.CompilingProgram;
 
-                case "reupload":
-                    return ProgramState.GettingInitialInformation;
+                        case "reupload":
+                            return ProgramState.GettingInitialInformation;
 
-                case "disconnect":
-                    await _communicationService.StopCommunication()!;
-                    return ProgramState.WaitingForClientConnection;
+                        case "disconnect":
+                            //await _communicationEngine.StopCommunication()!;
+                            return ProgramState.WaitingForClientConnection;
 
-                case "stop":
-                case "quit":
-                case "q":
-                    _consoleService.WriteColor("Exiting the program...");
-                    await _communicationService.StopCommunication()!;
-                    Environment.Exit(0);
-                    break;
+                        case "stop":
+                        case "quit":
+                        case "q":
+                            _consoleService.WriteColor("Exiting the program...");
+                            //await _communicationEngine.StopCommunication()!;
+                            Environment.Exit(0);
+                            break;
 
-                case "help":
-                case "?":
-                    PrintCommands();
+                        case "help":
+                        case "?":
+                            PrintCommands();
+                            return ProgramState.WaitingForUserInput;
+
+                        default:
+                            _consoleService.WriteColor("Invalid command. Please try again.");
+                            return ProgramState.WaitingForUserInput;
+                    }
+
                     return ProgramState.WaitingForUserInput;
-
-                default:
-                    _consoleService.WriteColor("Invalid dropletCommand. Please try again.");
-                    return ProgramState.WaitingForUserInput;
+                }
             }
 
-            return ProgramState.WaitingForUserInput;
+            return _currentState;
         }
 
         private void PrintCommands()

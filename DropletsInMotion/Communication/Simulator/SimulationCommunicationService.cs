@@ -12,9 +12,12 @@ public class SimulationCommunicationService : ICommunicationService
     private CancellationTokenSource? _cancellationTokenSource;
     public Task? WebSocketTask { get; private set; }
 
+    public event EventHandler? ClientDisconnected;
+
     public SimulationCommunicationService(IWebsocketService websocketService)
     {
         _websocketService = websocketService;
+        _websocketService.ClientDisconnected += OnClientDisconnected;
     }
 
     public async Task StartCommunication()
@@ -26,7 +29,7 @@ public class SimulationCommunicationService : ICommunicationService
             await _websocketService.StartServerAsync(_cancellationTokenSource.Token);
         });
 
-        await Task.Delay(100); 
+        await Task.Delay(100);
     }
 
     public async Task StopCommunication()
@@ -117,5 +120,10 @@ public class SimulationCommunicationService : ICommunicationService
     public async Task<bool> IsConnectionOpen()
     {
         return _websocketService.IsWebsocketRunning();
+    }
+
+    private void OnClientDisconnected(object? sender, EventArgs e)
+    {
+        ClientDisconnected?.Invoke(this, EventArgs.Empty);
     }
 }

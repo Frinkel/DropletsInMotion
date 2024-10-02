@@ -48,5 +48,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
         /// </summary>
         /// <returns>True if the WebSocket server is running, otherwise false.</returns>
         bool IsWebsocketRunning();
+
+        event EventHandler? ClientDisconnected;
     }
 }

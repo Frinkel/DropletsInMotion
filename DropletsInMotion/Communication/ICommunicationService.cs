@@ -9,7 +9,8 @@ namespace DropletsInMotion.Communication
         public Task SendActions(List<BoardAction> boardActionDtoList);
         public Task SendRequest(BoardSensorRequest sensorRequest);
         public Task WaitForConnection();
-        public Task<bool> IsClientConnected();
-        public Task<bool> IsConnectionOpen();
+        //public Task<bool> IsClientConnected();
+        //public Task<bool> IsConnectionOpen();
+        event EventHandler? ClientDisconnected;
     }
 }

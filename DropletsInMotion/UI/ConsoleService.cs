@@ -111,6 +111,25 @@ namespace DropletsInMotion.UI
             WriteColor(message, ConsoleColor.Green);
         }
 
+        public void Error(string message)
+        {
+            WriteColor(message, ConsoleColor.DarkRed);
+        }
+
+        public void Info(string message)
+        {
+            WriteColor("Info: " + message, ConsoleColor.DarkCyan);
+        }
+        public void Warning(string message)
+        {
+            WriteColor("Warning: " + message, ConsoleColor.Yellow);
+        }
+
+        public void Debug(string message)
+        {
+            WriteColor("Debug: " + message, ConsoleColor.Green);
+        }
+
         public void WriteEmptyLine(int number)
         {
             for (int i = 0; i < number; i++)
