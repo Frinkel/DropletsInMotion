@@ -1,7 +1,7 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers;
-using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace DropletsInMotion.Application.Services
 
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time)
         {
-            // Add logic for processing the Merge command
+            // Add logic for processing the Merge dropletCommand
             //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
 
 
@@ -179,7 +179,7 @@ namespace DropletsInMotion.Application.Services
             return mixActions;
         }
 
-        public bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<ICommand> movesToExecute)
+        public bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute)
         {
             if (_storeService.ContainsDroplet(mixCommand.DropletName))
             {
@@ -200,7 +200,7 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<ICommand> movesToExecute)
+        public bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute)
         {
             if (!agents.TryGetValue(storeCommand.DropletName, out var inputDroplet))
             {
@@ -216,16 +216,16 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public bool DropletsExistAndCommandInProgress(ICommand command, Dictionary<string, Agent> agents)
+        public bool DropletsExistAndCommandInProgress(IDropletCommand dropletCommand, Dictionary<string, Agent> agents)
         {
-            if (_commandLifetimeService.CanExecuteCommand(command))
+            if (_commandLifetimeService.CanExecuteCommand(dropletCommand))
             {
-                var inputDroplets = command.GetInputDroplets();
+                var inputDroplets = dropletCommand.GetInputDroplets();
                 foreach (var inputDroplet in inputDroplets)
                 {
                     if (!agents.ContainsKey(inputDroplet))
                     {
-                        throw new InvalidOperationException($"No droplet found with name {inputDroplet} for command {command}.");
+                        throw new InvalidOperationException($"No droplet found with name {inputDroplet} for dropletCommand {dropletCommand}.");
                     }
                 }
                 return true;
@@ -234,7 +234,7 @@ namespace DropletsInMotion.Application.Services
             return false;
         }
 
-        public void MoveMergeDropletToPosition(Merge mergeCommand, List<ICommand> movesToExecute, Dictionary<string, Agent> agents)
+        public void MoveMergeDropletToPosition(Merge mergeCommand, List<IDropletCommand> movesToExecute, Dictionary<string, Agent> agents)
         {
 
             if (!agents.TryGetValue(mergeCommand.OutputName, out var outDroplet))
@@ -244,11 +244,11 @@ namespace DropletsInMotion.Application.Services
 
             var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
             movesToExecute.Add(moveCommand);
-            Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
+            Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
         }
 
 
-        public bool InPositionToMerge(Merge mergeCommand, List<ICommand> movesToExecute, ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions, Dictionary<string, Agent> agents)
+        public bool InPositionToMerge(Merge mergeCommand, List<IDropletCommand> movesToExecute, ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions, Dictionary<string, Agent> agents)
         {
             var inputDroplet1 = agents[mergeCommand.InputName1];
             var inputDroplet2 = agents[mergeCommand.InputName2];
@@ -269,7 +269,7 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Item1.optimalX, mergePositions.Item1.optimalY);
                 movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move command added for droplet 1: {moveCommand}");
+                Console.WriteLine($"Move dropletCommand added for droplet 1: {moveCommand}");
             }
 
             // Move inputDroplet2 to be next to the merge position
@@ -277,14 +277,14 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Item2.optimalX, mergePositions.Item2.optimalY);
                 movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move command added for droplet 2: {moveCommand}");
+                Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
 
             }
 
             return false;
         }
 
-        public bool InPositionToSplit(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+        public bool InPositionToSplit(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
             ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions,
             Dictionary<string, Agent> agents)
         {
@@ -319,7 +319,7 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<ICommand> movesToExecute,
+        public void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
             Dictionary<string, Agent> agents)
         {
 

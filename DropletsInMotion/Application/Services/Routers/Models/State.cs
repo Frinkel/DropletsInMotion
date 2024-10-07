@@ -1,6 +1,6 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services.Routers.Models;
 
@@ -16,7 +16,7 @@ public class State
 
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
-    private List<ICommand> Commands { get; set; }
+    private List<IDropletCommand> Commands { get; set; }
     private ITemplateService _templateHandler;
 
     private int? CachedHash = null;
@@ -24,7 +24,7 @@ public class State
     private readonly IContaminationService _contaminationService;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ICommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, int? seed = null)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
@@ -299,7 +299,7 @@ public class State
     private int CalculateHeuristic()
     {
         int h = 0;
-        foreach (ICommand command in Commands)
+        foreach (IDropletCommand command in Commands)
         {
             if (command is Move moveCommand)
             {
@@ -325,7 +325,7 @@ public class State
             }
             else
             {
-                throw new InvalidOperationException("Trying to calculate heuristic for unknown command!");
+                throw new InvalidOperationException("Trying to calculate heuristic for unknown dropletCommand!");
             }
         }
         return h;
@@ -430,15 +430,15 @@ public class State
     }
 
 
-    public bool IsGoalState(ICommand command)
+    public bool IsGoalState(IDropletCommand dropletCommand)
     {
-        switch (command)
+        switch (dropletCommand)
         {
             case Move moveCommand:
                 var agent = Agents[moveCommand.GetInputDroplets().First()];
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
-                throw new InvalidOperationException("Trying to determine goalstate for unknown command!");
+                throw new InvalidOperationException("Trying to determine goalstate for unknown dropletCommand!");
                 break;
         }
 

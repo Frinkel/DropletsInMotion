@@ -26,9 +26,9 @@
 //            //ContaminationService.StateAmount = 0;
 //            //ContaminationService.StateAmountExists = 0;
 
-//            ICommand command = new Move("d1", 20, 5);
-//            ICommand command2 = new Move("d2", 1, 5);
-//            var commands = new List<ICommand>() { command, command2 };
+//            IDropletCommand dropletCommand = new Move("d1", 20, 5);
+//            IDropletCommand command2 = new Move("d2", 1, 5);
+//            var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 5, 5, 1);
@@ -62,9 +62,9 @@
 //            //ContaminationService.StateAmount = 0;
 //            //ContaminationService.StateAmountExists = 0;
 
-//            ICommand command = new Move("d1", 20, 5);
-//            ICommand command2 = new Move("d2", 1, 5);
-//            var commands = new List<ICommand>() { command, command2 };
+//            IDropletCommand dropletCommand = new Move("d1", 20, 5);
+//            IDropletCommand command2 = new Move("d2", 1, 5);
+//            var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 5, 5, 1);
@@ -99,8 +99,8 @@
 //            //ContaminationService.StateAmount = 0;
 //            //ContaminationService.StateAmountExists = 0;
 
-//            ICommand command = new Move("d1", 15, 10);
-//            var commands = new List<ICommand>() { command };
+//            IDropletCommand dropletCommand = new Move("d1", 15, 10);
+//            var commands = new List<IDropletCommand>() { dropletCommand };
 
 //            Dictionary<string, Droplet> droplets = new Dictionary<string, Droplet>();
 //            var d1 = new Droplet("d1", 5, 10, 1);
@@ -137,12 +137,12 @@
 
 //        }
 
-//        public bool IsOneGoalState(List<ICommand> commands, Dictionary<string, Droplet> droplets)
+//        public bool IsOneGoalState(List<IDropletCommand> commands, Dictionary<string, Droplet> droplets)
 //        {
-//            foreach (var command in commands)
+//            foreach (var dropletCommand in commands)
 //            {
 //                Droplet droplet;
-//                switch (command)
+//                switch (dropletCommand)
 //                {
 //                    case Move moveCommand:
 //                        droplet = droplets[moveCommand.GetInputDroplets().First()];

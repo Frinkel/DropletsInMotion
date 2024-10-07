@@ -1,6 +1,6 @@
-﻿namespace DropletsInMotion.Infrastructure.Models.Commands
+﻿namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
-    public class WaitForUserInput : ICommand
+    public class WaitForUserInput : IDropletCommand
     {
         public WaitForUserInput() { }
 
@@ -15,6 +15,13 @@
         }
 
         public List<string> GetOutputDroplets()
+        {
+            return new List<string> { };
+        }
+        public void Evaluate(Dictionary<string, double> variableValues)
+        {
+        }
+        public List<string> GetVariables()
         {
             return new List<string> { };
         }

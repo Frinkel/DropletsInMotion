@@ -110,7 +110,6 @@ namespace DropletsInMotion.Application.Services
         public List<BoardAction> ApplyTemplate(string templateName, Droplet droplet, double time)
         {
             List<BoardAction> template = Templates.Find(t => t.Item1 == templateName).Item2;
-            Console.WriteLine(Board);
             int relativePosition = Board[droplet.PositionX][droplet.PositionY].Id;
             List<BoardAction> finalActionDtos = new List<BoardAction>();
             foreach (BoardAction boardAction in template)

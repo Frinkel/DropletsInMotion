@@ -1,13 +1,13 @@
 ﻿using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotion.Application.Services
 {
     public class SchedulerService : ISchedulerService
     {
-        //private ICommand Command { get; set; }
-        //private List<ICommand> CommandList { get; set; }
+        //private IDropletCommand DropletCommand { get; set; }
+        //private List<IDropletCommand> CommandList { get; set; }
         //private Dictionary<string, Droplet> Droplets { get; set; }
 
 
@@ -24,9 +24,9 @@ namespace DropletsInMotion.Application.Services
 
         }
 
-        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(ICommand command, Dictionary<string, Agent> agents, byte[,] contaminationMap)
+        public ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(IDropletCommand dropletCommand, Dictionary<string, Agent> agents, byte[,] contaminationMap)
         {
-            switch (command)
+            switch (dropletCommand)
             {
                 case Merge mergeCommand:
                     Agent d1 = agents[mergeCommand.InputName1];
@@ -81,7 +81,7 @@ namespace DropletsInMotion.Application.Services
                     break;
 
                 default:
-                    throw new InvalidOperationException("Tried to schedule a non-schedulable command!");
+                    throw new InvalidOperationException("Tried to schedule a non-schedulable dropletCommand!");
             }
 
             return null;

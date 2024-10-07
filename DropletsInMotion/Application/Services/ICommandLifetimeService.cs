@@ -1,10 +1,10 @@
-﻿using DropletsInMotion.Infrastructure.Models.Commands;
+﻿using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using System.Collections.Generic;
 
 public interface ICommandLifetimeService
 {
-    List<ICommand> CommandsInAction { get; }
-    void StoreCommand(ICommand command);
-    bool CanExecuteCommand(ICommand command);
-    void RemoveCommand(ICommand command);
+    List<IDropletCommand> CommandsInAction { get; }
+    void StoreCommand(IDropletCommand dropletCommand);
+    bool CanExecuteCommand(IDropletCommand dropletCommand);
+    void RemoveCommand(IDropletCommand dropletCommand);
 }

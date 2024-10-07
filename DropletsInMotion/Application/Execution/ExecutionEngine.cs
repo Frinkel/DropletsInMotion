@@ -5,6 +5,7 @@ using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
@@ -17,7 +18,7 @@ namespace DropletsInMotion.Application.Execution
 
         public Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
 
-        public Dictionary<string, Double> Variable { get; set; } = new Dictionary<string, Double>();
+        public Dictionary<string, Double> Variables { get; set; } = new Dictionary<string, Double>();
 
         public double Time { get; set; }
         private byte[,] ContaminationMap { get; set; }
@@ -59,12 +60,9 @@ namespace DropletsInMotion.Application.Execution
         {
             Board = _translator.Board;
             DependencyGraph = _translator.DependencyGraph;
-            var droplets = _translator.Droplets;
 
             Time = 0;
-
             Console.WriteLine(Board[0][1]);
-
 
             DependencyGraph.GenerateDotFile();
 
@@ -73,12 +71,12 @@ namespace DropletsInMotion.Application.Execution
             Agents.Clear();
             Agent.ResetSubstanceId();
 
-            foreach (var droplet in droplets)
-            {
-                Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
-                Agents.Add(droplet.Key, agent);
-                ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
-            }
+            //foreach (var droplet in droplets)
+            //{
+            //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
+            //    Agents.Add(droplet.Key, agent);
+            //    ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+            //}
 
             _router.Initialize(Board);
 
@@ -94,21 +92,41 @@ namespace DropletsInMotion.Application.Execution
                 }
 
                 List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
-                List<ICommand> commandsToExecute = executableNodes.ConvertAll(node => node.Command);
+                List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
+                List<IDropletCommand> commandsToExecute = commands
+                    .FindAll(c => c is IDropletCommand)
+                    .ConvertAll(c => (IDropletCommand)c);
 
-                foreach (ICommand command in commandsToExecute)
+                List<ICommand> commandsToExecute3 = commands.FindAll(c => c is not IDropletCommand);
+
+
+                foreach (var command in commandsToExecute3)
                 {
-                    Console.WriteLine(command);
+                    command.Evaluate(Variables);
+
                 }
 
-                List<ICommand> movesToExecute = new List<ICommand>();
+                foreach (IDropletCommand command in commandsToExecute)
+                {
+                    command.Evaluate(Variables);
+                }
+
+
+                List<IDropletCommand> movesToExecute = new List<IDropletCommand>();
 
                 double? executionTime = Time;
-                foreach (ICommand command in commandsToExecute)
+                foreach (IDropletCommand command in commandsToExecute)
                 {
                     switch (command)
                     {
+                        case DropletDeclaration dropletCommand:
+                            Agent agent = new Agent(dropletCommand.DropletName, dropletCommand.PositionX,
+                                dropletCommand.PositionY, dropletCommand.Volume);
+                            Agents.Add(dropletCommand.DropletName, agent);
+                            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+                            break;
                         case Move moveCommand:
+                            moveCommand.Evaluate(Variables);
                             movesToExecute.Add(moveCommand);
                             break;
                         case Merge mergeCommand:
@@ -140,7 +158,7 @@ namespace DropletsInMotion.Application.Execution
                             executionTime = waitCommand.Time + Time;
                             break;
                         default:
-                            Console.WriteLine("Unknown command");
+                            Console.WriteLine("Unknown dropletCommand");
                             break;
                     }
                 }
@@ -173,7 +191,7 @@ namespace DropletsInMotion.Application.Execution
 
         }
 
-        private async Task HandleMixCommand(Mix mixCommand, List<ICommand> movesToExecute)
+        private async Task HandleMixCommand(Mix mixCommand, List<IDropletCommand> movesToExecute)
         {
             if (_actionService.InPositionToMix(mixCommand, Agents, movesToExecute))
             {
@@ -186,7 +204,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleMergeCommand(Merge mergeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
             {
@@ -205,7 +223,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
             {
@@ -225,7 +243,7 @@ namespace DropletsInMotion.Application.Execution
         }
         
 
-        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<ICommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
         {
             SplitByVolume splitByVolumeCommand2 = new SplitByVolume(splitByRatioCommand.InputName, splitByRatioCommand.OutputName1,
                 splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,

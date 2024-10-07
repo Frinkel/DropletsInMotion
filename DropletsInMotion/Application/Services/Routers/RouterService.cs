@@ -1,8 +1,8 @@
 ﻿using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Infrastructure.Models.Domain;
-using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -58,7 +58,7 @@ public class RouterService : IRouterService
 
     }
 
-    public List<BoardAction> Route(Dictionary<string, Agent> agents, List<ICommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
+    public List<BoardAction> Route(Dictionary<string, Agent> agents, List<IDropletCommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
     {
         //Agents = agents;
 

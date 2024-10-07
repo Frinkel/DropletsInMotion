@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Presentation.Services;
 using Antlr4.Runtime.Tree;
@@ -12,13 +11,14 @@ using Antlr4.Runtime;
 using DropletsInMotion.Presentation.Language;
 using static MicrofluidicsParser;
 using DropletsInMotion.Infrastructure.Models;
+using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Presentation
 {
     public class Translator : ITranslator
     {
         public Electrode[][] Board { get; set; }
-        public Dictionary<string, Droplet> Droplets { get; set; }
         public List<ICommand> Commands { get; set; }
         public DependencyGraph DependencyGraph { get; set; }
 
@@ -53,7 +53,6 @@ namespace DropletsInMotion.Presentation
             var tree = parser.program();
             ParseTreeWalker.Default.Walk(listener, tree);
             Commands = listener.Commands;
-            Droplets = listener.Droplets;
             DependencyGraph = _dependencyBuilder.Build(Commands);
         }
 

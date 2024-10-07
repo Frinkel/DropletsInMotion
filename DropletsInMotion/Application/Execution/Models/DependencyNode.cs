@@ -5,7 +5,7 @@ namespace DropletsInMotion.Application.ExecutionEngine.Models
     public class DependencyNode
     {
         public int NodeId { get; }
-        public ICommand Command { get; }
+        public ICommand Command { get; }  // Changed to ICommand
         public bool IsExecuted { get; private set; }
         public List<DependencyNode> Dependencies { get; }
 
@@ -29,7 +29,6 @@ namespace DropletsInMotion.Application.ExecutionEngine.Models
 
         public bool CanExecute()
         {
-            // A node can be executed if all its dependencies have been executed
             return Dependencies.All(dependency => dependency.IsExecuted);
         }
 
@@ -38,5 +37,4 @@ namespace DropletsInMotion.Application.ExecutionEngine.Models
             return $"Node {NodeId}: {Command.ToString()} (Executed: {IsExecuted})";
         }
     }
-
 }

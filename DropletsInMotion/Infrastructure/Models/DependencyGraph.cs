@@ -20,6 +20,11 @@ namespace DropletsInMotion.Infrastructure.Models
             return _nodes.Where(n => !n.IsExecuted && n.CanExecute()).ToList();
         }
 
+        public List<DependencyNode> GetAllNodes()
+        {
+            return _nodes;
+        }
+
         public void MarkNodeAsExecuted(int nodeId)
         {
             var node = _nodes.FirstOrDefault(n => n.NodeId == nodeId);
