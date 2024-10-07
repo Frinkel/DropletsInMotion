@@ -18,12 +18,8 @@ public class RouterService : IRouterService
      */
 
     public int? Seed = null;
-
-    //private Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
     private Electrode[][] Board { get; set; }
     
-
-    //private TemplateService _templateService;
     private readonly IContaminationService _contaminationService;
     private readonly ITemplateService _templateService;
 
@@ -32,44 +28,23 @@ public class RouterService : IRouterService
     {
         _templateService = templateService;
         _contaminationService = contaminationService;
-
-
-        //ApplicableFunctions.PrintContaminationState(ContaminationMap);
     }
 
-    public void Initialize(Electrode[][] board)
+    public void Initialize(Electrode[][] board, int? seed = null)
     {
+        Seed = seed;
         Board = board;
         _templateService.Initialize(Board);
-
-
-
-        //_templateService = new TemplateService(Board);
-
-        //ContaminationMap = new byte[Board.Length, Board[0].Length];
-        //Agents = agents;
-
-        //foreach (var droplet in droplets)
-        //{
-        //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
-        //    Agents.Add(droplet.Key, agent);
-        //    ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
-        //}
-
     }
 
     public List<BoardAction> Route(Dictionary<string, Agent> agents, List<IDropletCommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
     {
-        //Agents = agents;
-
         List<string> routableAgents = new List<string>();
 
         foreach (var command in commands)
         {
             routableAgents.AddRange(command.GetInputDroplets());
         }
-
-        //ContaminationMap = contaminationMap;
 
         State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, Seed);
         Frontier f = new Frontier();
@@ -138,11 +113,6 @@ public class RouterService : IRouterService
         }
 
         _contaminationService.PrintContaminationState(contaminationMap);
-        //foreach (var agent in Agents)
-        //{
-        //    Console.WriteLine(agent);
-
-        //}
 
         return sFinal.ExtractActions(time);
     }

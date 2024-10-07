@@ -33,12 +33,9 @@ namespace DropletsInMotion.Presentation
             _userService = userService;
             _dependencyBuilder = dependencyBuilder;
             _fileService = fileService;
-
-            Translate();
-
         }
 
-        private void Translate()
+        public void Translate()
         {
             Console.WriteLine(_userService.PlatformPath);
             _platformService.LoadBoardFromJson(_userService.PlatformPath);

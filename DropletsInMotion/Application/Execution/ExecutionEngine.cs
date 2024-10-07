@@ -58,6 +58,7 @@ namespace DropletsInMotion.Application.Execution
 
         public async Task Execute()
         {
+            _translator.Translate();
             Board = _translator.Board;
             DependencyGraph = _translator.DependencyGraph;
 

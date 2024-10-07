@@ -9,7 +9,5 @@ namespace DropletsInMotion.Application.Services
     {
         ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(IDropletCommand dropletCommand,
             Dictionary<string, Agent> agents, byte[,] contaminationMap);
-
-        ((int optimalX, int optimalY), (int optimalX, int optimalY))? FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, byte d1SubstanceId, byte d2SubstanceId);
     }
 }

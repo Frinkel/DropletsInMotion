@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.Models;
+﻿using System.Formats.Asn1;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 
@@ -34,6 +35,9 @@ namespace DropletsInMotion.Application.Services
 
                     byte d1SubstanceId = agents[d1.DropletName].SubstanceId;
                     byte d2SubstanceId = agents[d2.DropletName].SubstanceId;
+
+                    Console.WriteLine($"a1 {d1}");
+                    Console.WriteLine($"a2 {d2}");
 
                     var optimalPositions = FindOptimalPositions(mergeCommand.PositionX, mergeCommand.PositionY,
                         d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId);
