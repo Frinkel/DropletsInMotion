@@ -22,10 +22,10 @@
 //            var commonTokenStream = new CommonTokenStream(lexer);
 //            var parser = new MicrofluidicsParser(commonTokenStream);
 
-            // Get the root of the parse tree (starting with 'program')
-            var tree = parser.program();
-            Assert.AreEqual(tree.ToStringTree(parser), "(program (dropletCommand (dropletDeclaration Droplet ( d1 , 15 , 15 , 0.2 ))) ; (dropletCommand (moveDroplet Move ( d1 , 3 , 3 ))) ; <EOF>)");
-        }
+            //// Get the root of the parse tree (starting with 'program')
+        //    var tree = parser.program();
+        //    Assert.AreEqual(tree.ToStringTree(parser), "(program (dropletCommand (dropletDeclaration Droplet ( d1 , 15 , 15 , 0.2 ))) ; (dropletCommand (moveDroplet Move ( d1 , 3 , 3 ))) ; <EOF>)");
+        //}
 
 //        [Test]
 //        public void TemplateTester()
