@@ -87,12 +87,12 @@ namespace DropletsInMotion.Application.Execution
             
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
-                foreach (var agent in Agents)
+                foreach (var node in DependencyGraph.GetExecutableNodes())
                 {
-                    Console.WriteLine(agent.Value);
+                    Console.WriteLine(node);
                 }
 
-                List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
+                List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
                 List<IDropletCommand> commandsToExecute = commands
                     .FindAll(c => c is IDropletCommand)

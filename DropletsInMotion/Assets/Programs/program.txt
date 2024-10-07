@@ -1,9 +1,8 @@
-i = 5;
-Droplet(d1, i, 6, 1.2);
+a = 5;
+Droplet(d1, a, 6, 1.2);
 i = 1;
-Move(d1, i, i);
-Droplet(d2, 11, 6, 1.2);
-WaitForUserInput();
-Move(d2, i+4, i);
-Move(d1, i, 18);
+while(i < 3) {
+    i = i + 1;
+    Move(d1, i*5, 6);
+};
 

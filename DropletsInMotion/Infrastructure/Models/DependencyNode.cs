@@ -1,20 +1,20 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Commands;
 
-namespace DropletsInMotion.Application.ExecutionEngine.Models
+namespace DropletsInMotion.Infrastructure.Models
 {
-    public class DependencyNode
+    public class DependencyNode : IDependencyNode
     {
         public int NodeId { get; }
-        public ICommand Command { get; }  // Changed to ICommand
-        public bool IsExecuted { get; private set; }
-        public List<DependencyNode> Dependencies { get; }
+        public ICommand Command { get; }
+        public bool IsExecuted { get; set; }
+        public List<IDependencyNode> Dependencies { get; }
 
         public DependencyNode(int nodeId, ICommand command)
         {
             NodeId = nodeId;
             Command = command;
             IsExecuted = false;
-            Dependencies = new List<DependencyNode>();
+            Dependencies = new List<IDependencyNode>();
         }
 
         public void MarkAsExecuted()
@@ -22,9 +22,14 @@ namespace DropletsInMotion.Application.ExecutionEngine.Models
             IsExecuted = true;
         }
 
-        public void AddDependency(DependencyNode dependency)
+        public void AddDependency(IDependencyNode dependency)
         {
             Dependencies.Add(dependency);
+        }
+
+        public List<IDependencyNode> getExecutableNodes()
+        {
+            return new List<IDependencyNode>() {this};
         }
 
         public bool CanExecute()

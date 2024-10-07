@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
@@ -10,28 +9,46 @@ namespace DropletsInMotion.Presentation.Services
 {
     public class DependencyBuilder : IDependencyBuilder
     {
+        private int nodeId = 0;
         public DependencyGraph Build(List<ICommand> commands)
         {
-            List<DependencyNode> nodes = CreateNodes(commands);
+            List<IDependencyNode> nodes = CreateNodes(commands);
             BuildDependencies(nodes);
             var graph = new DependencyGraph(nodes);
             CleanDependencies(graph);
             return graph;
         }
 
-        private List<DependencyNode> CreateNodes(List<ICommand> commands)
+        private List<IDependencyNode> CreateNodes(List<ICommand> commands)
         {
-            var nodes = new List<DependencyNode>();
+            var nodes = new List<IDependencyNode>();
             for (int index = 0; index < commands.Count; index++)
             {
-                nodes.Add(new DependencyNode(index, commands[index]));
+                if (commands[index] is WhileCommand)
+                {
+                    WhileCommand whileCommand = (WhileCommand)commands[index];
+                    DependencyGraph body = Build(whileCommand.Commands);
+                    nodes.Add(new DependencyNodeWhile(nodeId, commands[index], body));
+                    body.GenerateDotFile();
+                } else if (commands[index] is IfCommand)
+                {
+                    //IfCommand ifCommand = (IfCommand)commands[index];
+                    //DependencyGraph body = Build(ifCommand.Commands);
+                    //nodes.Add(new DependencyNodeIf(nodeId, commands[index], body);
+                }
+                else
+                {
+                    nodes.Add(new DependencyNode(nodeId, commands[index]));
+
+                }
+                nodeId++;
             }
             return nodes;
         }
 
-        private void BuildDependencies(List<DependencyNode> nodes)
+        private void BuildDependencies(List<IDependencyNode> nodes)
         {
-            DependencyNode lastWaitNode = null;
+            IDependencyNode lastWaitNode = null;
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -40,7 +57,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private void HandleDependenciesForCurrentNode(int currentIndex, List<DependencyNode> nodes, ref DependencyNode lastWaitNode)
+        private void HandleDependenciesForCurrentNode(int currentIndex, List<IDependencyNode> nodes, ref IDependencyNode lastWaitNode)
         {
             var currentNode = nodes[currentIndex];
             var currentInputsDroplets = GetDropletInputs(currentNode);
@@ -70,7 +87,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private void HandleDropletDependencies(DependencyNode currentNode, DependencyNode potentialDependency, List<string> currentInputsDroplets)
+        private void HandleDropletDependencies(IDependencyNode currentNode, IDependencyNode potentialDependency, List<string> currentInputsDroplets)
         {
             var potentialOutputsDroplets = GetDropletOutputs(potentialDependency);
             if (currentInputsDroplets.Intersect(potentialOutputsDroplets).Any())
@@ -79,7 +96,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private void HandleVariableDependencies(DependencyNode currentNode, DependencyNode potentialDependency, List<string> currentVariables)
+        private void HandleVariableDependencies(IDependencyNode currentNode, IDependencyNode potentialDependency, List<string> currentVariables)
         {
             if (potentialDependency.Command is Assign assignCommand)
             {
@@ -90,7 +107,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private void HandleAssignDependencies(DependencyNode currentNode, DependencyNode potentialDependency)
+        private void HandleAssignDependencies(IDependencyNode currentNode, IDependencyNode potentialDependency)
         {
             if (currentNode.Command is Assign)
             {
@@ -103,7 +120,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private List<string> GetDropletInputs(DependencyNode node)
+        private List<string> GetDropletInputs(IDependencyNode node)
         {
             if (node.Command is IDropletCommand dropletCommand)
             {
@@ -112,7 +129,7 @@ namespace DropletsInMotion.Presentation.Services
             return new List<string>();
         }
 
-        private List<string> GetDropletOutputs(DependencyNode node)
+        private List<string> GetDropletOutputs(IDependencyNode node)
         {
             if (node.Command is IDropletCommand dropletCommand)
             {
@@ -135,7 +152,7 @@ namespace DropletsInMotion.Presentation.Services
                 var directDependencies = node.Dependencies.ToList();
 
                 // Track dependencies that are already covered transitively
-                var transitiveDependencies = new HashSet<DependencyNode>();
+                var transitiveDependencies = new HashSet<IDependencyNode>();
 
                 foreach (var dependency in directDependencies)
                 {
@@ -154,7 +171,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        private void CollectTransitiveDependencies(DependencyNode node, HashSet<DependencyNode> collectedDependencies)
+        private void CollectTransitiveDependencies(IDependencyNode node, HashSet<IDependencyNode> collectedDependencies)
         {
             foreach (var dependency in node.Dependencies)
             {

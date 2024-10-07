@@ -1,4 +1,6 @@
-﻿using DropletsInMotion.Infrastructure.Models.Commands;
+﻿using Antlr4.Runtime.Misc;
+using Antlr4.Runtime.Tree;
+using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 using DropletsInMotion.Infrastructure.Models.Domain;
@@ -12,8 +14,8 @@ namespace DropletsInMotion.Presentation.Language
 
         private ArithmeticExpression CreateExpression(MicrofluidicsParser.ArithmeticExpressionContext context)
         {
-            // If it's a binary operation
-            if (context.op != null)
+            // If it's a binary operation (e.g., +, -, *, /)
+            if (context.op != null && context.arithmeticExpression().Length == 2)
             {
                 ArithmeticExpression left = CreateExpression(context.arithmeticExpression(0)); // Left-hand side expression
                 ArithmeticExpression right = CreateExpression(context.arithmeticExpression(1)); // Right-hand side expression
@@ -24,37 +26,42 @@ namespace DropletsInMotion.Presentation.Language
             }
 
             // If it's a unary minus operation
-            if (context.op != null && context.op.Text == "-")
+            if (context.GetText().StartsWith("-") && context.arithmeticExpression().Length == 1)
             {
                 ArithmeticExpression operand = CreateExpression(context.arithmeticExpression(0));
                 return new UnaryNegationExpression(operand);
             }
 
+            // If it's an integer literal
             if (context.INT() != null)
             {
                 int value = int.Parse(context.INT().GetText());
                 return new LiteralExpression(value);
             }
 
+            // If it's a floating point literal
             if (context.FLOAT() != null)
             {
                 double value = double.Parse(context.FLOAT().GetText(), CultureInfo.InvariantCulture);
                 return new LiteralExpression(value);
             }
 
+            // If it's a variable (identifier)
             if (context.IDENTIFIER() != null)
             {
                 string variableName = context.IDENTIFIER().GetText();
                 return new VariableExpression(variableName);
             }
 
+            // Handle parentheses by evaluating the expression inside
             if (context.arithmeticExpression().Length == 1)
             {
-                return CreateExpression(context.arithmeticExpression(0)); // Handle parentheses by evaluating what's inside
+                return CreateExpression(context.arithmeticExpression(0));
             }
 
             throw new InvalidOperationException("Unknown arithmetic expression structure.");
         }
+
 
         public override void ExitDropletDeclaration(MicrofluidicsParser.DropletDeclarationContext context)
         {
@@ -179,6 +186,206 @@ namespace DropletsInMotion.Presentation.Language
             IDropletCommand dropletCommand = new WaitForUserInput();
             Commands.Add(dropletCommand);
         }
+
+
+        //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
+        //{
+        //    // Create the condition expression
+        //    BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
+
+        //    // Create a list for commands inside the "if" block
+        //    List<ICommand> ifCommands = new List<ICommand>();
+        //    foreach (var commandContext in context.block(0).command())
+        //    {
+        //        ifCommands.AddRange(CreateCommandsFromBlock(commandContext));
+        //    }
+
+        //    // Create the list for "else" block if present
+        //    List<ICommand> elseCommands = null;
+        //    if (context.block().Length > 1)
+        //    {
+        //        elseCommands = new List<ICommand>();
+        //        foreach (var commandContext in context.block(1).command())
+        //        {
+        //            elseCommands.AddRange(CreateCommandsFromBlock(commandContext));
+        //        }
+        //    }
+
+        //    // Create the IfCommand and add it to the command list
+        //    ICommand ifCommand = new IfCommand(condition, ifCommands, elseCommands);
+        //    Commands.Add(ifCommand);
+        //}
+
+
+        //private List<ICommand> CreateCommandsFromBlock(MicrofluidicsParser.CommandContext context)
+        //{
+        //    // Create commands from the block of statements
+        //    List<ICommand> commands = new List<ICommand>();
+        //    foreach (var commandContext in context.command())
+        //    {
+        //        // For each command, call the appropriate exit method manually
+        //        switch (commandContext)
+        //        {
+        //            case MicrofluidicsParser.MoveDropletContext moveContext:
+        //                ExitMoveDroplet(moveContext);
+        //                break;
+        //            case MicrofluidicsParser.DropletDeclarationContext dropletContext:
+        //                ExitDropletDeclaration(dropletContext);
+        //                break;
+        //                // Add cases for other command types like Split, Merge, etc.
+        //        }
+        //    }
+        //    return commands;
+        //}
+
+        //private BooleanExpression CreateBooleanExpression(MicrofluidicsParser.BooleanExpressionContext context)
+        //{
+        //    if (context.booleanExpression() != null)
+        //    {
+        //        BooleanExpression left = CreateBooleanExpression(context.booleanExpression(0));
+        //        BooleanExpression right = CreateBooleanExpression(context.booleanExpression(1));
+        //        string operatorSymbol = context.op.Text;
+
+        //        return new LogicalBinaryExpression(left, operatorSymbol, right);
+        //    }
+
+        //    if (context.arithmeticExpression() != null)
+        //    {
+        //        ArithmeticExpression left = CreateExpression(context.arithmeticExpression(0));
+        //        ArithmeticExpression right = CreateExpression(context.arithmeticExpression(1));
+        //        string comparisonOperator = context.op.Text;
+
+        //        return new ComparisonExpression(left, comparisonOperator, right);
+        //    }
+
+        //    if (context. != null)
+        //    {
+        //        BooleanExpression innerExpression = CreateBooleanExpression(context.booleanExpression(0));
+        //        return new LogicalNotExpression(innerExpression);
+        //    }
+
+        //    throw new InvalidOperationException("Unknown boolean expression structure.");
+        //}
+
+        //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
+        //{
+        //    BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
+        //    List<ICommand> ifBlock = ExtractCommandsFromBlock(context.block(0));
+
+        //    // Optional else block
+        //    List<ICommand> elseBlock = null;
+        //    if (context.block(1) != null)
+        //    {
+        //        elseBlock = ExtractCommandsFromBlock(context.block(1));
+        //    }
+
+        //    ICommand ifCommand = new IfCommand(condition, ifBlock, elseBlock);
+        //    Commands.Add(ifCommand);
+        //}
+
+        public override void ExitWhileLoop(MicrofluidicsParser.WhileLoopContext context)
+        {
+            BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
+
+            // Extract the commands from the while loop block
+            List<ICommand> blockCommands = ExtractCommandsFromBlock(context.block());
+
+            // Create the WhileCommand using the extracted block commands
+            ICommand whileCommand = new WhileCommand(condition, blockCommands);
+            Commands.Add(whileCommand);
+        }
+
+
+        private List<ICommand> ExtractCommandsFromBlock(MicrofluidicsParser.BlockContext context)
+        {
+            List<ICommand> blockCommands = new List<ICommand>();
+
+            // Capture the number of commands in the global list before the block is processed
+            int initialGlobalCommandCount = Commands.Count;
+
+            // Process each command in the block
+            foreach (var commandCtx in context.command())
+            {
+                // Walk through each command in the block (this adds to global Commands list)
+                ParseTreeWalker.Default.Walk(this, commandCtx);
+            }
+
+
+            for (int i = initialGlobalCommandCount; i < Commands.Count; i++)
+            {
+                blockCommands.Add(Commands[i]);
+            }
+
+            Commands.RemoveRange(initialGlobalCommandCount - blockCommands.Count, blockCommands.Count * 2);
+
+            return blockCommands;
+        }
+
+        //private List<ICommand> ExtractCommandsFromBlock(MicrofluidicsParser.BlockContext context)
+        //{
+        //    List<ICommand> blockCommands = new List<ICommand>();
+
+        //    // Temporarily store the global commands length
+        //    int globalCommandsCountBeforeBlock = Commands.Count;
+
+        //    // Process each command in the block manually
+        //    foreach (var commandCtx in context.command())
+        //    {
+        //        // Visit each command in the block
+        //        ParseTreeWalker.Default.Walk(this, commandCtx);
+
+        //        // After processing, the last command is added to the global list,
+        //        // so we capture it and remove it from the global list
+        //        if (Commands.Count > globalCommandsCountBeforeBlock)
+        //        {
+        //            // Collect the last processed command in the block
+        //            blockCommands.Add(Commands.Last());
+
+        //            // Remove it from the global list to keep it local to the block
+        //            Commands.RemoveAt(Commands.Count - 1);
+
+        //        }
+        //    }
+
+        //    return blockCommands;
+        //}
+
+
+
+        private BooleanExpression CreateBooleanExpression(MicrofluidicsParser.BooleanExpressionContext context)
+        {
+
+            if (context.booleanExpression().Length == 2 && context.op != null)
+            {
+                var left = CreateBooleanExpression(context.booleanExpression(0));
+                var right = CreateBooleanExpression(context.booleanExpression(1));
+                string operatorSymbol = context.op.Text;
+                return new LogicalBinaryExpression(left, operatorSymbol, right);
+            }
+
+            if (context.GetText().StartsWith("!") &&  context.booleanExpression().Length == 1)
+            {
+                BooleanExpression innerExpression = CreateBooleanExpression(context.booleanExpression(0));
+                return new LogicalNotExpression(innerExpression);
+            }
+
+            if (context.booleanExpression().Length == 1)
+            {
+                return CreateBooleanExpression(context.booleanExpression(0));
+            }
+
+            if (context.arithmeticExpression().Length == 2)
+            {
+                var left = CreateExpression(context.arithmeticExpression(0));
+                var right = CreateExpression(context.arithmeticExpression(1));
+                string operatorSymbol = context.op.Text;
+                return new ComparisonExpression(left, operatorSymbol, right);
+            }
+
+            throw new InvalidOperationException("Unknown boolean expression structure.");
+        }
+
+
 
     }
 }

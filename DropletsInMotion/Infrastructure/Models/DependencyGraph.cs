@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Domain;
@@ -8,19 +7,24 @@ namespace DropletsInMotion.Infrastructure.Models
 {
     public class DependencyGraph
     {
-        private readonly List<DependencyNode> _nodes;
+        private readonly List<IDependencyNode> _nodes;
 
-        public DependencyGraph(List<DependencyNode> nodes)
+        public DependencyGraph(List<IDependencyNode> nodes)
         {
             _nodes = nodes;
         }
 
-        public List<DependencyNode> GetExecutableNodes()
+        public List<IDependencyNode> GetExecutableNodes()
         {
-            return _nodes.Where(n => !n.IsExecuted && n.CanExecute()).ToList();
-        }
 
-        public List<DependencyNode> GetAllNodes()
+            // Aggregate executable nodes from each DependencyNode using their getExecutableNodes method
+            return _nodes
+                .Where(n => !n.IsExecuted && n.CanExecute())
+                .SelectMany(n => n.getExecutableNodes())
+                .ToList();
+        }
+        
+        public List<IDependencyNode> GetAllNodes()
         {
             return _nodes;
         }

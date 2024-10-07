@@ -116,20 +116,20 @@ namespace DropletsInMotion.UI
 
         private async Task<ProgramState> HandleCompilation()
         {
-            // Parse the contents
-            var inputStream = new AntlrInputStream(_programContent);
-            var lexer = new MicrofluidicsLexer(inputStream);
-            var commonTokenStream = new CommonTokenStream(lexer);
-            var parser = new MicrofluidicsParser(commonTokenStream);
-            var listener = new MicrofluidicsCustomListener();
-            var tree = parser.program();
-            ParseTreeWalker.Default.Walk(listener, tree);
+            //// Parse the contents
+            //var inputStream = new AntlrInputStream(_programContent);
+            //var lexer = new MicrofluidicsLexer(inputStream);
+            //var commonTokenStream = new CommonTokenStream(lexer);
+            //var parser = new MicrofluidicsParser(commonTokenStream);
+            //var listener = new MicrofluidicsCustomListener();
+            //var tree = parser.program();
+            //ParseTreeWalker.Default.Walk(listener, tree);
 
-            // TODO: Remove
-            foreach (var elem in listener.Commands)
-            {
-                Console.WriteLine(elem.ToString());
-            }
+            //// TODO: Remove
+            //foreach (var elem in listener.Commands)
+            //{
+            //    Console.WriteLine(elem.ToString());
+            //}
 
             // TODO: Maybe the compiler should return a status code for the compilation.
             IExecutionEngine executionEngine = _serviceProvider.GetRequiredService<IExecutionEngine>();
