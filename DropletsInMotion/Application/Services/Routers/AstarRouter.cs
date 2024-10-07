@@ -1,4 +1,5 @@
 ﻿using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Infrastructure;
 
 namespace DropletsInMotion.Application.Services.Routers
 {
@@ -17,7 +18,7 @@ namespace DropletsInMotion.Application.Services.Routers
 
             while (true)
             {
-                if (frontier.IsEmpty()) return initialState; // TODO: Do we want to return null? 
+                if (frontier.IsEmpty()) return initialState;
                 State state = frontier.Pop();
 
                 if (state.IsGoalState())
@@ -56,12 +57,12 @@ namespace DropletsInMotion.Application.Services.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        //ContaminationService.StateAmount += 1;
+                        //Debugger.ExploredStates += 1;
                         frontier.Add(expandedState);
                     }
                     else
                     {
-                        //ContaminationService.StateAmountExists += 1;
+                        //Debugger.ExistingStates += 1;
                         //Console.WriteLine($"State already exists {expandedState.GetHashCode()}");
                     }
                 }

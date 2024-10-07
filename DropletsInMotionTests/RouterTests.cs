@@ -3,6 +3,7 @@ using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Application.Services;
+using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -48,6 +49,8 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
+
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 
@@ -83,7 +86,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 11, 1);
+            var a1 = new Agent("a1", 5, 10, 1);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -91,9 +94,12 @@ namespace DropletsInMotionTests
 
             _routerService.Initialize(board, 1);
 
-            _contaminationService.UpdateContaminationArea(contaminationMap, 255, 10, 7, 0, 7);
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.UpdateContaminationArea(contaminationMap, 255, 10, 7, 0, 6);
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }

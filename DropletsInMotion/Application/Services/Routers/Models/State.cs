@@ -19,7 +19,7 @@ public class State
     private List<IDropletCommand> Commands { get; set; }
     private ITemplateService _templateHandler;
 
-    private int? CachedHash = null;
+    private int? _cachedHash = null;
 
     private readonly IContaminationService _contaminationService;
 
@@ -447,9 +447,9 @@ public class State
 
     public override int GetHashCode()
     {
-        if (CachedHash != null)
+        if (_cachedHash != null)
         {
-            return CachedHash.Value;
+            return _cachedHash.Value;
         }
 
         int hash = 17;
@@ -466,7 +466,7 @@ public class State
             hash = hash * 31 + agent.PositionY.GetHashCode();
         }
 
-        CachedHash = hash;
+        _cachedHash = hash;
         return hash;
     }
 

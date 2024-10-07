@@ -1,6 +1,5 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
-using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using Microsoft.Extensions.DependencyInjection;
