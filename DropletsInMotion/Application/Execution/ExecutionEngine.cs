@@ -68,7 +68,10 @@ namespace DropletsInMotion.Application.Execution
 
             DependencyGraph.GenerateDotFile();
 
+            // Reset the execution
             ContaminationMap = new byte[Board.Length, Board[0].Length];
+            Agents.Clear();
+            Agent.ResetSubstanceId();
 
             foreach (var droplet in droplets)
             {

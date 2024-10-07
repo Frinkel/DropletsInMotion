@@ -14,6 +14,8 @@ using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.UI;
 using Microsoft.Extensions.Configuration;
+using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Presentation;
 
 namespace DropletsInMotionTests
 {
@@ -30,10 +32,10 @@ namespace DropletsInMotionTests
                  .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 
-            IConfiguration configuration = builder.Build();
+            IConfiguration _configuration = builder.Build();
 
             // Services
-            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton(_configuration);
             serviceCollection.AddSingleton<IConsoleService, ConsoleService>();
             serviceCollection.AddSingleton<IFileService, FileService>();
             serviceCollection.AddSingleton<ICommunicationEngine, CommunicationEngine>();
@@ -48,10 +50,14 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton<IRouterService, RouterService>();
             serviceCollection.AddSingleton<IDependencyService, DependencyService>();
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
+            serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
+            serviceCollection.AddSingleton<IPlatformService, PlatformService>();
+
 
             // Classes
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();

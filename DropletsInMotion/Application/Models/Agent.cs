@@ -54,6 +54,11 @@ namespace DropletsInMotion.Application.Models
             }
         }
 
+        public static void ResetSubstanceId()
+        {
+            _nextSubstanceId = 1;
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(PositionX, PositionY);
