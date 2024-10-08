@@ -5,9 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DropletsInMotion.Application.Models;
+using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -135,6 +137,14 @@ namespace DropletsInMotion.Application.Services
                         if (dependencyNodeIf.IsComplete())
                         {
                             Console.WriteLine("IF command done");
+                            node.MarkAsExecuted();
+                        }
+                        break;
+
+                    case SensorCommand sensorCommand:
+                        if (!_commandLifetimeService.CanExecuteCommand(sensorCommand))
+                        {
+                            _commandLifetimeService.RemoveCommand(sensorCommand);
                             node.MarkAsExecuted();
                         }
                         break;

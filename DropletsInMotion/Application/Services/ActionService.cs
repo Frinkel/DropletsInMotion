@@ -8,6 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Communication;
+using DropletsInMotion.Communication.Models;
+using DropletsInMotion.Communication.Services;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
+using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -19,14 +24,17 @@ namespace DropletsInMotion.Application.Services
         private readonly IContaminationService _contaminationService;
         private readonly IStoreService _storeService;
         private readonly ICommandLifetimeService _commandLifetimeService;
+        private readonly ISensorRepository _sensorRepository;
 
-        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, ICommandLifetimeService commandLifetimeService)
+
+        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, ICommandLifetimeService commandLifetimeService, ISensorRepository sensorRepository)
         {
             _templateService = templateService;
             _contaminationService = contaminationService;
             _moveHandler = new MoveHandler(_templateService);
             _storeService = storeService;
             _commandLifetimeService = commandLifetimeService;
+            _sensorRepository = sensorRepository;
         }
 
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time)
@@ -196,6 +204,27 @@ namespace DropletsInMotion.Application.Services
                 return true;
             }
             movesToExecute.Add(new Move(mixCommand.DropletName, mixCommand.PositionX, mixCommand.PositionY));
+            return false;
+        }
+
+        public bool InPositionToSense(SensorCommand sensorCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute)
+        {
+
+            if (!agents.TryGetValue(sensorCommand.DropletName, out var inputDroplet))
+            {
+                throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
+            }
+
+            if (!_sensorRepository.Sensors.TryGetValue(sensorCommand.SensorName, out var sensor))
+            {
+                throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
+            }
+
+            if (inputDroplet.PositionX == sensor.CoordinateX && inputDroplet.PositionY == sensor.CoordinateY)
+            {
+                return true;
+            }
+            movesToExecute.Add(new Move(sensorCommand.DropletName, sensor.CoordinateX, sensor.CoordinateY));
             return false;
         }
 

@@ -5,6 +5,7 @@ using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using System.Globalization;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 
 namespace DropletsInMotion.Presentation.Language
 {
@@ -177,13 +178,24 @@ namespace DropletsInMotion.Presentation.Language
 
             ArithmeticExpression valueExpression = CreateExpression(context.arithmeticExpression());
 
-            ICommand assignCommand = new Assign(variableName, valueExpression);
+            ICommand assignCommand = new AssignCommand(variableName, valueExpression);
             Commands.Add(assignCommand);
         }
 
         public override void ExitWaitForUserInput(MicrofluidicsParser.WaitForUserInputContext context)
         {
             IDropletCommand dropletCommand = new WaitForUserInput();
+            Commands.Add(dropletCommand);
+        }
+
+        public override void ExitSensorCommand(MicrofluidicsParser.SensorCommandContext context)
+        {
+            string variableName = context.IDENTIFIER(0).GetText();
+            string sensorName = context.STRING(0).GetText().Trim('"');
+            string argument = context.STRING(1).GetText().Trim('"');
+            string dropletName = context.IDENTIFIER(1).GetText();
+
+            IDropletCommand dropletCommand = new SensorCommand(variableName, sensorName, argument, dropletName);
             Commands.Add(dropletCommand);
         }
 

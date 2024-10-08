@@ -4,12 +4,12 @@ using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands
 {
-    public class Assign : ICommand
+    public class AssignCommand : ICommand
     {
         public string VariableName { get; }
         public ArithmeticExpression ValueExpression { get; }
 
-        public Assign(string variableName, ArithmeticExpression valueExpression)
+        public AssignCommand(string variableName, ArithmeticExpression valueExpression)
         {
             VariableName = variableName;
             ValueExpression = valueExpression;

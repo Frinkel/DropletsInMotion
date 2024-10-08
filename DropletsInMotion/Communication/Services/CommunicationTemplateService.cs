@@ -1,6 +1,7 @@
 ﻿using System.Dynamic;
 using System.Text.Json;
 using DropletsInMotion.Communication.Models;
+using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -9,23 +10,25 @@ public class CommunicationTemplateService : ICommunicationTemplateService
 {
     private readonly IFileService _fileService;
     private readonly IUserService _userService;
-    public Dictionary<string, Sensor> Sensors { get; set; }
+    private readonly ISensorRepository _sensorRepository;
+    //public Dictionary<string, Sensor> Sensors { get; set; }
 
-    public CommunicationTemplateService(IFileService fileService, IUserService userService)
+    public CommunicationTemplateService(IFileService fileService, IUserService userService, ISensorRepository sensorRepository)
     {
         _fileService = fileService;
         _userService = userService;
-        Sensors = new Dictionary<string, Sensor>();
+        _sensorRepository = sensorRepository;
+        //Sensors = new Dictionary<string, Sensor>();
     }
 
     
 
     public void LoadTemplates()
     {
-        Dictionary<string, Sensor> sensors = LoadSensorTemplates();
+        LoadSensorTemplates();
     }
 
-    private Dictionary<string, Sensor> LoadSensorTemplates()
+    private void LoadSensorTemplates()
     {
         string sensorFolderPath = _userService.ConfigurationPath + "/Sensors";
 
@@ -42,10 +45,9 @@ public class CommunicationTemplateService : ICommunicationTemplateService
                 Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value.Request}");
             }
 
-            Sensors.Add(sensor.Name, sensor);
-        }
 
-        return Sensors;
+            _sensorRepository.Sensors.Add(sensor.Name, sensor);
+        }
     }
 
     private Dictionary<string, Sensor> LoadActuatorTemplates()

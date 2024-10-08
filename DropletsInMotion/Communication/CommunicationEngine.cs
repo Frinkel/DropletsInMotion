@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
+using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Communication
 {
@@ -13,16 +14,18 @@ namespace DropletsInMotion.Communication
         private ICommunicationService? _communicationService;
         private readonly IServiceProvider _serviceProvider;
         private ICommunicationTemplateService _communicationTemplateService;
+        private ISensorRepository _sensorRepository;
 
         public event EventHandler? ClientConnected;
         public event EventHandler? ClientDisconnected;
 
         private bool _isServerRunning = false;
 
-        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService)
+        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService, ISensorRepository sensorRepository)
         {
             _serviceProvider = serviceProvider;
             _communicationTemplateService = communicationTemplateService;
+            _sensorRepository = sensorRepository;
 
             userService.CommunicationTypeChanged += OnCommunicationTypeChanged;
         }
@@ -85,7 +88,7 @@ namespace DropletsInMotion.Communication
                 throw new InvalidOperationException("Tried to send request without a open communication channel!");
             }
 
-            if (!_communicationTemplateService.Sensors.TryGetValue(sensorName, out Sensor? sensor))
+            if (!_sensorRepository.Sensors.TryGetValue(sensorName, out Sensor? sensor))
             {
                 throw new Exception($"We could not find any sensor with name {sensorName}");
             }

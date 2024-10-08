@@ -1,6 +1,8 @@
 {
   "name": "RGB1",
   "sensorId": 1,
+  "coordinateX": 9,
+  "coordinateY": 9,
 
   "argumentHandlers": {
     "red": {
@@ -15,14 +17,14 @@
         "sensorId": 1,
         "requestArgument": "read"
       },
-      "response": "color.valueGreen"
+      "response": "valueGreen"
     },
     "blue": {
       "request": {
         "sensorId": 1,
         "requestArgument": "read"
       },
-      "response": "color.valueBlue"
+      "response": "valueBlue"
     }
   }
 }

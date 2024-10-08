@@ -1,8 +1,9 @@
-a = 5;
-Droplet(d1, a, 6, 1.2);
-i = 1;
-Move(d1, i, i);
-Droplet(d2, 11, 6, 1.2);
-Move(d2, i+4, i);
-Move(d1, i, 18);
-
+Droplet(d1, 2, 6, 1.2);
+Droplet(d2, 15, 0, 1.2);
+d1Blue = Sensor(d1, "RGB1", "blue");
+if(d1Blue == 255) {
+	Move(d1, 31, 19);
+} else {
+	Move(d1, 31, 0);
+};
+Move(d2, 10, 0);

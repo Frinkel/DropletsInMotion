@@ -5,6 +5,7 @@ using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Presentation;
@@ -32,7 +33,7 @@ namespace DropletsInMotion.Application.Execution
         private readonly ICommandLifetimeService _commandLifetimeService;
         private readonly ITimeService _timeService;
         private readonly IActionService _actionService;
-        private readonly ITemplateService _templateService;
+        //private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
         private readonly ITranslator _translator;
         private readonly ICommunicationEngine _communicationEngine;
@@ -50,7 +51,7 @@ namespace DropletsInMotion.Application.Execution
             _timeService = timeService;
             _actionService = actionService;
             _router = routerService;
-            _templateService = templateService;
+            //_templateService = templateService;
             _dependencyService = dependencyService;
             _translator = translator;
             _communicationEngine = communicationEngine;
@@ -78,7 +79,7 @@ namespace DropletsInMotion.Application.Execution
             
             List<BoardAction> boardActions = new List<BoardAction>();
 
-            _communicationEngine.SendRequest("RGB1", "red", 5);
+            //_communicationEngine.SendRequest("RGB1", "red", 5);
 
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
@@ -95,6 +96,7 @@ namespace DropletsInMotion.Application.Execution
 
                 List<ICommand> commandsToExecute3 = commands.FindAll(c => c is not IDropletCommand);
 
+                
 
                 foreach (var command in commandsToExecute3)
                 {
@@ -106,7 +108,6 @@ namespace DropletsInMotion.Application.Execution
                 {
                     command.Evaluate(Variables);
                 }
-
 
                 List<IDropletCommand> movesToExecute = new List<IDropletCommand>();
 
@@ -153,8 +154,13 @@ namespace DropletsInMotion.Application.Execution
                         case Wait waitCommand:
                             executionTime = waitCommand.Time + Time;
                             break;
+                        case SensorCommand sensorCommand:
+
+                            await HandleSensorCommand(sensorCommand, movesToExecute);
+
+                            break;
                         default:
-                            Console.WriteLine("Unknown dropletCommand");
+                            Console.WriteLine($"Unknown dropletCommand: {command}");
                             break;
                     }
                 }
@@ -177,6 +183,7 @@ namespace DropletsInMotion.Application.Execution
                 {
                     await _communicationEngine.SendActions(boardActions);
                 }
+
                 Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
 
@@ -186,6 +193,16 @@ namespace DropletsInMotion.Application.Execution
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
+        }
+
+        private async Task HandleSensorCommand(SensorCommand sensorCommand, List<IDropletCommand> movesToExecute)
+        {
+            if (_actionService.InPositionToSense(sensorCommand, Agents, movesToExecute))
+            {
+                _commandLifetimeService.StoreCommand(sensorCommand);
+                var sensorValue = await _communicationEngine.SendRequest(sensorCommand.SensorName, sensorCommand.Argument, Time);
+                Variables[sensorCommand.VariableName] = sensorValue;
+            }
         }
 
         private async Task HandleMixCommand(Mix mixCommand, List<IDropletCommand> movesToExecute)

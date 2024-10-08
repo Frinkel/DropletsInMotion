@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -31,5 +32,7 @@ namespace DropletsInMotion.Application.Services
 
         void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
             Dictionary<string, Agent> agents);
+
+        bool InPositionToSense(SensorCommand sensorCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
     }
 }

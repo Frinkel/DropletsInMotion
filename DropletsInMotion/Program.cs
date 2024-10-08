@@ -10,6 +10,7 @@ using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Communication.Simulator.Services;
+using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
 
@@ -81,6 +82,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
             serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
+            serviceCollection.AddSingleton<ISensorRepository, SensorRepository>();
 
 
             // Classes

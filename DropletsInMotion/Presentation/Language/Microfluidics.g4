@@ -17,10 +17,10 @@ command
     | store
     | wait
     | waitForUserInput
+    | sensorCommand
     | assignment
     | ifStatement
     | whileLoop
-    | sensorCommand
     | actuatorCommand
     ;
 
@@ -71,6 +71,11 @@ waitForUserInput
     : 'WaitForUserInput' '(' ')'
     ;
 
+// Sensor access
+sensorCommand
+    : IDENTIFIER '=' 'Sensor' '(' IDENTIFIER ',' STRING ',' STRING ')'
+    ;
+
 // Variable Assignment
 assignment
     : IDENTIFIER '=' arithmeticExpression
@@ -84,11 +89,6 @@ ifStatement
 // While Loop
 whileLoop
     : 'while' '(' booleanExpression ')' block
-    ;
-
-// Sensor access
-sensorCommand
-    : IDENTIFIER '=' 'sensor' '(' STRING ',' STRING ')'
     ;
 
 // Actuator access

@@ -76,6 +76,8 @@ public class SimulationCommunicationService : ICommunicationService
 
         var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
+
+
         switch (response.Type)
         {
             case (WebSocketResponseTypes.Sensor):
@@ -91,15 +93,17 @@ public class SimulationCommunicationService : ICommunicationService
 
                 if (propertyInfo == null)
                 {
-                    throw new Exception($"Sensor {simulationSensor.Name} did not contian propery {handler.Response}");
+                    throw new Exception($"Sensor {simulationSensor.Name} did not contian property {handler.Response}");
                 }
 
                 double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
-                
                 return sensorValue;
 
                 break;
+            default:
+                throw new Exception($"Unexpected response type: {response.Type}");
         }
+
 
         //WebSocketMessage<RequestWrapper> sensorRequestDto =
         //    new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.SimulationSensor, new RequestWrapper(sensorRequest.Id, sensorRequest.Time));
@@ -144,7 +148,7 @@ public class SimulationCommunicationService : ICommunicationService
         //    default:
         //        throw new Exception("The response type was not recognized!");
         //}
-        return 0;
+
     }
 
     public async Task<bool> IsClientConnected()
