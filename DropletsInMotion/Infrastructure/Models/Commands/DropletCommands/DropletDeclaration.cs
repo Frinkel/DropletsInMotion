@@ -59,5 +59,14 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
             x.AddRange(VolumeExpression.GetVariables());
             return x;
         }
+
+        public List<string> GetInputVariables()
+        {
+            return GetVariables();
+        }
+
+        public List<string> GetOutputVariables() {
+            return GetOutputDroplets();
+        }
     }
 }

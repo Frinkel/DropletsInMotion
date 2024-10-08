@@ -27,15 +27,26 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
             return $"While({Condition})";
         }
 
-        public List<string> GetVariables()
+        public List<string> GetInputVariables()
         {
             var variables = new List<string>();
             variables.AddRange(Condition.GetVariables());
             foreach (var command in Commands)
             {
-                variables.AddRange(command.GetVariables());
+                variables.AddRange(command.GetInputVariables());
             }
             return variables;
         }
+
+        public List<string> GetOutputVariables()
+        {
+            var variables = new List<string>();
+            foreach (var command in Commands)
+            {
+                variables.AddRange(command.GetOutputVariables());
+            }
+            return variables;
+        }
+
     }
 }

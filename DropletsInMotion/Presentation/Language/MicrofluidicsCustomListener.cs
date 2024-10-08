@@ -283,6 +283,27 @@ namespace DropletsInMotion.Presentation.Language
         //    Commands.Add(ifCommand);
         //}
 
+        public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
+        {
+            // Extract the condition (boolean expression)
+            BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
+
+            // Extract commands from the 'then' block
+            var thenCommands = ExtractCommandsFromBlock(context.block(0));
+
+            // Extract commands from the 'else' block, if it exists
+            List<ICommand> elseCommands = new List<ICommand>();
+            if (context.block().Length > 1) // Check if there's an else block
+            {
+                elseCommands = ExtractCommandsFromBlock(context.block(1));
+            }
+
+            // Create the IfCommand and add it to the Commands list
+            ICommand ifCommand = new IfCommand(condition, thenCommands, elseCommands);
+            Commands.Add(ifCommand);
+        }
+
+
         public override void ExitWhileLoop(MicrofluidicsParser.WhileLoopContext context)
         {
             BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());

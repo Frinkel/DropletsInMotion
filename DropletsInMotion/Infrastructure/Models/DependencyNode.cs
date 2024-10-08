@@ -41,5 +41,10 @@ namespace DropletsInMotion.Infrastructure.Models
         {
             return $"Node {NodeId}: {Command.ToString()} (Executed: {IsExecuted})";
         }
+
+        public void Reset()
+        {
+            IsExecuted = false;
+        }
     }
 }

@@ -51,11 +51,16 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
             PositionY = (int)PositionYExpression.Evaluate(variableValues);
         }
 
-        public List<string> GetVariables()
+        public List<string> GetOutputVariables() {
+            return GetOutputDroplets();
+        }
+
+        public List<string> GetInputVariables()
         {
-            var x = PositionXExpression.GetVariables();
-            x.AddRange(PositionYExpression.GetVariables());
-            return x;
+            var res = PositionXExpression.GetVariables();
+            res.AddRange(PositionYExpression.GetVariables());
+            res.AddRange(GetInputDroplets());
+            return res;
         }
     }
 }

@@ -9,6 +9,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
         public BooleanExpression Condition { get; }
         public List<ICommand> IfBlockCommands { get; }
         public List<ICommand> ElseBlockCommands { get; }
+        public bool Evaluation { get; set; }
+        public bool HasBeenEvaluated { get; set; }
 
         public IfCommand(BooleanExpression condition, List<ICommand> ifBlockCommands, List<ICommand> elseBlockCommands = null)
         {
@@ -19,14 +21,9 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
 
         public void Evaluate(Dictionary<string, double> variableValues)
         {
-            bool conditionResult = Condition.Evaluate(variableValues);
-
-            // Evaluate either if-block or else-block depending on the condition result
-            var commandsToExecute = conditionResult ? IfBlockCommands : ElseBlockCommands;
-            foreach (var command in commandsToExecute)
-            {
-                command.Evaluate(variableValues);
-            }
+            if (HasBeenEvaluated) return;
+            HasBeenEvaluated = true;
+            Evaluation = Condition.Evaluate(variableValues);
         }
 
         public override string ToString()
@@ -34,17 +31,31 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
             return $"If({Condition})";
         }
 
-        public List<string> GetVariables()
+        public List<string> GetInputVariables()
         {
             var variables = new List<string>();
             variables.AddRange(Condition.GetVariables());
             foreach (var command in IfBlockCommands)
             {
-                variables.AddRange(command.GetVariables());
+                variables.AddRange(command.GetInputVariables());
             }
             foreach (var command in ElseBlockCommands)
             {
-                variables.AddRange(command.GetVariables());
+                variables.AddRange(command.GetInputVariables());
+            }
+            return variables;
+        }
+
+        public List<string> GetOutputVariables()
+        {
+            var variables = new List<string>();
+            foreach (var command in IfBlockCommands)
+            {
+                variables.AddRange(command.GetOutputVariables());
+            }
+            foreach (var command in ElseBlockCommands)
+            {
+                variables.AddRange(command.GetOutputVariables());
             }
             return variables;
         }

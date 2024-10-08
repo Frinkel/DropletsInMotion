@@ -60,14 +60,20 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
             RepeatTimes = (int)RepeatTimesExpression.Evaluate(variableValues);
         }
 
-        public List<string> GetVariables()
+        public List<string> GetOutputVariables()
         {
-            var x = PositionXExpression.GetVariables();
-            x.AddRange(PositionYExpression.GetVariables());
-            x.AddRange(WidthExpression.GetVariables());
-            x.AddRange(HeightExpression.GetVariables());
-            x.AddRange(RepeatTimesExpression.GetVariables());
-            return x;
+            return GetOutputDroplets();
+        }
+
+        public List<string> GetInputVariables()
+        {
+            var res = PositionXExpression.GetVariables();
+            res.AddRange(PositionYExpression.GetVariables());
+            res.AddRange(WidthExpression.GetVariables());
+            res.AddRange(HeightExpression.GetVariables());
+            res.AddRange(RepeatTimesExpression.GetVariables());
+            res.AddRange(GetInputDroplets());
+            return res;
         }
 
     }

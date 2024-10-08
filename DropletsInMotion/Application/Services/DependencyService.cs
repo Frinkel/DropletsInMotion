@@ -124,12 +124,20 @@ namespace DropletsInMotion.Application.Services
                             }
                             else
                             {
-                                dependencyNodeWhile.ResetBody();
+                                dependencyNodeWhile.Reset();
                             }
                             
                         }
                         break;
 
+                    case IfCommand ifCommand:
+                        DependencyNodeIf dependencyNodeIf = (DependencyNodeIf)node;
+                        if (dependencyNodeIf.IsComplete())
+                        {
+                            Console.WriteLine("IF command done");
+                            node.MarkAsExecuted();
+                        }
+                        break;
 
                     default:
                         node.MarkAsExecuted();

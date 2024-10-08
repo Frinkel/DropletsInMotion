@@ -1,4 +1,5 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
+using System.Collections.Generic;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
@@ -45,9 +46,15 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
             Volume = VolumeExpression.Evaluate(variableValues);
         }
 
-        public List<string> GetVariables()
+        public List<string> GetInputVariables()
         {
-            return VolumeExpression.GetVariables();
+            var res = VolumeExpression.GetVariables();
+            res.AddRange(GetInputDroplets());
+            return res;
+        }
+        public List<string> GetOutputVariables()
+        {
+            return GetOutputDroplets();
         }
     }
 }

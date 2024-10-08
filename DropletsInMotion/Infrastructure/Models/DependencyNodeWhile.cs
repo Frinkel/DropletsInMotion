@@ -21,12 +21,12 @@ namespace DropletsInMotion.Infrastructure.Models
             Dependencies = new List<IDependencyNode>();
         }
 
-        public void ResetBody()
+        public void Reset()
         {
-            Console.WriteLine("Resetting body");
+            IsExecuted = false;
             foreach (var node in Body.GetAllNodes())
             {
-                node.IsExecuted = false;
+                node.Reset();
             }
         }
 
@@ -67,8 +67,6 @@ namespace DropletsInMotion.Infrastructure.Models
             //{
 
             //}
-            Console.WriteLine($"CanExecute: {Dependencies.All(dependency => dependency.IsExecuted)} and is {IsExecuted}");
-
             return Dependencies.All(dependency => dependency.IsExecuted);
         }
 

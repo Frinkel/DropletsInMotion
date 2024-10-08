@@ -72,13 +72,6 @@ namespace DropletsInMotion.Application.Execution
             Agents.Clear();
             Agent.ResetSubstanceId();
 
-            //foreach (var droplet in droplets)
-            //{
-            //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
-            //    Agents.Add(droplet.Key, agent);
-            //    ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
-            //}
-
             _router.Initialize(Board);
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -184,6 +177,7 @@ namespace DropletsInMotion.Application.Execution
                 }
                 Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
+
             }
 
             watch.Stop();

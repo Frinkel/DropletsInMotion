@@ -86,7 +86,6 @@ namespace DropletsInMotion.Infrastructure.Models
                 }
             }
             Console.WriteLine("}");
-
         }
 
 

@@ -13,4 +13,5 @@ public interface IDependencyNode
     List<IDependencyNode> getExecutableNodes();
     bool CanExecute();
     string ToString();
+    void Reset();
 }
