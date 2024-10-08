@@ -84,7 +84,9 @@ namespace DropletsInMotion.Application.Execution
             var watch = System.Diagnostics.Stopwatch.StartNew();
             
             List<BoardAction> boardActions = new List<BoardAction>();
-            
+
+            _communicationEngine.SendRequest("RGB1", "red", 5);
+
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
                 foreach (var agent in Agents)

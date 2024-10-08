@@ -24,5 +24,7 @@ namespace DropletsInMotion.Infrastructure.Services
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public string GetProjectDirectory();
+
+        List<string> GetFilesFromFolder(string path);
     }
 }

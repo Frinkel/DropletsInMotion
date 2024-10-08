@@ -211,7 +211,11 @@ namespace DropletsInMotion.Communication.Simulator.Services
             var tcs = new TaskCompletionSource<WebSocketMessage<object>>();
             _pendingRequests[requestId] = tcs;
 
+            Console.WriteLine("WE ARE BEFORE");
+
             await SendMessageToAllAsync(message, cancellationToken);
+
+            Console.WriteLine("WE ARE AFTER");
 
             var response = await tcs.Task;
 

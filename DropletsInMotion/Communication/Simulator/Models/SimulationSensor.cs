@@ -10,7 +10,7 @@ namespace DropletsInMotion.Communication.Simulator.Models
     }
 
 
-    public class Sensor
+    public class SimulationSensor
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }
@@ -53,7 +53,7 @@ namespace DropletsInMotion.Communication.Simulator.Models
 
         public override string ToString()
         {
-            return $"Sensor: {{ name: \"{Name}\", type: \"{Type}\", ID: {Id}, sensorID: {SensorId}, " +
+            return $"SimulationSensor: {{ name: \"{Name}\", type: \"{Type}\", ID: {Id}, sensorID: {SensorId}, " +
                    $"positionX: {PositionX}, positionY: {PositionY}, sizeX: {SizeX}, sizeY: {SizeY}, " +
                    $"electrodeID: {ElectrodeId}, valueRed: {ValueRed}, valueGreen: {ValueGreen}, " +
                    $"valueBlue: {ValueBlue}, valueTemperature: {ValueTemperature} }}";

@@ -1,0 +1,28 @@
+{
+  "name": "RGB2",
+  "sensorId": "2",
+
+  "argumentHandlers": {
+    "red": {
+      "request": {
+        "sensorId": "2",
+        "requestArgument": "read"
+      },
+      "response": "color.valueRed"
+    },
+    "green": {
+      "request": {
+        "sensorId": "2",
+        "requestArgument": "read"
+      },
+      "response": "color.valueGreen"
+    },
+    "blue": {
+      "request": {
+        "sensorId": "2",
+        "requestArgument": "read"
+      },
+      "response": "color.valueBlue"
+    }
+  }
+}

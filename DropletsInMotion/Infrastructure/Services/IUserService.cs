@@ -17,6 +17,7 @@ namespace DropletsInMotion.Infrastructure.Services
 
         string PlatformPath { get; set; }
         string ProgramPath { get; set; }
+        string ConfigurationPath { get; set; }
         public CommunicationType Communication { get; set; }
         event EventHandler? CommunicationTypeChanged;
     }

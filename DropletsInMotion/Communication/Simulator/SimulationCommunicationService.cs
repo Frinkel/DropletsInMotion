@@ -2,6 +2,8 @@
 using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Communication.Simulator.Services;
 using System.Text.Json;
+using DropletsInMotion.Communication.Models;
+using System.Reflection;
 
 namespace DropletsInMotion.Communication.Simulator;
 
@@ -62,52 +64,86 @@ public class SimulationCommunicationService : ICommunicationService
     }
 
     // TODO: We should return something useful in this function!
-    public async Task SendRequest(BoardSensorRequest sensorRequest)
+    public async Task<double> SendRequest(Sensor sensor, Handler handler, double time)
     {
 
-        WebSocketMessage<SensorRequest> sensorRequestDto =
-            new WebSocketMessage<SensorRequest>(WebSocketMessageTypes.Sensor, new SensorRequest(sensorRequest.Id, sensorRequest.Time));
+        RequestWrapper requestWrapper = new RequestWrapper(handler.Request, time);
+
+        WebSocketMessage<RequestWrapper> sensorRequestDto =
+            new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.Sensor, requestWrapper);
 
         string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
 
-        //Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
-        Console.WriteLine(sensorRequestDto);
-
         var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
-        
-
-        // Handle different response types
         switch (response.Type)
         {
             case (WebSocketResponseTypes.Sensor):
-                var sensor = JsonSerializer.Deserialize<Sensor>((response.Data?.ToString()) ?? string.Empty);
-
-                if (sensor == null)
-                {
-                    throw new Exception($"Sensor data was faulty: {response.Data}");
-                }
+                var simulationSensor =
+                    JsonSerializer.Deserialize<SimulationSensor>((response.Data?.ToString()) ?? string.Empty);
                 
-                // Handle sensor types
-                switch (sensor.Type)
+                if (simulationSensor == null)
                 {
-                    case SensorTypes.Rgb:
-                        Console.WriteLine($"Color = ({sensor.ValueRed}, {sensor.ValueGreen}, {sensor.ValueBlue})");
-                        // TODO: This should return something useful!
-                        break;
-                    case SensorTypes.Temperature:
-                        Console.WriteLine($"Temperature = {sensor.ValueTemperature}");
-                        // TODO: This should return something useful!
-                        break;
-                    default:
-                        throw new Exception("The sensor type was not recognized!");
+                    throw new Exception($"SimulationSensor data was faulty: {response.Data}");
                 }
+
+                PropertyInfo? propertyInfo = simulationSensor?.GetType()?.GetProperty(handler.Response, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+                if (propertyInfo == null)
+                {
+                    throw new Exception($"Sensor {simulationSensor.Name} did not contian propery {handler.Response}");
+                }
+
+                double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
+                
+                return sensorValue;
 
                 break;
-                
-            default:
-                throw new Exception("The response type was not recognized!");
         }
+
+        //WebSocketMessage<RequestWrapper> sensorRequestDto =
+        //    new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.SimulationSensor, new RequestWrapper(sensorRequest.Id, sensorRequest.Time));
+
+        //string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
+
+        ////Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
+        //Console.WriteLine(sensorRequestDto);
+
+        //var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+
+
+
+        //// Handle different response types
+        //switch (response.Type)
+        //{
+        //    case (WebSocketResponseTypes.SimulationSensor):
+        //        var simulationSensor = JsonSerializer.Deserialize<SimulationSensor>((response.Data?.ToString()) ?? string.Empty);
+
+        //        if (simulationSensor == null)
+        //        {
+        //            throw new Exception($"SimulationSensor data was faulty: {response.Data}");
+        //        }
+
+        //        // Handle simulationSensor types
+        //        switch (simulationSensor.Type)
+        //        {
+        //            case SensorTypes.Rgb:
+        //                Console.WriteLine($"Color = ({simulationSensor.ValueRed}, {simulationSensor.ValueGreen}, {simulationSensor.ValueBlue})");
+        //                // TODO: This should return something useful!
+        //                break;
+        //            case SensorTypes.Temperature:
+        //                Console.WriteLine($"Temperature = {simulationSensor.ValueTemperature}");
+        //                // TODO: This should return something useful!
+        //                break;
+        //            default:
+        //                throw new Exception("The simulationSensor type was not recognized!");
+        //        }
+
+        //        break;
+
+        //    default:
+        //        throw new Exception("The response type was not recognized!");
+        //}
     }
 
     public async Task<bool> IsClientConnected()

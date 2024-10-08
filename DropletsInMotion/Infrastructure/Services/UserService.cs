@@ -8,6 +8,7 @@ public class UserService : IUserService
 
     public required string PlatformPath { get; set; }
     public required string ProgramPath { get; set; }
+    public required string ConfigurationPath { get; set; }
 
     public IUserService.CommunicationType Communication
     {

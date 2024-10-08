@@ -40,5 +40,24 @@ namespace DropletsInMotion.Infrastructure.Services
         {
             return Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? throw new Exception("Something went wrong when getting the project directory.");
         }
+
+        public List<string> GetFilesFromFolder(string path)
+        {
+            try
+            {
+                List<string> files = Directory.GetFiles(path).ToList();
+                return files;
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Console.WriteLine($"Error: The directory '{path}' was not found.");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

@@ -6,27 +6,72 @@ namespace DropletsInMotion.UI
     public class ConsoleService : IConsoleService
     {
         private IUserService _userService;
+        private IFileService _fileService;
 
         public bool IsDevelopment { get; private set; }
         public string? DevelopmentPath { get; private set; }
         public string? DevelopmentProgram { get; private set; }
         public string? DevelopmentPlatform { get; private set; }
+        public string? DevelopmentConfiguration { get; private set; }
 
-        public ConsoleService(IConfiguration configuration, IUserService userService)
+        public ConsoleService(IConfiguration configuration, IUserService userService, IFileService fileService)
         {
             _userService = userService;
+            _fileService = fileService;
 
             var configuration1 = configuration;
             IsDevelopment = configuration1.GetValue<bool>("Development:IsDevelopment");
             DevelopmentPath = configuration1["Development:Path"];
             DevelopmentProgram = configuration1["Development:Program"];
             DevelopmentPlatform = configuration1["Development:Platform"];
+            DevelopmentConfiguration = configuration1["Development:Configuration"];
         }
 
         public void GetInitialInformation()
         {
             _userService.PlatformPath = GetPathToBoardConfiguration();
             _userService.ProgramPath = GetPathToProgram();
+            _userService.ConfigurationPath = GetPathToConfiguration();
+        }
+
+        private string GetPathToConfiguration()
+        {
+            string? path = null;
+
+            if (!IsDevelopment)
+            {
+                throw new NotImplementedException("We cant do this yet!");
+                //while (path == null || path?.Trim() == "")
+                //{
+                //    Console.Write("Enter the path to your configuration: ");
+                //    // TODO: Add validation logic for the path
+                //    path = Console.ReadLine();
+
+                //    if (!File.Exists(path))
+                //    {
+                //        Console.WriteLine($"No file found on path \"{path}\"");
+                //        path = null;
+                //    }
+                //    else if (Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase))
+                //    {
+                //        Console.WriteLine("File is not a JSON file");
+                //        path = null;
+                //    }
+
+                //}
+            }
+            else
+            {
+                path = _fileService.GetProjectDirectory() + DevelopmentPath + DevelopmentConfiguration;
+            }
+
+            if (path == null)
+            {
+                throw new ArgumentException("Path to board configuration cannot be null!");
+            }
+
+            Console.WriteLine($"Platform configuration path {path}\n");
+            return path;
         }
 
         public string GetPathToBoardConfiguration()
@@ -56,9 +101,7 @@ namespace DropletsInMotion.UI
             }
             else
             {
-                string workingDirectory = Environment.CurrentDirectory;
-                string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
-                path = projectDirectory + DevelopmentPath + DevelopmentPlatform;
+                path = _fileService.GetProjectDirectory() + DevelopmentPath + DevelopmentPlatform;
             }
 
             if (path == null)

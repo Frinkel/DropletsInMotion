@@ -5,8 +5,8 @@ namespace DropletsInMotion.Communication;
 public interface ICommunicationEngine
 {
     Task SendActions(List<BoardAction> boardActionDtoList);
-    Task SendRequest(BoardSensorRequest sensorRequest);
-    event EventHandler? ClientConnected;
+    Task<double> SendRequest(string sensorName, string argument, double time);
 
+    event EventHandler? ClientConnected;
     event EventHandler? ClientDisconnected;
 }

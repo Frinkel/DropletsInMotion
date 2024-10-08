@@ -88,7 +88,7 @@ whileLoop
 
 // Sensor access
 sensorCommand
-    : IDENTIFIER '=' 'sensor' '(' STRING ',' arithmeticExpression ')'
+    : IDENTIFIER '=' 'sensor' '(' STRING ',' STRING ')'
     ;
 
 // Actuator access

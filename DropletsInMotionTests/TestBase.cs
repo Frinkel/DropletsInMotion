@@ -10,6 +10,7 @@ using DropletsInMotion.Application.Execution;
 using DropletsInMotion.Application.ExecutionEngine;
 using DropletsInMotion.Communication.Simulator.Services;
 using DropletsInMotion.Communication;
+using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.UI;
@@ -52,6 +53,7 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
+            serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
 
 
             // Classes

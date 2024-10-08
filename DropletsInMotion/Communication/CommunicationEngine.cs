@@ -3,6 +3,8 @@ using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using DropletsInMotion.Communication.Models;
+using DropletsInMotion.Communication.Services;
 
 namespace DropletsInMotion.Communication
 {
@@ -10,15 +12,17 @@ namespace DropletsInMotion.Communication
     {
         private ICommunicationService? _communicationService;
         private readonly IServiceProvider _serviceProvider;
+        private ICommunicationTemplateService _communicationTemplateService;
 
         public event EventHandler? ClientConnected;
         public event EventHandler? ClientDisconnected;
 
         private bool _isServerRunning = false;
 
-        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService)
+        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService)
         {
             _serviceProvider = serviceProvider;
+            _communicationTemplateService = communicationTemplateService;
 
             userService.CommunicationTypeChanged += OnCommunicationTypeChanged;
         }
@@ -27,6 +31,8 @@ namespace DropletsInMotion.Communication
         {   
             try
             {
+                _communicationTemplateService.LoadTemplates();
+
                 if (sender == null) throw new ArgumentNullException(nameof(sender));
                 if (_isServerRunning) throw new InvalidOperationException("A server is already running");
 
@@ -72,24 +78,32 @@ namespace DropletsInMotion.Communication
             await _communicationService.SendActions(boardActionDtoList);
         }
 
-        public async Task SendRequest(BoardSensorRequest sensorRequest)
+        public async Task<double> SendRequest(string sensorName, string argument, double time)
         {
             if (!_isServerRunning || _communicationService == null)
             {
-                return;
+                throw new InvalidOperationException("Tried to send request without a open communication channel!");
             }
 
-            await _communicationService.SendRequest(sensorRequest);
+            if (!_communicationTemplateService.Sensors.TryGetValue(sensorName, out Sensor? sensor))
+            {
+                throw new Exception($"We could not find any sensor with name {sensorName}");
+            }
+
+            if (!sensor.ArgumentHandlers.TryGetValue(argument, out Handler? handler))
+            {
+                throw new Exception($"We could not find any argument {argument} in sensor {sensorName}");
+            }
+
+            return await _communicationService.SendRequest(sensor, handler, time);
         }
 
 
-        // Implement IDisposable
         public void Dispose()
         {
             StopCommunication().GetAwaiter().GetResult();
         }
 
-        // Implement IAsyncDisposable for async cleanup
         public async ValueTask DisposeAsync()
         {
             await StopCommunication();

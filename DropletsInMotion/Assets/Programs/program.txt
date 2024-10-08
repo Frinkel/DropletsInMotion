@@ -3,7 +3,6 @@ Droplet(d1, i, 6, 1.2);
 i = 1;
 Move(d1, i, i);
 Droplet(d2, 11, 6, 1.2);
-WaitForUserInput();
 Move(d2, i+4, i);
 Move(d1, i, 18);
 

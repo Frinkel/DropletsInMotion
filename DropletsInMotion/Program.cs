@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.ExecutionEngine;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
+using DropletsInMotion.Communication.Services;
 using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
@@ -79,6 +80,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
+            serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
 
 
             // Classes
