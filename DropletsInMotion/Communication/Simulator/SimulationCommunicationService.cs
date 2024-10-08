@@ -144,6 +144,7 @@ public class SimulationCommunicationService : ICommunicationService
         //    default:
         //        throw new Exception("The response type was not recognized!");
         //}
+        return 0;
     }
 
     public async Task<bool> IsClientConnected()
