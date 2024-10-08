@@ -1,0 +1,6 @@
+Droplet(d1, 1, 1, 1.2);
+Droplet(d2, 10, 10, 1.2);
+i = 5;
+Move(d1, i, i);
+i = i + i + 4;
+Move(d2, i, i);)

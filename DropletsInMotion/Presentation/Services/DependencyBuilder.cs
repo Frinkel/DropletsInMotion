@@ -29,25 +29,16 @@ namespace DropletsInMotion.Presentation.Services
                     WhileCommand whileCommand = (WhileCommand)commands[index];
                     DependencyGraph body = Build(whileCommand.Commands);
                     nodes.Add(new DependencyNodeWhile(nodeId, commands[index], body));
-                    Console.WriteLine("While body");
-                    body.GenerateDotFile();
-                    Console.WriteLine("End while body");
                 } else if (commands[index] is IfCommand)
                 {
                     IfCommand ifCommand = (IfCommand)commands[index];
                     DependencyGraph thenBody = Build(ifCommand.IfBlockCommands);
                     DependencyGraph elseBody = Build(ifCommand.ElseBlockCommands);
                     nodes.Add(new DependencyNodeIf(nodeId, commands[index], thenBody, elseBody));
-                    Console.WriteLine("If body");
-                    thenBody.GenerateDotFile();
-                    Console.WriteLine("--------------------");
-                    elseBody.GenerateDotFile();
-                    Console.WriteLine("End if body");
                 }
                 else
                 {
                     nodes.Add(new DependencyNode(nodeId, commands[index]));
-
                 }
                 nodeId++;
             }

@@ -3,14 +3,6 @@ using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Communication;
-using DropletsInMotion.Communication.Models;
-using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Repositories;
 

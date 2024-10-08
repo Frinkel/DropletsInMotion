@@ -16,8 +16,6 @@ namespace DropletsInMotion.Infrastructure.Models
 
         public List<IDependencyNode> GetExecutableNodes()
         {
-
-            // Aggregate executable nodes from each DependencyNode using their getExecutableNodes method
             return _nodes
                 .Where(n => !n.IsExecuted && n.CanExecute())
                 .SelectMany(n => n.getExecutableNodes())
@@ -36,7 +34,6 @@ namespace DropletsInMotion.Infrastructure.Models
             {
                 node.MarkAsExecuted();
             }
-            // remove dependency for all _nodes? for speedup or no gain?
         }
 
         public override string ToString()
@@ -71,23 +68,54 @@ namespace DropletsInMotion.Infrastructure.Models
             }
         }
 
-        public void GenerateDotFile()
+        public void GenerateDotFile(bool isSubgraph = false)
         {
-            Console.WriteLine("digraph DependencyGraph {");
+            // Only print the "digraph" definition at the top level, not for subgraphs
+            if (!isSubgraph)
+            {
+                Console.WriteLine("digraph DependencyGraph {");
+            }
+
             foreach (var node in _nodes)
             {
-                // Define the node
                 Console.WriteLine($"  Node{node.NodeId} [label=\"{node.Command}\"];");
 
-                // Define the edges (dependencies)
                 foreach (var dependency in node.Dependencies)
                 {
                     Console.WriteLine($"  Node{dependency.NodeId} -> Node{node.NodeId};");
                 }
-            }
-            Console.WriteLine("}");
-        }
 
+                if (node is DependencyNodeWhile whileNode && whileNode.Body != null)
+                {
+                    Console.WriteLine($"  subgraph cluster_while_{node.NodeId} {{");
+                    Console.WriteLine($"    label = \"Subgraph for While Node: {node.Command}\";");
+                    whileNode.Body.GenerateDotFile(true);  
+                    Console.WriteLine("  }");
+                }
+
+                if (node is DependencyNodeIf ifNode && ifNode.ThenBody != null)
+                {
+                    Console.WriteLine($"  subgraph cluster_if_then_{node.NodeId} {{");
+                    Console.WriteLine($"    label = \"Subgraph for IF Node THEN path: {node.Command}\";");
+                    ifNode.ThenBody.GenerateDotFile(true); 
+                    Console.WriteLine("  }");
+
+                    if (ifNode.ElseBody != null)
+                    {
+                        Console.WriteLine($"  subgraph cluster_if_else_{node.NodeId} {{");
+                        Console.WriteLine($"    label = \"Subgraph for IF Node ELSE path: {node.Command}\";");
+                        ifNode.ElseBody.GenerateDotFile(true); 
+                        Console.WriteLine("  }");
+                    }
+
+                }
+            }
+
+            if (!isSubgraph)
+            {
+                Console.WriteLine("}");
+            }
+        }
 
     }
 

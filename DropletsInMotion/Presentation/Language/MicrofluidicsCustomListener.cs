@@ -199,6 +199,31 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(dropletCommand);
         }
 
+        public override void ExitPrintStatement(MicrofluidicsParser.PrintStatementContext context)
+        {
+            List<object> arguments = new List<object>();
+
+            foreach (var arg in context.printArgument())
+            {
+                if (arg.STRING() != null)
+                {
+                    arguments.Add(arg.STRING().GetText().Trim('"'));
+                }
+                else if (arg.arithmeticExpression() != null)
+                {
+                    arguments.Add(CreateExpression(arg.arithmeticExpression()));
+                }
+                else if (arg.booleanExpression() != null)
+                {
+                    arguments.Add(CreateBooleanExpression(arg.booleanExpression()));
+                }
+            }
+
+            ICommand printCommand = new PrintCommand(arguments);
+            Commands.Add(printCommand);
+        }
+
+
 
         //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
         //{

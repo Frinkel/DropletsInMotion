@@ -162,5 +162,99 @@ namespace DropletsInMotionTests
             Assert.That(_executionEngine.Agents.Count, Is.EqualTo(4));
             Assert.GreaterOrEqual(_executionEngine.Time, 2001);
         }
+
+        [Test]
+        public async Task VariablesTest1()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestVariables1.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(5));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(5));
+        }
+
+        [Test]
+        public async Task VariablesTest2()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestVariables2.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(5));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(5));
+            Assert.That(_executionEngine.Agents["d2"].PositionX, Is.EqualTo(14));
+            Assert.That(_executionEngine.Agents["d2"].PositionY, Is.EqualTo(14));
+        }
+
+        [Test]
+        public async Task WhileLoopTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestWhileLoop.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(15));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(6));
+        }
+
+
+        [Test]
+        public async Task IfTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestIf.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(10));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(6));
+        }
+
+        [Test]
+        public async Task IfElseTest1()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestIfElse1.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(10));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(6));
+        }
+
+        [Test]
+        public async Task IfElseTest2()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestIfElse2.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(1));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(6));
+        }
+
+        [Test]
+        public async Task WhileIfElseTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestWhileLoopIfElse.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(5));
+            Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(10));
+        }
     }
 }

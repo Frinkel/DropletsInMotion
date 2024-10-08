@@ -11,7 +11,6 @@ namespace DropletsInMotion.Infrastructure.Models
         public List<IDependencyNode> Dependencies { get; }
         public DependencyGraph ThenBody { get; set; }
         public DependencyGraph ElseBody { get; set; }
-        //public bool ConditionIsTrue { get; set; }
 
 
         public DependencyNodeIf(int nodeId, ICommand command, DependencyGraph thenBody, DependencyGraph elseBody)
@@ -20,7 +19,6 @@ namespace DropletsInMotion.Infrastructure.Models
             Command = command;
             ThenBody = thenBody;
             ElseBody = elseBody;
-            //SetBodyExecuted();
             ResetBody();
             IsExecuted = false;
             Dependencies = new List<IDependencyNode>();
@@ -35,18 +33,6 @@ namespace DropletsInMotion.Infrastructure.Models
             foreach (var node in ElseBody.GetAllNodes())
             {
                 node.IsExecuted = false;
-            }
-        }
-
-        private void SetBodyExecuted()
-        {
-            foreach (var node in ThenBody.GetAllNodes())
-            {
-                node.IsExecuted = true;
-            }
-            foreach (var node in ElseBody.GetAllNodes())
-            {
-                node.IsExecuted = true;
             }
         }
 
@@ -72,7 +58,6 @@ namespace DropletsInMotion.Infrastructure.Models
 
             if (IsComplete())
             {
-                Console.WriteLine("IS COMPLEET!");
                 return new List<IDependencyNode>() { this };
             }
 
@@ -81,11 +66,13 @@ namespace DropletsInMotion.Infrastructure.Models
             {
                 return new List<IDependencyNode>(ThenBody.GetExecutableNodes());
             }
+
             return new List<IDependencyNode>(ElseBody.GetExecutableNodes());
         }
 
         public bool IsComplete()
         {
+            //Check if all nodes in the chosen path have been executed
             IfCommand ifCommand = (IfCommand)Command;
             if (ifCommand.Evaluation)
             {

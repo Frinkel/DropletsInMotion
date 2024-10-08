@@ -63,6 +63,7 @@ namespace DropletsInMotion.Application.Execution
             Board = _translator.Board;
             DependencyGraph = _translator.DependencyGraph;
 
+
             Time = 0;
             Console.WriteLine(Board[0][1]);
 
@@ -79,8 +80,6 @@ namespace DropletsInMotion.Application.Execution
             
             List<BoardAction> boardActions = new List<BoardAction>();
 
-            //_communicationEngine.SendRequest("RGB1", "red", 5);
-
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
                 foreach (var node in DependencyGraph.GetExecutableNodes())
@@ -94,23 +93,9 @@ namespace DropletsInMotion.Application.Execution
                     .FindAll(c => c is IDropletCommand)
                     .ConvertAll(c => (IDropletCommand)c);
 
-                List<ICommand> commandsToExecute3 = commands.FindAll(c => c is not IDropletCommand);
-
-                
-
-                foreach (var command in commandsToExecute3)
-                {
-                    command.Evaluate(Variables);
-
-                }
-
-                foreach (IDropletCommand command in commandsToExecute)
-                {
-                    command.Evaluate(Variables);
-                }
+                commands.ForEach(c => c.Evaluate(Variables));
 
                 List<IDropletCommand> movesToExecute = new List<IDropletCommand>();
-
                 double? executionTime = Time;
                 foreach (IDropletCommand command in commandsToExecute)
                 {
@@ -122,28 +107,35 @@ namespace DropletsInMotion.Application.Execution
                             Agents.Add(dropletCommand.DropletName, agent);
                             ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
                             break;
+
                         case Move moveCommand:
                             moveCommand.Evaluate(Variables);
                             movesToExecute.Add(moveCommand);
                             break;
+
                         case Merge mergeCommand:
                             HandleMergeCommand(mergeCommand, movesToExecute, boardActions, ref executionTime, Agents);
                             break;
+
                         case SplitByRatio splitByRatioCommand:
                             HandleSplitByRatioCommand(splitByRatioCommand, movesToExecute, boardActions, executionTime, Agents);
                             break;
+
                         case SplitByVolume splitByVolumeCommand:
                             HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, ref executionTime, Agents);
                             break;
+
                         case Store storeCommand:
                             if (_actionService.InPositionToStore(storeCommand, Agents, movesToExecute))
                             {
                                 _storeService.StoreDroplet(storeCommand, Time);
                             }
                             break;
+
                         case Mix mixCommand:
                             await HandleMixCommand(mixCommand, movesToExecute);
                             break;
+
                         case WaitForUserInput waitForUserInputCommand:
                             Console.WriteLine("");
                             Console.WriteLine("Press enter to continue");
@@ -151,14 +143,15 @@ namespace DropletsInMotion.Application.Execution
                             // MAYBE ADD STOPWATCH TO EXTEND TIME WITH GIVEN AMOUNT?
                             Console.ReadLine();
                             break;
+
                         case Wait waitCommand:
                             executionTime = waitCommand.Time + Time;
                             break;
+
                         case SensorCommand sensorCommand:
-
                             await HandleSensorCommand(sensorCommand, movesToExecute);
-
                             break;
+
                         default:
                             Console.WriteLine($"Unknown dropletCommand: {command}");
                             break;
@@ -178,11 +171,8 @@ namespace DropletsInMotion.Application.Execution
                 }
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
-
-                if (boardActions.Count > 0)
-                {
-                    await _communicationEngine.SendActions(boardActions);
-                }
+                
+                await SendActions(boardActions);
 
                 Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
@@ -193,6 +183,14 @@ namespace DropletsInMotion.Application.Execution
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
+        }
+
+        private async Task SendActions(List<BoardAction> boardActions)
+        {
+            if (boardActions.Count > 0)
+            {
+                await _communicationEngine.SendActions(boardActions);
+            }
         }
 
         private async Task HandleSensorCommand(SensorCommand sensorCommand, List<IDropletCommand> movesToExecute)

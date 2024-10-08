@@ -194,7 +194,7 @@ public class State
 
             foreach (Types.RouteAction action in possibleActions)
             {
-                if (_contaminationService.IsMoveApplicable(action, agent, this))
+                if (agent.IsMoveApplicable(action, this))
                 {
                     agentActions.Add(action);
                 }
