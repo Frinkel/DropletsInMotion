@@ -21,7 +21,13 @@
         public void Evaluate(Dictionary<string, double> variableValues)
         {
         }
-        public List<string> GetVariables()
+
+        public List<string> GetInputVariables()
+        {
+            return new List<string> { };
+        }
+
+        public List<string> GetOutputVariables()
         {
             return new List<string> { };
         }

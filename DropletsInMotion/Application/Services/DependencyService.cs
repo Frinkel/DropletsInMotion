@@ -1,5 +1,4 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Infrastructure.Models.Domain;
+﻿using DropletsInMotion.Infrastructure.Models.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+using DropletsInMotion.Infrastructure.Models;
+using DropletsInMotion.Infrastructure.Models.Commands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -22,9 +23,9 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public void updateExecutedNodes(List<DependencyNode> nodes, Dictionary<string, Agent> agents, double currentTime)
+        public void updateExecutedNodes(List<IDependencyNode> nodes, Dictionary<string, Agent> agents, double currentTime)
         {
-            foreach (DependencyNode node in nodes)
+            foreach (IDependencyNode node in nodes)
             {
                 switch (node.Command)
                 {
@@ -113,6 +114,30 @@ namespace DropletsInMotion.Application.Services
                         }
                         break;
 
+                    case WhileCommand whileCommand:
+                        DependencyNodeWhile dependencyNodeWhile = (DependencyNodeWhile)node;
+                        if (dependencyNodeWhile.Body.GetAllNodes().All(n => n.IsExecuted))
+                        {
+                            if (!whileCommand.Evaluation)
+                            {
+                                node.MarkAsExecuted();
+                            }
+                            else
+                            {
+                                dependencyNodeWhile.Reset();
+                            }
+                            
+                        }
+                        break;
+
+                    case IfCommand ifCommand:
+                        DependencyNodeIf dependencyNodeIf = (DependencyNodeIf)node;
+                        if (dependencyNodeIf.IsComplete())
+                        {
+                            Console.WriteLine("IF command done");
+                            node.MarkAsExecuted();
+                        }
+                        break;
 
                     default:
                         node.MarkAsExecuted();

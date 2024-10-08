@@ -39,6 +39,13 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.Expressions
         {
             return $"({Left} {Operator} {Right})";
         }
+
+        public override List<string> GetVariables()
+        {
+            List<string> variables = Left.GetVariables();
+            variables.AddRange(Right.GetVariables());
+            return variables.Distinct().ToList();
+        }
     }
 
 }

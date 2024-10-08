@@ -93,7 +93,7 @@ sensorCommand
 
 // Actuator access
 actuatorCommand
-    : IDENTIFIER '=' 'actuate' '(' STRING ',' arithmeticExpression ')'
+    : IDENTIFIER '=' 'actuate' '(' STRING ',' STRING ')'
     ;
 
 // Block (for if/else and loops)
@@ -117,7 +117,7 @@ arithmeticExpression
     : arithmeticExpression op=('*'|'/') arithmeticExpression
     | arithmeticExpression op=('+'|'-') arithmeticExpression
     | '(' arithmeticExpression ')'
-    | '-' ArithmeticExpression
+    | '-' arithmeticExpression
     | FLOAT
     | INT
     | IDENTIFIER
@@ -147,6 +147,8 @@ WS
     ;
 
 // Operators
+fragment
+NOT: '!';
 fragment
 ADD: '+';
 fragment

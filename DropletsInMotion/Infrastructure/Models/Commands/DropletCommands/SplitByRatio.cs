@@ -67,14 +67,19 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
             Ratio = RatioExpression.Evaluate(variableValues);
         }
 
-        public List<string> GetVariables()
+        public List<string> GetInputVariables()
         {
             var x = PositionX1Expression.GetVariables();
             x.AddRange(PositionY1Expression.GetVariables());
             x.AddRange(PositionX2Expression.GetVariables());
             x.AddRange(PositionY2Expression.GetVariables());
             x.AddRange(RatioExpression.GetVariables());
+            x.AddRange(GetInputDroplets());
             return x;
+        }
+
+        public List<string> GetOutputVariables() {
+            return GetOutputDroplets();
         }
     }
 }

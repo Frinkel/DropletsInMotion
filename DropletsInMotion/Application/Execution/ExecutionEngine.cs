@@ -72,13 +72,6 @@ namespace DropletsInMotion.Application.Execution
             Agents.Clear();
             Agent.ResetSubstanceId();
 
-            //foreach (var droplet in droplets)
-            //{
-            //    Agent agent = new Agent(droplet.Value.DropletName, droplet.Value.PositionX, droplet.Value.PositionY, droplet.Value.Volume);
-            //    Agents.Add(droplet.Key, agent);
-            //    ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
-            //}
-
             _router.Initialize(Board);
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -89,12 +82,12 @@ namespace DropletsInMotion.Application.Execution
 
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
-                foreach (var agent in Agents)
+                foreach (var node in DependencyGraph.GetExecutableNodes())
                 {
-                    Console.WriteLine(agent.Value);
+                    Console.WriteLine(node);
                 }
 
-                List<DependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
+                List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
                 List<IDropletCommand> commandsToExecute = commands
                     .FindAll(c => c is IDropletCommand)
@@ -186,6 +179,7 @@ namespace DropletsInMotion.Application.Execution
                 }
                 Console.WriteLine($"Compiler time {Time}");
                 boardActions.Clear();
+
             }
 
             watch.Stop();
