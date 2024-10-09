@@ -256,12 +256,13 @@ public class TypeChecker : ITypeChecker
 
     private void Sensor(SensorCommand sensorCommand)
     {
-        //var droplets = sensorCommand.GetInputDroplets();
-        //ValidateInputDroplets(droplets, sensorCommand);
+        var variableName = sensorCommand.VariableName;
 
-        //var variables = sensorCommand.GetInputVariables();
-        //var nonDropletVariables = variables.Where(v => !droplets.Contains(v)).ToList();
-        //VariablesExist(nonDropletVariables, sensorCommand);
+        if (_droplets.Contains(variableName))
+        {
+            throw new InvalidOperationException($"Error: Variable '{variableName}' conflicts with a droplet name in command '{sensorCommand}'.");
+        }
+        _variables.Add(variableName);
     }
 
     private void Actuator(ActuatorCommand actuatorCommand)
