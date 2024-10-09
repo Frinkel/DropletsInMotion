@@ -3,6 +3,7 @@ using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Repositories;
@@ -81,21 +82,11 @@ namespace DropletsInMotion.Communication
             await _communicationService.SendActions(boardActionDtoList);
         }
 
-        public async Task<double> SendSensorRequest(string sensorName, string argument, double time)
+        public async Task<double> SendSensorRequest(Sensor sensor, SensorHandler handler, double time)
         {
             if (!_isServerRunning || _communicationService == null)
             {
                 throw new InvalidOperationException("Tried to send request without a open communication channel!");
-            }
-
-            if (!_deviceRepository.Sensors.TryGetValue(sensorName, out Sensor? sensor))
-            {
-                throw new Exception($"We could not find any sensor with name {sensorName}");
-            }
-
-            if (!sensor.ArgumentHandlers.TryGetValue(argument, out SensorHandler? handler))
-            {
-                throw new Exception($"We could not find any argument {argument} in sensor {sensorName}");
             }
 
             return await _communicationService.SendSensorRequest(sensor, handler, time);
@@ -109,6 +100,16 @@ namespace DropletsInMotion.Communication
             }
 
             return await _communicationService.SendActuatorRequest(actuator, time);
+        }
+
+        public async Task<double> SendTimeRequest()
+        {
+            if (!_isServerRunning || _communicationService == null)
+            {
+                throw new InvalidOperationException("Tried to send request without a open communication channel!");
+            }
+
+            return await _communicationService.SendTimeRequest();
         }
 
 
@@ -139,15 +140,5 @@ namespace DropletsInMotion.Communication
                 ClientConnected?.Invoke(this, EventArgs.Empty);
             }
         }
-
-        //public async Task<bool> IsClientConnected()
-        //{
-        //    return await _communicationService.IsClientConnected();
-        //}
-
-        //public async Task<bool> IsConnectionOpen()
-        //{
-        //    return await _communicationService.IsConnectionOpen();
-        //}
     }
 }

@@ -4,6 +4,7 @@ using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication;
+using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
@@ -217,6 +218,18 @@ namespace DropletsInMotion.Application.Execution
         {
             if (boardActions.Count > 0)
             {
+                var actualTime = await _communicationEngine.SendTimeRequest();
+                var boardActionTime = boardActions.First().Time;
+
+                // Handle time desync
+                // TODO: Check if mix sends its own request, we should do it here!
+                if (boardActionTime + 1 < actualTime) // TODO: Do we need +1 here?
+                {
+                    var timeDifference = actualTime - boardActionTime + 1; // TODO: how can we a good buffer?
+                    boardActions.ForEach(b => b.Time += timeDifference);
+                    Time = boardActions.Last().Time; 
+                }
+
                 await _communicationEngine.SendActions(boardActions);
             }
         }
@@ -226,8 +239,19 @@ namespace DropletsInMotion.Application.Execution
             if (_actionService.InPositionToSense(sensorCommand, Agents, movesToExecute))
             {
                 _commandLifetimeService.StoreCommand(sensorCommand);
-                var sensorValue = await _communicationEngine.SendSensorRequest(sensorCommand.SensorName, sensorCommand.Argument, Time);
-                Console.WriteLine($"Sensor value is {sensorValue}");
+
+                if (!_deviceRepository.Sensors.TryGetValue(sensorCommand.SensorName, out var sensor))
+                {
+                    throw new Exception($"We could not find any actuator with name {sensorCommand.SensorName}");
+                }
+
+                if (!sensor.ArgumentHandlers.TryGetValue(sensorCommand.Argument, out SensorHandler? handler))
+                {
+                    throw new Exception($"We could not find any argument {sensorCommand.Argument} in sensor {sensor.Name}");
+                }
+
+                var sensorValue = await _communicationEngine.SendSensorRequest(sensor, handler, Time);
+                //Console.WriteLine($"Sensor value is {sensorValue}");
                 Variables[sensorCommand.VariableName] = sensorValue;
             }
         }

@@ -4,6 +4,7 @@ using DropletsInMotion.Communication.Simulator.Services;
 using System.Text.Json;
 using DropletsInMotion.Communication.Models;
 using System.Reflection;
+using System;
 
 namespace DropletsInMotion.Communication.Simulator;
 
@@ -121,7 +122,7 @@ public class SimulationCommunicationService : ICommunicationService
         {
             case (WebSocketResponseTypes.Actuator):
                 Console.WriteLine($"Actuator response is: {response}");
-                break;
+                return true;
 
             case (WebSocketResponseTypes.Error):
                 throw new Exception($"The actuator {actuator.Name} with id {actuator.ActuatorId} was not found.");
@@ -129,8 +130,35 @@ public class SimulationCommunicationService : ICommunicationService
             default:
                 throw new Exception($"Unexpected response type: {response.Type}");
         }
-        
-        return true;
+    }
+
+    public async Task<double> SendTimeRequest()
+    {
+        WebSocketMessage<int> requestDto =
+            new WebSocketMessage<int>(WebSocketMessageTypes.Time, 200);
+
+        string serializedObject = JsonSerializer.Serialize(requestDto);
+
+        Console.WriteLine($"Sending {serializedObject}");
+
+        var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+
+        switch (response.Type)
+        {
+            case WebSocketResponseTypes.Time:
+                if (!double.TryParse(response.Data.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var time))
+                {
+                    throw new Exception($"Unable to parse {response.Data} into a double");
+                }
+
+                return time;
+
+            case (WebSocketResponseTypes.Error):
+                throw new Exception($"An error occured when trying to fetch the simulator time");
+
+            default:
+                throw new Exception($"Unexpected response type: {response.Type}");
+        }
     }
 
     public async Task<bool> IsClientConnected()

@@ -14,5 +14,6 @@ namespace DropletsInMotion.Communication
         //public Task<bool> IsConnectionOpen();
         event EventHandler? ClientDisconnected;
         Task<bool> SendActuatorRequest(Actuator actuator, double time);
+        Task<double> SendTimeRequest();
     }
 }
