@@ -200,6 +200,38 @@ namespace DropletsInMotion.Presentation.Language
         }
 
 
+        public override void ExitActuatorCommand(MicrofluidicsParser.ActuatorCommandContext context)
+        {
+            string identifier = null;
+            string actuatorName = context.STRING().GetText().Trim('"');
+
+            if (context.IDENTIFIER() != null)
+            {
+                identifier = context.IDENTIFIER().GetText();
+            }
+
+            Dictionary<string, double> keyValuePairs = new Dictionary<string, double>();
+
+            foreach (var kvpContext in context.argumentKeyValuePair())
+            {
+                string key = kvpContext.IDENTIFIER().GetText();
+                if (!Double.TryParse(kvpContext.arithmeticExpression().GetText(), out double value))
+                {
+                    throw new Exception($"Actuator {actuatorName} had an invalid argument format on {key}");
+                }
+
+                keyValuePairs.Add(key, value);
+            }
+
+            Console.WriteLine(keyValuePairs);
+
+            IDropletCommand actuatorCommand = new ActuatorCommand(identifier, actuatorName, keyValuePairs);
+
+            Commands.Add(actuatorCommand);
+        }
+
+
+
         //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
         //{
         //    // Create the condition expression

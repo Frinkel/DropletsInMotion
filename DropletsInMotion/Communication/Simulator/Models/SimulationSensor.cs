@@ -2,14 +2,6 @@
 
 namespace DropletsInMotion.Communication.Simulator.Models
 {
-
-    public static class SensorTypes
-    {
-        public const string Rgb = "RGB_color";
-        public const string Temperature = "temperature";
-    }
-
-
     public class SimulationSensor
     {
         [JsonPropertyName("name")]

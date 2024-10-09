@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using System.Reflection.Metadata;
+using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
@@ -8,6 +9,7 @@ using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
 
@@ -37,12 +39,12 @@ namespace DropletsInMotion.Application.Execution
         private readonly IDependencyService _dependencyService;
         private readonly ITranslator _translator;
         private readonly ICommunicationEngine _communicationEngine;
-
+        private readonly IDeviceRepository _deviceRepository;
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine)
+                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -55,6 +57,7 @@ namespace DropletsInMotion.Application.Execution
             _dependencyService = dependencyService;
             _translator = translator;
             _communicationEngine = communicationEngine;
+            _deviceRepository = deviceRepository;
         }
 
         public async Task Execute()
@@ -155,9 +158,11 @@ namespace DropletsInMotion.Application.Execution
                             executionTime = waitCommand.Time + Time;
                             break;
                         case SensorCommand sensorCommand:
-
                             await HandleSensorCommand(sensorCommand, movesToExecute);
-
+                            break;
+                        case ActuatorCommand actuatorCommand:
+                            //var statusCode = await _communicationEngine.SendActuatorRequest(actuatorCommand.ActuatorName, Time);
+                            await HandleActuatorCommand(actuatorCommand);
                             break;
                         default:
                             Console.WriteLine($"Unknown dropletCommand: {command}");
@@ -195,12 +200,34 @@ namespace DropletsInMotion.Application.Execution
 
         }
 
+        private async Task HandleActuatorCommand(ActuatorCommand actuatorCommand)
+        {
+            if (!_deviceRepository.Actuators.TryGetValue(actuatorCommand.ActuatorName, out var actuator))
+            {
+                throw new Exception($"We could not find any actuator with name {actuatorCommand.ActuatorName}");
+            }
+
+            actuator.Arguments = actuatorCommand.KeyValuePairs;
+
+            var invalidArguments = actuator.Arguments.Keys
+                .Where(key => !actuator.ValidArguments.Contains(key))
+                .ToList();
+
+            if (invalidArguments.Any())
+            {
+                throw new ArgumentException($"Actuator {actuator.Name} had invalid arguments: [{string.Join(", ", invalidArguments)}]. Valid arguments are: [{String.Join(", ", actuator.ValidArguments.ToArray())}]");
+            }
+
+            await _communicationEngine.SendActuatorRequest(actuator, Time);
+        }
+
         private async Task HandleSensorCommand(SensorCommand sensorCommand, List<IDropletCommand> movesToExecute)
         {
             if (_actionService.InPositionToSense(sensorCommand, Agents, movesToExecute))
             {
                 _commandLifetimeService.StoreCommand(sensorCommand);
-                var sensorValue = await _communicationEngine.SendRequest(sensorCommand.SensorName, sensorCommand.Argument, Time);
+                var sensorValue = await _communicationEngine.SendSensorRequest(sensorCommand.SensorName, sensorCommand.Argument, Time);
+                Console.WriteLine($"Sensor value is {sensorValue}");
                 Variables[sensorCommand.VariableName] = sensorValue;
             }
         }

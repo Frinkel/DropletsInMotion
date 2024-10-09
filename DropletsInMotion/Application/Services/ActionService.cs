@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
-using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Application.Services
@@ -24,17 +23,17 @@ namespace DropletsInMotion.Application.Services
         private readonly IContaminationService _contaminationService;
         private readonly IStoreService _storeService;
         private readonly ICommandLifetimeService _commandLifetimeService;
-        private readonly ISensorRepository _sensorRepository;
+        private readonly IDeviceRepository _deviceRepository;
 
 
-        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, ICommandLifetimeService commandLifetimeService, ISensorRepository sensorRepository)
+        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, ICommandLifetimeService commandLifetimeService, IDeviceRepository deviceRepository)
         {
             _templateService = templateService;
             _contaminationService = contaminationService;
             _moveHandler = new MoveHandler(_templateService);
             _storeService = storeService;
             _commandLifetimeService = commandLifetimeService;
-            _sensorRepository = sensorRepository;
+            _deviceRepository = deviceRepository;
         }
 
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time)
@@ -215,7 +214,7 @@ namespace DropletsInMotion.Application.Services
                 throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
             }
 
-            if (!_sensorRepository.Sensors.TryGetValue(sensorCommand.SensorName, out var sensor))
+            if (!_deviceRepository.Sensors.TryGetValue(sensorCommand.SensorName, out var sensor))
             {
                 throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
             }

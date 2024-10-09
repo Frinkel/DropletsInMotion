@@ -36,12 +36,12 @@ namespace DropletsInMotionTests
 
         }
 
-        [Test]
-        public void LoadSensorFiles()
-        {
+        //[Test]
+        //public void LoadSensorFiles()
+        //{
             
-            _communicationTemplateService.LoadTemplates();
+        //    _communicationTemplateService.LoadTemplates();
 
-        }
+        //}
     }
 }

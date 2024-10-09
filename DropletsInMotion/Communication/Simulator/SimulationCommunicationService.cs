@@ -63,11 +63,9 @@ public class SimulationCommunicationService : ICommunicationService
         await _websocketService.SendMessageToAllAsync(serializedObject, _cancellationTokenSource.Token);
     }
 
-    // TODO: We should return something useful in this function!
-    public async Task<double> SendRequest(Sensor sensor, Handler handler, double time)
+    public async Task<double> SendSensorRequest(Sensor sensor, SensorHandler sensorHandler, double time)
     {
-
-        RequestWrapper requestWrapper = new RequestWrapper(handler.Request, time);
+        RequestWrapper requestWrapper = new RequestWrapper(sensorHandler.Request, time);
 
         WebSocketMessage<RequestWrapper> sensorRequestDto =
             new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.Sensor, requestWrapper);
@@ -75,7 +73,6 @@ public class SimulationCommunicationService : ICommunicationService
         string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
 
         var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
-
 
 
         switch (response.Type)
@@ -89,66 +86,62 @@ public class SimulationCommunicationService : ICommunicationService
                     throw new Exception($"SimulationSensor data was faulty: {response.Data}");
                 }
 
-                PropertyInfo? propertyInfo = simulationSensor?.GetType()?.GetProperty(handler.Response, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                PropertyInfo? propertyInfo = simulationSensor?.GetType()?.GetProperty(sensorHandler.Response, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
                 if (propertyInfo == null)
                 {
-                    throw new Exception($"Sensor {simulationSensor.Name} did not contian property {handler.Response}");
+                    throw new Exception($"Sensor {simulationSensor.Name} did not contian property {sensorHandler.Response}");
                 }
 
                 double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
                 return sensorValue;
 
-                break;
             default:
                 throw new Exception($"Unexpected response type: {response.Type}");
         }
+    }
 
+    public async Task<bool> SendActuatorRequest(Actuator actuator, double time)
+    {
 
-        //WebSocketMessage<RequestWrapper> sensorRequestDto =
-        //    new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.SimulationSensor, new RequestWrapper(sensorRequest.Id, sensorRequest.Time));
+        ActuatorDto actuatorDto = new ActuatorDto(actuator.ActuatorId, actuator.Arguments);
+        RequestWrapper requestWrapper = new RequestWrapper(actuatorDto, time);
 
-        //string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
+        WebSocketMessage<RequestWrapper> requestDto =
+            new WebSocketMessage<RequestWrapper>(WebSocketMessageTypes.Actuator, requestWrapper);
 
-        ////Console.WriteLine($"Request sent with request id {sensorRequestDto.RequestId}");
-        //Console.WriteLine(sensorRequestDto);
+        string serializedObject = JsonSerializer.Serialize(requestDto);
 
-        //var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+        var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
+        Console.WriteLine($"Actuator response is: {response}");
 
-
-        //// Handle different response types
         //switch (response.Type)
         //{
-        //    case (WebSocketResponseTypes.SimulationSensor):
-        //        var simulationSensor = JsonSerializer.Deserialize<SimulationSensor>((response.Data?.ToString()) ?? string.Empty);
+        //    case (WebSocketResponseTypes.Sensor):
+        //        var simulationSensor =
+        //            JsonSerializer.Deserialize<SimulationSensor>((response.Data?.ToString()) ?? string.Empty);
 
         //        if (simulationSensor == null)
         //        {
         //            throw new Exception($"SimulationSensor data was faulty: {response.Data}");
         //        }
 
-        //        // Handle simulationSensor types
-        //        switch (simulationSensor.Type)
+        //        PropertyInfo? propertyInfo = simulationSensor?.GetType()?.GetProperty(handler.Response, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+        //        if (propertyInfo == null)
         //        {
-        //            case SensorTypes.Rgb:
-        //                Console.WriteLine($"Color = ({simulationSensor.ValueRed}, {simulationSensor.ValueGreen}, {simulationSensor.ValueBlue})");
-        //                // TODO: This should return something useful!
-        //                break;
-        //            case SensorTypes.Temperature:
-        //                Console.WriteLine($"Temperature = {simulationSensor.ValueTemperature}");
-        //                // TODO: This should return something useful!
-        //                break;
-        //            default:
-        //                throw new Exception("The simulationSensor type was not recognized!");
+        //            throw new Exception($"Sensor {simulationSensor.Name} did not contian property {handler.Response}");
         //        }
 
+        //        double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
+        //        return sensorValue;
+
         //        break;
-
         //    default:
-        //        throw new Exception("The response type was not recognized!");
+        //        throw new Exception($"Unexpected response type: {response.Type}");
         //}
-
+        return true;
     }
 
     public async Task<bool> IsClientConnected()

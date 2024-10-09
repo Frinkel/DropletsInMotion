@@ -14,18 +14,18 @@ namespace DropletsInMotion.Communication
         private ICommunicationService? _communicationService;
         private readonly IServiceProvider _serviceProvider;
         private ICommunicationTemplateService _communicationTemplateService;
-        private ISensorRepository _sensorRepository;
+        private IDeviceRepository _deviceRepository;
 
         public event EventHandler? ClientConnected;
         public event EventHandler? ClientDisconnected;
 
         private bool _isServerRunning = false;
 
-        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService, ISensorRepository sensorRepository)
+        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService, IDeviceRepository deviceRepository)
         {
             _serviceProvider = serviceProvider;
             _communicationTemplateService = communicationTemplateService;
-            _sensorRepository = sensorRepository;
+            _deviceRepository = deviceRepository;
 
             userService.CommunicationTypeChanged += OnCommunicationTypeChanged;
         }
@@ -81,24 +81,34 @@ namespace DropletsInMotion.Communication
             await _communicationService.SendActions(boardActionDtoList);
         }
 
-        public async Task<double> SendRequest(string sensorName, string argument, double time)
+        public async Task<double> SendSensorRequest(string sensorName, string argument, double time)
         {
             if (!_isServerRunning || _communicationService == null)
             {
                 throw new InvalidOperationException("Tried to send request without a open communication channel!");
             }
 
-            if (!_sensorRepository.Sensors.TryGetValue(sensorName, out Sensor? sensor))
+            if (!_deviceRepository.Sensors.TryGetValue(sensorName, out Sensor? sensor))
             {
                 throw new Exception($"We could not find any sensor with name {sensorName}");
             }
 
-            if (!sensor.ArgumentHandlers.TryGetValue(argument, out Handler? handler))
+            if (!sensor.ArgumentHandlers.TryGetValue(argument, out SensorHandler? handler))
             {
                 throw new Exception($"We could not find any argument {argument} in sensor {sensorName}");
             }
 
-            return await _communicationService.SendRequest(sensor, handler, time);
+            return await _communicationService.SendSensorRequest(sensor, handler, time);
+        }
+
+        public async Task<bool> SendActuatorRequest(Actuator actuator, double time)
+        {
+            if (!_isServerRunning || _communicationService == null)
+            {
+                throw new InvalidOperationException("Tried to send request without a open communication channel!");
+            }
+
+            return await _communicationService.SendActuatorRequest(actuator, time);
         }
 
 

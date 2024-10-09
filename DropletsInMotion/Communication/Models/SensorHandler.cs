@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DropletsInMotion.Communication.Models
 {
-    public class Handler
+    public class SensorHandler
     {
         [JsonPropertyName("request")]
         public required object Request { get; set; }

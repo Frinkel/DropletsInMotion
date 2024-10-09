@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 
-namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
+namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class SensorCommand : IDropletCommand
     {
@@ -26,7 +25,7 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
 
         public List<string> GetInputVariables()
         {
-            var res = new List<string>(){ SensorName };
+            var res = new List<string>() { SensorName };
             res.AddRange(GetInputDroplets());
 
             return res;

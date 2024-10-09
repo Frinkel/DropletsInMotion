@@ -4,6 +4,7 @@
     {
         public const string Action = "action";
         public const string Sensor = "sensor_request";
+        public const string Actuator = "actuator_request";
     }
     public static class WebSocketResponseTypes
     {

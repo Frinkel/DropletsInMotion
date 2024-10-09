@@ -22,11 +22,11 @@ namespace DropletsInMotion.Communication.Models
         public required int CoordinateY { get; set; }
 
         [JsonPropertyName("argumentHandlers")]
-        public required Dictionary<string, Handler> ArgumentHandlers { get; set; } // JSON
+        public required Dictionary<string, SensorHandler> ArgumentHandlers { get; set; } // JSON
 
         public override string ToString()
         {
-            return $"SimulationSensor [Name: {Name}, SensorId: {SensorId}, ArgumentHandlers: {ArgumentHandlers}]";
+            return $"SimulationSensor (Name: {Name}, SensorId: {SensorId}, ArgumentHandlers: {ArgumentHandlers})";
         }
     }
 }

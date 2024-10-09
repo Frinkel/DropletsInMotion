@@ -1,9 +1,71 @@
-Droplet(d1, 2, 6, 1.2);
-Droplet(d2, 15, 0, 1.2);
-d1Blue = Sensor(d1, "RGB1", "blue");
-if(d1Blue == 255) {
-	Move(d1, 31, 19);
-} else {
-	Move(d1, 31, 0);
+// Input DNA and PCRmix droplets
+Droplet(DNA, 0, 0, 1);
+Droplet(PCRmix, 0, 19, 1);
+
+// Turn heaters on
+Actuator("Heater1", temperature=95);
+Actuator("Heater2", temperature=55);
+Actuator("Heater3", temperature=72);
+
+// Variables
+storeTime = 5; // This should be 30 seconds for the read PCR protocol
+cycles = 1; // This should be 30
+denaturationTemp = 75; // This should be 95
+annealingTemp = 55;
+extensionTemp = 72;
+
+
+// Merge DNA and PCRmix
+Merge(DNA, PCRmix, mergedDroplet, 2, 7);
+
+// Mix the merges substance (should be 30 times)
+Mix(mergedDroplet, 2, 7, 5, 5, 1);
+
+// Get the temperature of the droplet
+s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
+
+// Wait for the droplet to reach the temperature
+while(s1Temp < denaturationTemp) {
+	Store(mergedDroplet, 12, 16, 5);
+	s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
 };
-Move(d2, 10, 0);
+
+Store(mergedDroplet, 12, 16, storeTime);
+
+
+// Begin the cycles
+i = 0;
+while(i < cycles) {
+	
+	// Denaturation step
+	s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
+	while(s1Temp < denaturationTemp) {
+		Store(mergedDroplet, 12, 16, 5);
+		s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
+	}
+	Store(mergedDroplet, 12, 16, storeTime);
+
+
+
+	// Annealing step
+	s2Temp = Sensor(mergedDroplet, "TempSensor2", "temperature");
+	while(s2Temp < annealingTemp) {
+		Store(mergedDroplet, 12, 3, 5);
+		s2Temp = Sensor(mergedDroplet, "TempSensor2", "temperature");
+	}
+	Store(mergedDroplet, 12, 3, storeTime);
+
+
+
+	// Extension step
+	s3Temp = Sensor(mergedDroplet, "TempSensor3", "temperature");
+	while(s3Temp < annealingTemp) {
+		Store(mergedDroplet, 21, 16, 5);
+		s3Temp = Sensor(mergedDroplet, "TempSensor3", "temperature");
+	}
+	Store(mergedDroplet, 21, 16, storeTime);
+
+}
+
+
+Move(mergedDroplet, 21, 0);

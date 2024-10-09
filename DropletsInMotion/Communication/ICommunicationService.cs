@@ -8,10 +8,11 @@ namespace DropletsInMotion.Communication
         public Task StartCommunication();
         public Task StopCommunication();
         public Task SendActions(List<BoardAction> boardActionDtoList);
-        public Task<double> SendRequest(Sensor sensor, Handler handler, double time);
+        public Task<double> SendSensorRequest(Sensor sensor, SensorHandler sensorHandler, double time);
         public Task WaitForConnection();
         //public Task<bool> IsClientConnected();
         //public Task<bool> IsConnectionOpen();
         event EventHandler? ClientDisconnected;
+        Task<bool> SendActuatorRequest(Actuator actuator, double time);
     }
 }

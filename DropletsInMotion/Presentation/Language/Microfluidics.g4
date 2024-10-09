@@ -91,9 +91,14 @@ whileLoop
     : 'while' '(' booleanExpression ')' block
     ;
 
-// Actuator access
+// Actuator access with dynamic key-value arguments
 actuatorCommand
-    : IDENTIFIER '=' 'actuate' '(' STRING ',' STRING ')'
+    : 'Actuator' '(' (IDENTIFIER ',')? STRING (',' argumentKeyValuePair)* ')'
+    ;
+
+// Key-Value pair (e.g., temperature=80)
+argumentKeyValuePair
+    : IDENTIFIER '=' arithmeticExpression
     ;
 
 // Block (for if/else and loops)
@@ -144,6 +149,16 @@ STRING
 
 WS
     : [ \t\r\n]+ -> skip
+    ;
+
+// Single-line comment
+LINE_COMMENT
+    : '//' ~[\r\n]* -> skip
+    ;
+
+// Multi-line comment
+BLOCK_COMMENT
+    : '/*' .*? '*/' -> skip
     ;
 
 // Operators

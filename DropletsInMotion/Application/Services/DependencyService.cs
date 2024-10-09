@@ -9,7 +9,6 @@ using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 
 namespace DropletsInMotion.Application.Services
 {

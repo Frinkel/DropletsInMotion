@@ -10,14 +10,14 @@ public class CommunicationTemplateService : ICommunicationTemplateService
 {
     private readonly IFileService _fileService;
     private readonly IUserService _userService;
-    private readonly ISensorRepository _sensorRepository;
+    private readonly IDeviceRepository _deviceRepository;
     //public Dictionary<string, Sensor> Sensors { get; set; }
 
-    public CommunicationTemplateService(IFileService fileService, IUserService userService, ISensorRepository sensorRepository)
+    public CommunicationTemplateService(IFileService fileService, IUserService userService, IDeviceRepository deviceRepository)
     {
         _fileService = fileService;
         _userService = userService;
-        _sensorRepository = sensorRepository;
+        _deviceRepository = deviceRepository;
         //Sensors = new Dictionary<string, Sensor>();
     }
 
@@ -26,6 +26,7 @@ public class CommunicationTemplateService : ICommunicationTemplateService
     public void LoadTemplates()
     {
         LoadSensorTemplates();
+        LoadActuatorTemplates();
     }
 
     private void LoadSensorTemplates()
@@ -46,13 +47,30 @@ public class CommunicationTemplateService : ICommunicationTemplateService
             }
 
 
-            _sensorRepository.Sensors.Add(sensor.Name, sensor);
+            _deviceRepository.Sensors.Add(sensor.Name, sensor);
         }
     }
 
-    private Dictionary<string, Sensor> LoadActuatorTemplates()
+    private void LoadActuatorTemplates()
     {
-        throw new NotImplementedException();
+        string actuatorFolderPath = _userService.ConfigurationPath + "/Actuators";
+
+        List<string> actuatorPaths = _fileService.GetFilesFromFolder(actuatorFolderPath);
+        foreach (var actuatorPath in actuatorPaths)
+        {
+            string content = _fileService.ReadFileFromPath(actuatorPath);
+            Actuator actuator = JsonSerializer.Deserialize<Actuator>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
+
+            Console.WriteLine($"Added actuator {actuator.Name}");
+
+            foreach (var kvp in actuator.Arguments)
+            {
+                Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value}");
+            }
+
+
+            _deviceRepository.Actuators.Add(actuator.Name, actuator);
+        }
     }
 
 

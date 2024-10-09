@@ -55,7 +55,7 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
             serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
-            serviceCollection.AddSingleton<ISensorRepository, SensorRepository>();
+            serviceCollection.AddSingleton<IDeviceRepository, DeviceRepository>();
 
 
             // Classes
