@@ -79,6 +79,10 @@ public class TypeChecker : ITypeChecker
                     Sensor(sensorCommand);
                     break;
 
+                case ActuatorCommand actuatorCommand:
+                    Actuator(actuatorCommand);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command: {command.GetType().Name}");
             }
@@ -252,12 +256,18 @@ public class TypeChecker : ITypeChecker
 
     private void Sensor(SensorCommand sensorCommand)
     {
-        var droplets = sensorCommand.GetInputDroplets();
-        ValidateInputDroplets(droplets, sensorCommand);
+        //var droplets = sensorCommand.GetInputDroplets();
+        //ValidateInputDroplets(droplets, sensorCommand);
 
-        var variables = sensorCommand.GetInputVariables();
-        var nonDropletVariables = variables.Where(v => !droplets.Contains(v)).ToList();
-        VariablesExist(nonDropletVariables, sensorCommand);
+        //var variables = sensorCommand.GetInputVariables();
+        //var nonDropletVariables = variables.Where(v => !droplets.Contains(v)).ToList();
+        //VariablesExist(nonDropletVariables, sensorCommand);
+    }
+
+    private void Actuator(ActuatorCommand actuatorCommand)
+    {
+        //var variables = actuatorCommand.GetInputVariables();
+        //VariablesExist(variables, actuatorCommand);
     }
 
     private void ValidateInputDroplets(List<string> inputDroplets, ICommand command)

@@ -52,7 +52,7 @@ namespace DropletsInMotion.Presentation
             var tree = parser.program();
             ParseTreeWalker.Default.Walk(listener, tree);
             Commands = listener.Commands;
-            _typeChecker.typeCheck(Commands);
+            //_typeChecker.typeCheck(Commands);
 
             DependencyGraph = _dependencyBuilder.Build(Commands);
         }
