@@ -238,10 +238,9 @@ namespace DropletsInMotion.Application.Execution
             {
                 List<BoardAction> mixActions = new List<BoardAction>();
                 mixActions.AddRange(_actionService.Mix(Agents, mixCommand, ContaminationMap, Time));
-                _storeService.StoreDropletWithNameAndTime(mixCommand.DropletName, Time + mixActions.Last().Time);
+                _storeService.StoreDropletWithNameAndTime(mixCommand.DropletName, mixActions.Last().Time);
                 
                 await _communicationEngine.SendActions(mixActions);
-                
             }
         }
 
