@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
+using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Application.Services

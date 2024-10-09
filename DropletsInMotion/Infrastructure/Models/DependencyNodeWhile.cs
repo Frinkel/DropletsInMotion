@@ -60,13 +60,6 @@ namespace DropletsInMotion.Infrastructure.Models
 
         public bool CanExecute()
         {
-            //bool canExecute = Dependencies.All(dependency => dependency.IsExecuted);
-                
-
-            //if (canExecute && Body.GetAllNodes().All(node => node.IsExecuted))
-            //{
-
-            //}
             return Dependencies.All(dependency => dependency.IsExecuted);
         }
 

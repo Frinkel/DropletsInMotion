@@ -54,6 +54,48 @@ namespace DropletsInMotion.Application.Models
             }
         }
 
+        public bool IsMoveApplicable(Types.RouteAction action, State state)
+        {
+            var contamination = state.ContaminationMap;
+            var agents = state.Agents;
+            var deltaX = PositionX + action.DropletXDelta;
+            var deltaY = PositionY + action.DropletYDelta;
+
+            //Check out of bounds
+            if (deltaX < 0 || deltaX >= contamination.GetLength(0) || deltaY < 0 || deltaY >= contamination.GetLength(1))
+            {
+                return false;
+            }
+
+            // check for contaminations
+            if (contamination[deltaX, deltaY] != 0 && contamination[deltaX, deltaY] != SubstanceId)
+            {
+                return false;
+            }
+
+            if (state.Parent != null &&
+                action.Type != Types.ActionType.NoOp &&
+                deltaX == state.Parent.Agents[DropletName].PositionX &&
+                deltaY == state.Parent.Agents[DropletName].PositionY)
+            {
+                return false;
+            }
+
+
+            //Check for going near other agents of the same substance
+            foreach (var otherAgentKvp in agents)
+            {
+                var otherAgent = otherAgentKvp.Value;
+                if (otherAgent.SubstanceId != SubstanceId || otherAgent.DropletName == DropletName) continue;
+                if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 && Math.Abs(otherAgent.PositionY - deltaY) <= 1)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static void ResetSubstanceId()
         {
             _nextSubstanceId = 1;

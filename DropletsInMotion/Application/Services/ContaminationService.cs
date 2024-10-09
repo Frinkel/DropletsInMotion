@@ -1,57 +1,24 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Application.Services
 {
     public class ContaminationService : IContaminationService
     {
+        private readonly IConfiguration _configuration;
 
-        // TODO move out of here
-        public bool IsMoveApplicable(Types.RouteAction action, Agent agent, State state)
+        public ContaminationService(IConfiguration configuration)
         {
-            var contamination = state.ContaminationMap;
-            var agents = state.Agents;
-            var deltaX = agent.PositionX + action.DropletXDelta;
-            var deltaY = agent.PositionY + action.DropletYDelta;
-
-            //Check out of bounds
-            if (deltaX < 0 || deltaX >= contamination.GetLength(0) || deltaY < 0 || deltaY >= contamination.GetLength(1))
-            {
-                return false;
-            }
-
-            // check for contaminations
-            if (contamination[deltaX, deltaY] != 0 && contamination[deltaX, deltaY] != agent.SubstanceId)
-            {
-                return false;
-            }
-
-            if (state.Parent != null &&
-                action.Type != Types.ActionType.NoOp &&
-                deltaX == state.Parent.Agents[agent.DropletName].PositionX &&
-                deltaY == state.Parent.Agents[agent.DropletName].PositionY)
-            {
-                return false;
-            }
-
-
-            //Check for going near other agents of the same substance
-            foreach (var otherAgentKvp in agents)
-            {
-                var otherAgent = otherAgentKvp.Value;
-                if (otherAgent.SubstanceId != agent.SubstanceId || otherAgent.DropletName == agent.DropletName) continue;
-                if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 && Math.Abs(otherAgent.PositionY - deltaY) <= 1)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            _configuration = configuration;
         }
-
-
+        
         public byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
         {
+            if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            {
+                return contaminationMap;
+            }
             var x = agent.PositionX;
             var y = agent.PositionY;
 
@@ -86,6 +53,10 @@ namespace DropletsInMotion.Application.Services
 
         public byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap)
         {
+            if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            {
+                return contaminationMap;
+            }
             var x = agent.PositionX;
             var y = agent.PositionY;
 
@@ -169,6 +140,10 @@ namespace DropletsInMotion.Application.Services
 
         public void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
         {
+            if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            {
+                return;
+            }
 
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
@@ -275,12 +250,6 @@ namespace DropletsInMotion.Application.Services
                 }
             }
         }
-
-
-
-
-        //public static int StateAmount { get; set; }
-        //public static int StateAmountExists { get; set; }
 
     }
 

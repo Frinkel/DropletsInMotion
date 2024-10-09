@@ -22,6 +22,7 @@ command
     | ifStatement
     | whileLoop
     | actuatorCommand
+    | printStatement
     ;
 
 // Declarations
@@ -128,7 +129,17 @@ arithmeticExpression
     | IDENTIFIER
     ;
 
+// Print Statement
+printStatement
+    : 'print' '(' (printArgument (',' printArgument)*)? ')'
+    ;
 
+// Print arguments: can be strings or arithmetic expressions (variables/numbers)
+printArgument
+    : STRING 
+    | arithmeticExpression
+    | booleanExpression
+    ;
 
 // Lexer rules
 IDENTIFIER
