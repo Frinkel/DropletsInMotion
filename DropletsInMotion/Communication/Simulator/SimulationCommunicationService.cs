@@ -96,6 +96,9 @@ public class SimulationCommunicationService : ICommunicationService
                 double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
                 return sensorValue;
 
+            case (WebSocketResponseTypes.Error):
+                throw new Exception($"The sensor {sensor.Name} with id {sensor.SensorId} was not found.");
+
             default:
                 throw new Exception($"Unexpected response type: {response.Type}");
         }
@@ -114,40 +117,25 @@ public class SimulationCommunicationService : ICommunicationService
 
         var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
-        Console.WriteLine($"Actuator response is: {response}");
+        switch (response.Type)
+        {
+            case (WebSocketResponseTypes.Actuator):
+                Console.WriteLine($"Actuator response is: {response}");
+                break;
 
-        //switch (response.Type)
-        //{
-        //    case (WebSocketResponseTypes.Sensor):
-        //        var simulationSensor =
-        //            JsonSerializer.Deserialize<SimulationSensor>((response.Data?.ToString()) ?? string.Empty);
+            case (WebSocketResponseTypes.Error):
+                throw new Exception($"The actuator {actuator.Name} with id {actuator.ActuatorId} was not found.");
 
-        //        if (simulationSensor == null)
-        //        {
-        //            throw new Exception($"SimulationSensor data was faulty: {response.Data}");
-        //        }
-
-        //        PropertyInfo? propertyInfo = simulationSensor?.GetType()?.GetProperty(handler.Response, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-        //        if (propertyInfo == null)
-        //        {
-        //            throw new Exception($"Sensor {simulationSensor.Name} did not contian property {handler.Response}");
-        //        }
-
-        //        double sensorValue = Convert.ToDouble(propertyInfo.GetValue(simulationSensor));
-        //        return sensorValue;
-
-        //        break;
-        //    default:
-        //        throw new Exception($"Unexpected response type: {response.Type}");
-        //}
+            default:
+                throw new Exception($"Unexpected response type: {response.Type}");
+        }
+        
         return true;
     }
 
     public async Task<bool> IsClientConnected()
     {
         var amountClients = _websocketService.GetNumberOfConnectedClients();
-        //Console.WriteLine($"Amount: {amountClients}");
         return amountClients > 0;
     }
 

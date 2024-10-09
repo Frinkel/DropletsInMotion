@@ -150,19 +150,13 @@ namespace DropletsInMotion.Communication.Simulator.Services
 
         private void HandleReceivedMessages(WebSocketReceiveResult result, byte[] buffer)
         {
-            //var buffer = new byte[1024 * 4];
-
             var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-            //var response = JsonSerializer.Deserialize<WebSocketMessage<T>>(message);
             var baseMessage = JsonSerializer.Deserialize<WebSocketMessage<object>>(message);
 
             if (baseMessage == null || baseMessage.Type == null || baseMessage.Data == null)
             {
                 throw new Exception($"Response is missing data: {message}");
             }
-
-            Console.WriteLine($"Received a message with request id {baseMessage.RequestId}");
 
             if (_pendingRequests.TryGetValue(baseMessage.RequestId.ToString(), out var tcs))
             {
@@ -211,11 +205,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
             var tcs = new TaskCompletionSource<WebSocketMessage<object>>();
             _pendingRequests[requestId] = tcs;
 
-            Console.WriteLine("WE ARE BEFORE");
-
             await SendMessageToAllAsync(message, cancellationToken);
-
-            Console.WriteLine("WE ARE AFTER");
 
             var response = await tcs.Task;
 

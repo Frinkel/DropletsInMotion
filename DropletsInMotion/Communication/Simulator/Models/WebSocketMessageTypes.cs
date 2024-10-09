@@ -9,6 +9,8 @@
     public static class WebSocketResponseTypes
     {
         public const string Sensor = "sensor_response";
+        public const string Actuator = "actuator_response";
+        public const string Error = "error";
     }
 
     public static class ActionTypes
