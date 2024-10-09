@@ -93,6 +93,17 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public void ParserProgramPcr()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestPcrProgram.txt";
+
+            _translator.Translate();
+
+            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(20));
+        }
+
+        [Test]
         public void CannotParseProgramTest1()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
