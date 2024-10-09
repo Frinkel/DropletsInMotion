@@ -11019,8 +11019,8 @@
       "substance_name": "h20",
       "positionX": 460,
       "positionY": 130,
-      "sizeX": 40,
-      "sizeY": 40,
+      "sizeX": 60,
+      "sizeY": 60,
       "color": "#FF0000",
       "temperature": 20,
       "electrodeID": 210

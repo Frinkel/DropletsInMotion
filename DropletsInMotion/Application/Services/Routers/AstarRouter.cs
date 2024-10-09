@@ -13,6 +13,8 @@ namespace DropletsInMotion.Application.Services.Routers
 
         public State Search(State initialState, Frontier frontier)
         {
+            initialState.IsGoalStateReachable();
+
             frontier.Add(initialState);
             HashSet<State> explored = new HashSet<State>();
 

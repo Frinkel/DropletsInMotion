@@ -3,4 +3,5 @@
 public interface ITypeChecker
 {
     void typeCheck(List<ICommand> commands);
+    public void resetTypeEnviroments();
 }

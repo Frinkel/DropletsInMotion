@@ -1,0 +1,3 @@
+Droplet(d1, 2, 2, 2);
+SplitByRatio(d1, d2, d3, 2, 2, 0.5);
+Move(d1, 1, 1);

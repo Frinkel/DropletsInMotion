@@ -12,6 +12,8 @@ namespace DropletsInMotion.Application.Services
         void LoadTemplatesFromFiles(string folderPath);
         void Initialize(Electrode[][] board);
         List<BoardAction> ApplyTemplate(string templateName, Droplet droplet, double time);
+        public List<BoardAction> ApplyTemplateScaled(string templateName, Droplet droplet, double time, double scale);
+
         void PrintAllTemplates();
         List<BoardAction> SpinTemplate(List<BoardAction> template);
     }
