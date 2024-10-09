@@ -15,10 +15,11 @@ namespace DropletsInMotion.Application.Services
         
         public byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
         {
-            if (!_configuration.GetValue<bool>("Development:Contaminations"))
-            {
-                return contaminationMap;
-            }
+            // for disabeling contamination
+            //if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            //{
+            //    return contaminationMap;
+            //}
             var x = agent.PositionX;
             var y = agent.PositionY;
 
@@ -53,10 +54,11 @@ namespace DropletsInMotion.Application.Services
 
         public byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap)
         {
-            if (!_configuration.GetValue<bool>("Development:Contaminations"))
-            {
-                return contaminationMap;
-            }
+            // for disabeling contamination
+            //if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            //{
+            //    return contaminationMap;
+            //}
             var x = agent.PositionX;
             var y = agent.PositionY;
 
@@ -140,10 +142,11 @@ namespace DropletsInMotion.Application.Services
 
         public void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height)
         {
-            if (!_configuration.GetValue<bool>("Development:Contaminations"))
-            {
-                return;
-            }
+            // for disabeling contamination
+            //if (!_configuration.GetValue<bool>("Development:Contaminations"))
+            //{
+            //    return;
+            //}
 
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);

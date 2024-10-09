@@ -13,6 +13,12 @@ public class TypeChecker : ITypeChecker
         _droplets = new HashSet<string>();
     }
 
+    public void resetTypeEnviroments()
+    {
+        _variables = new HashSet<string>();
+        _droplets = new HashSet<string>();
+    }
+
     public void typeCheck(List<ICommand> commands)
     {
         foreach (var command in commands)

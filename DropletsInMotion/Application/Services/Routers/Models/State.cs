@@ -105,6 +105,8 @@ public class State
         List<BoardAction> finalActions = new List<BoardAction>();
         double currentTime = time;
 
+        double scaleFactor = 1;
+
         foreach (State state in chosenStates)
         {
             foreach (var actionKvp in state.JointAction)
@@ -117,7 +119,7 @@ public class State
                 string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
 
-                List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currentTime);
+                List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agents[dropletName], currentTime, scaleFactor);
 
                 finalActions.AddRange(translatedActions);
 
@@ -125,7 +127,8 @@ public class State
 
 
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
-            currentTime = finalActions.Last().Time;
+            var totalTime = finalActions.Last().Time - currentTime;
+            currentTime = currentTime + (totalTime/scaleFactor);
         }
 
         return finalActions;
@@ -442,6 +445,31 @@ public class State
                 break;
         }
 
+    }
+
+    public bool IsGoalStateReachable()
+    {
+        foreach (var command in Commands)
+        {
+            switch (command)
+            {
+                case Move moveCommand:
+                    var agent = Agents[moveCommand.GetInputDroplets().First()];
+                    //return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
+                    var goalPositionContamination = ContaminationMap[moveCommand.PositionX,moveCommand.PositionY];
+                    if (goalPositionContamination != 0 && goalPositionContamination != agent.SubstanceId)
+                    {
+                        throw new InvalidOperationException(
+                            $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand}");
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return true;
     }
 
 

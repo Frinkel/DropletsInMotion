@@ -106,10 +106,7 @@ namespace DropletsInMotion.Application.Execution
                     switch (command)
                     {
                         case DropletDeclaration dropletCommand:
-                            Agent agent = new Agent(dropletCommand.DropletName, dropletCommand.PositionX,
-                                dropletCommand.PositionY, dropletCommand.Volume);
-                            Agents.Add(dropletCommand.DropletName, agent);
-                            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+                            HandleDropletDeclaration(dropletCommand);
                             break;
 
                         case Move moveCommand:
@@ -191,6 +188,22 @@ namespace DropletsInMotion.Application.Execution
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
+        }
+
+        private void HandleDropletDeclaration(DropletDeclaration dropletCommand)
+        {
+
+            var contamintation = ContaminationMap[dropletCommand.PositionX, dropletCommand.PositionY];
+            if (contamintation != 0)
+            {
+                throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it is already contaminated");
+            }
+
+
+            Agent agent = new Agent(dropletCommand.DropletName, dropletCommand.PositionX,
+                dropletCommand.PositionY, dropletCommand.Volume);
+            Agents.Add(dropletCommand.DropletName, agent);
+            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
         }
 
         private async Task HandleActuatorCommand(ActuatorCommand actuatorCommand)

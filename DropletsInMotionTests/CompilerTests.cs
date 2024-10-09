@@ -256,5 +256,24 @@ namespace DropletsInMotionTests
             Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(5));
             Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(10));
         }
+
+        [Test]
+        public async Task DropletDeclarationIncorrectFailTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestDropletDeclarationFailure.txt";
+
+            Assert.CatchAsync(async () => await _executionEngine.Execute());
+        }
+
+        [Test]
+        public async Task CannotMoveDropletFailTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestCannotMoveDropletsFail.txt";
+
+            Assert.CatchAsync(async () => await _executionEngine.Execute());
+        }
+
     }
 }

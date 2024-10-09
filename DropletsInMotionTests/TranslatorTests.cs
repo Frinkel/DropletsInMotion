@@ -92,6 +92,62 @@ namespace DropletsInMotionTests
             Assert.That(_translator.Commands.Count, Is.EqualTo(3));
         }
 
+        [Test]
+        public void ParserProgramPcr()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestPcrProgram.txt";
+
+            _translator.Translate();
+
+            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(20));
+        }
+
+        [Test]
+        public void CannotParseProgramTest1()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse1.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
+        [Test]
+        public void CannotParseProgramTest2()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse2.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
+        [Test]
+        public void CannotParseProgramTest3()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse3.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
+        [Test]
+        public void CannotParseProgramTest4() {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse4.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
+        [Test]
+        public void CannotParseProgramTest5() {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse5.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
+        [Test]
+        public void CannotParseProgramTest6() {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse6.txt";
+            Assert.Catch(() => _translator.Translate());
+        }
+
         //[Test]
         //public async Task MoveOneDropletTest()
         //{

@@ -120,6 +120,20 @@ namespace DropletsInMotion.Application.Services
             return finalActionDtos;
         }
 
+        public List<BoardAction> ApplyTemplateScaled(string templateName, Droplet droplet, double time, double scale)
+        {
+            List<BoardAction> template = Templates.Find(t => t.Item1 == templateName).Item2;
+            int relativePosition = Board[droplet.PositionX][droplet.PositionY].Id;
+            List<BoardAction> finalActionDtos = new List<BoardAction>();
+            foreach (BoardAction boardAction in template)
+            {
+                BoardAction newAction = new BoardAction(boardAction.ElectrodeId + relativePosition, boardAction.Action,
+                    (boardAction.Time * scale) + time);
+                finalActionDtos.Add(newAction);
+            }
+            return finalActionDtos;
+        }
+
 
         // Method to print all Templates
         public void PrintAllTemplates()
