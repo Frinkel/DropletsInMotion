@@ -26,13 +26,15 @@ namespace DropletsInMotion.Presentation
         private readonly IUserService _userService;
         private readonly IDependencyBuilder _dependencyBuilder;
         private readonly IFileService _fileService;
+        private readonly ITypeChecker _typeChecker;
 
-        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService)
+        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService, ITypeChecker typeChecker)
         {
             _platformService = platformService;
             _userService = userService;
             _dependencyBuilder = dependencyBuilder;
             _fileService = fileService;
+            _typeChecker = typeChecker;
         }
 
         public void Translate()
@@ -50,6 +52,8 @@ namespace DropletsInMotion.Presentation
             var tree = parser.program();
             ParseTreeWalker.Default.Walk(listener, tree);
             Commands = listener.Commands;
+            _typeChecker.typeCheck(Commands);
+
             DependencyGraph = _dependencyBuilder.Build(Commands);
         }
 
