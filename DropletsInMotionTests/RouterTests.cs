@@ -104,6 +104,49 @@ namespace DropletsInMotionTests
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 
+        [Test]
+        public void AStarManyDropletsSimpleRoute()
+        {
+
+            IDropletCommand dropletCommandA1 = new Move("a1", 31, 0);
+            IDropletCommand dropletCommandA2 = new Move("a2", 31, 5);
+            IDropletCommand dropletCommandA3 = new Move("a3", 31, 10);
+            IDropletCommand dropletCommandA4 = new Move("a4", 31, 15);
+            IDropletCommand dropletCommandA5 = new Move("a5", 31, 19);
+
+            var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 0, 0, 1);
+            var a2 = new Agent("a2", 0, 5, 1);
+            var a3 = new Agent("a3", 0, 10, 1);
+            var a4 = new Agent("a4", 0, 15, 1);
+            var a5 = new Agent("a5", 0, 19, 1);
+
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+            agents.Add("a3", a3);
+            agents.Add("a4", a4);
+            agents.Add("a5", a5);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.ApplyContamination(a2, contaminationMap);
+            _contaminationService.ApplyContamination(a3, contaminationMap);
+            _contaminationService.ApplyContamination(a4, contaminationMap);
+            _contaminationService.ApplyContamination(a5, contaminationMap);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
+
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
         public bool IsOneGoalState(List<IDropletCommand> commands, Dictionary<string, Agent> droplets)
         {
             foreach (var dropletCommand in commands)
