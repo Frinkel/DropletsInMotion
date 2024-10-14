@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Infrastructure.Models.Domain;
 
 namespace DropletsInMotion.Infrastructure.Models
 {

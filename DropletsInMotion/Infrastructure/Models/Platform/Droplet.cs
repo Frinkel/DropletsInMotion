@@ -1,4 +1,4 @@
-﻿namespace DropletsInMotion.Infrastructure.Models.Domain
+﻿namespace DropletsInMotion.Infrastructure.Models.Platform
 {
     public class Droplet
     {

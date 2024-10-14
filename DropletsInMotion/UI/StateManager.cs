@@ -16,6 +16,7 @@ using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using static MicrofluidicsParser;
 using System.Runtime.InteropServices;
+using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.UI
 {
@@ -30,13 +31,16 @@ namespace DropletsInMotion.UI
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
         private readonly IConfiguration _configuration;
+        private IDeviceRepository _deviceRepository;
+        private IDeviceTemplateService _deviceTemplateService;
 
         private ProgramState _currentState = ProgramState.GettingInitialInformation;
 
         private string? _programContent;
         private TaskCompletionSource<bool> _isClientConnected;
 
-        public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationEngine communicationEngine, IUserService userService, IFileService fileService, IConfiguration configuration)
+        public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationEngine communicationEngine, 
+                            IUserService userService, IFileService fileService, IConfiguration configuration, IDeviceTemplateService deviceTemplateService, IDeviceRepository deviceRepository)
         {
             _serviceProvider = serviceProvider;
             _consoleService = consoleService;
@@ -48,6 +52,8 @@ namespace DropletsInMotion.UI
 
             _communicationEngine.ClientConnected += OnClientConnected;
             _communicationEngine.ClientDisconnected += OnClientDisconnected;
+            _deviceTemplateService = deviceTemplateService;
+            _deviceRepository = deviceRepository;
         }
 
         public async Task Start()
@@ -198,6 +204,8 @@ namespace DropletsInMotion.UI
 
             _consoleService.WriteColor(_programContent);
             _consoleService.WriteEmptyLine(2);
+
+            _deviceTemplateService.LoadTemplates();
 
             // Switch states
             return _configuration.GetValue<bool>("Development:SkipCommunication")

@@ -10,6 +10,7 @@ namespace DropletsInMotion.Infrastructure
     {
         public static int ExploredStates { get; set; }
         public static int ExistingStates { get; set; }
-
+        public static int ExpandedStates { get; set; }
+        public static List<long> ElapsedTime = new List<long>();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+using DropletsInMotion.Infrastructure.Models.Platform;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests
@@ -27,6 +27,10 @@ namespace DropletsInMotionTests
         public void Setup()
         {
             Agent.ResetSubstanceId();
+            Debugger.ExpandedStates = 0;
+            Debugger.ExistingStates = 0;
+            Debugger.ExploredStates = 0;
+            Debugger.ElapsedTime.Clear();
         }
 
         [Test]
@@ -49,7 +53,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -99,7 +103,33 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
+
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+        [Test]
+        public void AStarSearchSmallWallOfDmf()
+        {
+
+            IDropletCommand dropletCommand = new Move("a1", 10, 0);
+            var commands = new List<IDropletCommand>() { dropletCommand };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 0, 0, 1);
+            agents.Add("a1", a1);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.UpdateContaminationArea(contaminationMap, 255, 5, 0, 0, 7);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -142,7 +172,8 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }

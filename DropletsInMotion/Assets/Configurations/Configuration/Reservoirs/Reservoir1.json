@@ -1,0 +1,15 @@
+{
+  "name": "Reservoir1",
+  "outputX": 0,
+  "outputY": 2,
+  "dispenseSequence": [
+    {"id": 641, "status": 1, "time": 0},
+    {"id": 643, "status": 1, "time": 0.5},
+    {"id": 644, "status": 1, "time": 1},
+    {"id": 645, "status": 1, "time": 1.5},
+    {"id": 644, "status": 0, "time": 2},
+    {"id": 65, "status": 1, "time": 2},
+    {"id": 645, "status": 0, "time": 2.5},
+    {"id": 643, "status": 0, "time": 2.5}
+  ]
+}

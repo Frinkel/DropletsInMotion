@@ -59,12 +59,12 @@ namespace DropletsInMotion.Application.Services.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        //Debugger.ExploredStates += 1;
+                        Debugger.ExploredStates += 1;
                         frontier.Add(expandedState);
                     }
                     else
                     {
-                        //Debugger.ExistingStates += 1;
+                        Debugger.ExistingStates += 1;
                         //Console.WriteLine($"State already exists {expandedState.GetHashCode()}");
                     }
                 }

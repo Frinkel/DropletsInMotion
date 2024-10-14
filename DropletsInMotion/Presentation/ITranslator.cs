@@ -1,7 +1,7 @@
 ﻿using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Presentation;
 

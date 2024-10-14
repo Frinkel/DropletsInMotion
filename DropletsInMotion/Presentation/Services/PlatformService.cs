@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
-using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Presentation.Services
 {

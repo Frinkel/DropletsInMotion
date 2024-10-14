@@ -9,7 +9,7 @@ using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
@@ -100,13 +100,17 @@ namespace DropletsInMotion.Application.Execution
                 commands.ForEach(c => c.Evaluate(Variables));
 
                 List<IDropletCommand> movesToExecute = new List<IDropletCommand>();
-                double? executionTime = Time;
+                double executionTime = Time;
                 foreach (IDropletCommand command in commandsToExecute)
                 {
                     switch (command)
                     {
                         case DropletDeclaration dropletCommand:
                             HandleDropletDeclaration(dropletCommand);
+                            break;
+
+                        case Dispense dispenseCommand:
+                            HandleDispense(dispenseCommand, boardActions, ref executionTime, Agents);
                             break;
 
                         case Move moveCommand:
@@ -141,7 +145,6 @@ namespace DropletsInMotion.Application.Execution
                             Console.WriteLine("");
                             Console.WriteLine("Press enter to continue");
                             Console.WriteLine("");
-                            // MAYBE ADD STOPWATCH TO EXTEND TIME WITH GIVEN AMOUNT?
                             Console.ReadLine();
                             break;
 
@@ -153,7 +156,6 @@ namespace DropletsInMotion.Application.Execution
                             await HandleSensorCommand(sensorCommand, movesToExecute);
                             break;
                         case ActuatorCommand actuatorCommand:
-                            //var statusCode = await _communicationEngine.SendActuatorRequest(actuatorCommand.ActuatorName, Time);
                             await HandleActuatorCommand(actuatorCommand);
                             break;
 
@@ -162,6 +164,9 @@ namespace DropletsInMotion.Application.Execution
                             break;
                     }
                 }
+
+                boardActions = boardActions.OrderBy(b => b.Time).ToList();
+                if(boardActions.Count > 0) { executionTime = boardActions.Last().Time; }
 
                 double? boundTime = _timeService.CalculateBoundTime(Time, executionTime);
                 if (movesToExecute.Count > 0)
@@ -188,6 +193,29 @@ namespace DropletsInMotion.Application.Execution
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
+        }
+
+        private void HandleDispense(Dispense dispenseCommand, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
+        {
+            if (!_deviceRepository.Reservoirs.TryGetValue(dispenseCommand.ReservoirName, out Reservoir reservoir))
+            {
+                throw new Exception($"No reservoir with name {dispenseCommand.ReservoirName}");
+            }
+
+            foreach (var kvp in reservoir.DispenseSequence)
+            {
+                
+                BoardAction b = new BoardAction(Convert.ToInt32(kvp["id"]), Convert.ToInt32(kvp["status"]), kvp["time"] + executionTime);
+                boardActions.Add(b);
+            }
+
+            // Update time
+            //executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
+
+            Agent agent = new Agent(dispenseCommand.DropletName, reservoir.OutputX,
+                reservoir.OutputY, dispenseCommand.Volume); // TODO: the reservoir should contain a substance id?
+            Agents.Add(dispenseCommand.DropletName, agent);
+            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
         }
 
         private void HandleDropletDeclaration(DropletDeclaration dropletCommand)
@@ -233,6 +261,8 @@ namespace DropletsInMotion.Application.Execution
             {
                 var actualTime = await _communicationEngine.SendTimeRequest();
                 var boardActionTime = boardActions.First().Time;
+
+                Console.WriteLine(actualTime);
 
                 // Handle time desync
                 // TODO: Check if mix sends its own request, we should do it here!
@@ -281,7 +311,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
             {
@@ -300,7 +330,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
             {
@@ -320,7 +350,7 @@ namespace DropletsInMotion.Application.Execution
         }
         
 
-        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, double? executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, double executionTime, Dictionary<string, Agent> agents)
         {
             SplitByVolume splitByVolumeCommand2 = new SplitByVolume(splitByRatioCommand.InputName, splitByRatioCommand.OutputName1,
                 splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,
