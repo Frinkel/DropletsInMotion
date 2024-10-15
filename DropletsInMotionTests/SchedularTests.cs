@@ -1,7 +1,7 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Domain;
+using DropletsInMotion.Infrastructure.Models.Platform;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests

@@ -7,33 +7,33 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
     {
         public string DropletName { get; }
 
-        public string InputName { get; }
+        public string ReservoirName { get; }
 
         public double Volume { get; set; }
         public ArithmeticExpression VolumeExpression { get; }
 
-        public Dispense(string name, string inputName, double volume)
+        public Dispense(string name, string reservoirName, double volume)
         {
             DropletName = name;
-            InputName = inputName;
+            ReservoirName = reservoirName;
             Volume = volume;
         }
 
-        public Dispense(string name, string inputName, ArithmeticExpression volumeExpression)
+        public Dispense(string name, string reservoirName, ArithmeticExpression volumeExpression)
         {
             DropletName = name;
-            InputName = inputName;
+            ReservoirName = reservoirName;
             VolumeExpression = volumeExpression;
         }
 
         public override string ToString()
         {
-            return $"Dispense(DropletName: {DropletName}, InputName: {InputName}, Volume: {VolumeExpression})";
+            return $"Dispense(DropletName: {DropletName}, ReservoirName: {ReservoirName}, Volume: {VolumeExpression})";
         }
 
         public List<string> GetInputDroplets()
         {
-            return new List<string> { DropletName };
+            return new List<string>();
         }
 
         public List<string> GetOutputDroplets()

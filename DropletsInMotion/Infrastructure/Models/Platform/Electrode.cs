@@ -1,4 +1,4 @@
-﻿namespace DropletsInMotion.Infrastructure.Models.Domain
+﻿namespace DropletsInMotion.Infrastructure.Models.Platform
 {
     /// <summary>
     /// Naming was decided by Joel whom you can complain to if you do not agree

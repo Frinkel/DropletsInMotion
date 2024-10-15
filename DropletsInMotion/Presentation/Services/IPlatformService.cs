@@ -1,4 +1,4 @@
-﻿using DropletsInMotion.Infrastructure.Models.Domain;
+﻿using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Presentation.Services;
 

@@ -1,6 +1,8 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using System.Diagnostics;
+using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotion.Application.Services.Routers.Models;
 
@@ -66,6 +68,7 @@ public class State
             Agents[kvp.Key] = (Agent)kvp.Value.Clone();
         }
 
+        var watch = System.Diagnostics.Stopwatch.StartNew();
         foreach (var actionKvp in jointAction)
         {
             Agent agent = Agents[actionKvp.Key];
@@ -87,7 +90,9 @@ public class State
         }
 
         H = CalculateHeuristic();
-
+        watch.Stop();
+        var elapsedMs = watch.Elapsed.Microseconds;
+        Debugger.ElapsedTime.Add(elapsedMs);
     }
 
     public List<BoardAction> ExtractActions(double time)
@@ -214,6 +219,8 @@ public class State
             {
                 State newState = new State(this, jointAction);
                 expandedStates.Add(newState);
+
+                Debugger.ExpandedStates += 1;
             }
         }
 

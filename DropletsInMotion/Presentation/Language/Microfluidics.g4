@@ -32,7 +32,7 @@ dropletDeclaration
     ;
 
 dispense
-    : 'Dispense' '(' IDENTIFIER ',' IDENTIFIER ',' arithmeticExpression ')'
+    : 'Dispense' '(' IDENTIFIER ',' STRING ',' arithmeticExpression ')'
     ;
 
 // Move

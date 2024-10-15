@@ -35,7 +35,7 @@ namespace DropletsInMotion.Communication
         {   
             try
             {
-                _communicationTemplateService.LoadTemplates();
+                //_communicationTemplateService.LoadTemplates();
 
                 if (sender == null) throw new ArgumentNullException(nameof(sender));
                 if (_isServerRunning) throw new InvalidOperationException("A server is already running");

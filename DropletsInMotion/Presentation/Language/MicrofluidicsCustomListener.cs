@@ -3,7 +3,6 @@ using Antlr4.Runtime.Tree;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
-using DropletsInMotion.Infrastructure.Models.Domain;
 using System.Globalization;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 
@@ -90,11 +89,11 @@ namespace DropletsInMotion.Presentation.Language
 
         public override void ExitDispense(MicrofluidicsParser.DispenseContext context)
         {
-            string name = context.IDENTIFIER(0).GetText();
-            string inputName = context.IDENTIFIER(1).GetText();
+            string dropletName = context.IDENTIFIER().GetText();
+            string reservoirName = context.STRING().GetText().Trim('"');
             var volume = CreateExpression(context.arithmeticExpression());
 
-            IDropletCommand dropletCommand = new Dispense(name, inputName, volume);
+            IDropletCommand dropletCommand = new Dispense(dropletName, reservoirName, volume);
             Commands.Add(dropletCommand);
         }
 
