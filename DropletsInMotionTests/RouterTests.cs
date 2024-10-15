@@ -175,7 +175,7 @@ namespace DropletsInMotionTests
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
             Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
 
-            Assert.That(true, Is.EqualTo(IsOneGoalState(commands1, agents)));
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 
         public bool IsOneGoalState(List<IDropletCommand> commands, Dictionary<string, Agent> droplets)

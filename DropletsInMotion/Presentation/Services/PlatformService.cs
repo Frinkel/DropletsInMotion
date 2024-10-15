@@ -1,16 +1,24 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Services;
+using DropletsInMotion.Infrastructure.Repositories;
+using System.IO;
 
 namespace DropletsInMotion.Presentation.Services
 {
     public class PlatformService : IPlatformService
     {
         public Electrode[][] Board { get; set; }
+        private readonly IFileService _fileService;
+        private readonly IUserService _userService;
+        private readonly IPlatformRepository _platformRepository;
 
-        public PlatformService()
+        public PlatformService(IFileService fileService, IUserService userService, IPlatformRepository platformRepository)
         {
-            
+            _fileService = fileService;
+            _userService = userService;
+            _platformRepository = platformRepository;
         }
         public void LoadBoardFromJson(string jsonFilePath)
         {
@@ -48,6 +56,20 @@ namespace DropletsInMotion.Presentation.Services
 
                 Board[x][y] = new Electrode(electrodeJson.Id, x, y);
             }
+
+            _platformRepository.Board = Board;
+        }
+
+        public void LoadPlatformInformation()
+        {
+            string platformInformationPath = _userService.ConfigurationPath + "/PlatformInformation.json";
+
+            string fileContent = _fileService.ReadFileFromPath(platformInformationPath);
+
+            var platformInfo = JsonSerializer.Deserialize<PlatformInformation>(fileContent);
+
+            _platformRepository.MinimumMovementVolume = platformInfo.Movement.MinimumMovementVolume;
+            _platformRepository.MaximumMovementVolume = platformInfo.Movement.MaximumMovementVolume;
         }
 
         public void PrintBoard()
@@ -81,7 +103,7 @@ namespace DropletsInMotion.Presentation.Services
             }
         }
 
-        public class PlatformInformation
+        public class Platform
         {
             public string PlatformName { get; set; }
             public string PlatformType { get; set; }
@@ -115,7 +137,7 @@ namespace DropletsInMotion.Presentation.Services
         public class RootObject
         {
             [JsonPropertyName("information")]
-            public PlatformInformation Information { get; set; }
+            public Platform Information { get; set; }
             [JsonPropertyName("electrodes")]
             public List<ElectrodeJson> Electrodes { get; set; }
         }

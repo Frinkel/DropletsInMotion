@@ -85,6 +85,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<IDeviceRepository, DeviceRepository>();
             serviceCollection.AddSingleton<ITypeChecker, TypeChecker>();
             serviceCollection.AddSingleton<IDeviceTemplateService, DeviceTemplateService>();
+            serviceCollection.AddSingleton<IPlatformRepository, PlatformRepository>();
 
 
             // Classes

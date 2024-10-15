@@ -110,7 +110,7 @@ namespace DropletsInMotion.Application.Execution
                             break;
 
                         case Dispense dispenseCommand:
-                            HandleDispense(dispenseCommand, boardActions, ref executionTime, Agents);
+                            HandleDispense(dispenseCommand, boardActions, Agents);
                             break;
 
                         case Move moveCommand:
@@ -119,15 +119,15 @@ namespace DropletsInMotion.Application.Execution
                             break;
 
                         case Merge mergeCommand:
-                            HandleMergeCommand(mergeCommand, movesToExecute, boardActions, ref executionTime, Agents);
+                            HandleMergeCommand(mergeCommand, movesToExecute, boardActions, Agents);
                             break;
 
                         case SplitByRatio splitByRatioCommand:
-                            HandleSplitByRatioCommand(splitByRatioCommand, movesToExecute, boardActions, executionTime, Agents);
+                            HandleSplitByRatioCommand(splitByRatioCommand, movesToExecute, boardActions, Agents);
                             break;
 
                         case SplitByVolume splitByVolumeCommand:
-                            HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, ref executionTime, Agents);
+                            HandleSplitByVolumeCommand(splitByVolumeCommand, movesToExecute, boardActions, Agents);
                             break;
 
                         case Store storeCommand:
@@ -173,6 +173,7 @@ namespace DropletsInMotion.Application.Execution
                 if(boardActions.Count > 0) { executionTime = boardActions.Last().Time; }
 
                 double? boundTime = _timeService.CalculateBoundTime(Time, executionTime);
+
                 if (movesToExecute.Count > 0)
                 {
                     boardActions.AddRange(_router.Route(Agents, movesToExecute, ContaminationMap, Time, boundTime));
@@ -215,7 +216,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleDispense(Dispense dispenseCommand, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
+        private void HandleDispense(Dispense dispenseCommand, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
             if (!_deviceRepository.Reservoirs.TryGetValue(dispenseCommand.ReservoirName, out Reservoir reservoir))
             {
@@ -225,7 +226,7 @@ namespace DropletsInMotion.Application.Execution
             foreach (var kvp in reservoir.DispenseSequence)
             {
                 
-                BoardAction b = new BoardAction(Convert.ToInt32(kvp["id"]), Convert.ToInt32(kvp["status"]), kvp["time"] + executionTime);
+                BoardAction b = new BoardAction(Convert.ToInt32(kvp["id"]), Convert.ToInt32(kvp["status"]), kvp["time"] + Time);
                 boardActions.Add(b);
             }
 
@@ -332,7 +333,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
+        private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
             {
@@ -342,7 +343,6 @@ namespace DropletsInMotion.Application.Execution
                 {
                     _commandLifetimeService.StoreCommand(mergeCommand);
                     boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, Time));
-                    executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
                 }
             }
             else
@@ -351,7 +351,7 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
-        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, ref double executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
             {
@@ -361,7 +361,6 @@ namespace DropletsInMotion.Application.Execution
                 {
                     _commandLifetimeService.StoreCommand(splitByVolumeCommand);
                     boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, Time, splitPositions.Value));
-                    executionTime = boardActions.Any() ? boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time : Time;
                 }
             }
             else
@@ -371,13 +370,13 @@ namespace DropletsInMotion.Application.Execution
         }
         
 
-        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, double executionTime, Dictionary<string, Agent> agents)
+        private void HandleSplitByRatioCommand(SplitByRatio splitByRatioCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
             SplitByVolume splitByVolumeCommand2 = new SplitByVolume(splitByRatioCommand.InputName, splitByRatioCommand.OutputName1,
                 splitByRatioCommand.OutputName2, splitByRatioCommand.PositionX1, splitByRatioCommand.PositionY1,
                 splitByRatioCommand.PositionX2, splitByRatioCommand.PositionY2,
                 Agents.ContainsKey(splitByRatioCommand.InputName) ? Agents[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
-            HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, ref executionTime, agents);
+            HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, agents);
         }
 
     }

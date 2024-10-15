@@ -42,6 +42,7 @@ namespace DropletsInMotion.Presentation
             Console.WriteLine(_userService.PlatformPath);
             _platformService.LoadBoardFromJson(_userService.PlatformPath);
             Board = _platformService.Board;
+            _platformService.LoadPlatformInformation();
 
             var programContent = _fileService.ReadFileFromPath(_userService.ProgramPath);
             var inputStream = new AntlrInputStream(programContent);

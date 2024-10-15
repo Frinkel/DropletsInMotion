@@ -287,5 +287,16 @@ namespace DropletsInMotionTests
             Assert.CatchAsync(async () => await _executionEngine.Execute());
         }
 
+        [Test]
+        public async Task ParallelTest1()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestParallelRun1.txt";
+
+            await _executionEngine.Execute();
+
+            Assert.That(_executionEngine.Time, Is.EqualTo(1));
+        }
+
     }
 }
