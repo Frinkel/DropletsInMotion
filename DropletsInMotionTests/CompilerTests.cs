@@ -258,6 +258,18 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public async Task WasteTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestWaste.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            Assert.IsFalse(_executionEngine.Agents.ContainsKey("d1"));
+        }
+
+        [Test]
         public async Task DropletDeclarationIncorrectFailTest()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";

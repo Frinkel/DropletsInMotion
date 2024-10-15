@@ -23,6 +23,7 @@ command
     | whileLoop
     | actuatorCommand
     | printStatement
+    | waste
     ;
 
 // Declarations
@@ -62,6 +63,11 @@ mix
 store
     : 'Store' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')'
     ;
+
+// Waste
+waste
+	: 'Waste' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ')'
+	;
 
 // Wait
 wait

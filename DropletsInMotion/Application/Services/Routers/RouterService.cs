@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using System.Reflection.Metadata.Ecma335;
+using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Infrastructure.Models.Domain;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
@@ -39,6 +40,60 @@ public class RouterService : IRouterService
 
     public List<BoardAction> Route(Dictionary<string, Agent> agents, List<IDropletCommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
     {
+        AstarRouter astarRouter = new AstarRouter();
+
+
+        //List<State> finalStates = new List<State>();
+        //List<State> conflictingStates = new List<State>();
+
+
+
+        //foreach (var command in commands)
+        //{
+        //    List<string> routableAgents1 = new List<string>(command.GetInputDroplets());
+        //    State state = new State(routableAgents1, agents, contaminationMap, new List<IDropletCommand>() { command }, _templateService, _contaminationService, Seed);
+        //    Frontier f1 = new Frontier();
+        //    State sFinal1 = astarRouter.Search(state, f1);
+        //    finalStates.Add(sFinal1);
+        //}
+
+        //foreach (var finalState1 in finalStates)
+        //{
+        //    foreach (var finalState2 in finalStates)
+        //    {
+        //        if (finalState2 != finalState1)
+        //        {
+        //            if (ConflictingSates(finalState1, finalState2))
+        //            {
+        //                conflictingStates.Add(finalState1);
+        //                conflictingStates.Add(finalState2);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //if (conflictingStates.Count == 0)
+        //{
+        //    Console.WriteLine("No conflicting states found!");
+        //}
+        //else
+        //{
+        //    conflictingStates.ForEach(s => Console.WriteLine(s));
+        //}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         List<string> routableAgents = new List<string>();
 
         foreach (var command in commands)
@@ -48,7 +103,7 @@ public class RouterService : IRouterService
 
         State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, Seed);
         Frontier f = new Frontier();
-        AstarRouter astarRouter = new AstarRouter();
+        //AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);
 
 
@@ -115,6 +170,28 @@ public class RouterService : IRouterService
         _contaminationService.PrintContaminationState(contaminationMap);
 
         return sFinal.ExtractActions(time);
+    }
+
+    private bool ConflictingSates(State s1, State s2)
+    {
+        byte[,] c1 = s1.ContaminationMap;
+        byte[,] c2 = s2.ContaminationMap;
+
+        for (int i = 0; i < c1.GetLength(0); i++)
+        {
+            for (int j = 0; j < c1.GetLength(1); j++)
+            {
+                if (c1[i, j] != 0 && c2[i, j] != 0 && c1[i, j] != c2[i, j])
+                {
+                    Console.WriteLine($"Conflict at {i}, {j}");
+                    _contaminationService.PrintContaminationState(c1);
+                    _contaminationService.PrintContaminationState(c2);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 

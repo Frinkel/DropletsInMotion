@@ -149,6 +149,10 @@ namespace DropletsInMotion.Application.Execution
                             executionTime = waitCommand.Time + Time;
                             break;
 
+                        case Waste wasteCommand:
+                            HandleWasteCommand(wasteCommand, movesToExecute);
+                            break;
+
                         case SensorCommand sensorCommand:
                             await HandleSensorCommand(sensorCommand, movesToExecute);
                             break;
@@ -188,6 +192,22 @@ namespace DropletsInMotion.Application.Execution
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs.ToString());
 
+        }
+
+        private void HandleWasteCommand(Waste wasteCommand, List<IDropletCommand> movesToExecute)
+        {
+            if (Agents.ContainsKey(wasteCommand.DropletName))
+            {
+                if (_actionService.InPositionToWaste(wasteCommand, Agents, movesToExecute))
+                {
+                    Agents.Remove(wasteCommand.DropletName);
+
+                }
+            }
+            else
+            {
+                throw new Exception($"Cannot waste droplet {wasteCommand.DropletName} since it does not exist");
+            }
         }
 
         private void HandleDropletDeclaration(DropletDeclaration dropletCommand)
@@ -231,6 +251,7 @@ namespace DropletsInMotion.Application.Execution
         {
             if (boardActions.Count > 0)
             {
+                //boardActions.ForEach(b => Console.WriteLine(b));
                 var actualTime = await _communicationEngine.SendTimeRequest();
                 var boardActionTime = boardActions.First().Time;
 

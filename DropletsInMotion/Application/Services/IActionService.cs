@@ -33,5 +33,8 @@ namespace DropletsInMotion.Application.Services
             Dictionary<string, Agent> agents);
 
         bool InPositionToSense(SensorCommand sensorCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
+
+        bool InPositionToWaste(Waste wasteCommand, Dictionary<string, Agent> agents,
+            List<IDropletCommand> movesToExecute);
     }
 }

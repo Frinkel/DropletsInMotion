@@ -89,6 +89,10 @@ public class TypeChecker : ITypeChecker
                     Actuator(actuatorCommand);
                     break;
 
+                case Waste wasteCommand:
+                    Waste(wasteCommand);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command: {command.GetType().Name}");
             }
@@ -275,6 +279,19 @@ public class TypeChecker : ITypeChecker
     {
         //var variables = actuatorCommand.GetInputVariables();
         //VariablesExist(variables, actuatorCommand);
+    }
+
+    private void Waste(Waste wasteCommand)
+    {
+        var inputDroplets = wasteCommand.GetInputDroplets();
+        var outputDroplets = wasteCommand.GetOutputDroplets();
+        ValidateInputDroplets(inputDroplets, wasteCommand);
+
+        var variables = wasteCommand.GetInputVariables();
+        var nonDropletVariables = variables.Where(v => !inputDroplets.Contains(v)).ToList();
+        VariablesExist(nonDropletVariables, wasteCommand);
+
+        UpdateDeclaredDroplets(inputDroplets, outputDroplets, wasteCommand);
     }
 
     private void ValidateInputDroplets(List<string> inputDroplets, ICommand command)

@@ -164,6 +164,16 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(dropletCommand);
         }
 
+        public override void ExitWaste(MicrofluidicsParser.WasteContext context)
+        {
+            string name = context.IDENTIFIER().GetText();
+            var posX = CreateExpression(context.arithmeticExpression(0));
+            var posY = CreateExpression(context.arithmeticExpression(1));
+
+            IDropletCommand dropletCommand = new Waste(name, posX, posY);
+            Commands.Add(dropletCommand);
+        }
+
         public override void ExitWait(MicrofluidicsParser.WaitContext context)
         {
             var time = CreateExpression(context.arithmeticExpression());

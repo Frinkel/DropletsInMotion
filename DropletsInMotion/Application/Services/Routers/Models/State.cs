@@ -34,7 +34,7 @@ public class State
         {
             Agents[kvp.Key] = (Agent)kvp.Value.Clone();
         }
-        ContaminationMap = contaminationMap;
+        ContaminationMap = (byte[,]) contaminationMap.Clone();
         Commands = commands;
         JointAction = null;
         _templateHandler = templateHandler;

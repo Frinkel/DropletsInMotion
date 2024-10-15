@@ -228,6 +228,21 @@ namespace DropletsInMotion.Application.Services
             return false;
         }
 
+        public bool InPositionToWaste(Waste wasteCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute)
+        {
+            if (!agents.TryGetValue(wasteCommand.DropletName, out var inputDroplet))
+            {
+                throw new InvalidOperationException($"No droplet found with name {wasteCommand.DropletName}.");
+            }
+
+            if (inputDroplet.PositionX == wasteCommand.PositionX && inputDroplet.PositionY == wasteCommand.PositionY)
+            {
+                return true;
+            }
+            movesToExecute.Add(new Move(wasteCommand.DropletName, wasteCommand.PositionX, wasteCommand.PositionY));
+            return false;
+        }
+
 
         public bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute)
         {

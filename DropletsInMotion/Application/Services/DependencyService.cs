@@ -148,6 +148,14 @@ namespace DropletsInMotion.Application.Services
                         }
                         break;
 
+                    case Waste wasteCommand:
+                        if (!agents.ContainsKey(wasteCommand.DropletName))
+                        {
+                            Console.WriteLine("WasteDone");
+                            node.MarkAsExecuted();
+                        }
+                        break;
+
                     default:
                         node.MarkAsExecuted();
                         break;
