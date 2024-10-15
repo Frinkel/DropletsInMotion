@@ -1,0 +1,6 @@
+{
+  "Movement": {
+    "MinimumMovementVolume": 350,
+    "MaximumMovementVolume": 4000
+  }
+}

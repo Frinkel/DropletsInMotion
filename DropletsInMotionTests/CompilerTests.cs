@@ -26,12 +26,14 @@ namespace DropletsInMotionTests
             _executionEngine = ServiceProvider.GetRequiredService<IExecutionEngine>();
             _userService = ServiceProvider.GetRequiredService<IUserService>();
             _filerService = ServiceProvider.GetRequiredService<IFileService>();
+            _userService.ConfigurationPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/Configuration";
         }
 
         [Test]
         public async Task MoveOneDropletTest()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestMoveDroplet.txt";
 
             await _executionEngine.Execute();
