@@ -14,8 +14,10 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         int MinSize { get; }
         int MaxSize { get; }
         List<BoardAction> Actions { get; }
-        List<(int id, int x, int y)> FinalPositions { get; }
-        List<(int id, int x, int y)> InitialPositions { get; }
+
+        Dictionary<string, (int x, int y)> FinalPositions { get; }
+        Dictionary<string, (int x, int y)> InitialPositions { get; }
+
         List<BoardAction> Apply(int relativePosition, double time, double scale);
     }
 }

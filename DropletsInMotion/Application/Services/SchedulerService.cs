@@ -61,7 +61,7 @@ namespace DropletsInMotion.Application.Services
 
 
                     var optimalPositions = FindOptimalPositions(dInput.PositionX, dInput.PositionY,
-                        dOutput1PositionX, dOutput1PositionY, dOutput2PositionX, dOutput2PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, templates);
+                        dOutput1PositionX, dOutput1PositionY, dOutput2PositionX, dOutput2PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, templates, splitByVolumeCommand);
                     return optimalPositions;
                     
                 case SplitByRatio splitByRatioCommand:
@@ -76,7 +76,8 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public ScheduledPosition FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, byte d1SubstanceId, byte d2SubstanceId, List<ITemplate> templates)
+        public ScheduledPosition FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, 
+                                                      byte d1SubstanceId, byte d2SubstanceId, List<ITemplate> templates, SplitByVolume splitByVolumeCommand)
         {
             int minBoundingX = Math.Min(commandX, Math.Min(d1X, d2X));
             int minBoundingY = Math.Min(commandY, Math.Min(d1Y, d2Y));
@@ -106,7 +107,7 @@ namespace DropletsInMotion.Application.Services
                         continue;
                     }
 
-                    var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates);
+                    var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates, splitByVolumeCommand);
 
 
                     // Out of bounds
@@ -180,18 +181,20 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
-                              $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
-            //throw new Exception("");
             if (bestPositions == null)
             {
                 throw new Exception("No optimal position found");
             }
 
+            Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
+                              $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
+            //throw new Exception("");
+            
+
             return bestPositions;
         }
 
-        private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates)
+        private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, SplitByVolume splitByVolumeCommand)
         {
             int d1XDiff = originX - target1X;
             int d1YDiff = originY - target1Y;
@@ -208,34 +211,21 @@ namespace DropletsInMotion.Application.Services
             foreach (var template in templates)
             {
                 int totalCost = 0;
+
                 
-                totalCost += Math.Abs(d1XDiff + template.FinalPositions[0].x) + Math.Abs(d1YDiff + template.FinalPositions[0].y);
-                totalCost += Math.Abs(d2XDiff + template.FinalPositions[1].x) + Math.Abs(d2YDiff + template.FinalPositions[1].y);
+
+                // TODO: It comes in as same coordinates swapped ids but we do not use ids
+                totalCost += Math.Abs(d1XDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].x) + Math.Abs(d1YDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].y);
+                totalCost += Math.Abs(d2XDiff + template.FinalPositions[splitByVolumeCommand.OutputName2].x) + Math.Abs(d2YDiff + template.FinalPositions[splitByVolumeCommand.OutputName2].y);
 
                 if (totalCost < cost)
                 {
                     cost = totalCost;
                     chosenTemplate = template;
-                    d1OptimalX = originX + template.FinalPositions[0].x;
-                    d1OptimalY = originY + template.FinalPositions[0].y;
-                    d2OptimalX = originX + template.FinalPositions[1].x;
-                    d2OptimalY = originY + template.FinalPositions[1].y;
-                }
-
-
-                totalCost = 0;
-
-                totalCost += Math.Abs(d1XDiff + template.FinalPositions[1].x) + Math.Abs(d1YDiff + template.FinalPositions[1].y);
-                totalCost += Math.Abs(d2XDiff + template.FinalPositions[0].x) + Math.Abs(d2YDiff + template.FinalPositions[0].y);
-
-                if (totalCost < cost)
-                {
-                    cost = totalCost;
-                    chosenTemplate = template;
-                    d1OptimalX = originX + template.FinalPositions[1].x;
-                    d1OptimalY = originY + template.FinalPositions[1].y;
-                    d2OptimalX = originX + template.FinalPositions[0].x;
-                    d2OptimalY = originY + template.FinalPositions[0].y;
+                    d1OptimalX = originX + template.FinalPositions[splitByVolumeCommand.OutputName1].x;
+                    d1OptimalY = originY + template.FinalPositions[splitByVolumeCommand.OutputName1].y;
+                    d2OptimalX = originX + template.FinalPositions[splitByVolumeCommand.OutputName2].x;
+                    d2OptimalY = originY + template.FinalPositions[splitByVolumeCommand.OutputName2].y;
                 }
 
             }

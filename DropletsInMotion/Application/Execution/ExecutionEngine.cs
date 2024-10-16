@@ -359,12 +359,53 @@ namespace DropletsInMotion.Application.Execution
                 // Find eligible templates
                 Agent splitAgent = agents[splitByVolumeCommand.InputName];
                 double agentVolume = splitAgent.Volume;
+                double ratio = splitByVolumeCommand.Volume / splitAgent.Volume;
 
-                List<ITemplate> eligibleSplitTemplates = _templateRepository?
-                    .SplitTemplates?
-                    .FindAll(t => t.MinSize <= agentVolume && agentVolume < t.MaxSize && Math.Abs(t.Ratio - (splitByVolumeCommand.Volume / splitAgent.Volume)) < 1) // TODO: Set tolerance (current 1)
-                    ?.Cast<ITemplate>()
-                    .ToList() ?? new List<ITemplate>();
+                List<ITemplate> eligibleSplitTemplates = new List<ITemplate>();
+
+                // Find 
+                foreach (var template in _templateRepository.SplitTemplates)
+                {
+                    if ((template.MinSize <= agentVolume && agentVolume < template.MaxSize &&
+                          Math.Abs(template.Ratio - ratio) < 0.1))
+                    {
+                        
+                        if (Math.Abs(template.RatioRelation.First().Value - ratio) < 0.1) // TODO: Should this tolerance be user defined
+                        {
+                            SplitTemplate t = new SplitTemplate(template.Name, template.MinSize, template.MaxSize,
+                                template.Ratio, template.RatioRelation);
+                            
+                            Dictionary<string, (int x, int y)>
+                                finalPositions = new Dictionary<string, (int x, int y)>();
+
+                            finalPositions.Add(splitByVolumeCommand.OutputName2, (template.FinalPositions[template.RatioRelation.First().Key].x, template.FinalPositions[template.RatioRelation.First().Key].y));
+                            finalPositions.Add(splitByVolumeCommand.OutputName1, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
+
+                            t.FinalPositions = finalPositions;
+                            t.InitialPositions = template.InitialPositions;
+                            t.Actions = template.Actions;
+
+                            eligibleSplitTemplates.Add(t);
+                        }
+                        else
+                        {
+                            SplitTemplate t = new SplitTemplate(template.Name, template.MinSize, template.MaxSize,
+                                template.Ratio, template.RatioRelation);
+
+                            Dictionary<string, (int x, int y)>
+                                finalPositions = new Dictionary<string, (int x, int y)>();
+
+                            finalPositions.Add(splitByVolumeCommand.OutputName1, (template.FinalPositions[template.RatioRelation.First().Key].x, template.FinalPositions[template.RatioRelation.First().Key].y));
+                            finalPositions.Add(splitByVolumeCommand.OutputName2, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
+
+                            t.FinalPositions = finalPositions;
+                            t.InitialPositions = template.InitialPositions;
+                            t.Actions = template.Actions;
+
+                            eligibleSplitTemplates.Add(t);
+                        }
+                    }
+                }
 
 
                 if (!eligibleSplitTemplates.Any())
@@ -373,6 +414,29 @@ namespace DropletsInMotion.Application.Execution
                 }
 
                 var splitPositions = _schedulerService.ScheduleCommand(splitByVolumeCommand, agents, ContaminationMap, eligibleSplitTemplates);
+
+                
+
+                //// Determine which template cluster id relates to which droplet
+                //Dictionary<string, string> agentClusterRelation = new Dictionary<string, string>();
+                //if (splitPositions.Template is SplitTemplate template)
+                //{
+                //    foreach (var kvp in template.RatioRelation)
+                //    {
+                //        if (kvp.Value.Equals(ratio) && !agentClusterRelation.ContainsKey(splitByVolumeCommand.OutputName2))
+                //        {
+                //            agentClusterRelation.Add(splitByVolumeCommand.OutputName2, kvp.Key);
+                //        }
+                //        else
+                //        {
+                //            agentClusterRelation.Add(splitByVolumeCommand.OutputName1, kvp.Key);
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    throw new InvalidCastException("The template is not a SplitTemplate.");
+                //}
 
 
                 if (_actionService.InPositionToSplit(splitByVolumeCommand, movesToExecute, splitPositions, agents))
