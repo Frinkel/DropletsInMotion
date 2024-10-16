@@ -29,6 +29,8 @@ public class TemplateRepository : ITemplateRepository
 
     public List<SplitTemplate> SplitTemplates { get; private set; } = new List<SplitTemplate>();
 
+    public List<MergeTemplate> MergeTemplates { get; private set; } = new List<MergeTemplate>();
+
     public List<RavelTemplate> RavelTemplates { get; private set; } = new List<RavelTemplate>();
 
     public List<UnravelTemplate> UnravelTemplates { get; private set; } = new List<UnravelTemplate>();
@@ -91,6 +93,40 @@ public class TemplateRepository : ITemplateRepository
         SplitTemplates.Add(splitTemplate);
 
         Console.WriteLine(splitTemplate);
+    }
+
+    public void AddMerge(MergeTemplate mergeTemplate, string template)
+    {
+        // Find all the blocks and actions
+        mergeTemplate.Actions = ParseTemplateFile(template);
+
+        Block firstBlock = _blocks.First();
+        var initialPositions = FindClusters(firstBlock.Template);
+
+        // Validate initial positions
+        if (initialPositions.Count != 2)
+        {
+            throw new InvalidOperationException($"The merge template \"{mergeTemplate.Name}\" did not start with exactly 2 droplet!");
+        }
+        // Add the initial positions
+        initialPositions.ForEach(pos => mergeTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        // Find the end positions
+        Block finalBlock = _blocks.Last();
+        var finalPositions = FindClusters(finalBlock.Template);
+
+        // Validate final positions
+        if (finalPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The merge template \"{mergeTemplate.Name}\" did not result in exactly 1 end droplets!");
+        }
+
+        // Add the final positions
+        finalPositions.ForEach(pos => mergeTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        MergeTemplates.Add(mergeTemplate);
+
+        //Console.WriteLine(splitTemplate);
     }
 
     public void AddRavel(RavelTemplate ravelTemplate, string template)

@@ -11,7 +11,7 @@ namespace DropletsInMotion.Application.Services
 {
     public interface IActionService
     {
-        List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time);
+        List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions);
         List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, byte[,] contaminationMap, 
             double time, ScheduledPosition splitPositions);
         List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime);
@@ -20,7 +20,7 @@ namespace DropletsInMotion.Application.Services
         bool DropletsExistAndCommandInProgress(IDropletCommand dropletCommand, Dictionary<string, Agent> agents);
 
         bool InPositionToMerge(Merge mergeCommand, List<IDropletCommand> movesToExecute,
-            ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions,
+            ScheduledPosition mergePositions,
             Dictionary<string, Agent> agents);
         void MoveMergeDropletToPosition(Merge mergeCommand, List<IDropletCommand> movesToExecute, 
             Dictionary<string, Agent> agents);

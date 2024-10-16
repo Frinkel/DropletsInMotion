@@ -13,4 +13,6 @@ public interface ITemplateRepository
     List<SplitTemplate>? SplitTemplates { get; }
     List<RavelTemplate>? RavelTemplates { get; }
     List<UnravelTemplate>? UnravelTemplates { get; }
+    List<MergeTemplate> MergeTemplates { get; }
+    void AddMerge(MergeTemplate mergeTemplate, string template);
 }

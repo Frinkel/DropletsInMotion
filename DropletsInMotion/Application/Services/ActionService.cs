@@ -44,7 +44,7 @@ namespace DropletsInMotion.Application.Services
             _platformService = platformService;
         }
 
-        public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time)
+        public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions)
         {
             // Add logic for processing the Merge dropletCommand
             //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
@@ -295,15 +295,15 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public bool InPositionToMerge(Merge mergeCommand, List<IDropletCommand> movesToExecute, ((int optimalX, int optimalY), (int optimalX, int optimalY)) mergePositions, Dictionary<string, Agent> agents)
+        public bool InPositionToMerge(Merge mergeCommand, List<IDropletCommand> movesToExecute, ScheduledPosition mergePositions, Dictionary<string, Agent> agents)
         {
             var inputDroplet1 = agents[mergeCommand.InputName1];
             var inputDroplet2 = agents[mergeCommand.InputName2];
 
-            bool areInPosition = inputDroplet1.PositionX == mergePositions.Item1.optimalX &&
-                                 inputDroplet1.PositionY == mergePositions.Item1.optimalY &&
-                                 inputDroplet2.PositionX == mergePositions.Item2.optimalX &&
-                                 inputDroplet2.PositionY == mergePositions.Item2.optimalY;
+            bool areInPosition = inputDroplet1.PositionX == mergePositions.X1 &&
+                                 inputDroplet1.PositionY == mergePositions.Y1 &&
+                                 inputDroplet2.PositionX == mergePositions.X2 &&
+                                 inputDroplet2.PositionY == mergePositions.Y2;
 
             // If the droplets are already in position, return true
             if (areInPosition)
@@ -312,17 +312,17 @@ namespace DropletsInMotion.Application.Services
             }
 
             // Move inputDroplet1 to be next to the merge position
-            if (inputDroplet1.PositionX != mergePositions.Item1.optimalX || inputDroplet1.PositionY != mergePositions.Item1.optimalY)
+            if (inputDroplet1.PositionX != mergePositions.X1 || inputDroplet1.PositionY != mergePositions.Y1)
             {
-                var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.Item1.optimalX, mergePositions.Item1.optimalY);
+                var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.X1, mergePositions.Y1);
                 movesToExecute.Add(moveCommand);
                 Console.WriteLine($"Move dropletCommand added for droplet 1: {moveCommand}");
             }
 
             // Move inputDroplet2 to be next to the merge position
-            if (inputDroplet2.PositionX != mergePositions.Item2.optimalX || inputDroplet2.PositionY != mergePositions.Item2.optimalY)
+            if (inputDroplet2.PositionX != mergePositions.X2 || inputDroplet2.PositionY != mergePositions.Y2)
             {
-                var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.Item2.optimalX, mergePositions.Item2.optimalY);
+                var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.X2, mergePositions.Y2);
                 movesToExecute.Add(moveCommand);
                 Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
 

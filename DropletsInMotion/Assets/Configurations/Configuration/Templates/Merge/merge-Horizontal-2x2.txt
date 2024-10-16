@@ -1,6 +1,6 @@
 {
-	"name": "Merge Horizontal 1x1",
-	"minSize": 350,
+	"name": "Merge Horizontal 2x2",
+	"minSize": 1000,
 	"maxSize": 2800
 }
 ?
@@ -8,8 +8,8 @@
 0000000
 0000000
 0000000
-0110011
-0110011
+0110022
+0110022
 0000000
 0000000
 ;

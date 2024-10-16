@@ -38,6 +38,7 @@ namespace DropletsInMotion.Presentation.Services
             LoadActuatorTemplates();
             LoadReservoirTemplates();
             LoadSplitTemplates();
+            LoadMergeTemplates();
             LoadRavelTemplates();
             LoadUnravelTemplates();
 
@@ -64,6 +65,30 @@ namespace DropletsInMotion.Presentation.Services
                 Console.WriteLine($"Added split template: {splitTemplate.Name}");
 
                 _templateRepository.AddSplit(splitTemplate, template);
+            }
+        }
+
+        private void LoadMergeTemplates()
+        {
+            string mergeFolderPath = _userService.ConfigurationPath + "/Templates/Merge";
+
+            List<string> mergePaths = _fileService.GetFilesFromFolder(mergeFolderPath);
+            foreach (var mergePath in mergePaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(mergePath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Split template \"{mergePath}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                MergeTemplate mergeTemplate = JsonSerializer.Deserialize<MergeTemplate>(content) ?? throw new InvalidOperationException("A merge template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added split template: {mergeTemplate.Name}");
+
+                _templateRepository.AddMerge(mergeTemplate, template);
             }
         }
 
