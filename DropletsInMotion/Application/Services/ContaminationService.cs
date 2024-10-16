@@ -1,5 +1,6 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Application.Services
@@ -7,14 +8,17 @@ namespace DropletsInMotion.Application.Services
     public class ContaminationService : IContaminationService
     {
         private readonly IConfiguration _configuration;
+        private readonly IPlatformRepository _platformRepository;
 
-        public ContaminationService(IConfiguration configuration)
+        public ContaminationService(IConfiguration configuration, IPlatformRepository platformRepository)
         {
             _configuration = configuration;
+            _platformRepository = platformRepository;
         }
         
         public byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
         {
+            //return ApplyContaminationWithSize(agent, contaminationMap);
             // for disabeling contamination
             //if (!_configuration.GetValue<bool>("Development:Contaminations"))
             //{
@@ -86,6 +90,63 @@ namespace DropletsInMotion.Application.Services
 
             return contaminationMap;
         }
+
+        public byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap)
+        {
+            var x = agent.PositionX;
+            var y = agent.PositionY;
+
+            int size = 1;
+            //TODO skal de 1200 være en variabel? eller global i platformRepository
+            if (agent.Volume > 1200)
+            {
+                size = 2;
+            }
+            int rowCount = contaminationMap.GetLength(0);
+            int colCount = contaminationMap.GetLength(1);
+
+            // Helper function to apply contamination and update the hash
+            void ApplyIfInBounds(int xPos, int yPos)
+            {
+                if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
+                {
+                    byte oldValue = contaminationMap[xPos, yPos];
+                    byte newValue = (byte)(oldValue == 0 || oldValue == agent.SubstanceId ? agent.SubstanceId : 255);
+
+                    contaminationMap[xPos, yPos] = newValue;
+                }
+            }
+
+            // Loop over the area of the droplet, size x size
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    // Apply contamination to the droplet area
+                    ApplyIfInBounds(x + i, y + j);
+                }
+            }
+
+            // Apply contamination to the neighbors around the droplet area
+            for (int i = -1; i <= size; i++)
+            {
+                for (int j = -1; j <= size; j++)
+                {
+                    if (i >= 0 && i < size && j >= 0 && j < size)
+                    {
+                        // Skip the internal droplet cells that are already contaminated
+                        continue;
+                    }
+
+                    // Apply contamination to the neighboring cells
+                    ApplyIfInBounds(x + i, y + j);
+                }
+            }
+
+            return contaminationMap;
+        }
+
+
 
         // TEMP FUNCTIONS
         public void PrintContaminationState(byte[,] contaminationMap)

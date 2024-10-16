@@ -38,6 +38,8 @@ namespace DropletsInMotion.Presentation.Services
             LoadActuatorTemplates();
             LoadReservoirTemplates();
             LoadSplitTemplates();
+            LoadRavelTemplates();
+            LoadUnravelTemplates();
 
         }
 
@@ -62,6 +64,54 @@ namespace DropletsInMotion.Presentation.Services
                 Console.WriteLine($"Added split template: {splitTemplate.Name}");
 
                 _templateRepository.AddSplit(splitTemplate, template);
+            }
+        }
+
+        private void LoadRavelTemplates()
+        {
+            string ravelFolderPath = _userService.ConfigurationPath + "/Templates/Ravel";
+
+            List<string> ravelPaths = _fileService.GetFilesFromFolder(ravelFolderPath);
+            foreach (var ravelPath in ravelPaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(ravelPath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Ravel template \"{ravelPaths}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                RavelTemplate ravelTemplate = JsonSerializer.Deserialize<RavelTemplate>(content) ?? throw new InvalidOperationException("A ravel template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added ravel template: {ravelTemplate.Name}");
+
+                _templateRepository.AddRavel(ravelTemplate, template);
+            }
+        }
+
+        private void LoadUnravelTemplates()
+        {
+            string unravelFolderPath = _userService.ConfigurationPath + "/Templates/Unravel";
+
+            List<string> unravelPaths = _fileService.GetFilesFromFolder(unravelFolderPath);
+            foreach (var unravelPath in unravelPaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(unravelPath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Unravel template \"{unravelPaths}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                UnravelTemplate unravelTemplate = JsonSerializer.Deserialize<UnravelTemplate>(content) ?? throw new InvalidOperationException("A unravel template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added unravel template: {unravelTemplate.Name}");
+
+                _templateRepository.AddUnravel(unravelTemplate, template);
             }
         }
 

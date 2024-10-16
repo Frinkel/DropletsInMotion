@@ -26,13 +26,15 @@ public class RouterService : IRouterService
     private readonly IContaminationService _contaminationService;
     private readonly ITemplateService _templateService;
     private readonly IPlatformRepository _platformRepository;
+    private readonly ITemplateRepository _templateRepository;
 
 
-    public RouterService(IContaminationService contaminationService, ITemplateService templateService, IPlatformRepository platformRepository)
+    public RouterService(IContaminationService contaminationService, ITemplateService templateService, IPlatformRepository platformRepository, ITemplateRepository templateRepository)
     {
         _templateService = templateService;
         _contaminationService = contaminationService;
         _platformRepository = platformRepository;
+        _templateRepository = templateRepository;
     }
 
     public void Initialize(Electrode[][] board, int? seed = null)
@@ -105,7 +107,7 @@ public class RouterService : IRouterService
             routableAgents.AddRange(command.GetInputDroplets());
         }
 
-        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, _platformRepository, Seed);
+        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, _platformRepository, _templateRepository, Seed);
         Frontier f = new Frontier();
         //AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);

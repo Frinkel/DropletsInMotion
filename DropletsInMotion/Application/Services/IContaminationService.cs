@@ -11,5 +11,6 @@ namespace DropletsInMotion.Application.Services
         void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height);
         void PrintContaminationState(byte[,] contaminationMap);
         void CopyContaminationMap(byte[,] source, byte[,] destination);
+        byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap);
     }
 }

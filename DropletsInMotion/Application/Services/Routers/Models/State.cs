@@ -2,6 +2,7 @@
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using static DropletsInMotion.Application.Services.Routers.Models.Types;
 using Debugger = DropletsInMotion.Infrastructure.Debugger;
@@ -27,13 +28,15 @@ public class State
 
     private readonly IContaminationService _contaminationService;
     private readonly IPlatformRepository _platformRepository;
+    private readonly ITemplateRepository _templateRepository;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, IPlatformRepository platformRepository, int? seed = null)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
         _platformRepository = platformRepository;
+        _templateRepository = templateRepository;
         RoutableAgents = routableAgents;
         Agents = new Dictionary<string, Agent>();
         foreach (var kvp in agents)
@@ -63,6 +66,7 @@ public class State
         _templateHandler = Parent._templateHandler;
         _contaminationService = Parent._contaminationService;
         _platformRepository = Parent._platformRepository;
+        _templateRepository = Parent._templateRepository;
 
         G = Parent.G + 1;
 
@@ -177,6 +181,7 @@ public class State
 
         //double scaleFactor = 1;
 
+
         State firstState = chosenStates.First();
         foreach (var actionKvp in firstState.JointAction)
         {
@@ -184,11 +189,11 @@ public class State
             {
                 string dropletName = actionKvp.Key;
                 Agent agent = firstState.Parent.Agents[dropletName];
-                var unrawelActions = Unrawel(agent, actionKvp.Value, currentTime);
+                var unrawelActions = Unravel(agent, actionKvp.Value, currentTime);
                 finalActions.AddRange(unrawelActions);
             }
         }
-        
+
         int totalState = chosenStates.Count;
 
         foreach (State state in chosenStates)
@@ -226,7 +231,7 @@ public class State
             {
                 string dropletName = actionKvp.Key;
                 Agent agent = lastState.Agents[dropletName];
-                var rawelActions = Rawel(agent, actionKvp.Value, currentTimes[dropletName]-1);
+                var rawelActions = Rawel(agent, actionKvp.Value, finalActions.Last().Time);
                 finalActions.AddRange(rawelActions);
             }
         }
@@ -236,40 +241,28 @@ public class State
 
     }
 
-    private List<BoardAction> Unrawel(Agent agent, Types.RouteAction action, double time)
+    private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
     {
-        var boardActions = new List<BoardAction>();
+        UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
-        if (agent.Volume > _platformRepository.MinimumMovementVolume * 9)
-        {
-            return boardActions;
-        }
-
-        if (agent.Volume > _platformRepository.MinimumMovementVolume * 4)
-        {
-            List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled("UnrawelRight", agent, time, 1);
-            return translatedActions;
-
-        }
-
-        return boardActions;
-    }
-
-    private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
-    {
-        if (agent.Volume > _platformRepository.MinimumMovementVolume * 9)
+        if (unravelTemplate == null)
         {
             return new List<BoardAction>();
         }
 
-        if (agent.Volume > _platformRepository.MinimumMovementVolume * 4)
+        return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
+    }
+
+    private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
+    {
+        RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+
+        if (ravelTemplate == null)
         {
-            List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled("RawelLeft", agent, time, 1);
-            return translatedActions;
+            return new List<BoardAction>();
         }
 
-
-        return new List<BoardAction>();
+        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time - ravelTemplate.Duration, 1);
     }
 
 

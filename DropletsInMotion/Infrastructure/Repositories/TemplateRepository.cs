@@ -29,6 +29,10 @@ public class TemplateRepository : ITemplateRepository
 
     public List<SplitTemplate> SplitTemplates { get; private set; } = new List<SplitTemplate>();
 
+    public List<RavelTemplate> RavelTemplates { get; private set; } = new List<RavelTemplate>();
+
+    public List<UnravelTemplate> UnravelTemplates { get; private set; } = new List<UnravelTemplate>();
+
 
     private List<Block> _blocks = new();
     private static readonly string[] Separator = ["\r\n", "\r", "\n"];
@@ -78,6 +82,32 @@ public class TemplateRepository : ITemplateRepository
 
 
         Console.WriteLine(splitTemplate);
+    }
+
+    public void AddRavel(RavelTemplate ravelTemplate, string template)
+    {
+        // Find all the blocks and actions
+        ravelTemplate.Actions = ParseTemplateFile(template);
+        ;
+        ravelTemplate.Duration = _blocks.Last().TimeOffset;
+
+        RavelTemplates.Add(ravelTemplate);
+
+
+        Console.WriteLine(ravelTemplate);
+    }
+
+    public void AddUnravel(UnravelTemplate unravelTemplate, string template)
+    {
+        // Find all the blocks and actions
+        unravelTemplate.Actions = ParseTemplateFile(template);
+
+        unravelTemplate.Duration = _blocks.Last().TimeOffset;
+
+        UnravelTemplates.Add(unravelTemplate);
+
+
+        Console.WriteLine(unravelTemplate);
     }
 
 
@@ -142,6 +172,7 @@ public class TemplateRepository : ITemplateRepository
 
             previousBlock = lines;
         }
+        boardActions = boardActions.OrderBy(b => b.Time).ToList();
 
         return boardActions;
     }
