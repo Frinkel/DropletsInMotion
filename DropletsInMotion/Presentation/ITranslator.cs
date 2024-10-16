@@ -11,4 +11,5 @@ public interface ITranslator
     List<ICommand> Commands { get; set; }
     DependencyGraph DependencyGraph { get; set; }
     void Translate();
+    void Load();
 }

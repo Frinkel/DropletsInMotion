@@ -4,25 +4,130 @@ using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Infrastructure.Repositories;
 using System.IO;
+using DropletsInMotion.Communication.Models;
 
 namespace DropletsInMotion.Presentation.Services
 {
     public class PlatformService : IPlatformService
     {
-        public Electrode[][] Board { get; set; }
+        public Electrode[][]? Board { get; set; }
         private readonly IFileService _fileService;
         private readonly IUserService _userService;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IDeviceRepository _deviceRepository;
+        private readonly ITemplateRepository _templateRepository;
 
-        public PlatformService(IFileService fileService, IUserService userService, IPlatformRepository platformRepository)
+        public PlatformService(IFileService fileService, IUserService userService, IPlatformRepository platformRepository, IDeviceRepository deviceRepository, ITemplateRepository templateRepository)
         {
             _fileService = fileService;
             _userService = userService;
             _platformRepository = platformRepository;
+            _deviceRepository = deviceRepository;
+            _templateRepository = templateRepository;
         }
-        public void LoadBoardFromJson(string jsonFilePath)
+
+
+        public void Load()
         {
-            string jsonContent = File.ReadAllText(jsonFilePath);
+            _deviceRepository.Initialize();
+            _templateRepository.Initialize();
+
+            LoadBoardFromJson();
+            LoadPlatformInformation();
+            LoadSensorTemplates();
+            LoadActuatorTemplates();
+            LoadReservoirTemplates();
+            LoadSplitTemplates();
+
+        }
+
+        private void LoadSplitTemplates()
+        {
+            string splitFolderPath = _userService.ConfigurationPath + "/Templates/Split";
+
+            List<string> splitPaths = _fileService.GetFilesFromFolder(splitFolderPath);
+            foreach (var splitPath in splitPaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(splitPath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Split template \"{splitPath}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                SplitTemplate splitTemplate = JsonSerializer.Deserialize<SplitTemplate>(content) ?? throw new InvalidOperationException("A split template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added split template: {splitTemplate.Name}");
+
+                _templateRepository.AddSplit(splitTemplate, template);
+            }
+        }
+
+        private void LoadSensorTemplates()
+        {
+            string sensorFolderPath = _userService.ConfigurationPath + "/Sensors";
+
+            List<string> sensorPaths = _fileService.GetFilesFromFolder(sensorFolderPath);
+            foreach (var sensorPath in sensorPaths)
+            {
+                string content = _fileService.ReadFileFromPath(sensorPath);
+                Sensor sensor = JsonSerializer.Deserialize<Sensor>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added sensor {sensor.Name}");
+
+                foreach (var kvp in sensor.ArgumentHandlers)
+                {
+                    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value.Request}");
+                }
+
+
+                _deviceRepository.Sensors.Add(sensor.Name, sensor);
+            }
+        }
+
+        private void LoadActuatorTemplates()
+        {
+            string actuatorFolderPath = _userService.ConfigurationPath + "/Actuators";
+
+            List<string> actuatorPaths = _fileService.GetFilesFromFolder(actuatorFolderPath);
+            foreach (var actuatorPath in actuatorPaths)
+            {
+                string content = _fileService.ReadFileFromPath(actuatorPath);
+                Actuator actuator = JsonSerializer.Deserialize<Actuator>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added actuator {actuator.Name}");
+
+                foreach (var kvp in actuator.Arguments)
+                {
+                    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value}");
+                }
+
+
+                _deviceRepository.Actuators.Add(actuator.Name, actuator);
+            }
+        }
+
+        private void LoadReservoirTemplates()
+        {
+            string reservoirFolderPath = _userService.ConfigurationPath + "/Reservoirs";
+
+            List<string> reservoirPaths = _fileService.GetFilesFromFolder(reservoirFolderPath);
+            foreach (var reservoirPath in reservoirPaths)
+            {
+                string content = _fileService.ReadFileFromPath(reservoirPath);
+                Reservoir reservoir = JsonSerializer.Deserialize<Reservoir>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added reservoir:\n{reservoir}");
+
+                _deviceRepository.Reservoirs.Add(reservoir.Name, reservoir);
+            }
+        }
+
+        public void LoadBoardFromJson()
+        {
+            string jsonContent = File.ReadAllText(_userService.PlatformPath);
             RootObject rootObject = JsonSerializer.Deserialize<RootObject>(jsonContent);
 
             // Filter electrodes with names starting with "arrel"
@@ -60,7 +165,7 @@ namespace DropletsInMotion.Presentation.Services
             _platformRepository.Board = Board;
         }
 
-        public void LoadPlatformInformation()
+        private void LoadPlatformInformation()
         {
             string platformInformationPath = _userService.ConfigurationPath + "/PlatformInformation.json";
 
