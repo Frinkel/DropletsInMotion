@@ -134,25 +134,23 @@ namespace DropletsInMotion.Application.Services
                 throw new InvalidOperationException("Input droplet is not positioned between the specified split positions.");
             }
 
+
+
+            //if (splitPositions.Template is SplitTemplate template)
+            //{
+            //    var d1 = template.RatioRelation[agentClusterRelation[splitCommand.OutputName1]];
+            //    var d2 = template.RatioRelation[agentClusterRelation[splitCommand.OutputName2]];
+            //}
+
+
             Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, splitPositions.X1, splitPositions.Y1, inputDroplet.Volume - splitCommand.Volume);
             Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, splitPositions.X2, splitPositions.Y2, splitCommand.Volume);
 
-            string templateName;
-            if (isBetweenHorizontally)
-            {
-                templateName = "splitHorizontal";
-            }
-            else if (isBetweenVertically)
-            {
-                templateName = "splitVertical";
-            }
-            else
-            {
-                throw new InvalidOperationException("The split could not be determined to be horizontal or vertical.");
-            }
+            
 
             Agent newAgent1 = new Agent(outputDroplet1.DropletName, outputDroplet1.PositionX, outputDroplet1.PositionY, outputDroplet1.Volume, agents[inputDroplet.DropletName].SubstanceId);
             Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, agents[inputDroplet.DropletName].SubstanceId);
+            
             agents.Remove(inputDroplet.DropletName);
 
             agents[outputDroplet1.DropletName] = newAgent1;
@@ -160,10 +158,7 @@ namespace DropletsInMotion.Application.Services
             _contaminationService.ApplyContamination(newAgent1, contaminationMap);
             _contaminationService.ApplyContamination(newAgent2, contaminationMap);
 
-            List<BoardAction> splitActions = new List<BoardAction>();
-            //splitActions.AddRange(_templateService.ApplyTemplate(templateName, inputDroplet, time));
-            // TODO: This should be added correctly
-            splitActions.AddRange(splitPositions.Template.Apply(_platformService.Board[inputDroplet.PositionX][inputDroplet.PositionY].Id, time, 1));
+            List<BoardAction> splitActions = splitPositions.Template.Apply(_platformService.Board[inputDroplet.PositionX][inputDroplet.PositionY].Id, time, 1);
 
             return splitActions;
         }

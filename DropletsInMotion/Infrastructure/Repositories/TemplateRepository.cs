@@ -58,9 +58,7 @@ public class TemplateRepository : ITemplateRepository
             throw new InvalidOperationException($"The split template \"{splitTemplate.Name}\" did not start with exactly 1 droplet!");
         }
         // Add the initial positions
-        splitTemplate.InitialPositions.AddRange(initialPositions);
-
-
+        initialPositions.ForEach(pos => splitTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
 
         // Find the end positions
         Block finalBlock = _blocks.Last();
@@ -71,11 +69,22 @@ public class TemplateRepository : ITemplateRepository
         {
             throw new InvalidOperationException($"The split template \"{splitTemplate.Name}\" did not result in exactly 2 end droplets!");
         }
+
         // Add the final positions
-        splitTemplate.FinalPositions.AddRange(finalPositions);
+        finalPositions.ForEach(pos => splitTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+
+        foreach (var idPos in splitTemplate.FinalPositions)
+        {
+            var id = idPos.Key;
+            if (!splitTemplate.RatioRelation.ContainsKey(id))
+            {
+                throw new Exception(
+                    $"Ratio relation for id: {id} was not found in split template \"{splitTemplate.Name}\"");
+            }
+        }
 
         SplitTemplates.Add(splitTemplate);
-
 
         Console.WriteLine(splitTemplate);
     }
@@ -194,7 +203,7 @@ public class TemplateRepository : ITemplateRepository
                     int newCol = curC + dCol[i];
 
                     if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols &&
-                        !visited[newRow, newCol] && grid[newRow, newCol] == 1)
+                        !visited[newRow, newCol] && grid[newRow, newCol] != 0)
                     {
                         visited[newRow, newCol] = true;
                         stack.Push((newRow, newCol));

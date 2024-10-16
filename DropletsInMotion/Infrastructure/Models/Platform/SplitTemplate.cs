@@ -6,22 +6,36 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 {
     public class SplitTemplate : ITemplate
     {
+        public SplitTemplate(string name, int minSize, int maxSize, double ratio, Dictionary<string, double> ratioRelation)
+        {
+            Name = name;
+            MinSize = minSize;
+            MaxSize = maxSize;
+            Ratio = ratio;
+            RatioRelation = ratioRelation;
+        }
+
+
         [JsonPropertyName("name")]
-        public required string Name { get; set; }
+        public string Name { get; set; }
 
         [JsonPropertyName("minSize")]
-        public required int MinSize { get; set; }
+        public int MinSize { get; set; }
 
         [JsonPropertyName("maxSize")]
-        public required int MaxSize { get; set; }
+        public int MaxSize { get; set; }
 
         [JsonPropertyName("ratio")]
-        public required double Ratio { get; set; }
+        public double Ratio { get; set; }
+
+        [JsonPropertyName("ratioRelation")]
+        public Dictionary<string, double> RatioRelation { get; set; }
 
         public List<BoardAction>? Actions { get; set; }
 
-        public List<(int id, int x, int y)> FinalPositions { get; set; } = new List<(int id, int x, int y)>();
-        public List<(int id, int x, int y)> InitialPositions { get; set; } = new List<(int id, int x, int y)>();
+        public Dictionary<string, (int x, int y)> FinalPositions { get; set; } = new Dictionary<string, (int x, int y)>();
+
+        public Dictionary<string, (int x, int y)> InitialPositions { get; set; } = new Dictionary<string, (int x, int y)>();
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {
@@ -41,25 +55,25 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
             return finalActionDtos;
         }
 
-        public override string ToString()
-        {
-            // Format Actions into a readable string
-            var actionsString = Actions != null && Actions.Any()
-                ? string.Join(", ", Actions.Select(a => a.ToString()))
-                : "No Actions";
+        //public override string ToString()
+        //{
+        //    // Format Actions into a readable string
+        //    var actionsString = Actions != null && Actions.Any()
+        //        ? string.Join(", ", Actions.Select(a => a.ToString()))
+        //        : "No Actions";
 
-            // Format FinalPositions into a readable string
-            var finalPositionsString = FinalPositions != null && FinalPositions.Any()
-                ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
-                : "No Final Positions";
+        //    // Format FinalPositions into a readable string
+        //    var finalPositionsString = FinalPositions != null && FinalPositions.Any()
+        //        ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
+        //        : "No Final Positions";
 
-            // Format InitialPositions into a readable string
-            var initialPositionsString = InitialPositions != null && InitialPositions.Any()
-                ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
-                : "No Initial Positions";
+        //    // Format InitialPositions into a readable string
+        //    var initialPositionsString = InitialPositions != null && InitialPositions.Any()
+        //        ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
+        //        : "No Initial Positions";
 
-            return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
-        }
+        //    return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
+        //}
 
     }
 }
