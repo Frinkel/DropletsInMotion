@@ -2,6 +2,8 @@
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+using DropletsInMotion.Infrastructure.Repositories;
+using static DropletsInMotion.Application.Services.Routers.Models.Types;
 using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotion.Application.Services.Routers.Models;
@@ -24,12 +26,14 @@ public class State
     private int? _cachedHash = null;
 
     private readonly IContaminationService _contaminationService;
+    private readonly IPlatformRepository _platformRepository;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, int? seed = null)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, IPlatformRepository platformRepository, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
+        _platformRepository = platformRepository;
         RoutableAgents = routableAgents;
         Agents = new Dictionary<string, Agent>();
         foreach (var kvp in agents)
@@ -58,6 +62,7 @@ public class State
         JointAction = jointAction;
         _templateHandler = Parent._templateHandler;
         _contaminationService = Parent._contaminationService;
+        _platformRepository = Parent._platformRepository;
 
         G = Parent.G + 1;
 
@@ -95,7 +100,7 @@ public class State
         Debugger.ElapsedTime.Add(elapsedMs);
     }
 
-    public List<BoardAction> ExtractActions(double time)
+    public List<BoardAction> ExtractActionsOld(double time)
     {
         List<State> chosenStates = new List<State>();
         State currentState = this;
@@ -136,9 +141,138 @@ public class State
             currentTime = currentTime + (totalTime/scaleFactor);
         }
 
+
         return finalActions;
 
     }
+
+    public List<BoardAction> ExtractActions(double time)
+    {
+        if (JointAction == null)
+        {
+            return new List<BoardAction>();
+        }
+
+        List<State> chosenStates = new List<State>();
+        State currentState = this;
+        while (currentState.Parent != null)
+        {
+            chosenStates.Add(currentState);
+            currentState = currentState.Parent;
+        }
+
+        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+        List<BoardAction> finalActions = new List<BoardAction>();
+
+        Dictionary<string, double> currentTimes = new Dictionary<string, double>();
+
+        foreach (var actionKvp in chosenStates[0].JointAction)
+        {
+            currentTimes[actionKvp.Key] = time;
+        }
+        
+
+        double currentTime = time;
+
+        //double scaleFactor = 1;
+
+        State firstState = chosenStates.First();
+        foreach (var actionKvp in firstState.JointAction)
+        {
+            if (actionKvp.Value != Types.RouteAction.NoOp)
+            {
+                string dropletName = actionKvp.Key;
+                Agent agent = firstState.Parent.Agents[dropletName];
+                var unrawelActions = Unrawel(agent, actionKvp.Value, currentTime);
+                finalActions.AddRange(unrawelActions);
+            }
+        }
+        
+        int totalState = chosenStates.Count;
+
+        foreach (State state in chosenStates)
+        {
+            foreach (var actionKvp in state.JointAction)
+            {
+                
+                if (actionKvp.Value == Types.RouteAction.NoOp)
+                {
+                    continue;
+                }
+                string dropletName = actionKvp.Key;
+                string routeAction = actionKvp.Value.Name;
+                var agents = state.Parent.Agents;
+                Agent agent = agents[dropletName];
+                double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume), totalState);
+
+                List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agent, currentTimes[dropletName], scaleFactor);
+                var totalTime = translatedActions.Last().Time - currentTimes[dropletName];
+                currentTimes[dropletName] += (totalTime / scaleFactor);
+
+                finalActions.AddRange(translatedActions);
+
+            }
+
+            finalActions = finalActions.OrderBy(b => b.Time).ToList();
+            //var totalTime = finalActions.Last().Time - currentTime;
+            //currentTime = currentTime + (totalTime / scaleFactor);
+        }
+
+        State lastState = chosenStates.Last();
+        foreach (var actionKvp in lastState.JointAction)
+        {
+            if (actionKvp.Value != Types.RouteAction.NoOp)
+            {
+                string dropletName = actionKvp.Key;
+                Agent agent = lastState.Agents[dropletName];
+                var rawelActions = Rawel(agent, actionKvp.Value, currentTimes[dropletName]-1);
+                finalActions.AddRange(rawelActions);
+            }
+        }
+        finalActions = finalActions.OrderBy(b => b.Time).ToList();
+
+        return finalActions;
+
+    }
+
+    private List<BoardAction> Unrawel(Agent agent, Types.RouteAction action, double time)
+    {
+        var boardActions = new List<BoardAction>();
+
+        if (agent.Volume > _platformRepository.MinimumMovementVolume * 9)
+        {
+            return boardActions;
+        }
+
+        if (agent.Volume > _platformRepository.MinimumMovementVolume * 4)
+        {
+            List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled("UnrawelRight", agent, time, 1);
+            return translatedActions;
+
+        }
+
+        return boardActions;
+    }
+
+    private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
+    {
+        if (agent.Volume > _platformRepository.MinimumMovementVolume * 9)
+        {
+            return new List<BoardAction>();
+        }
+
+        if (agent.Volume > _platformRepository.MinimumMovementVolume * 4)
+        {
+            List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled("RawelLeft", agent, time, 1);
+            return translatedActions;
+        }
+
+
+        return new List<BoardAction>();
+    }
+
+
 
     public List<BoardAction> ExtractActionsToTime(double time)
     {

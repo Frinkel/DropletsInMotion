@@ -24,6 +24,8 @@ namespace DropletsInMotionTests
             _translator = ServiceProvider.GetRequiredService<ITranslator>();
             _userService = ServiceProvider.GetRequiredService<IUserService>();
             _filerService = ServiceProvider.GetRequiredService<IFileService>();
+            _userService.ConfigurationPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/Configuration";
+
         }
 
         [Test]

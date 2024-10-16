@@ -5,6 +5,7 @@ using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -24,12 +25,14 @@ public class RouterService : IRouterService
     
     private readonly IContaminationService _contaminationService;
     private readonly ITemplateService _templateService;
+    private readonly IPlatformRepository _platformRepository;
 
 
-    public RouterService(IContaminationService contaminationService, ITemplateService templateService)
+    public RouterService(IContaminationService contaminationService, ITemplateService templateService, IPlatformRepository platformRepository)
     {
         _templateService = templateService;
         _contaminationService = contaminationService;
+        _platformRepository = platformRepository;
     }
 
     public void Initialize(Electrode[][] board, int? seed = null)
@@ -102,7 +105,7 @@ public class RouterService : IRouterService
             routableAgents.AddRange(command.GetInputDroplets());
         }
 
-        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, Seed);
+        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, _platformRepository, Seed);
         Frontier f = new Frontier();
         //AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);
