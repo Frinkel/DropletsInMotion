@@ -20,8 +20,9 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         public double Duration { get; set; }
         public List<BoardAction>? Actions { get; set; }
 
-        public List<(int id, int x, int y)> FinalPositions { get; set; } = new List<(int id, int x, int y)>();
-        public List<(int id, int x, int y)> InitialPositions { get; set; } = new List<(int id, int x, int y)>();
+        public Dictionary<string, (int x, int y)> FinalPositions => throw new NotImplementedException();
+
+        public Dictionary<string, (int x, int y)> InitialPositions => throw new NotImplementedException();
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {
@@ -41,25 +42,25 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
             return finalActionDtos;
         }
 
-        public override string ToString()
-        {
-            // Format Actions into a readable string
-            var actionsString = Actions != null && Actions.Any()
-                ? string.Join(", ", Actions.Select(a => a.ToString()))
-                : "No Actions";
+        //public override string ToString()
+        //{
+        //    // Format Actions into a readable string
+        //    var actionsString = Actions != null && Actions.Any()
+        //        ? string.Join(", ", Actions.Select(a => a.ToString()))
+        //        : "No Actions";
 
-            // Format FinalPositions into a readable string
-            var finalPositionsString = FinalPositions != null && FinalPositions.Any()
-                ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
-                : "No Final Positions";
+        //    // Format FinalPositions into a readable string
+        //    var finalPositionsString = FinalPositions != null && FinalPositions.Any()
+        //        ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
+        //        : "No Final Positions";
 
-            // Format InitialPositions into a readable string
-            var initialPositionsString = InitialPositions != null && InitialPositions.Any()
-                ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
-                : "No Initial Positions";
+        //    // Format InitialPositions into a readable string
+        //    var initialPositionsString = InitialPositions != null && InitialPositions.Any()
+        //        ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
+        //        : "No Initial Positions";
 
-            return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
-        }
+        //    return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
+        //}
 
     }
 }
