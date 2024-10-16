@@ -129,11 +129,11 @@ public class TemplateRepository : ITemplateRepository
                     int electrodeIdOffset = (i - centerRow) * boardWidth + (colIndex - centerCol);
 
 
-                    if (action == 1 && prevAction == 0)
+                    if (action != 0 && prevAction == 0)
                     {
                         boardActions.Add(new BoardAction(electrodeIdOffset, 1, block.TimeOffset));
                     }
-                    else if (action == 0 && prevAction == 1)
+                    else if (action == 0 && prevAction != 0)
                     {
                         boardActions.Add(new BoardAction(electrodeIdOffset, 0, block.TimeOffset));
                     }
@@ -147,7 +147,7 @@ public class TemplateRepository : ITemplateRepository
     }
 
     // Method to find clusters and return their top-left positions
-    public List<(int x, int y)> FindClusters(string[] block)
+    public List<(int id, int x, int y)> FindClusters(string[] block)
     {
         int rows = block.Length;
         int cols = block[0].Length;
@@ -163,7 +163,7 @@ public class TemplateRepository : ITemplateRepository
         }
 
         bool[,] visited = new bool[rows, cols];
-        List<(int row, int col)> topLeftPositions = new List<(int row, int col)>();
+        List<(int id, int row, int col)> topLeftPositions = new List<(int id, int row, int col)>();
 
         // Direction vectors for navigating neighbors (up, down, left, right)
         int[] dRow = { -1, 1, 0, 0 };
@@ -208,7 +208,7 @@ public class TemplateRepository : ITemplateRepository
         {
             for (int c = 0; c < cols; c++)
             {
-                if (grid[r, c] == 1 && !visited[r, c])
+                if (grid[r, c] != 0 && !visited[r, c])
                 {
                     // Found a new cluster, start flood-fill
                     int minRow = r, minCol = c;
@@ -218,7 +218,7 @@ public class TemplateRepository : ITemplateRepository
                     int centerRow = gridSize / 2;
                     int centerCol = gridSize / 2;
 
-                    topLeftPositions.Add((minCol - centerCol, minRow - centerRow));
+                    topLeftPositions.Add((grid[r, c], minCol - centerCol, minRow - centerRow));
                 }
             }
         }

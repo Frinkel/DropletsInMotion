@@ -362,7 +362,7 @@ namespace DropletsInMotion.Application.Execution
 
                 List<ITemplate> eligibleSplitTemplates = _templateRepository?
                     .SplitTemplates?
-                    .FindAll(t => t.MinSize <= agentVolume && agentVolume < t.MaxSize)
+                    .FindAll(t => t.MinSize <= agentVolume && agentVolume < t.MaxSize && Math.Abs(t.Ratio - (splitByVolumeCommand.Volume / splitAgent.Volume)) < 1) // TODO: Set tolerance (current 1)
                     ?.Cast<ITemplate>()
                     .ToList() ?? new List<ITemplate>();
 
