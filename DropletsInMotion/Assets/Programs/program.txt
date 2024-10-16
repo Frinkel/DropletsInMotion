@@ -1,2 +1,2 @@
-Droplet(d1, 9, 9, 750);
-SplitByRatio(d1, d2, d3, 8, 9, 10, 9, 0.5);
+Droplet(d1, 9, 9, 2799);
+SplitByRatio(d1, d2, d3, 9, 5, 9, 14, 0.5);

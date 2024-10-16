@@ -16,5 +16,6 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         List<BoardAction> Actions { get; }
         List<(int x, int y)> FinalPositions { get; }
         List<(int x, int y)> InitialPositions { get; }
+        List<BoardAction> Apply(int relativePosition, double time, double scale);
     }
 }

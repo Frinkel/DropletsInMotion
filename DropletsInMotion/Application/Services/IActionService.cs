@@ -13,7 +13,7 @@ namespace DropletsInMotion.Application.Services
     {
         List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time);
         List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, byte[,] contaminationMap, 
-            double time, ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions);
+            double time, ScheduledPosition splitPositions);
         List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime);
         bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
         bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
@@ -26,7 +26,7 @@ namespace DropletsInMotion.Application.Services
             Dictionary<string, Agent> agents);
 
         bool InPositionToSplit(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
-            ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions,
+            ScheduledPosition splitPositions,
             Dictionary<string, Agent> agents);
 
         void MoveToSplitToFinalPositions(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
