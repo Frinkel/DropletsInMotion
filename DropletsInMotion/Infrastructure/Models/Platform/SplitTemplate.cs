@@ -20,8 +20,8 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
         public List<BoardAction>? Actions { get; set; }
 
-        public List<(int x, int y)> FinalPositions { get; set; } = new List<(int x, int y)>();
-        public List<(int x, int y)> InitialPositions { get; set; } = new List<(int x, int y)>();
+        public List<(int id, int x, int y)> FinalPositions { get; set; } = new List<(int id, int x, int y)>();
+        public List<(int id, int x, int y)> InitialPositions { get; set; } = new List<(int id, int x, int y)>();
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {
