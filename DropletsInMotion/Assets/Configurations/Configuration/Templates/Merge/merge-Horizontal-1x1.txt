@@ -1,7 +1,7 @@
 {
 	"name": "Merge Horizontal 1x1",
 	"minSize": 350,
-	"maxSize": 1400
+	"maxSize": 1000
 }
 ?
 0.0,
