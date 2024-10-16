@@ -13,6 +13,7 @@ using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
+using DropletsInMotion.Presentation.Services;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -25,9 +26,13 @@ namespace DropletsInMotion.Application.Services
         private readonly IStoreService _storeService;
         private readonly ICommandLifetimeService _commandLifetimeService;
         private readonly IDeviceRepository _deviceRepository;
+        private readonly ITemplateRepository _templateRepository;
+        private readonly IPlatformService _platformService;
 
 
-        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, ICommandLifetimeService commandLifetimeService, IDeviceRepository deviceRepository)
+        public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, 
+                             ICommandLifetimeService commandLifetimeService, IDeviceRepository deviceRepository, ITemplateRepository templateRepository,
+                             IPlatformService platformService)
         {
             _templateService = templateService;
             _contaminationService = contaminationService;
@@ -35,6 +40,8 @@ namespace DropletsInMotion.Application.Services
             _storeService = storeService;
             _commandLifetimeService = commandLifetimeService;
             _deviceRepository = deviceRepository;
+            _templateRepository = templateRepository;
+            _platformService = platformService;
         }
 
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time)
@@ -96,7 +103,7 @@ namespace DropletsInMotion.Application.Services
              SplitByVolume splitCommand,
              byte[,] contaminationMap,
              double time,
-             ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions)
+             ScheduledPosition splitPositions)
         {
             Droplet inputDroplet = agents[splitCommand.InputName]
                                    ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
@@ -115,21 +122,20 @@ namespace DropletsInMotion.Application.Services
                 throw new InvalidOperationException($"Droplets with the same names cannot be split.");
             }
 
-            var (firstSplitPosition, secondSplitPosition) = splitPositions;
 
-            bool isBetweenHorizontally = (inputDroplet.PositionX == (firstSplitPosition.optimalX + secondSplitPosition.optimalX) / 2) &&
-                                         (inputDroplet.PositionY == firstSplitPosition.optimalY && inputDroplet.PositionY == secondSplitPosition.optimalY);
+            bool isBetweenHorizontally = (inputDroplet.PositionX == (splitPositions.X1 + splitPositions.X2) / 2) &&
+                                         (inputDroplet.PositionY == splitPositions.Y1 && inputDroplet.PositionY == splitPositions.Y2);
 
-            bool isBetweenVertically = (inputDroplet.PositionY == (firstSplitPosition.optimalY + secondSplitPosition.optimalY) / 2) &&
-                                       (inputDroplet.PositionX == firstSplitPosition.optimalX && inputDroplet.PositionX == secondSplitPosition.optimalX);
+            bool isBetweenVertically = (inputDroplet.PositionY == (splitPositions.Y1 + splitPositions.Y2) / 2) &&
+                                       (inputDroplet.PositionX == splitPositions.X1 && inputDroplet.PositionX == splitPositions.X2);
 
             if (!isBetweenHorizontally && !isBetweenVertically)
             {
                 throw new InvalidOperationException("Input droplet is not positioned between the specified split positions.");
             }
 
-            Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, firstSplitPosition.optimalX, firstSplitPosition.optimalY, inputDroplet.Volume - splitCommand.Volume);
-            Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, secondSplitPosition.optimalX, secondSplitPosition.optimalY, splitCommand.Volume);
+            Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, splitPositions.X1, splitPositions.Y1, inputDroplet.Volume - splitCommand.Volume);
+            Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, splitPositions.X2, splitPositions.Y2, splitCommand.Volume);
 
             string templateName;
             if (isBetweenHorizontally)
@@ -155,7 +161,9 @@ namespace DropletsInMotion.Application.Services
             _contaminationService.ApplyContamination(newAgent2, contaminationMap);
 
             List<BoardAction> splitActions = new List<BoardAction>();
-            splitActions.AddRange(_templateService.ApplyTemplate(templateName, inputDroplet, time));
+            //splitActions.AddRange(_templateService.ApplyTemplate(templateName, inputDroplet, time));
+            // TODO: This should be added correctly
+            splitActions.AddRange(splitPositions.Template.Apply(_platformService.Board[inputDroplet.PositionX][inputDroplet.PositionY].Id, time, 1));
 
             return splitActions;
         }
@@ -329,7 +337,7 @@ namespace DropletsInMotion.Application.Services
         }
 
         public bool InPositionToSplit(SplitByVolume splitCommand, List<IDropletCommand> movesToExecute,
-            ((int optimalX, int optimalY), (int optimalX, int optimalY)) splitPositions,
+            ScheduledPosition splitPositions,
             Dictionary<string, Agent> agents)
         {
 
@@ -348,8 +356,8 @@ namespace DropletsInMotion.Application.Services
                 throw new InvalidOperationException($"Droplet with the same names can not be split.");
             }
 
-            int splitPositionX = (splitPositions.Item1.optimalX + splitPositions.Item2.optimalX) / 2;
-            int splitPositionY = (splitPositions.Item1.optimalY + splitPositions.Item2.optimalY) / 2;
+            int splitPositionX = (splitPositions.X1 + splitPositions.X2) / 2;
+            int splitPositionY = (splitPositions.Y1 + splitPositions.Y2) / 2;
 
             Droplet splitDroplet = agents[splitCommand.InputName];
 

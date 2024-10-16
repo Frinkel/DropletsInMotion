@@ -1,12 +1,13 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using System.Collections.Generic;
+using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Application.Services
 {
     public interface ISchedulerService
     {
-        ((int optimalX, int optimalY), (int optimalX, int optimalY))? ScheduleCommand(IDropletCommand dropletCommand,
-            Dictionary<string, Agent> agents, byte[,] contaminationMap);
+        ScheduledPosition ScheduleCommand(IDropletCommand dropletCommand,
+            Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ITemplate> templates);
     }
 }

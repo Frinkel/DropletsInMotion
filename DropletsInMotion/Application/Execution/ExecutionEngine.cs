@@ -41,11 +41,12 @@ namespace DropletsInMotion.Application.Execution
         private readonly ITranslator _translator;
         private readonly ICommunicationEngine _communicationEngine;
         private readonly IDeviceRepository _deviceRepository;
+        private readonly ITemplateRepository _templateRepository;
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository)
+                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository, ITemplateRepository templateRepository)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -59,6 +60,7 @@ namespace DropletsInMotion.Application.Execution
             _translator = translator;
             _communicationEngine = communicationEngine;
             _deviceRepository = deviceRepository;
+            _templateRepository = templateRepository;
         }
 
         public async Task Execute()
@@ -335,32 +337,49 @@ namespace DropletsInMotion.Application.Execution
 
         private void HandleMergeCommand(Merge mergeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
-            if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
-            {
-                var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents,
-                    ContaminationMap);
-                if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions.Value, agents))
-                {
-                    _commandLifetimeService.StoreCommand(mergeCommand);
-                    boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, Time));
-                }
-            }
-            else
-            {
-                _actionService.MoveMergeDropletToPosition(mergeCommand, movesToExecute, agents);
-            }
+            //if (_actionService.DropletsExistAndCommandInProgress(mergeCommand, agents))
+            //{
+            //    var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents, ContaminationMap);
+            //    if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions.Value, agents))
+            //    {
+            //        _commandLifetimeService.StoreCommand(mergeCommand);
+            //        boardActions.AddRange(_actionService.Merge(agents, mergeCommand, ContaminationMap, Time));
+            //    }
+            //}
+            //else
+            //{
+            //    _actionService.MoveMergeDropletToPosition(mergeCommand, movesToExecute, agents);
+            //}
         }
 
         private void HandleSplitByVolumeCommand(SplitByVolume splitByVolumeCommand, List<IDropletCommand> movesToExecute, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
             if (_actionService.DropletsExistAndCommandInProgress(splitByVolumeCommand, agents))
             {
-                var splitPositions = _schedulerService.ScheduleCommand(splitByVolumeCommand, agents,
-                    ContaminationMap);
-                if (_actionService.InPositionToSplit(splitByVolumeCommand, movesToExecute, splitPositions.Value, agents))
+                // Find eligible templates
+                Agent splitAgent = agents[splitByVolumeCommand.InputName];
+                double agentVolume = splitAgent.Volume;
+
+                List<ITemplate> eligibleSplitTemplates = _templateRepository?
+                    .SplitTemplates?
+                    .FindAll(t => t.MinSize <= agentVolume && agentVolume < t.MaxSize)
+                    ?.Cast<ITemplate>()
+                    .ToList() ?? new List<ITemplate>();
+
+
+                if (!eligibleSplitTemplates.Any())
+                {
+                    throw new Exception("There were no eligible split templates"); // TODO: Maybe more saying?
+                }
+
+                var splitPositions = _schedulerService.ScheduleCommand(splitByVolumeCommand, agents, ContaminationMap, eligibleSplitTemplates);
+
+
+                if (_actionService.InPositionToSplit(splitByVolumeCommand, movesToExecute, splitPositions, agents))
                 {
                     _commandLifetimeService.StoreCommand(splitByVolumeCommand);
-                    boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, Time, splitPositions.Value));
+                    // TODO: Maybe move the apply of templates out here :)
+                    boardActions.AddRange(_actionService.SplitByVolume(Agents, splitByVolumeCommand, ContaminationMap, Time, splitPositions));
                 }
             }
             else
