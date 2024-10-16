@@ -58,26 +58,28 @@ namespace DropletsInMotion.Application.Services
                                     ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
 
 
-            List<BoardAction> mergeActions = new List<BoardAction>();
+            //List<BoardAction> mergeActions = new List<BoardAction>();
 
-            int outPutDropletX = (inputDroplet1.PositionX + inputDroplet2.PositionX) / 2;
-            int outPutDropletY = (inputDroplet1.PositionY + inputDroplet2.PositionY) / 2;
+            int outPutDropletX = mergePositions.CommandX;
+            int outPutDropletY = mergePositions.CommandY;
             Droplet outputDroplet = new Droplet(mergeCommand.OutputName, outPutDropletX, outPutDropletY,
                 inputDroplet1.Volume + inputDroplet2.Volume);
 
-            if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY)
-            {
-                mergeActions.AddRange(_templateService.ApplyTemplate("mergeHorizontal", outputDroplet, time));
+            //if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY)
+            //{
+            //    mergeActions.AddRange(_templateService.ApplyTemplate("mergeHorizontal", outputDroplet, time));
 
-            }
-            else if (Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) == 2 && inputDroplet1.PositionX == inputDroplet2.PositionX)
-            {
-                mergeActions.AddRange(_templateService.ApplyTemplate("mergeVertical", outputDroplet, time));
-            }
-            else
-            {
-                throw new InvalidOperationException("Droplets are not in position to merge");
-            }
+            //}
+            //else if (Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) == 2 && inputDroplet1.PositionX == inputDroplet2.PositionX)
+            //{
+            //    mergeActions.AddRange(_templateService.ApplyTemplate("mergeVertical", outputDroplet, time));
+            //}
+            //else
+            //{
+            //    throw new InvalidOperationException("Droplets are not in position to merge");
+            //}
+
+            List<BoardAction> mergeActions = mergePositions.Template.Apply(_platformService.Board[outputDroplet.PositionX][outputDroplet.PositionY].Id, time, 1);
 
 
             Agent newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);

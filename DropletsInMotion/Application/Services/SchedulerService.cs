@@ -304,7 +304,7 @@ namespace DropletsInMotion.Application.Services
             }
 
             ScheduledPosition optimalPosition =
-                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY);
+                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
 
             return optimalPosition;
         }
@@ -350,7 +350,7 @@ namespace DropletsInMotion.Application.Services
             }
 
             ScheduledPosition optimalPosition =
-                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY);
+                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
 
             return optimalPosition;
         }
