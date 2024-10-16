@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using static MicrofluidicsParser;
 using System.Runtime.InteropServices;
 using DropletsInMotion.Infrastructure.Repositories;
+using DropletsInMotion.Presentation;
 
 namespace DropletsInMotion.UI
 {
@@ -31,8 +32,10 @@ namespace DropletsInMotion.UI
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
         private readonly IConfiguration _configuration;
-        private IDeviceRepository _deviceRepository;
-        private IDeviceTemplateService _deviceTemplateService;
+        //private IDeviceRepository _deviceRepository;
+
+        private readonly ITranslator _translator;
+        //private IDeviceTemplateService _deviceTemplateService;
 
         private ProgramState _currentState = ProgramState.GettingInitialInformation;
 
@@ -40,7 +43,7 @@ namespace DropletsInMotion.UI
         private TaskCompletionSource<bool> _isClientConnected;
 
         public StateManager(IServiceProvider serviceProvider, IConsoleService consoleService, ICommunicationEngine communicationEngine, 
-                            IUserService userService, IFileService fileService, IConfiguration configuration, IDeviceTemplateService deviceTemplateService, IDeviceRepository deviceRepository)
+                            IUserService userService, IFileService fileService, IConfiguration configuration, IDeviceRepository deviceRepository, ITranslator translator)
         {
             _serviceProvider = serviceProvider;
             _consoleService = consoleService;
@@ -52,8 +55,9 @@ namespace DropletsInMotion.UI
 
             _communicationEngine.ClientConnected += OnClientConnected;
             _communicationEngine.ClientDisconnected += OnClientDisconnected;
-            _deviceTemplateService = deviceTemplateService;
-            _deviceRepository = deviceRepository;
+            //_deviceTemplateService = deviceTemplateService;
+            //_deviceRepository = deviceRepository;
+            _translator = translator;
         }
 
         public async Task Start()
@@ -68,6 +72,7 @@ namespace DropletsInMotion.UI
                         case (ProgramState.GettingInitialInformation):
                             PrintCommands();
                             _consoleService.GetInitialInformation();
+                            _translator.Load();
                             _currentState = ProgramState.ReadingInputFiles;
                             break;
 
@@ -205,7 +210,7 @@ namespace DropletsInMotion.UI
             _consoleService.WriteColor(_programContent);
             _consoleService.WriteEmptyLine(2);
 
-            _deviceTemplateService.LoadTemplates();
+            //_deviceTemplateService.LoadTemplates();
 
             // Switch states
             return _configuration.GetValue<bool>("Development:SkipCommunication")

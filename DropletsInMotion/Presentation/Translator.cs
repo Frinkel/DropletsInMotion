@@ -37,13 +37,14 @@ namespace DropletsInMotion.Presentation
             _typeChecker = typeChecker;
         }
 
+        public void Load()
+        {
+            _platformService.Load();
+            Board = _platformService.Board;
+        }
+
         public void Translate()
         {
-            Console.WriteLine(_userService.PlatformPath);
-            _platformService.LoadBoardFromJson(_userService.PlatformPath);
-            Board = _platformService.Board;
-            _platformService.LoadPlatformInformation();
-
             var programContent = _fileService.ReadFileFromPath(_userService.ProgramPath);
             var inputStream = new AntlrInputStream(programContent);
             var lexer = new MicrofluidicsLexer(inputStream);

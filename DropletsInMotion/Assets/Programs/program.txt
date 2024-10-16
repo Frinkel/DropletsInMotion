@@ -1,4 +1,2 @@
-Droplet(d1, 7, 7, 2);
-Droplet(d2, 8, 5, 2);
-Droplet(d3, 10, 5, 2);
-SplitByVolume(d1, d5, d6, 6,7, 8,7, 5);
+Droplet(d1, 9, 9, 750);
+SplitByRatio(d1, d2, d3, 8, 9, 10, 9, 0.5);
