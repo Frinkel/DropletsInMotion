@@ -37,6 +37,8 @@ public class TemplateRepository : ITemplateRepository
 
     public List<UnravelTemplate> UnravelTemplates { get; private set; } = new List<UnravelTemplate>();
 
+    public List<DeclareTemplate> DeclareTemplates { get; private set; } = new List<DeclareTemplate>();
+
 
     private List<Block> _blocks = new();
     private static readonly string[] Separator = ["\r\n", "\r", "\n"];
@@ -164,6 +166,16 @@ public class TemplateRepository : ITemplateRepository
 
 
         Console.WriteLine(unravelTemplate);
+    }
+
+    public void AddDeclare(DeclareTemplate declareTemplate, string template)
+    {
+        // Find all the blocks and actions
+        declareTemplate.Actions = ParseTemplateFile(template);
+
+        DeclareTemplates.Add(declareTemplate);
+
+        Console.WriteLine(declareTemplate);
     }
 
 

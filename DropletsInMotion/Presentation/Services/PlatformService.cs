@@ -41,6 +41,7 @@ namespace DropletsInMotion.Presentation.Services
             LoadMergeTemplates();
             LoadRavelTemplates();
             LoadUnravelTemplates();
+            LoadDeclareTemplates();
 
         }
 
@@ -113,6 +114,30 @@ namespace DropletsInMotion.Presentation.Services
                 Console.WriteLine($"Added ravel template: {ravelTemplate.Name}");
 
                 _templateRepository.AddRavel(ravelTemplate, template);
+            }
+        }
+
+        private void LoadDeclareTemplates()
+        {
+            string declareFolderPath = _userService.ConfigurationPath + "/Templates/Declare";
+
+            List<string> declarePaths = _fileService.GetFilesFromFolder(declareFolderPath);
+            foreach (var declarePath in declarePaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(declarePath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Declare template \"{declarePaths}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                DeclareTemplate declareTemplate = JsonSerializer.Deserialize<DeclareTemplate>(content) ?? throw new InvalidOperationException("A ravel template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added ravel template: {declareTemplate.Name}");
+
+                _templateRepository.AddDeclare(declareTemplate, template);
             }
         }
 
@@ -250,6 +275,10 @@ namespace DropletsInMotion.Presentation.Services
 
             _platformRepository.MinimumMovementVolume = platformInfo.Movement.MinimumMovementVolume;
             _platformRepository.MaximumMovementVolume = platformInfo.Movement.MaximumMovementVolume;
+            _platformRepository.MinSize1x1 = platformInfo.Movement.MinSize1x1;
+            _platformRepository.MinSize2x2 = platformInfo.Movement.MinSize2x2;
+            _platformRepository.MinSize3x3 = platformInfo.Movement.MinSize3x3;
+
         }
 
         public void PrintBoard()

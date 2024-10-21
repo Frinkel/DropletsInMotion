@@ -176,6 +176,7 @@ public class RouterService : IRouterService
 
         _contaminationService.PrintContaminationState(contaminationMap);
 
+        routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
         return sFinal.ExtractActions(time);
     }
 
