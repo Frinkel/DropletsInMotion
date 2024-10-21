@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.Models;
+﻿using System.Dynamic;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -73,53 +74,20 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public void ApplyIfInBoundsMerge(byte[,] contaminationMap, int xPos, int yPos, int finalX, int finalY, byte substanceIdInput1, byte substanceIdInput2, byte substanceIdOutput)
-        {
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                byte currentSubstanceId = contaminationMap[xPos, yPos];
-
-                //byte newValue = (byte)(currentSubstanceId == 0 || currentSubstanceId == substanceIdInput1 || currentSubstanceId == substanceIdInput2 ? substanceIdOutput : 255);
-
-                //byte newValue2 = (byte)(currentSubstanceId == 0 && currentSubstanceId == substanceIdInput1 || currentSubstanceId == substanceIdInput2 ? substanceIdOutput : 255);
-                byte newValue = currentSubstanceId switch
-                {
-                    byte b when b == substanceIdInput1 => substanceIdInput1,
-                    byte b when b == substanceIdInput2 => substanceIdInput2,
-                    0 => substanceIdOutput,
-                    255 => 255,
-                    _ => 255
-                };
-
-
-                contaminationMap[xPos, yPos] = newValue;
-            }
-
-
-
-        }
+       
 
         public byte[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePosition, byte[,] contaminationMap)
         {
-
             var contaminationCoordinates = mergePosition.Template.ContaminationPositions;
-            int mergeX = mergePosition.X1;
-            int mergeY = mergePosition.Y1;
+            int mergeX = mergePosition.CommandX;
+            int mergeY = mergePosition.CommandY;
 
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
 
-
-            // Apply contamination positions
+            //// Apply contamination positions
             foreach (var pos in contaminationCoordinates)
             {
-                
-                Console.WriteLine($"pos {pos.x} {pos.y}");
-
-                // Calculate the coordinates relative to the center
                 int xPos = pos.x + mergeX;
                 int yPos = pos.y + mergeY;
 
@@ -141,14 +109,59 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            
-            // Apply contamination for the new agent
-            //int topContamination
+
+            int size = GetAgentSize(outputAgent);
+
+            int GetContaminationValue(int x, int y, byte[,] contaminationMap)
+            {
+                int rowCount = contaminationMap.GetLength(0);
+                int colCount = contaminationMap.GetLength(1);
+
+                if (x >= 0 && x < rowCount && y >= 0 && y < colCount)
+                {
+                    return contaminationMap[x, y];
+                }
+
+                return 255;
+            }
 
 
+            // Overwrite initial area with new agent substance
+            for (int i = -1; i <= size; i++)
+            {
+                for (int j = -1; j <= size; j++)
+                {
+                    ApplyIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, outputAgent.SubstanceId);
+                }
+            }
 
+            // Calculate final contaminations
+            for (int i = 0; i <= size + 1; i++)
+            {
+                int x1 = mergeX - 1 + i;
+                int y1 = mergeY - 2;
+                int cont1 = GetContaminationValue(x1, y1, contaminationMap);
+                int canContChange1 = GetContaminationValue(x1, mergeY - 1, contaminationMap);
+                ApplyIfInBounds(contaminationMap, x1, mergeY - 1, (cont1 == 0 || cont1 == outputAgent.SubstanceId) && canContChange1 != 255 ? outputAgent.SubstanceId : (byte)255);
 
-            //ApplyContaminationWithSize(outputAgent, contaminationMap);
+                int x2 = mergeX - 1 + i;
+                int y2 = mergeY + size + 1;
+                int cont2 = GetContaminationValue(x2, y2, contaminationMap);
+                int canContChange2 = GetContaminationValue(x2, mergeY + size, contaminationMap);
+                ApplyIfInBounds(contaminationMap, x2, mergeY + size, (cont2 == 0 || cont2 == outputAgent.SubstanceId) && canContChange2 != 255 ? outputAgent.SubstanceId : (byte)255);
+
+                int x3 = mergeX - 2;
+                int y3 = mergeY - 1 + i;
+                int cont3 = GetContaminationValue(x3, y3, contaminationMap);
+                int canContChange3 = GetContaminationValue(mergeX - 1, y3, contaminationMap);
+                ApplyIfInBounds(contaminationMap, mergeX - 1, y3, (cont3 == 0 || cont3 == outputAgent.SubstanceId) && canContChange3 != 255 ? outputAgent.SubstanceId : (byte)255);
+
+                int x4 = mergeX + size + 1;
+                int y4 = mergeY - 1 + i;
+                int cont4 = GetContaminationValue(x4, y4, contaminationMap);
+                int canContChange4 = GetContaminationValue(mergeX + size, y3, contaminationMap);
+                ApplyIfInBounds(contaminationMap, mergeX + size, y4, (cont4 == 0 || cont4 == outputAgent.SubstanceId) && canContChange4 != 255 ? outputAgent.SubstanceId : (byte)255);
+            }
 
             return contaminationMap;
         }
@@ -158,15 +171,8 @@ namespace DropletsInMotion.Application.Services
             var x = agent.PositionX;
             var y = agent.PositionY;
 
-            int size = 1;
-            if (agent.Volume > _platformRepository.MinSize2x2)
-            {
-                size = 2;
-            }
-            if (agent.Volume > _platformRepository.MinSize3x3)
-            {
-                size = 3;
-            }
+            int size = GetAgentSize(agent);
+
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
 
@@ -200,6 +206,21 @@ namespace DropletsInMotion.Application.Services
             return contaminationMap;
         }
 
+
+        private int GetAgentSize(Agent agent)
+        {
+            int size = 1;
+            if (agent.Volume > _platformRepository.MinSize2x2)
+            {
+                size = 2;
+            }
+            if (agent.Volume > _platformRepository.MinSize3x3)
+            {
+                size = 3;
+            }
+
+            return size;
+        }
 
 
         // TEMP FUNCTIONS
