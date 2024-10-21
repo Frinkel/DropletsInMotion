@@ -195,7 +195,7 @@ public class State
             }
         }
 
-        int totalState = chosenStates.Count;
+        int totalStates = chosenStates.Count;
 
         foreach (State state in chosenStates)
         {
@@ -210,7 +210,7 @@ public class State
                 string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
                 Agent agent = agents[dropletName];
-                double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume), totalState);
+                double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume) + 1, totalStates);
 
                 List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agent, currentTimes[dropletName], scaleFactor);
                 var totalTime = translatedActions.Last().Time - currentTimes[dropletName];
