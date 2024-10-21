@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
@@ -13,10 +14,13 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         string Name { get; }
         int MinSize { get; }
         int MaxSize { get; }
+
         List<BoardAction> Actions { get; }
 
         Dictionary<string, (int x, int y)> FinalPositions { get; }
         Dictionary<string, (int x, int y)> InitialPositions { get; }
+
+        List<(int x, int y)> ContaminationPositions { get; }
 
         List<BoardAction> Apply(int relativePosition, double time, double scale);
     }

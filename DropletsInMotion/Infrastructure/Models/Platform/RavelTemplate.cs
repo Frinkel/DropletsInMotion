@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Text.Json.Serialization;
+using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
@@ -24,6 +25,8 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         public Dictionary<string, (int x, int y)> FinalPositions => throw new NotImplementedException();
 
         public Dictionary<string, (int x, int y)> InitialPositions => throw new NotImplementedException();
+
+        public List<(int x, int y)> ContaminationPositions { get; set; } = new List<(int x, int y)>();
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {

@@ -5,6 +5,7 @@ using System.Text.Json;
 using DropletsInMotion.Communication.Models;
 using System.Reflection;
 using System;
+using DropletsInMotion.Application.Execution.Models;
 
 namespace DropletsInMotion.Communication.Simulator;
 

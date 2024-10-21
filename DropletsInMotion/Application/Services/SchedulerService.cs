@@ -325,6 +325,10 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var template in templates)
             {
+                Console.WriteLine("*******************************************");
+                Console.WriteLine(template.ContaminationPositions.Count);
+
+
                 int totalCost = 0;
 
                 totalCost += Math.Abs(d1XDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].x) + Math.Abs(d1YDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].y);

@@ -1,4 +1,5 @@
 ﻿using System.Reflection.Metadata;
+using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
@@ -347,7 +348,7 @@ namespace DropletsInMotion.Application.Execution
 
                 List<ITemplate> eligibleMergeTemplates = _templateRepository?
                     .MergeTemplates?
-                    .FindAll(t => t.MinSize <= agentVolume1 && t.MinSize <= agentVolume2 && agentVolume1 + agentVolume2 < t.MaxSize)
+                    .FindAll(t => t.MinSize <= agentVolume1 + agentVolume2 && agentVolume1 + agentVolume2 < t.MaxSize)
                     ?.Cast<ITemplate>()
                     .ToList() ?? new List<ITemplate>();
 
@@ -389,7 +390,7 @@ namespace DropletsInMotion.Application.Execution
                         {
                             SplitTemplate t = new SplitTemplate(template.Name, template.MinSize, template.MaxSize,
                                 template.Ratio, template.RatioRelation);
-                            
+
                             Dictionary<string, (int x, int y)>
                                 finalPositions = new Dictionary<string, (int x, int y)>();
 
@@ -399,6 +400,7 @@ namespace DropletsInMotion.Application.Execution
                             t.FinalPositions = finalPositions;
                             t.InitialPositions = template.InitialPositions;
                             t.Actions = template.Actions;
+                            t.ContaminationPositions = template.ContaminationPositions;
 
                             eligibleSplitTemplates.Add(t);
                         }
@@ -416,6 +418,7 @@ namespace DropletsInMotion.Application.Execution
                             t.FinalPositions = finalPositions;
                             t.InitialPositions = template.InitialPositions;
                             t.Actions = template.Actions;
+                            t.ContaminationPositions = template.ContaminationPositions;
 
                             eligibleSplitTemplates.Add(t);
                         }

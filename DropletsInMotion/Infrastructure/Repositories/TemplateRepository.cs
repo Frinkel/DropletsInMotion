@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
@@ -55,6 +57,9 @@ public class TemplateRepository : ITemplateRepository
         // Find all the blocks and actions
         splitTemplate.Actions = ParseTemplateFile(template);
 
+        // Find contamination positions
+        splitTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
+
         Block firstBlock = _blocks.First();
         var initialPositions = FindClusters(firstBlock.Template);
 
@@ -99,6 +104,12 @@ public class TemplateRepository : ITemplateRepository
     {
         // Find all the blocks and actions
         mergeTemplate.Actions = ParseTemplateFile(template);
+
+        // Find contamination positions
+        Console.WriteLine("Merge T");
+        mergeTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
+
+        //mergeTemplate.ContaminationPositions.ForEach(t => Console.WriteLine($"x {t.x}, y {t.y}"));
 
         Block firstBlock = _blocks.First();
         var initialPositions = FindClusters(firstBlock.Template);
@@ -153,6 +164,75 @@ public class TemplateRepository : ITemplateRepository
 
 
         Console.WriteLine(unravelTemplate);
+    }
+
+
+
+    private List<(int x, int y)> FindContaminationCoordinates(string template)
+    {
+        _blocks.Clear();
+        var turnedOnCoordinates = new HashSet<(int x, int y)>();  // Use HashSet to avoid duplicates
+        int boardWidth = _platformRepository.Board.Length;
+        string[] stringBlocks = template.Split(";");
+        int gridSize = stringBlocks.First().Split(",")[1].Split(Separator, StringSplitOptions.None).Skip(1).First().Length;
+        string[] previousBlock = new string[gridSize];
+
+        foreach (var stringBlock in stringBlocks)
+        {
+            var timeOffset = double.Parse(stringBlock.Split(",")[0].Trim(), CultureInfo.InvariantCulture);
+            string blockTemplate = stringBlock.Split(",")[1];
+            var lines = blockTemplate.Trim().Split(Separator, StringSplitOptions.None);
+
+            Block block = new Block(lines, timeOffset);
+            _blocks.Add(block);
+        }
+
+        foreach (var block in _blocks)
+        {
+            var lines = block.Template;
+            for (int rowIndex = 0; rowIndex < lines.Length; rowIndex++)
+            {
+                var line = lines[rowIndex];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                char[] prevChars = (previousBlock != null) && (previousBlock?[rowIndex] != null) ? previousBlock[rowIndex].Trim().ToCharArray() : Enumerable.Repeat('0', gridSize).ToArray();
+                char[] chars = line.Trim().ToCharArray();
+
+                for (int colIndex = 0; colIndex < chars.Length; colIndex++)
+                {
+                    int action = chars[colIndex] - '0';
+                    int prevAction = prevChars[colIndex] - '0';
+
+                    if (action != 0 && prevAction == 0)  // Cell was turned on
+                    {
+                        int centerRow = gridSize / 2;
+                        int centerCol = gridSize / 2;
+
+                        // Calculate the coordinates relative to the center
+                        int x = colIndex - centerCol;
+                        int y = rowIndex - centerRow;
+
+
+                        turnedOnCoordinates.Add((x, y));
+                        turnedOnCoordinates.Add((x + 1, y));
+                        turnedOnCoordinates.Add((x - 1, y));
+                        turnedOnCoordinates.Add((x, y + 1));
+                        turnedOnCoordinates.Add((x, y - 1));
+                        turnedOnCoordinates.Add((x + 1, y - 1));
+                        turnedOnCoordinates.Add((x - 1, y + 1));
+                        turnedOnCoordinates.Add((x + 1, y + 1));
+                        turnedOnCoordinates.Add((x - 1, y - 1));
+                    }
+                }
+            }
+
+            previousBlock = lines;
+        }
+
+        return turnedOnCoordinates.ToList();  // Return HashSet, duplicates will be avoided
     }
 
 

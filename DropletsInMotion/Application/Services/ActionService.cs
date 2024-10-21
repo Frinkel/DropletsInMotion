@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
@@ -47,8 +48,6 @@ namespace DropletsInMotion.Application.Services
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions)
         {
             // Add logic for processing the Merge dropletCommand
-            //Console.WriteLine($"Merging droplets with IDs: {mergeCommand.InputName1}, {mergeCommand.InputName2}");
-
 
             //Merge
             Droplet inputDroplet1 = agents[mergeCommand.InputName1]
@@ -65,28 +64,17 @@ namespace DropletsInMotion.Application.Services
             Droplet outputDroplet = new Droplet(mergeCommand.OutputName, outPutDropletX, outPutDropletY,
                 inputDroplet1.Volume + inputDroplet2.Volume);
 
-            //if (Math.Abs(inputDroplet1.PositionX - inputDroplet2.PositionX) == 2 && inputDroplet1.PositionY == inputDroplet2.PositionY)
-            //{
-            //    mergeActions.AddRange(_templateService.ApplyTemplate("mergeHorizontal", outputDroplet, time));
-
-            //}
-            //else if (Math.Abs(inputDroplet1.PositionY - inputDroplet2.PositionY) == 2 && inputDroplet1.PositionX == inputDroplet2.PositionX)
-            //{
-            //    mergeActions.AddRange(_templateService.ApplyTemplate("mergeVertical", outputDroplet, time));
-            //}
-            //else
-            //{
-            //    throw new InvalidOperationException("Droplets are not in position to merge");
-            //}
 
             List<BoardAction> mergeActions = mergePositions.Template.Apply(_platformService.Board[outputDroplet.PositionX][outputDroplet.PositionY].Id, time, 1);
 
+            Agent inputAgent1 = agents[inputDroplet1.DropletName];
+            Agent inputAgent2 = agents[inputDroplet2.DropletName];
 
             Agent newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
 
-            if (agents[inputDroplet1.DropletName].SubstanceId == agents[inputDroplet2.DropletName].SubstanceId)
+            if (inputAgent1.SubstanceId == inputAgent2.SubstanceId)
             {
-                newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, agents[inputDroplet1.DropletName].SubstanceId);
+                newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, inputAgent1.SubstanceId);
             }
 
             agents.Remove(inputDroplet1.DropletName);
@@ -94,7 +82,15 @@ namespace DropletsInMotion.Application.Services
 
             agents.Add(newAgent.DropletName, newAgent);
 
-            _contaminationService.ApplyContaminationMerge(newAgent, contaminationMap);
+            //_contaminationService.ApplyContaminationMerge(newAgent, contaminationMap);
+
+            _contaminationService.ApplyContaminationMerge(inputAgent1, inputAgent2, newAgent, mergePositions, contaminationMap);
+
+            //mergePositions.Template.ContaminationPositions.ForEach(pos => _contaminationService.ApplyIfInBoundsMerge(contaminationMap, newAgent.PositionX + pos.x, 
+            //    newAgent.PositionY + pos.y, mergePositions.Template.FinalPositions.First().Value.x, mergePositions.Template.FinalPositions.First().Value.y,
+            //    inputAgent1.SubstanceId, inputAgent2.SubstanceId, newAgent.SubstanceId));
+            //mergePositions.Template.ContaminationPositions.ForEach(pos => Console.WriteLine($"{newAgent.PositionX + pos.x}, {newAgent.PositionY + pos.y}"));
+
             _contaminationService.PrintContaminationState(contaminationMap);
             Console.WriteLine(outputDroplet);
             return mergeActions;
@@ -138,16 +134,8 @@ namespace DropletsInMotion.Application.Services
 
 
 
-            //if (splitPositions.Template is SplitTemplate template)
-            //{
-            //    var d1 = template.RatioRelation[agentClusterRelation[splitCommand.OutputName1]];
-            //    var d2 = template.RatioRelation[agentClusterRelation[splitCommand.OutputName2]];
-            //}
-
-
             Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, splitPositions.X1, splitPositions.Y1, inputDroplet.Volume - splitCommand.Volume);
             Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, splitPositions.X2, splitPositions.Y2, splitCommand.Volume);
-
             
 
             Agent newAgent1 = new Agent(outputDroplet1.DropletName, outputDroplet1.PositionX, outputDroplet1.PositionY, outputDroplet1.Volume, agents[inputDroplet.DropletName].SubstanceId);
@@ -157,8 +145,13 @@ namespace DropletsInMotion.Application.Services
 
             agents[outputDroplet1.DropletName] = newAgent1;
             agents[outputDroplet2.DropletName] = newAgent2;
-            _contaminationService.ApplyContamination(newAgent1, contaminationMap);
-            _contaminationService.ApplyContamination(newAgent2, contaminationMap);
+            //_contaminationService.ApplyContamination(newAgent1, contaminationMap);
+            //_contaminationService.ApplyContamination(newAgent2, contaminationMap);
+
+            splitPositions.Template.ContaminationPositions.ForEach(pos => _contaminationService.ApplyIfInBoundsWithContamination(contaminationMap, inputDroplet.PositionX + pos.x, inputDroplet.PositionY + pos.y, newAgent1.SubstanceId));
+            splitPositions.Template.ContaminationPositions.ForEach(pos => Console.WriteLine($"{inputDroplet.PositionX + pos.x}, {inputDroplet.PositionY + pos.y}"));
+            
+            //_contaminationService.PrintContaminationState(contaminationMap);
 
             List<BoardAction> splitActions = splitPositions.Template.Apply(_platformService.Board[inputDroplet.PositionX][inputDroplet.PositionY].Id, time, 1);
 

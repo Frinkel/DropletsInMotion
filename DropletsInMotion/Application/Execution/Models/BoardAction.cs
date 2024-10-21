@@ -1,4 +1,4 @@
-﻿namespace DropletsInMotion.Application.ExecutionEngine.Models
+﻿namespace DropletsInMotion.Application.Execution.Models
 {
     public class BoardAction
     {
