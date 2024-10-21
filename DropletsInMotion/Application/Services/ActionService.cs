@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
@@ -28,20 +29,23 @@ namespace DropletsInMotion.Application.Services
         private readonly IDeviceRepository _deviceRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IPlatformService _platformService;
+        private readonly IPlatformRepository _platformRepository;
 
 
         public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, 
                              ICommandLifetimeService commandLifetimeService, IDeviceRepository deviceRepository, ITemplateRepository templateRepository,
-                             IPlatformService platformService)
+                             IPlatformService platformService, IPlatformRepository platformRepository)
         {
             _templateService = templateService;
             _contaminationService = contaminationService;
-            _moveHandler = new MoveHandler(_templateService);
             _storeService = storeService;
             _commandLifetimeService = commandLifetimeService;
             _deviceRepository = deviceRepository;
             _templateRepository = templateRepository;
             _platformService = platformService;
+            _platformRepository = platformRepository;
+            _moveHandler = new MoveHandler(_templateService, templateRepository, platformRepository);
+
         }
 
         public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions)
@@ -177,18 +181,27 @@ namespace DropletsInMotion.Application.Services
             List<BoardAction> mixActions = new List<BoardAction>();
             double time1 = compilerTime;
 
+            double scaleFactor = (int)(inputDroplet.Volume / _platformRepository.MinimumMovementVolume);
+
+            mixActions.AddRange(_moveHandler.Unravel(inputDroplet, Types.RouteAction.MoveRight, time1));
+
             for (int i = 0; i < mixCommand.RepeatTimes; i++)
             {
-                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1));
-                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1));
-                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1));
-                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1));
+                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX + mixCommand.Width, inputDroplet.PositionY, ref time1, scaleFactor));
+                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY + mixCommand.Height, ref time1, scaleFactor));
+                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX - mixCommand.Width, inputDroplet.PositionY, ref time1, scaleFactor));
+                mixActions.AddRange(_moveHandler.MoveDroplet(inputDroplet, inputDroplet.PositionX, inputDroplet.PositionY - mixCommand.Height, ref time1, scaleFactor));
             }
-            Console.WriteLine("-----------------------------------------------------");
-            _contaminationService.PrintContaminationState(contaminationMap);
+
+
             _contaminationService.UpdateContaminationArea(contaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX - 1,
                 mixCommand.PositionY - 1, mixCommand.Width + 2, mixCommand.Height + 2);
             _contaminationService.PrintContaminationState(contaminationMap);
+            mixActions = mixActions.OrderBy(b => b.Time).ToList();
+
+            mixActions.AddRange(_moveHandler.Ravel(inputDroplet, Types.RouteAction.MoveUp, mixActions.Last().Time));
+            mixActions = mixActions.OrderBy(b => b.Time).ToList();
+
             return mixActions;
         }
 

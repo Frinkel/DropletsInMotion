@@ -97,10 +97,13 @@ namespace DropletsInMotion.Application.Services
             var y = agent.PositionY;
 
             int size = 1;
-            //TODO skal de 1200 være en variabel? eller global i platformRepository
-            if (agent.Volume > 1200)
+            if (agent.Volume > _platformRepository.MinSize2x2)
             {
                 size = 2;
+            }
+            if (agent.Volume > _platformRepository.MinSize3x3)
+            {
+                size = 3;
             }
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);

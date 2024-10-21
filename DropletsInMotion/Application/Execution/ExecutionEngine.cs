@@ -42,11 +42,12 @@ namespace DropletsInMotion.Application.Execution
         private readonly ICommunicationEngine _communicationEngine;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ITemplateRepository _templateRepository;
+        private readonly IPlatformRepository _platformRepository;
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository, ITemplateRepository templateRepository)
+                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository, ITemplateRepository templateRepository, IPlatformRepository platformRepository)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -61,6 +62,7 @@ namespace DropletsInMotion.Application.Execution
             _communicationEngine = communicationEngine;
             _deviceRepository = deviceRepository;
             _templateRepository = templateRepository;
+            _platformRepository = platformRepository;
         }
 
         public async Task Execute()
@@ -108,7 +110,7 @@ namespace DropletsInMotion.Application.Execution
                     switch (command)
                     {
                         case DropletDeclaration dropletCommand:
-                            HandleDropletDeclaration(dropletCommand);
+                            HandleDropletDeclaration(dropletCommand, boardActions);
                             break;
 
                         case Dispense dispenseCommand:
@@ -188,10 +190,11 @@ namespace DropletsInMotion.Application.Execution
                 }
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
-                
-                await SendActions(boardActions);
 
                 Console.WriteLine($"Compiler time {Time}");
+
+                await SendActions(boardActions);
+
                 boardActions.Clear();
 
             }
@@ -239,9 +242,22 @@ namespace DropletsInMotion.Application.Execution
                 reservoir.OutputY, dispenseCommand.Volume); // TODO: the reservoir should contain a substance id?
             Agents.Add(dispenseCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+
+            DeclareTemplate declareTemplate = _templateRepository?
+                .DeclareTemplates?
+                .Find(t => t.MinSize <= agent.Volume && agent.Volume < t.MaxSize);
+
+            if (declareTemplate == null)
+            {
+                throw new Exception($"Cannot dispense a new droplet at Position {reservoir.OutputX}, {reservoir.OutputY} since there is not template");
+            }
+
+            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, Time, 1);
+            boardActions.AddRange(initialElectrodes);
+
         }
 
-        private void HandleDropletDeclaration(DropletDeclaration dropletCommand)
+        private void HandleDropletDeclaration(DropletDeclaration dropletCommand, List<BoardAction> boardActions)
         {
 
             var contamintation = ContaminationMap[dropletCommand.PositionX, dropletCommand.PositionY];
@@ -250,11 +266,22 @@ namespace DropletsInMotion.Application.Execution
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it is already contaminated");
             }
 
-
             Agent agent = new Agent(dropletCommand.DropletName, dropletCommand.PositionX,
                 dropletCommand.PositionY, dropletCommand.Volume);
             Agents.Add(dropletCommand.DropletName, agent);
-            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+            ContaminationMap = _contaminationService.ApplyContaminationWithSize(agent, ContaminationMap);
+
+            DeclareTemplate declareTemplate = _templateRepository?
+                .DeclareTemplates?
+                .Find(t => t.MinSize <= agent.Volume && agent.Volume < t.MaxSize);
+
+            if (declareTemplate == null)
+            {
+                throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since there is not template");
+            }
+
+            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, Time, 1);
+            boardActions.AddRange(initialElectrodes);
         }
 
         private async Task HandleActuatorCommand(ActuatorCommand actuatorCommand)
@@ -290,12 +317,14 @@ namespace DropletsInMotion.Application.Execution
 
                 // Handle time desync
                 // TODO: Check if mix sends its own request, we should do it here!
-                if (boardActionTime + 1 < actualTime) // TODO: Do we need +1 here?
+                if (boardActionTime <= actualTime) // TODO: Do we need +1 here?
                 {
                     var timeDifference = actualTime - boardActionTime + 1; // TODO: how can we a good buffer?
                     boardActions.ForEach(b => b.Time += timeDifference);
                     Time = boardActions.Last().Time; 
                 }
+
+
 
                 await _communicationEngine.SendActions(boardActions);
             }
@@ -347,11 +376,14 @@ namespace DropletsInMotion.Application.Execution
 
                 List<ITemplate> eligibleMergeTemplates = _templateRepository?
                     .MergeTemplates?
-                    .FindAll(t => t.MinSize <= agentVolume1 && t.MinSize <= agentVolume2 && agentVolume1 + agentVolume2 < t.MaxSize)
+                    .FindAll(t => t.MinSize <= agentVolume1 + agentVolume2 && agentVolume1 + agentVolume2 < t.MaxSize)
                     ?.Cast<ITemplate>()
                     .ToList() ?? new List<ITemplate>();
 
-
+                if (!eligibleMergeTemplates.Any())
+                {
+                    throw new Exception($"There were no eligible merge templates for command {mergeCommand}");
+                }
 
 
                 var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents, ContaminationMap, eligibleMergeTemplates);
