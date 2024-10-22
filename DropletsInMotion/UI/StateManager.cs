@@ -16,6 +16,7 @@ using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using static MicrofluidicsParser;
 using System.Runtime.InteropServices;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 
@@ -55,8 +56,6 @@ namespace DropletsInMotion.UI
 
             _communicationEngine.ClientConnected += OnClientConnected;
             _communicationEngine.ClientDisconnected += OnClientDisconnected;
-            //_deviceTemplateService = deviceTemplateService;
-            //_deviceRepository = deviceRepository;
             _translator = translator;
         }
 

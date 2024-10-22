@@ -20,7 +20,7 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         Dictionary<string, (int x, int y)> FinalPositions { get; }
         Dictionary<string, (int x, int y)> InitialPositions { get; }
 
-        List<(int x, int y)> ContaminationPositions { get; }
+        List<Dictionary<string, List<(int x, int y)>>> Blocks { get; set; }
 
         List<BoardAction> Apply(int relativePosition, double time, double scale);
     }

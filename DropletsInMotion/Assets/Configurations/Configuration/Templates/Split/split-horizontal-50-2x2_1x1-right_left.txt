@@ -1,7 +1,7 @@
 {
 	"name": "Split Horizontal 50/50 2x2 to 1x1 right left",
-	"minSize": 1400,
-	"maxSize": 2800,
+	"minSize": 1000,
+	"maxSize": 2000,
 	"ratio": 0.5,
 	"ratioRelation": {
 		"2": 0.5,

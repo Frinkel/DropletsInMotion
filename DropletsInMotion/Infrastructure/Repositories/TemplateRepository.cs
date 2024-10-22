@@ -60,7 +60,19 @@ public class TemplateRepository : ITemplateRepository
         splitTemplate.Actions = ParseTemplateFile(template);
 
         // Find contamination positions
-        splitTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
+        //splitTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
+
+
+        // Find the block positions with ids
+        List<Dictionary<string, List<(int x, int y)>>> blockPositions = new List<Dictionary<string, List<(int x, int y)>>>();
+        foreach (var block in _blocks)
+        {
+            blockPositions.Add(GetClusterPositions(block));
+        }
+        splitTemplate.Blocks = blockPositions;
+
+
+
 
         Block firstBlock = _blocks.First();
         var initialPositions = FindClusters(firstBlock.Template);
@@ -107,11 +119,14 @@ public class TemplateRepository : ITemplateRepository
         // Find all the blocks and actions
         mergeTemplate.Actions = ParseTemplateFile(template);
 
-        // Find contamination positions
-        Console.WriteLine("Merge T");
-        mergeTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
+        // Find the block positions with ids
+        List<Dictionary<string, List<(int x, int y)>>> blockPositions = new List<Dictionary<string, List<(int x, int y)>>>();
+        foreach (var block in _blocks)
+        {
+            blockPositions.Add(GetClusterPositions(block));
+        }
+        mergeTemplate.Blocks = blockPositions;        
 
-        //mergeTemplate.ContaminationPositions.ForEach(t => Console.WriteLine($"x {t.x}, y {t.y}"));
 
         Block firstBlock = _blocks.First();
         var initialPositions = FindClusters(firstBlock.Template);
@@ -177,6 +192,95 @@ public class TemplateRepository : ITemplateRepository
 
         Console.WriteLine(declareTemplate);
     }
+
+
+
+    private Dictionary<string, List<(int x, int y)>> GetClusterPositions(Block block)
+    {
+        int rows = block.Template.Length;
+        int cols = block.Template[0].Length;
+        int[,] grid = new int[rows, cols];
+
+        // Parse the block into a 2D array
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                grid[i, j] = block.Template[i][j] - '0';  // Convert '0'/'1' characters to integers
+            }
+        }
+
+        bool[,] visited = new bool[rows, cols];
+        Dictionary<string, List<(int x, int y)>> clusters = new Dictionary<string, List<(int x, int y)>>();
+
+        // Direction vectors for navigating neighbors (up, down, left, right)
+        int[] dRow = { -1, 1, 0, 0 };
+        int[] dCol = { 0, 0, -1, 1 };
+
+        // Method for performing DFS or flood-fill to find a cluster
+        void FloodFill(int r, int c, int id)
+        {
+            Stack<(int r, int c)> stack = new Stack<(int r, int c)>();
+            stack.Push((r, c));
+            visited[r, c] = true;
+
+            string clusterId = id.ToString();
+            if (!clusters.ContainsKey(clusterId))
+            {
+                clusters[clusterId] = new List<(int x, int y)>();
+            }
+
+            int gridSize = block.Template.First().Length;
+            int centerRow = gridSize / 2;
+            int centerCol = gridSize / 2;
+
+            // Add initial position to the cluster
+            clusters[clusterId].Add((c - centerCol, r - centerRow));
+
+            while (stack.Count > 0)
+            {
+                var (curR, curC) = stack.Pop();
+
+                // Visit all neighbors
+                for (int i = 0; i < 4; i++)
+                {
+                    int newRow = curR + dRow[i];
+                    int newCol = curC + dCol[i];
+
+                    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols &&
+                        !visited[newRow, newCol] && grid[newRow, newCol] != 0)
+                    {
+                        visited[newRow, newCol] = true;
+                        stack.Push((newRow, newCol));
+                        clusters[clusterId].Add((newCol - centerCol, newRow - centerRow));
+                    }
+                }
+            }
+        }
+
+        // Iterate over the grid to find clusters
+        int clusterId = 1;
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (grid[r, c] != 0 && !visited[r, c])
+                {
+                    // Found a new cluster, start flood-fill with a new cluster ID
+                    FloodFill(r, c, clusterId);
+                    clusterId++;
+                }
+            }
+        }
+
+        return clusters;
+    }
+
+
+
+
+
+
 
 
 

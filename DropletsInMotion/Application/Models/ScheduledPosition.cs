@@ -15,17 +15,21 @@ namespace DropletsInMotion.Application.Models
         public int Y1;
         public int X2;
         public int Y2;
-        public int CommandX;
-        public int CommandY;
-        public ScheduledPosition(ITemplate template, int x1, int y1, int x2, int y2, int commandX, int commandY)
+        public int SingularX;
+        public int SingularY;
+        public int OriginX;
+        public int OriginY;
+        public ScheduledPosition(ITemplate template, int x1, int y1, int x2, int y2, int singularX, int singularY, int originX, int originY)
         {
             Template = template;
             X1 = x1;
             Y1 = y1;
             X2 = x2;
             Y2 = y2;
-            CommandX = commandX;
-            CommandY = commandY;
+            SingularX = singularX;
+            SingularY = singularY;
+            OriginX = originX;
+            OriginY = originY;
         }
     }
 }

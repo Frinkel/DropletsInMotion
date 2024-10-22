@@ -15,5 +15,6 @@ namespace DropletsInMotion.Application.Services
         void ApplyIfInBoundsWithContamination(byte[,] contaminationMap, int xPos, int yPos, byte substanceId);
 
         byte[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePosition, byte[,] contaminationMap);
+        byte[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, byte[,] contaminationMap);
     }
 }

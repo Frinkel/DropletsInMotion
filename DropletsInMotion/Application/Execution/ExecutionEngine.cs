@@ -420,8 +420,7 @@ namespace DropletsInMotion.Application.Execution
                         
                         if (Math.Abs(template.RatioRelation.First().Value - ratio) < 0.1) // TODO: Should this tolerance be user defined
                         {
-                            SplitTemplate t = new SplitTemplate(template.Name, template.MinSize, template.MaxSize,
-                                template.Ratio, template.RatioRelation);
+                            SplitTemplate t = template.DeepCopy();
 
                             Dictionary<string, (int x, int y)>
                                 finalPositions = new Dictionary<string, (int x, int y)>();
@@ -430,16 +429,14 @@ namespace DropletsInMotion.Application.Execution
                             finalPositions.Add(splitByVolumeCommand.OutputName1, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
 
                             t.FinalPositions = finalPositions;
-                            t.InitialPositions = template.InitialPositions;
-                            t.Actions = template.Actions;
-                            t.ContaminationPositions = template.ContaminationPositions;
+                            //t.InitialPositions = template.InitialPositions;
+                            //t.Actions = template.Actions;
 
                             eligibleSplitTemplates.Add(t);
                         }
                         else
                         {
-                            SplitTemplate t = new SplitTemplate(template.Name, template.MinSize, template.MaxSize,
-                                template.Ratio, template.RatioRelation);
+                            SplitTemplate t = template.DeepCopy();
 
                             Dictionary<string, (int x, int y)>
                                 finalPositions = new Dictionary<string, (int x, int y)>();
@@ -448,9 +445,9 @@ namespace DropletsInMotion.Application.Execution
                             finalPositions.Add(splitByVolumeCommand.OutputName2, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
 
                             t.FinalPositions = finalPositions;
-                            t.InitialPositions = template.InitialPositions;
-                            t.Actions = template.Actions;
-                            t.ContaminationPositions = template.ContaminationPositions;
+                            //t.InitialPositions = template.InitialPositions;
+                            //t.Actions = template.Actions;
+                            //t.ContaminationPositions = template.ContaminationPositions;
 
                             eligibleSplitTemplates.Add(t);
                         }

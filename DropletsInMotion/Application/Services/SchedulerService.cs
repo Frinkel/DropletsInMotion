@@ -186,7 +186,7 @@ namespace DropletsInMotion.Application.Services
 
             if (bestPositions == null)
             {
-                throw new Exception("No optimal position found");
+                throw new Exception("No optimal position found"); // TODO: THIS IS NOT VERY DESCRIBING
             }
 
             Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
@@ -247,56 +247,22 @@ namespace DropletsInMotion.Application.Services
 
                 totalCost = 0;
 
-                totalCost += Math.Abs(d1XDiff + template.FinalPositions.Last().Value.x) + Math.Abs(d1YDiff + template.FinalPositions.Last().Value.y);
-                totalCost += Math.Abs(d2XDiff + template.FinalPositions.First().Value.x) + Math.Abs(d2YDiff + template.FinalPositions.First().Value.y);
+                totalCost += Math.Abs(d1XDiff + template.InitialPositions.Last().Value.x) + Math.Abs(d1YDiff + template.InitialPositions.Last().Value.y);
+                totalCost += Math.Abs(d2XDiff + template.InitialPositions.First().Value.x) + Math.Abs(d2YDiff + template.InitialPositions.First().Value.y);
 
 
                 if (totalCost < cost)
                 {
                     cost = totalCost;
                     chosenTemplate = template;
-                    d1OptimalX = originX + template.FinalPositions.Last().Value.x;
-                    d1OptimalY = originY + template.FinalPositions.Last().Value.y;
-                    d2OptimalX = originX + template.FinalPositions.First().Value.x;
-                    d2OptimalY = originY + template.FinalPositions.First().Value.y;
+                    d1OptimalX = originX + template.InitialPositions.Last().Value.x;
+                    d1OptimalY = originY + template.InitialPositions.Last().Value.y;
+                    d2OptimalX = originX + template.InitialPositions.First().Value.x;
+                    d2OptimalY = originY + template.InitialPositions.First().Value.y;
                 }
 
             }
 
-
-
-
-
-
-            //int leftRightDistance = Math.Abs(d1XDiff - 1) + Math.Abs(d1YDiff) +
-            //                        Math.Abs(d2XDiff + 1) + Math.Abs(d2YDiff);
-
-            //int rightLeftDistance = Math.Abs(d1XDiff + 1) + Math.Abs(d1YDiff) +
-            //                        Math.Abs(d2XDiff - 1) + Math.Abs(d2YDiff);
-
-            //int upDownDistance = Math.Abs(d1XDiff) + Math.Abs(d1YDiff - 1) +
-            //                     Math.Abs(d2XDiff) + Math.Abs(d2YDiff + 1);
-
-            //int downUpDistance = Math.Abs(d1XDiff) + Math.Abs(d1YDiff + 1) +
-            //                     Math.Abs(d2XDiff) + Math.Abs(d2YDiff - 1);
-
-            //var directionDeltas = new List<(int Distance, Directions Direction, int d1DeltaX, int d1DeltaY, int d2DeltaX, int d2DeltaY)>
-            //{
-            //    (leftRightDistance, Directions.LeftRight, -1, 0, +1, 0),
-            //    (rightLeftDistance, Directions.RightLeft, +1, 0, -1, 0),
-            //    (upDownDistance, Directions.UpDown, 0, -1, 0, +1),
-            //    (downUpDistance, Directions.DownUp, 0, +1, 0, -1)
-            //};
-
-            //var optimal = directionDeltas.MinBy(tuple => tuple.Distance);
-
-            //int d1OptimalX = originX + optimal.d1DeltaX;
-            //int d1OptimalY = originY + optimal.d1DeltaY;
-            //int d2OptimalX = originX + optimal.d2DeltaX;
-            //int d2OptimalY = originY + optimal.d2DeltaY;
-            //Console.WriteLine((originX, originY));
-            //Console.WriteLine(((d1OptimalX, d1OptimalY), (d2OptimalX, d2OptimalY)));
-            //throw new Exception("test");
 
             if (chosenTemplate == null)
             {
@@ -304,7 +270,8 @@ namespace DropletsInMotion.Application.Services
             }
 
             ScheduledPosition optimalPosition =
-                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
+                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY,
+                    originX + chosenTemplate.FinalPositions.First().Value.x, originY + chosenTemplate.FinalPositions.First().Value.y, originX, originY);
 
             return optimalPosition;
         }
@@ -325,8 +292,8 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var template in templates)
             {
-                Console.WriteLine("*******************************************");
-                Console.WriteLine(template.ContaminationPositions.Count);
+                //Console.WriteLine("*******************************************");
+                //Console.WriteLine(template.ContaminationPositions.Count);
 
 
                 int totalCost = 0;
@@ -354,7 +321,8 @@ namespace DropletsInMotion.Application.Services
             }
 
             ScheduledPosition optimalPosition =
-                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
+                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY,
+                    originX, originY, originX, originY);
 
             return optimalPosition;
         }

@@ -24,6 +24,8 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
         public List<(int x, int y)> ContaminationPositions => throw new NotImplementedException();
 
+        public List<Dictionary<string, List<(int x, int y)>>> Blocks { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {
             if (Actions == null || Actions.Count == 0)
