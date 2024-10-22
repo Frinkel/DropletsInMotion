@@ -27,5 +27,10 @@ namespace DropletsInMotion.Application.Models
             CommandX = commandX;
             CommandY = commandY;
         }
+
+        public override string ToString()
+        {
+            return $"Template: {Template.Name}, X1: {X1}, Y1: {Y1}, X2: {X2}, Y2: {Y2}, CommandX: {CommandX}, CommandY: {CommandY}";
+        }
     }
 }

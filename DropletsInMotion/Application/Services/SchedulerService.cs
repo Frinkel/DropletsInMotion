@@ -110,77 +110,78 @@ namespace DropletsInMotion.Application.Services
                         continue;
                     }
 
-                    var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates, command);
+                    var optimalPositionss = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates, command);
+
+                    foreach(var optimalPositions in optimalPositionss){
+
+                        if (optimalPositions.X1 < minBoundingX || optimalPositions.X1 > maxBoundingX ||
+                            optimalPositions.Y1 < minBoundingY || optimalPositions.Y1 > maxBoundingY ||
+                            optimalPositions.X2 < minBoundingX || optimalPositions.X2 > maxBoundingX ||
+                            optimalPositions.Y2 < minBoundingY || optimalPositions.Y2 > maxBoundingY)
+                        {
+                            continue;
+                        }
+
+                        byte d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
+                            optimalPositions.Y1];
+                        byte d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
+                            optimalPositions.Y2];
+                        if (d1OptimalPositionContamination == 255 || d1OptimalPositionContamination != 0 &&
+                            d1OptimalPositionContamination != d1SubstanceId)
+                        {
+                            continue;
+                        }
+                        if (d2OptimalPositionContamination == 255 || d2OptimalPositionContamination != 0 &&
+                            d2OptimalPositionContamination != d2SubstanceId)
+                        {
+                            continue;
+                        }
+
+                        // Same position
+                        if (optimalPositions.X1 == optimalPositions.X2 && optimalPositions.Y1 == optimalPositions.Y2)
+                        {
+                            continue;
+                        }
+
+                        int d1DistanceToOrigin = Math.Abs(optimalPositions.X1 - d1X) +
+                                                 Math.Abs(optimalPositions.Y1 - d1Y);
+
+                        int d2DistanceToOrigin = Math.Abs(optimalPositions.X2 - d2X) +
+                                                 Math.Abs(optimalPositions.Y2 - d2Y);
+
+                        int distanceToTarget = Math.Abs(x - commandX) +
+                                               Math.Abs(y - commandY);
 
 
-                    // Out of bounds
-                    if (optimalPositions.X1 < minBoundingX || optimalPositions.X1 > maxBoundingX ||
-                        optimalPositions.Y1 < minBoundingY || optimalPositions.Y1 > maxBoundingY ||
-                        optimalPositions.X2 < minBoundingX || optimalPositions.X2 > maxBoundingX ||
-                        optimalPositions.Y2 < minBoundingY || optimalPositions.Y2 > maxBoundingY)
-                    {
-                        continue;
+
+
+
+                        int totalScore = d1DistanceToOrigin + d2DistanceToOrigin + distanceToTarget;
+
+
+                        bool d1CrossesD2 = d1X < d2X && optimalPositions.X1 > optimalPositions.X2 ||
+                                           d1X > d2X && optimalPositions.X1 < optimalPositions.X2 ||
+                                           d1Y < d2Y && optimalPositions.Y1 > optimalPositions.Y2 ||
+                                           d1Y > d2Y && optimalPositions.Y1 < optimalPositions.Y2;
+
+                        bool d2CrossesD1 = d2X < d1X && optimalPositions.X2 > optimalPositions.X1 ||
+                                           d2X > d1X && optimalPositions.X2 < optimalPositions.X1 ||
+                                           d2Y < d1Y && optimalPositions.Y2 > optimalPositions.Y1 ||
+                                           d2Y > d1Y && optimalPositions.Y2 < optimalPositions.Y1;
+
+                        if (d1CrossesD2 || d2CrossesD1)
+                        {
+                            totalScore += 5;
+                        }
+
+                        if (totalScore >= bestScore)
+                        {
+                            continue;
+                        }
+
+                        bestScore = totalScore;
+                        bestPositions = optimalPositions;
                     }
-
-                    byte d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
-                        optimalPositions.Y1];
-                    byte d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
-                        optimalPositions.Y2];
-                    if (d1OptimalPositionContamination == 255 || d1OptimalPositionContamination != 0 &&
-                        d1OptimalPositionContamination != d1SubstanceId)
-                    {
-                        continue;
-                    }
-                    if (d2OptimalPositionContamination == 255 || d2OptimalPositionContamination != 0 &&
-                        d2OptimalPositionContamination != d2SubstanceId)
-                    {
-                        continue;
-                    }
-
-                    // Same position
-                    if (optimalPositions.X1 == optimalPositions.X2 && optimalPositions.Y1 == optimalPositions.Y2)
-                    {
-                        continue;
-                    }
-
-                    int d1DistanceToOrigin = Math.Abs(optimalPositions.X1 - d1X) +
-                                             Math.Abs(optimalPositions.Y1 - d1Y);
-
-                    int d2DistanceToOrigin = Math.Abs(optimalPositions.X2 - d2X) +
-                                             Math.Abs(optimalPositions.Y2 - d2Y);
-
-                    int distanceToTarget = Math.Abs(x - commandX) +
-                                           Math.Abs(y - commandY);
-
-
-
-
-
-                    int totalScore = d1DistanceToOrigin + d2DistanceToOrigin + distanceToTarget;
-
-
-                    bool d1CrossesD2 = d1X < d2X && optimalPositions.X1 > optimalPositions.X2 ||
-                                       d1X > d2X && optimalPositions.X1 < optimalPositions.X2 ||
-                                       d1Y < d2Y && optimalPositions.Y1 > optimalPositions.Y2 ||
-                                       d1Y > d2Y && optimalPositions.Y1 < optimalPositions.Y2;
-
-                    bool d2CrossesD1 = d2X < d1X && optimalPositions.X2 > optimalPositions.X1 ||
-                                       d2X > d1X && optimalPositions.X2 < optimalPositions.X1 ||
-                                       d2Y < d1Y && optimalPositions.Y2 > optimalPositions.Y1 ||
-                                       d2Y > d1Y && optimalPositions.Y2 < optimalPositions.Y1;
-
-                    if (d1CrossesD2 || d2CrossesD1)
-                    {
-                        totalScore += 5;
-                    }
-
-                    if (totalScore >= bestScore)
-                    {
-                        continue;
-                    }
-
-                    bestScore = totalScore;
-                    bestPositions = optimalPositions;
                 }
             }
 
@@ -197,7 +198,7 @@ namespace DropletsInMotion.Application.Services
             return bestPositions;
         }
 
-        private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y,
+        private List<ScheduledPosition> FindOptimalDirections(int originX, int originY, int target1X, int target1Y,
             int target2X, int target2Y, List<ITemplate> templates, IDropletCommand command)
         {
             switch (command)
@@ -206,14 +207,15 @@ namespace DropletsInMotion.Application.Services
                     return FindOptimalDirections(originX, originY, target1X, target1Y, target2X, target2Y, templates, mergeCommand);
 
                 case SplitByVolume splitCommand:
-                    return FindOptimalDirections(originX, originY, target1X, target1Y, target2X, target2Y, templates, splitCommand);
+                    return new List<ScheduledPosition>() { FindOptimalDirections(originX, originY, target1X, target1Y, target2X, target2Y, templates, splitCommand)}
+                    ;
 
                 default:
                     throw new Exception("No schedular case for command");
             }
         }
 
-        private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, Merge mergeCommand)
+        private List<ScheduledPosition> FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, Merge mergeCommand)
         {
             int d1XDiff = originX - target1X;
             int d1YDiff = originY - target1Y;
@@ -227,6 +229,8 @@ namespace DropletsInMotion.Application.Services
             int d2OptimalX = target2X;
             int d2OptimalY = target2Y;
 
+            var optimalPositions = new List<ScheduledPosition>();
+
             foreach (var template in templates)
             {
                 int totalCost = 0;
@@ -234,32 +238,40 @@ namespace DropletsInMotion.Application.Services
                 totalCost += Math.Abs(d1XDiff + template.InitialPositions.First().Value.x) + Math.Abs(d1YDiff + template.InitialPositions.First().Value.y);
                 totalCost += Math.Abs(d2XDiff + template.InitialPositions.Last().Value.x) + Math.Abs(d2YDiff + template.InitialPositions.Last().Value.y);
 
-                if (totalCost < cost)
-                {
-                    cost = totalCost;
-                    chosenTemplate = template;
-                    d1OptimalX = originX + template.InitialPositions.First().Value.x;
-                    d1OptimalY = originY + template.InitialPositions.First().Value.y;
-                    d2OptimalX = originX + template.InitialPositions.Last().Value.x;
-                    d2OptimalY = originY + template.InitialPositions.Last().Value.y;
-                }
+                //if (totalCost < cost)
+                //{
+                //    cost = totalCost;
+                chosenTemplate = template;
+                d1OptimalX = originX + template.InitialPositions.First().Value.x;
+                d1OptimalY = originY + template.InitialPositions.First().Value.y;
+                d2OptimalX = originX + template.InitialPositions.Last().Value.x;
+                d2OptimalY = originY + template.InitialPositions.Last().Value.y;
+                //}
 
+                ScheduledPosition optimalPosition =
+                    new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
+                optimalPositions.Add(optimalPosition);
 
                 totalCost = 0;
 
-                totalCost += Math.Abs(d1XDiff + template.FinalPositions.Last().Value.x) + Math.Abs(d1YDiff + template.FinalPositions.Last().Value.y);
-                totalCost += Math.Abs(d2XDiff + template.FinalPositions.First().Value.x) + Math.Abs(d2YDiff + template.FinalPositions.First().Value.y);
+                totalCost += Math.Abs(d1XDiff + template.InitialPositions.Last().Value.x) + Math.Abs(d1YDiff + template.InitialPositions.Last().Value.y);
+                totalCost += Math.Abs(d2XDiff + template.InitialPositions.First().Value.x) + Math.Abs(d2YDiff + template.InitialPositions.First().Value.y);
 
 
-                if (totalCost < cost)
-                {
-                    cost = totalCost;
-                    chosenTemplate = template;
-                    d1OptimalX = originX + template.FinalPositions.Last().Value.x;
-                    d1OptimalY = originY + template.FinalPositions.Last().Value.y;
-                    d2OptimalX = originX + template.FinalPositions.First().Value.x;
-                    d2OptimalY = originY + template.FinalPositions.First().Value.y;
-                }
+                //if (totalCost < cost)
+                //{
+                //    cost = totalCost;
+                chosenTemplate = template;
+                d1OptimalX = originX + template.InitialPositions.Last().Value.x;
+                d1OptimalY = originY + template.InitialPositions.Last().Value.y;
+                d2OptimalX = originX + template.InitialPositions.First().Value.x;
+                d2OptimalY = originY + template.InitialPositions.First().Value.y;
+                //}
+
+                ScheduledPosition optimalPosition2 =
+                    new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
+                optimalPositions.Add(optimalPosition2);
+
 
             }
 
@@ -298,15 +310,15 @@ namespace DropletsInMotion.Application.Services
             //Console.WriteLine(((d1OptimalX, d1OptimalY), (d2OptimalX, d2OptimalY)));
             //throw new Exception("test");
 
-            if (chosenTemplate == null)
-            {
-                throw new Exception("No template was chosen");
-            }
+            //if (chosenTemplate == null)
+            //{
+            //    throw new Exception("No template was chosen");
+            //}
 
-            ScheduledPosition optimalPosition =
-                new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
+            //ScheduledPosition optimalPosition =
+            //    new ScheduledPosition(chosenTemplate, d1OptimalX, d1OptimalY, d2OptimalX, d2OptimalY, originX, originY);
 
-            return optimalPosition;
+            return optimalPositions;
         }
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, SplitByVolume splitByVolumeCommand)
