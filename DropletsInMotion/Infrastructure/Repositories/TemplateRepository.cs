@@ -241,7 +241,6 @@ public class TemplateRepository : ITemplateRepository
         int[] dRow = { -1, 1, 0, 0 };
         int[] dCol = { 0, 0, -1, 1 };
 
-        // Method for performing DFS or flood-fill to find a cluster
         void FloodFill(int r, int c, int id)
         {
             Stack<(int r, int c)> stack = new Stack<(int r, int c)>();
@@ -254,9 +253,8 @@ public class TemplateRepository : ITemplateRepository
                 clusters[clusterId] = new List<(int x, int y)>();
             }
 
-            int gridSize = block.Template.First().Length;
-            int centerRow = gridSize / 2;
-            int centerCol = gridSize / 2;
+            int centerRow = rows / 2;
+            int centerCol = cols / 2;
 
             // Add initial position to the cluster
             clusters[clusterId].Add((c - centerCol, r - centerRow));
@@ -290,7 +288,6 @@ public class TemplateRepository : ITemplateRepository
             {
                 if (grid[r, c] != 0 && !visited[r, c])
                 {
-                    // Found a new cluster, start flood-fill with a new cluster ID
                     FloodFill(r, c, clusterId);
                     clusterId++;
                 }
@@ -303,95 +300,24 @@ public class TemplateRepository : ITemplateRepository
 
 
 
-
-
-
-
-
-    private List<(int x, int y)> FindContaminationCoordinates(string template)
-    {
-        _blocks.Clear();
-        var turnedOnCoordinates = new HashSet<(int x, int y)>();  // Use HashSet to avoid duplicates
-        int boardWidth = _platformRepository.Board.Length;
-        string[] stringBlocks = template.Split(";");
-        int gridSize = stringBlocks.First().Split(",")[1].Split(Separator, StringSplitOptions.None).Skip(1).First().Length;
-        string[] previousBlock = new string[gridSize];
-
-        foreach (var stringBlock in stringBlocks)
-        {
-            var timeOffset = double.Parse(stringBlock.Split(",")[0].Trim(), CultureInfo.InvariantCulture);
-            string blockTemplate = stringBlock.Split(",")[1];
-            var lines = blockTemplate.Trim().Split(Separator, StringSplitOptions.None);
-
-            Block block = new Block(lines, timeOffset);
-            _blocks.Add(block);
-        }
-
-        foreach (var block in _blocks)
-        {
-            var lines = block.Template;
-            for (int rowIndex = 0; rowIndex < lines.Length; rowIndex++)
-            {
-                var line = lines[rowIndex];
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
-                char[] prevChars = (previousBlock != null) && (previousBlock?[rowIndex] != null) ? previousBlock[rowIndex].Trim().ToCharArray() : Enumerable.Repeat('0', gridSize).ToArray();
-                char[] chars = line.Trim().ToCharArray();
-
-                for (int colIndex = 0; colIndex < chars.Length; colIndex++)
-                {
-                    int action = chars[colIndex] - '0';
-                    int prevAction = prevChars[colIndex] - '0';
-
-                    if (action != 0 && prevAction == 0)  // Cell was turned on
-                    {
-                        int centerRow = gridSize / 2;
-                        int centerCol = gridSize / 2;
-
-                        // Calculate the coordinates relative to the center
-                        int x = colIndex - centerCol;
-                        int y = rowIndex - centerRow;
-
-
-                        turnedOnCoordinates.Add((x, y));
-                        turnedOnCoordinates.Add((x + 1, y));
-                        turnedOnCoordinates.Add((x - 1, y));
-                        turnedOnCoordinates.Add((x, y + 1));
-                        turnedOnCoordinates.Add((x, y - 1));
-                        turnedOnCoordinates.Add((x + 1, y - 1));
-                        turnedOnCoordinates.Add((x - 1, y + 1));
-                        turnedOnCoordinates.Add((x + 1, y + 1));
-                        turnedOnCoordinates.Add((x - 1, y - 1));
-                    }
-                }
-            }
-
-            previousBlock = lines;
-        }
-
-        return turnedOnCoordinates.ToList();  // Return HashSet, duplicates will be avoided
-    }
-
-
-
-
     private List<BoardAction> ParseTemplateFile(string template)
     {
         _blocks.Clear();
         var boardActions = new List<BoardAction>();
         int boardWidth = _platformRepository.Board.Length;
         string[] stringBlocks = template.Split(";");
-        int gridSize = stringBlocks.First().Split(",")[1].Split(Separator, StringSplitOptions.None).Skip(1).First().Length;
-        string[] previousBlock = new string[gridSize];
 
+        string[] previousBlock = null;
 
         foreach (var stringBlock in stringBlocks)
         {
-            var timeOffset = double.Parse(stringBlock.Split(",")[0].Trim(), CultureInfo.InvariantCulture);
-            string blockTemplate = stringBlock.Split(",")[1];
+            if (string.IsNullOrWhiteSpace(stringBlock))
+                continue;
+
+            var parts = stringBlock.Split(",");
+            var timeOffset = double.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
+            var blockTemplate = parts[1];
+
             var lines = blockTemplate.Trim().Split(Separator, StringSplitOptions.None);
 
             Block block = new Block(lines, timeOffset);
@@ -401,28 +327,27 @@ public class TemplateRepository : ITemplateRepository
         foreach (var block in _blocks)
         {
             var lines = block.Template;
-            for (int i = 0; i < lines.Length; i++)
+            int blockRows = lines.Length;
+            int blockCols = lines[0].Trim().Length;
+
+            int centerRow = blockRows / 2;
+            int centerCol = blockCols / 2;
+
+            for (int i = 0; i < blockRows; i++)
             {
                 var line = lines[i];
-                //Console.WriteLine(line);
                 if (string.IsNullOrWhiteSpace(line))
-                {
                     continue;
-                }
 
-
-                char[] prevChars = (previousBlock != null) && (previousBlock?[i] != null) ? previousBlock[i].Trim().ToCharArray() : Enumerable.Repeat('0', gridSize).ToArray();
                 char[] chars = line.Trim().ToCharArray();
+                char[] prevChars = previousBlock != null && previousBlock.Length > i ? previousBlock[i].Trim().ToCharArray() : new char[blockCols];
 
                 for (int colIndex = 0; colIndex < chars.Length; colIndex++)
                 {
                     int action = chars[colIndex] - '0';
-                    int prevAction = prevChars[colIndex] - '0';
+                    int prevAction = prevChars.Length > colIndex ? prevChars[colIndex] - '0' : 0;
 
-                    int centerRow = gridSize / 2;
-                    int centerCol = gridSize / 2;
                     int electrodeIdOffset = (i - centerRow) * boardWidth + (colIndex - centerCol);
-
 
                     if (action != 0 && prevAction == 0)
                     {
@@ -434,13 +359,12 @@ public class TemplateRepository : ITemplateRepository
                     }
                 }
             }
-
-            previousBlock = lines;
+            previousBlock = block.Template;
         }
         boardActions = boardActions.OrderBy(b => b.Time).ToList();
-
         return boardActions;
     }
+
 
     // Method to find clusters and return their top-left positions
     public List<(int id, int x, int y)> FindClusters(string[] block)
@@ -465,7 +389,6 @@ public class TemplateRepository : ITemplateRepository
         int[] dRow = { -1, 1, 0, 0 };
         int[] dCol = { 0, 0, -1, 1 };
 
-        // Method for performing DFS or flood-fill to find a cluster
         void FloodFill(int r, int c, ref int minRow, ref int minCol)
         {
             Stack<(int r, int c)> stack = new Stack<(int r, int c)>();
@@ -506,13 +429,11 @@ public class TemplateRepository : ITemplateRepository
             {
                 if (grid[r, c] != 0 && !visited[r, c])
                 {
-                    // Found a new cluster, start flood-fill
                     int minRow = r, minCol = c;
                     FloodFill(r, c, ref minRow, ref minCol);
-                    
-                    int gridSize = block.First().Length;
-                    int centerRow = gridSize / 2;
-                    int centerCol = gridSize / 2;
+
+                    int centerRow = rows / 2;
+                    int centerCol = cols / 2;
 
                     topLeftPositions.Add((grid[r, c], minCol - centerCol, minRow - centerRow));
                 }
@@ -521,4 +442,5 @@ public class TemplateRepository : ITemplateRepository
 
         return topLeftPositions;
     }
+
 }

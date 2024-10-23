@@ -87,114 +87,131 @@ namespace DropletsInMotion.Application.Services
             int maxBoundingX = Math.Max(commandX, Math.Max(d1X, d2X));
             int maxBoundingY = Math.Max(commandY, Math.Max(d1Y, d2Y));
 
-            Console.WriteLine($"Bounding box: {((minBoundingX, minBoundingY), (maxBoundingX, maxBoundingY))}");
 
-            int bestScore = int.MaxValue;
-            ScheduledPosition bestPositions = null;
+            int boardWidth = contaminationMap.GetLength(0);
+            int boardHeight = contaminationMap.GetLength(1);
 
-            for (int x = minBoundingX; x <= maxBoundingX; x++)
+
+            int increment = 0;
+
+            while (maxBoundingX < boardWidth && maxBoundingY < boardHeight && minBoundingX > 0 && minBoundingY > 0)
             {
-                for (int y = minBoundingY; y <= maxBoundingY; y++)
+                minBoundingX -= increment;
+                minBoundingY -= increment;
+                maxBoundingX += increment;
+                maxBoundingY += increment;
+
+
+                int bestScore = int.MaxValue;
+                ScheduledPosition bestPositions = null;
+
+                for (int x = minBoundingX; x <= maxBoundingX; x++)
                 {
-                    byte contamination = contaminationMap[x, y];
-                    if (contamination != 0 && contamination != 255 &&
-                        contamination != d1SubstanceId && contamination != d2SubstanceId)
+                    for (int y = minBoundingY; y <= maxBoundingY; y++)
                     {
-                        continue;
+                        byte contamination = contaminationMap[x, y];
+                        if (contamination != 0 && contamination != 255 &&
+                            contamination != d1SubstanceId && contamination != d2SubstanceId)
+                        {
+                            continue;
+                        }
+
+
+                        int estimatedMinScore = Math.Abs(x - commandX) + Math.Abs(y - commandY);
+                        if (estimatedMinScore >= bestScore)
+                        {
+                            continue;
+                        }
+
+                        var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates, command);
+
+
+                        // Out of bounds
+                        if (optimalPositions.X1 < minBoundingX || optimalPositions.X1 > maxBoundingX ||
+                            optimalPositions.Y1 < minBoundingY || optimalPositions.Y1 > maxBoundingY ||
+                            optimalPositions.X2 < minBoundingX || optimalPositions.X2 > maxBoundingX ||
+                            optimalPositions.Y2 < minBoundingY || optimalPositions.Y2 > maxBoundingY)
+                        {
+                            continue;
+                        }
+
+                        byte d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
+                            optimalPositions.Y1];
+                        byte d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
+                            optimalPositions.Y2];
+                        if (d1OptimalPositionContamination == 255 || d1OptimalPositionContamination != 0 &&
+                            d1OptimalPositionContamination != d1SubstanceId)
+                        {
+                            continue;
+                        }
+                        if (d2OptimalPositionContamination == 255 || d2OptimalPositionContamination != 0 &&
+                            d2OptimalPositionContamination != d2SubstanceId)
+                        {
+                            continue;
+                        }
+
+                        // Same position
+                        if (optimalPositions.X1 == optimalPositions.X2 && optimalPositions.Y1 == optimalPositions.Y2)
+                        {
+                            continue;
+                        }
+
+                        int d1DistanceToOrigin = Math.Abs(optimalPositions.X1 - d1X) +
+                                                 Math.Abs(optimalPositions.Y1 - d1Y);
+
+                        int d2DistanceToOrigin = Math.Abs(optimalPositions.X2 - d2X) +
+                                                 Math.Abs(optimalPositions.Y2 - d2Y);
+
+                        int distanceToTarget = Math.Abs(x - commandX) +
+                                               Math.Abs(y - commandY);
+
+
+
+
+
+                        int totalScore = d1DistanceToOrigin + d2DistanceToOrigin + distanceToTarget;
+
+
+                        bool d1CrossesD2 = d1X < d2X && optimalPositions.X1 > optimalPositions.X2 ||
+                                           d1X > d2X && optimalPositions.X1 < optimalPositions.X2 ||
+                                           d1Y < d2Y && optimalPositions.Y1 > optimalPositions.Y2 ||
+                                           d1Y > d2Y && optimalPositions.Y1 < optimalPositions.Y2;
+
+                        bool d2CrossesD1 = d2X < d1X && optimalPositions.X2 > optimalPositions.X1 ||
+                                           d2X > d1X && optimalPositions.X2 < optimalPositions.X1 ||
+                                           d2Y < d1Y && optimalPositions.Y2 > optimalPositions.Y1 ||
+                                           d2Y > d1Y && optimalPositions.Y2 < optimalPositions.Y1;
+
+                        if (d1CrossesD2 || d2CrossesD1)
+                        {
+                            totalScore += 5;
+                        }
+
+                        if (totalScore >= bestScore)
+                        {
+                            continue;
+                        }
+
+                        bestScore = totalScore; 
+                        bestPositions = optimalPositions;
                     }
-
-
-                    int estimatedMinScore = Math.Abs(x - commandX) + Math.Abs(y - commandY);
-                    if (estimatedMinScore >= bestScore)
-                    {
-                        continue;
-                    }
-
-                    var optimalPositions = FindOptimalDirections(x, y, d1X, d1Y, d2X, d2Y, templates, command);
-
-
-                    // Out of bounds
-                    if (optimalPositions.X1 < minBoundingX || optimalPositions.X1 > maxBoundingX ||
-                        optimalPositions.Y1 < minBoundingY || optimalPositions.Y1 > maxBoundingY ||
-                        optimalPositions.X2 < minBoundingX || optimalPositions.X2 > maxBoundingX ||
-                        optimalPositions.Y2 < minBoundingY || optimalPositions.Y2 > maxBoundingY)
-                    {
-                        continue;
-                    }
-
-                    byte d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
-                        optimalPositions.Y1];
-                    byte d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
-                        optimalPositions.Y2];
-                    if (d1OptimalPositionContamination == 255 || d1OptimalPositionContamination != 0 &&
-                        d1OptimalPositionContamination != d1SubstanceId)
-                    {
-                        continue;
-                    }
-                    if (d2OptimalPositionContamination == 255 || d2OptimalPositionContamination != 0 &&
-                        d2OptimalPositionContamination != d2SubstanceId)
-                    {
-                        continue;
-                    }
-
-                    // Same position
-                    if (optimalPositions.X1 == optimalPositions.X2 && optimalPositions.Y1 == optimalPositions.Y2)
-                    {
-                        continue;
-                    }
-
-                    int d1DistanceToOrigin = Math.Abs(optimalPositions.X1 - d1X) +
-                                             Math.Abs(optimalPositions.Y1 - d1Y);
-
-                    int d2DistanceToOrigin = Math.Abs(optimalPositions.X2 - d2X) +
-                                             Math.Abs(optimalPositions.Y2 - d2Y);
-
-                    int distanceToTarget = Math.Abs(x - commandX) +
-                                           Math.Abs(y - commandY);
-
-
-
-
-
-                    int totalScore = d1DistanceToOrigin + d2DistanceToOrigin + distanceToTarget;
-
-
-                    bool d1CrossesD2 = d1X < d2X && optimalPositions.X1 > optimalPositions.X2 ||
-                                       d1X > d2X && optimalPositions.X1 < optimalPositions.X2 ||
-                                       d1Y < d2Y && optimalPositions.Y1 > optimalPositions.Y2 ||
-                                       d1Y > d2Y && optimalPositions.Y1 < optimalPositions.Y2;
-
-                    bool d2CrossesD1 = d2X < d1X && optimalPositions.X2 > optimalPositions.X1 ||
-                                       d2X > d1X && optimalPositions.X2 < optimalPositions.X1 ||
-                                       d2Y < d1Y && optimalPositions.Y2 > optimalPositions.Y1 ||
-                                       d2Y > d1Y && optimalPositions.Y2 < optimalPositions.Y1;
-
-                    if (d1CrossesD2 || d2CrossesD1)
-                    {
-                        totalScore += 5;
-                    }
-
-                    if (totalScore >= bestScore)
-                    {
-                        continue;
-                    }
-
-                    bestScore = totalScore;
-                    bestPositions = optimalPositions;
                 }
+
+
+                if (bestPositions != null)
+                {
+                    Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
+                                      $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
+
+                    return bestPositions;
+                }
+
+                increment++;
             }
 
-            if (bestPositions == null)
-            {
-                throw new Exception("No optimal position found"); // TODO: THIS IS NOT VERY DESCRIBING
-            }
+            throw new Exception($"There was no positions where command \"{command}\" could be applied!");
 
-            Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
-                              $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
-            //throw new Exception("");
-            
 
-            return bestPositions;
         }
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y,
@@ -209,7 +226,7 @@ namespace DropletsInMotion.Application.Services
                     return FindOptimalDirections(originX, originY, target1X, target1Y, target2X, target2Y, templates, splitCommand);
 
                 default:
-                    throw new Exception("No schedular case for command");
+                    throw new Exception($"Schedular cannot schedule the command: {command}");
             }
         }
 
@@ -292,10 +309,6 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var template in templates)
             {
-                //Console.WriteLine("*******************************************");
-                //Console.WriteLine(template.ContaminationPositions.Count);
-
-
                 int totalCost = 0;
 
                 totalCost += Math.Abs(d1XDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].x) + Math.Abs(d1YDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].y);
@@ -312,8 +325,6 @@ namespace DropletsInMotion.Application.Services
                 }
 
             }
-
-
 
             if (chosenTemplate == null)
             {
