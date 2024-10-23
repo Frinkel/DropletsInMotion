@@ -9,6 +9,10 @@ public interface ITemplateRepository
     void AddUnravel(UnravelTemplate unravelTemplate, string template);
     void AddDeclare(DeclareTemplate declareTemplate, string template);
 
+    void AddGrow(GrowTemplate growTemplate, string template);
+
+    void AddShrink(ShrinkTemplate shrinkTemplate, string template);
+
 
     void Initialize();
     List<SplitTemplate>? SplitTemplates { get; }
@@ -16,5 +20,7 @@ public interface ITemplateRepository
     List<UnravelTemplate>? UnravelTemplates { get; }
     List<MergeTemplate> MergeTemplates { get; }
     List<DeclareTemplate> DeclareTemplates { get; }
+    List<GrowTemplate> GrowTemplates { get; }
+    List<ShrinkTemplate> ShrinkTemplates { get; }
     void AddMerge(MergeTemplate mergeTemplate, string template);
 }

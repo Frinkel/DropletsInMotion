@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
@@ -182,7 +183,7 @@ public class State
 
         //double scaleFactor = 1;
 
-
+        var unravelActions = new List<BoardAction>();
         State firstState = chosenStates.First();
         foreach (var actionKvp in firstState.JointAction)
         {
@@ -190,8 +191,9 @@ public class State
             {
                 string dropletName = actionKvp.Key;
                 Agent agent = firstState.Parent.Agents[dropletName];
-                var unrawelActions = Unravel(agent, actionKvp.Value, currentTime);
-                finalActions.AddRange(unrawelActions);
+                if(agent.SnakeBody.Count == 1) {
+                    unravelActions.AddRange( Unravel(agent, actionKvp.Value, currentTime));
+                }
             }
         }
 
@@ -207,23 +209,33 @@ public class State
                     continue;
                 }
                 string dropletName = actionKvp.Key;
-                string routeAction = actionKvp.Value.Name;
+                //string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
                 Agent agent = agents[dropletName];
-                double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume) + 1, totalStates);
+                Agent nextAgent = state.Agents[dropletName];
+                //double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume) + 1, totalStates);
 
-                List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agent, currentTimes[dropletName], scaleFactor);
-                var totalTime = translatedActions.Last().Time - currentTimes[dropletName];
-                currentTimes[dropletName] += (totalTime / scaleFactor);
+                //List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agent, currentTimes[dropletName], scaleFactor);
+                //var totalTime = translatedActions.Last().Time - currentTimes[dropletName];
+                //currentTimes[dropletName] += (totalTime / scaleFactor);
 
-                finalActions.AddRange(translatedActions);
+                //finalActions.AddRange(translatedActions);
+
+
+                finalActions.AddRange(ApplySnake(agent, nextAgent, actionKvp.Value, currentTime)); 
+
 
             }
-
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
+
             //var totalTime = finalActions.Last().Time - currentTime;
             //currentTime = currentTime + (totalTime / scaleFactor);
+            currentTime = finalActions.Last().Time;
         }
+
+        finalActions = finalActions.OrderBy(b => b.Time).ToList();
+        currentTime = finalActions.Last().Time;
+
 
         State lastState = chosenStates.Last();
         foreach (var actionKvp in lastState.JointAction)
@@ -232,15 +244,103 @@ public class State
             {
                 string dropletName = actionKvp.Key;
                 Agent agent = lastState.Agents[dropletName];
-                var rawelActions = Rawel(agent, actionKvp.Value, finalActions.Last().Time);
-                finalActions.AddRange(rawelActions);
+
+                IDropletCommand dropletCommand =
+                    lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
+
+                if(IsGoalState(dropletCommand, agent))
+                {
+                    Console.WriteLine("sdkjfskdj" + currentTime);
+                    var shrinkActions = ShrinkSnake(agent, currentTime);
+
+                    //if (shrinkActions.Count == 0)
+                    //{
+                    //    continue;
+                    //}
+                    //double shrinkFinalTime = shrinkActions.Last().Time;
+
+                    finalActions.AddRange(shrinkActions);
+                    Console.WriteLine("232332:" + currentTime);
+                    var ravelActions = Rawel(agent, actionKvp.Value, currentTime);
+                    finalActions.AddRange(ravelActions);
+                    
+                }
+
+                
+
             }
         }
+
+        finalActions.AddRange(unravelActions);
         finalActions = finalActions.OrderBy(b => b.Time).ToList();
 
         return finalActions;
 
     }
+
+    private List<BoardAction> ShrinkSnake(Agent agent, double time)
+    {
+        var boardActions = new List<BoardAction>();
+
+        var snakeBody = agent.SnakeBody;
+
+        while (snakeBody.Count > 1)
+        {
+            var last = snakeBody.Last();
+            agent.RemoveFromSnake();
+            var nextToLast = snakeBody.Last();
+            string direction = FindDirection(nextToLast, last);
+
+            ShrinkTemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+            boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[last.x][last.y].Id, time, 1));
+            time = boardActions.Last().Time;
+        }
+
+        return boardActions;
+    }
+
+    private List<BoardAction> ApplySnake(Agent agent, Agent nextAgent, Types.RouteAction action, double time)
+    {
+        var boardActions = new List<BoardAction>();
+
+        GrowTemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+        if (growTemplate == null)
+        {
+            throw new Exception($"No grow template found for agent {agent.DropletName}");
+        }
+
+        boardActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1));
+
+
+        if (agent.SnakeBody.Count == nextAgent.SnakeBody.Count)
+        {
+            var tailPosition = agent.SnakeBody.Last();
+            var tailPositionNext = nextAgent.SnakeBody.Last();
+            string direction = FindDirection(tailPositionNext, tailPosition);
+
+            ShrinkTemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+            boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[tailPosition.x][tailPosition.y].Id, time, 1));
+        }
+
+        return boardActions;
+    }
+
+    private string FindDirection((int x, int y) tail1, (int x, int y) tail2)
+    {
+        var xDiff = tail1.x - tail2.x;
+        var yDiff = tail1.y - tail2.y;
+
+        string direction = (xDiff, yDiff) switch
+        {
+            ( > 0, _) => "moveRight",
+            ( < 0, _) => "moveLeft",
+            (_, > 0) => "moveDown",
+            (_, < 0) => "moveUp",
+            _ => throw new InvalidOperationException("No movement detected or invalid movement.")
+        };
+        return direction;
+    }
+
 
     private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
     {
@@ -263,7 +363,7 @@ public class State
             return new List<BoardAction>();
         }
 
-        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time - ravelTemplate.Duration, 1);
+        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
     }
 
 
@@ -574,6 +674,19 @@ public class State
         {
             case Move moveCommand:
                 var agent = Agents[moveCommand.GetInputDroplets().First()];
+                return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
+            default:
+                throw new InvalidOperationException("Trying to determine goalstate for unknown dropletCommand!");
+                break;
+        }
+
+    }
+
+    public bool IsGoalState(IDropletCommand dropletCommand, Agent agent)
+    {
+        switch (dropletCommand)
+        {
+            case Move moveCommand:
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
                 throw new InvalidOperationException("Trying to determine goalstate for unknown dropletCommand!");

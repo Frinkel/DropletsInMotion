@@ -39,6 +39,10 @@ public class TemplateRepository : ITemplateRepository
 
     public List<DeclareTemplate> DeclareTemplates { get; private set; } = new List<DeclareTemplate>();
 
+    public List<GrowTemplate> GrowTemplates { get; private set; } = new List<GrowTemplate>();
+
+    public List<ShrinkTemplate> ShrinkTemplates { get; private set; } = new List<ShrinkTemplate>();
+
 
     private List<Block> _blocks = new();
     private static readonly string[] Separator = ["\r\n", "\r", "\n"];
@@ -191,6 +195,26 @@ public class TemplateRepository : ITemplateRepository
         DeclareTemplates.Add(declareTemplate);
 
         Console.WriteLine(declareTemplate);
+    }
+
+    public void AddGrow(GrowTemplate growTemplate, string template)
+    {
+        // Find all the blocks and actions
+        growTemplate.Actions = ParseTemplateFile(template);
+
+        GrowTemplates.Add(growTemplate);
+
+        Console.WriteLine(growTemplate);
+    }
+
+    public void AddShrink(ShrinkTemplate shrinkTemplate, string template)
+    {
+        // Find all the blocks and actions
+        shrinkTemplate.Actions = ParseTemplateFile(template);
+
+        ShrinkTemplates.Add(shrinkTemplate);
+
+        Console.WriteLine(shrinkTemplate);
     }
 
 

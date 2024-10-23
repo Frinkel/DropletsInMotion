@@ -167,6 +167,7 @@ public class RouterService : IRouterService
                 var agent = agentKvp.Value;
                 agents[agentKvp.Key].PositionX = agent.PositionX;
                 agents[agentKvp.Key].PositionY = agent.PositionY;
+                agents[agentKvp.Key].SnakeBody = agent.SnakeBody;
             }
             else
             {
