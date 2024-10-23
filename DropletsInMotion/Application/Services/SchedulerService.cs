@@ -88,8 +88,8 @@ namespace DropletsInMotion.Application.Services
             int maxBoundingY = Math.Max(commandY, Math.Max(d1Y, d2Y));
 
 
-            int boardWidth = contaminationMap.GetLength(1);
-            int boardHeight = contaminationMap.GetLength(0);
+            int boardWidth = contaminationMap.GetLength(0);
+            int boardHeight = contaminationMap.GetLength(1);
 
 
             int increment = 0;

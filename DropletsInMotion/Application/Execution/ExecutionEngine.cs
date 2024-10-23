@@ -429,8 +429,6 @@ namespace DropletsInMotion.Application.Execution
                             finalPositions.Add(splitByVolumeCommand.OutputName1, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
 
                             t.FinalPositions = finalPositions;
-                            //t.InitialPositions = template.InitialPositions;
-                            //t.Actions = template.Actions;
 
                             eligibleSplitTemplates.Add(t);
                         }
@@ -445,9 +443,6 @@ namespace DropletsInMotion.Application.Execution
                             finalPositions.Add(splitByVolumeCommand.OutputName2, (template.FinalPositions[template.RatioRelation.Last().Key].x, template.FinalPositions[template.RatioRelation.Last().Key].y));
 
                             t.FinalPositions = finalPositions;
-                            //t.InitialPositions = template.InitialPositions;
-                            //t.Actions = template.Actions;
-                            //t.ContaminationPositions = template.ContaminationPositions;
 
                             eligibleSplitTemplates.Add(t);
                         }
@@ -457,7 +452,7 @@ namespace DropletsInMotion.Application.Execution
 
                 if (!eligibleSplitTemplates.Any())
                 {
-                    throw new Exception("There were no eligible split templates"); // TODO: Maybe more saying?
+                    throw new Exception($"There were no eligible split templates for command {splitByVolumeCommand}");
                 }
 
                 var splitPositions = _schedulerService.ScheduleCommand(splitByVolumeCommand, agents, ContaminationMap, eligibleSplitTemplates);
