@@ -342,6 +342,45 @@ public class State
     }
 
 
+    private List<BoardAction> Unravel2(Agent agent, Agent nextAgent, double time)
+    {
+        (int x, int y) newPosition = (nextAgent.PositionX, nextAgent.PositionY);
+
+        if (!agent.GetAllAgentPositions().Contains(newPosition))
+        {
+            UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.FinalPositions.First().Value == (agent.PositionX, agent.PositionY) && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+
+            if (unravelTemplate == null)
+            {
+                return new List<BoardAction>();
+            }
+
+            return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
+        }
+
+        return null;
+    }
+
+    private List<BoardAction> ravel2(Agent finalAgent, Agent nextAgent, double time)
+    {
+        (int x, int y) newPosition = (nextAgent.PositionX, nextAgent.PositionY);
+
+        if (finalAgent.GetAllAgentPositions().Contains(newPosition))
+        {
+            RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.FinalPositions.First().Value == newPosition && t.MinSize <= finalAgent.Volume && finalAgent.Volume < t.MaxSize) ?? null;
+
+            if (ravelTemplate == null)
+            {
+                return new List<BoardAction>();
+            }
+
+            return ravelTemplate.Apply(_platformRepository.Board[nextAgent.PositionX][nextAgent.PositionY].Id, time, 1);
+        }
+
+        return null;
+    }
+
+
     private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
     {
         UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
