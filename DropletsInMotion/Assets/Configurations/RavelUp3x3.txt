@@ -1,8 +1,7 @@
 {
 	"name": "Ravel Up 3x3",
 	"minSize": 2800,
-	"maxSize": 5000,
-	"direction": "moveUp"
+	"maxSize": 5000
 }
 ?
 0.0,
