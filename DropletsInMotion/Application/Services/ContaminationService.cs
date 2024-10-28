@@ -120,7 +120,7 @@ namespace DropletsInMotion.Application.Services
             int mergeX = mergePositions.OriginX;
             int mergeY = mergePositions.OriginY;
 
-            int size = GetAgentSize(outputAgent);
+            int size = outputAgent.GetAgentSize();
 
             // Overwrite initial area with new agent substance
             for (int i = -1; i <= size; i++)
@@ -241,7 +241,7 @@ namespace DropletsInMotion.Application.Services
             var x = agent.PositionX;
             var y = agent.PositionY;
 
-            int size = GetAgentSize(agent);
+            int size = agent.GetAgentSize();
 
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
@@ -277,20 +277,20 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        private int GetAgentSize(Agent agent)
-        {
-            int size = 1;
-            if (agent.Volume > _platformRepository.MinSize2x2)
-            {
-                size = 2;
-            }
-            if (agent.Volume > _platformRepository.MinSize3x3)
-            {
-                size = 3;
-            }
+        //private int GetAgentSize(Agent agent)
+        //{
+        //    int size = 1;
+        //    if (agent.Volume > _platformRepository.MinSize2x2)
+        //    {
+        //        size = 2;
+        //    }
+        //    if (agent.Volume > _platformRepository.MinSize3x3)
+        //    {
+        //        size = 3;
+        //    }
 
-            return size;
-        }
+        //    return size;
+        //}
 
 
         // TEMP FUNCTIONS

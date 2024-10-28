@@ -42,6 +42,8 @@ namespace DropletsInMotion.Presentation.Services
             LoadRavelTemplates();
             LoadUnravelTemplates();
             LoadDeclareTemplates();
+            LoadGrowTemplates();
+            LoadShrinkTemplates();
 
         }
 
@@ -114,6 +116,55 @@ namespace DropletsInMotion.Presentation.Services
                 Console.WriteLine($"Added ravel template: {ravelTemplate.Name}");
 
                 _templateRepository.AddRavel(ravelTemplate, template);
+            }
+        }
+
+        private void LoadGrowTemplates()
+        {
+            string growFolderPath = _userService.ConfigurationPath + "/Templates/Move/Grow";
+
+            List<string> growPaths = _fileService.GetFilesFromFolder(growFolderPath);
+            foreach (var growPath in growPaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(growPath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"Grow template \"{growPaths}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                GrowTemplate growTemplate = JsonSerializer.Deserialize<GrowTemplate>(content) ?? throw new InvalidOperationException("A grow template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added grow template: {growTemplate.Name}");
+
+                _templateRepository.AddGrow(growTemplate, template);
+            }
+        }
+
+
+        private void LoadShrinkTemplates()
+        {
+            string shrinkFolderPath = _userService.ConfigurationPath + "/Templates/Move/Shrink";
+
+            List<string> shrinkPaths = _fileService.GetFilesFromFolder(shrinkFolderPath);
+            foreach (var shrinkPath in shrinkPaths)
+            {
+                string[] contentArr = _fileService.ReadFileFromPath(shrinkPath).Split("?");
+
+                if (contentArr.Length < 2)
+                {
+                    throw new InvalidOperationException($"shrink template \"{shrinkPaths}\" is missing information!");
+                }
+
+                string content = contentArr[0];
+                string template = contentArr[1];
+                ShrinkTemplate shrinkTemplate = JsonSerializer.Deserialize<ShrinkTemplate>(content) ?? throw new InvalidOperationException("A shrink template configuration did not correspond to the expected format!");
+
+                Console.WriteLine($"Added shrink template: {shrinkTemplate.Name}");
+
+                _templateRepository.AddShrink(shrinkTemplate, template);
             }
         }
 
@@ -278,6 +329,7 @@ namespace DropletsInMotion.Presentation.Services
             _platformRepository.MinSize1x1 = platformInfo.Movement.MinSize1x1;
             _platformRepository.MinSize2x2 = platformInfo.Movement.MinSize2x2;
             _platformRepository.MinSize3x3 = platformInfo.Movement.MinSize3x3;
+
 
         }
 
