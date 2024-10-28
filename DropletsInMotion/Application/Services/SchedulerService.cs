@@ -38,10 +38,6 @@ namespace DropletsInMotion.Application.Services
                     byte d2SubstanceId = agents[d2.DropletName].SubstanceId;
 
 
-
-                    Console.WriteLine($"a1 {d1}");
-                    Console.WriteLine($"a2 {d2}");
-
                     var optimalPositions = FindOptimalPositions(mergeCommand.PositionX, mergeCommand.PositionY,
                         d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, templates, mergeCommand);
 
@@ -162,8 +158,8 @@ namespace DropletsInMotion.Application.Services
                         int d2DistanceToOrigin = Math.Abs(optimalPositions.X2 - d2X) +
                                                  Math.Abs(optimalPositions.Y2 - d2Y);
 
-                        int distanceToTarget = Math.Abs(x - commandX) +
-                                               Math.Abs(y - commandY);
+                        int distanceToTarget = Math.Abs(optimalPositions.SingularX - commandX) +
+                                               Math.Abs(optimalPositions.SingularY - commandY);
 
 
 
@@ -232,10 +228,7 @@ namespace DropletsInMotion.Application.Services
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, Merge mergeCommand)
         {
-            int d1XDiff = originX - target1X;
-            int d1YDiff = originY - target1Y;
-            int d2XDiff = originX - target2X;
-            int d2YDiff = originY - target2Y;
+            
 
             ITemplate chosenTemplate = null;
             int cost = Int32.MaxValue;
@@ -246,6 +239,11 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var template in templates)
             {
+                int d1XDiff = originX - target1X + template.FinalPositions.First().Value.x;
+                int d1YDiff = originY - target1Y + template.FinalPositions.First().Value.y;
+                int d2XDiff = originX - target2X + template.FinalPositions.First().Value.x;
+                int d2YDiff = originY - target2Y + template.FinalPositions.First().Value.y;
+
                 int totalCost = 0;
 
                 totalCost += Math.Abs(d1XDiff + template.InitialPositions.First().Value.x) + Math.Abs(d1YDiff + template.InitialPositions.First().Value.y);
@@ -295,11 +293,6 @@ namespace DropletsInMotion.Application.Services
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, SplitByVolume splitByVolumeCommand)
         {
-            int d1XDiff = originX - target1X;
-            int d1YDiff = originY - target1Y;
-            int d2XDiff = originX - target2X;
-            int d2YDiff = originY - target2Y;
-
             ITemplate chosenTemplate = null;
             int cost = Int32.MaxValue;
             int d1OptimalX = target1X;
@@ -309,6 +302,12 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var template in templates)
             {
+                int d1XDiff = originX - target1X + template.InitialPositions.First().Value.x;
+                int d1YDiff = originY - target1Y + template.InitialPositions.First().Value.y;
+                int d2XDiff = originX - target2X + template.InitialPositions.First().Value.x;
+                int d2YDiff = originY - target2Y + template.InitialPositions.First().Value.y;
+
+
                 int totalCost = 0;
 
                 totalCost += Math.Abs(d1XDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].x) + Math.Abs(d1YDiff + template.FinalPositions[splitByVolumeCommand.OutputName1].y);

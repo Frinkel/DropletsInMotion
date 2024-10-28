@@ -198,15 +198,16 @@ public class TemplateRepository : ITemplateRepository
     private Dictionary<string, List<(int x, int y)>> GetClusterPositions(Block block)
     {
         int rows = block.Template.Length;
-        int cols = block.Template[0].Length;
+        int cols = block.Template[0].Trim().Length;
         int[,] grid = new int[rows, cols];
 
         // Parse the block into a 2D array
         for (int i = 0; i < rows; i++)
         {
+            var line = block.Template[i].Trim();
             for (int j = 0; j < cols; j++)
             {
-                grid[i, j] = block.Template[i][j] - '0';  // Convert '0'/'1' characters to integers
+                grid[i, j] = line[j] - '0';  // Convert '0'/'1' characters to integers
             }
         }
 
@@ -276,25 +277,45 @@ public class TemplateRepository : ITemplateRepository
 
 
 
+
     private List<BoardAction> ParseTemplateFile(string template)
     {
         _blocks.Clear();
         var boardActions = new List<BoardAction>();
         int boardWidth = _platformRepository.Board.Length;
-        string[] stringBlocks = template.Split(";");
+        string[] stringBlocks = template.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
         string[] previousBlock = null;
+        int blockRows = 0;
+        int blockCols = 0;
 
+        // First, parse all the blocks and ensure they have the same size
         foreach (var stringBlock in stringBlocks)
         {
-            if (string.IsNullOrWhiteSpace(stringBlock))
+            var parts = stringBlock.Trim().Split(",", 2);
+            if (parts.Length < 2)
                 continue;
 
-            var parts = stringBlock.Split(",");
             var timeOffset = double.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
             var blockTemplate = parts[1];
 
             var lines = blockTemplate.Trim().Split(Separator, StringSplitOptions.None);
+            lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray(); // Remove empty lines
+
+            if (blockRows == 0 && blockCols == 0)
+            {
+                // Initialize block size based on the first block
+                blockRows = lines.Length;
+                blockCols = lines[0].Trim().Length;
+            }
+            else
+            {
+                // Validate that the block size matches the initial block size
+                if (lines.Length != blockRows || lines.Any(line => line.Trim().Length != blockCols))
+                {
+                    throw new InvalidOperationException("All blocks within a template must have the same size.");
+                }
+            }
 
             Block block = new Block(lines, timeOffset);
             _blocks.Add(block);
@@ -303,25 +324,22 @@ public class TemplateRepository : ITemplateRepository
         foreach (var block in _blocks)
         {
             var lines = block.Template;
-            int blockRows = lines.Length;
-            int blockCols = lines[0].Trim().Length;
-
             int centerRow = blockRows / 2;
             int centerCol = blockCols / 2;
 
             for (int i = 0; i < blockRows; i++)
             {
-                var line = lines[i];
+                var line = lines[i].Trim();
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                char[] chars = line.Trim().ToCharArray();
-                char[] prevChars = previousBlock != null && previousBlock.Length > i ? previousBlock[i].Trim().ToCharArray() : new char[blockCols];
+                char[] chars = line.ToCharArray();
+                char[] prevChars = previousBlock != null ? previousBlock[i].Trim().ToCharArray() : new string('0', blockCols).ToCharArray();
 
-                for (int colIndex = 0; colIndex < chars.Length; colIndex++)
+                for (int colIndex = 0; colIndex < blockCols; colIndex++)
                 {
                     int action = chars[colIndex] - '0';
-                    int prevAction = prevChars.Length > colIndex ? prevChars[colIndex] - '0' : 0;
+                    int prevAction = prevChars[colIndex] - '0';
 
                     int electrodeIdOffset = (i - centerRow) * boardWidth + (colIndex - centerCol);
 
@@ -337,24 +355,27 @@ public class TemplateRepository : ITemplateRepository
             }
             previousBlock = block.Template;
         }
+
         boardActions = boardActions.OrderBy(b => b.Time).ToList();
         return boardActions;
     }
+
 
 
     // Method to find clusters and return their top-left positions
     public List<(int id, int x, int y)> FindClusters(string[] block)
     {
         int rows = block.Length;
-        int cols = block[0].Length;
+        int cols = block[0].Trim().Length;
         int[,] grid = new int[rows, cols];
 
         // Parse the block into a 2D array
         for (int i = 0; i < rows; i++)
         {
+            var line = block[i].Trim();
             for (int j = 0; j < cols; j++)
             {
-                grid[i, j] = block[i][j] - '0';  // Convert '0'/'1' characters to integers
+                grid[i, j] = line[j] - '0';  // Convert '0'/'1' characters to integers
             }
         }
 
@@ -418,5 +439,6 @@ public class TemplateRepository : ITemplateRepository
 
         return topLeftPositions;
     }
+
 
 }
