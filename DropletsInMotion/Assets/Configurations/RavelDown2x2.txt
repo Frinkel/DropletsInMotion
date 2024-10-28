@@ -1,8 +1,7 @@
 {
 	"name": "Ravel Down 2x2",
 	"minSize": 1000,
-	"maxSize": 2800,
-	"direction": "moveDown"
+	"maxSize": 2800
 }
 ?
 0.0,

@@ -1,8 +1,7 @@
 {
 	"name": "Ravel Right 3x3",
 	"minSize": 2800,
-	"maxSize": 5000,
-	"direction": "moveRight"
+	"maxSize": 5000
 }
 ?
 0.0,

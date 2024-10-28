@@ -1,8 +1,7 @@
 {
 	"name": "Ravel Left 2x2",
 	"minSize": 1000,
-	"maxSize": 2800,
-	"direction": "moveLeft"
+	"maxSize": 2800
 }
 ?
 0.0,

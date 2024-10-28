@@ -1,9 +1,8 @@
 {
 	"name": "Ravel Down 3x3",
 	"minSize": 2800,
-	"maxSize": 5000,
-	"direction": "moveDown"
-}
+	"maxSize": 5000
+	}
 ?
 0.0,
 00000
