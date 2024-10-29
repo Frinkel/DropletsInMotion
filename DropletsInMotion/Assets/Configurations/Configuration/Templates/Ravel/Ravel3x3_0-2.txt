@@ -1,5 +1,5 @@
 {
-	"name": "Ravel 3x3 0 0",
+	"name": "Ravel 3x3 0 2",
 	"minSize": 2800,
 	"maxSize": 5000
 }

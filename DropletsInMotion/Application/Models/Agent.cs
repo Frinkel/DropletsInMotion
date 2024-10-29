@@ -191,11 +191,11 @@ namespace DropletsInMotion.Application.Models
         public int GetAgentSize()
         {
             int size = 1;
-            if (Volume > _minSize2x2)
+            if (Volume >= _minSize2x2)
             {
                 size = 2;
             }
-            if (Volume > _minSize3x3)
+            if (Volume >= _minSize3x3)
             {
                 size = 3;
             }

@@ -16,14 +16,12 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         [JsonPropertyName("maxSize")]
         public required int MaxSize { get; set; }
 
-        [JsonPropertyName("direction")]
-        public required string Direction { get; set; }
         public double Duration { get; set; }
         public List<BoardAction>? Actions { get; set; }
+        public Dictionary<string, (int x, int y)> FinalPositions { get; set; } = new Dictionary<string, (int x, int y)>();
 
-        public Dictionary<string, (int x, int y)> FinalPositions => throw new NotImplementedException();
+        public Dictionary<string, (int x, int y)> InitialPositions { get; set; } = new Dictionary<string, (int x, int y)>();
 
-        public Dictionary<string, (int x, int y)> InitialPositions => throw new NotImplementedException();
         public List<Dictionary<string, List<(int x, int y)>>> Blocks { get; set; } = new List<Dictionary<string, List<(int x, int y)>>>();
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)

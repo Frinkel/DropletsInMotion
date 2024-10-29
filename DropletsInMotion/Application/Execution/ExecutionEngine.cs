@@ -192,7 +192,6 @@ namespace DropletsInMotion.Application.Execution
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
-                Console.WriteLine($"Compiler time {Time}");
 
                 await SendActions(boardActions);
 
@@ -325,7 +324,7 @@ namespace DropletsInMotion.Application.Execution
                     Time = boardActions.Last().Time; 
                 }
 
-
+                Console.WriteLine("thetime" + boardActions.Last().Time);
 
                 await _communicationEngine.SendActions(boardActions);
             }

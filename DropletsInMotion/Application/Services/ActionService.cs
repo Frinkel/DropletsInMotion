@@ -192,7 +192,7 @@ namespace DropletsInMotion.Application.Services
 
             double scaleFactor = (int)(inputDroplet.Volume / _platformRepository.MinimumMovementVolume);
 
-            mixActions.AddRange(_moveHandler.Unravel(inputDroplet, Types.RouteAction.MoveRight, time1));
+            //mixActions.AddRange(_moveHandler.Unravel(inputDroplet, Types.RouteAction.MoveRight, time1));
 
             for (int i = 0; i < mixCommand.RepeatTimes; i++)
             {
@@ -209,7 +209,7 @@ namespace DropletsInMotion.Application.Services
 
             mixActions = mixActions.OrderBy(b => b.Time).ToList();
 
-            mixActions.AddRange(_moveHandler.Ravel(inputDroplet, Types.RouteAction.MoveUp, mixActions.Last().Time));
+            //mixActions.AddRange(_moveHandler.Ravel(inputDroplet, Types.RouteAction.MoveUp, mixActions.Last().Time));
             mixActions = mixActions.OrderBy(b => b.Time).ToList();
 
             return mixActions;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
@@ -172,32 +173,56 @@ public class State
         List<BoardAction> finalActions = new List<BoardAction>();
 
         Dictionary<string, double> currentTimes = new Dictionary<string, double>();
+        Dictionary<string, bool> hasRaveled = new Dictionary<string, bool>();
+        Dictionary<string, bool> hasUnraveled = new Dictionary<string, bool>();
 
         foreach (var actionKvp in chosenStates[0].JointAction)
         {
             currentTimes[actionKvp.Key] = time;
         }
-        
+
+        State lastState = chosenStates.Last();
+        foreach (var actionKvp in lastState.JointAction)
+        {
+            IDropletCommand dropletCommand =
+                lastState.Commands.Find(c => c.GetInputDroplets().First() == actionKvp.Key);
+
+            if (IsGoalState(dropletCommand, lastState.Agents[actionKvp.Key]))
+            {
+                hasRaveled[actionKvp.Key] = false;
+            }
+            else
+            {
+                hasRaveled[actionKvp.Key] = true;
+            }
+            
+        }
+
+
+
 
         double currentTime = time;
 
-        //double scaleFactor = 1;
-
-        var unravelActions = new List<BoardAction>();
         State firstState = chosenStates.First();
         foreach (var actionKvp in firstState.JointAction)
         {
-            if (actionKvp.Value != Types.RouteAction.NoOp)
-            {
-                string dropletName = actionKvp.Key;
+           string dropletName = actionKvp.Key;
                 Agent agent = firstState.Parent.Agents[dropletName];
-                if(agent.SnakeBody.Count == 1) {
-                    unravelActions.AddRange( Unravel(agent, actionKvp.Value, currentTime));
+                if (agent.SnakeBody.Count == 1)
+                {
+                    hasUnraveled[actionKvp.Key] = false;
                 }
-            }
+                else
+                {
+                    hasUnraveled[actionKvp.Key] = true;
+                }
+
         }
 
-        int totalStates = chosenStates.Count;
+        
+        var ravelActions = new List<BoardAction>();
+        var unravelActions = new List<BoardAction>();
+        var shrinkActions = new List<BoardAction>();
 
         foreach (State state in chosenStates)
         {
@@ -213,18 +238,34 @@ public class State
                 var agents = state.Parent.Agents;
                 Agent agent = agents[dropletName];
                 Agent nextAgent = state.Agents[dropletName];
-                //double scaleFactor = Math.Min((int)(agent.Volume/_platformRepository.MinimumMovementVolume) + 1, totalStates);
-
-                //List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agent, currentTimes[dropletName], scaleFactor);
-                //var totalTime = translatedActions.Last().Time - currentTimes[dropletName];
-                //currentTimes[dropletName] += (totalTime / scaleFactor);
-
-                //finalActions.AddRange(translatedActions);
 
 
-                finalActions.AddRange(ApplySnake(agent, nextAgent, actionKvp.Value, currentTime)); 
+                var moveActions = ApplySnake(agent, nextAgent, actionKvp.Value, currentTime);
+                finalActions.AddRange(moveActions);
+                var tempTime = moveActions.Last().Time;
 
+                if (!hasRaveled[dropletName])
+                {
+                    var ravelAction = Ravel(lastState.Agents[dropletName], nextAgent, tempTime);
+                    if (ravelAction != null)
+                    {
+                        ravelActions.AddRange(ravelAction);
+                        hasRaveled[dropletName] = true;
+                        shrinkActions.AddRange(ShrinkSnake(nextAgent, tempTime));
+                    }
+                }
 
+                if (!hasUnraveled[dropletName])
+                {
+                    var unravelAction = Unravel(firstState.Parent.Agents[dropletName], agent, nextAgent, currentTime);
+                    if (unravelAction != null)
+                    {
+                        unravelActions.AddRange(unravelAction);
+                        hasUnraveled[dropletName] = true;
+                    }
+                }
+
+                
             }
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
 
@@ -233,46 +274,57 @@ public class State
             currentTime = finalActions.Last().Time;
         }
 
+        shrinkActions = shrinkActions.OrderBy(b => b.Time).ToList();
+        ravelActions = ravelActions.OrderBy(b => b.Time).ToList();
+
         finalActions = finalActions.OrderBy(b => b.Time).ToList();
         currentTime = finalActions.Last().Time;
 
 
-        State lastState = chosenStates.Last();
-        foreach (var actionKvp in lastState.JointAction)
-        {
-            if (actionKvp.Value != Types.RouteAction.NoOp)
-            {
-                string dropletName = actionKvp.Key;
-                Agent agent = lastState.Agents[dropletName];
+        //State lastState = chosenStates.Last();
+        //foreach (var actionKvp in lastState.JointAction)
+        //{
+        //    if (actionKvp.Value != Types.RouteAction.NoOp)
+        //    {
+        //        string dropletName = actionKvp.Key;
+        //        Agent agent = lastState.Agents[dropletName];
 
-                IDropletCommand dropletCommand =
-                    lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
+        //        IDropletCommand dropletCommand =
+        //            lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
 
-                if(IsGoalState(dropletCommand, agent))
-                {
-                    Console.WriteLine("sdkjfskdj" + currentTime);
-                    var shrinkActions = ShrinkSnake(agent, currentTime);
+        //        if(IsGoalState(dropletCommand, agent))
+        //        {
+        //            Console.WriteLine("sdkjfskdj" + currentTime);
+        //            var shrinkActions = ShrinkSnake(agent, currentTime);
 
-                    //if (shrinkActions.Count == 0)
-                    //{
-                    //    continue;
-                    //}
-                    //double shrinkFinalTime = shrinkActions.Last().Time;
+        //            //if (shrinkActions.Count == 0)
+        //            //{
+        //            //    continue;
+        //            //}
+        //            //double shrinkFinalTime = shrinkActions.Last().Time;
 
-                    finalActions.AddRange(shrinkActions);
-                    Console.WriteLine("232332:" + currentTime);
-                    var ravelActions = Rawel(agent, actionKvp.Value, currentTime);
-                    finalActions.AddRange(ravelActions);
+        //            finalActions.AddRange(shrinkActions);
+        //            Console.WriteLine("232332:" + currentTime);
+        //            var ravelActions = Rawel(agent, actionKvp.Value, currentTime);
+        //            finalActions.AddRange(ravelActions);
                     
-                }
+        //        }
 
                 
 
-            }
-        }
+        //    }
+        //}
+
+
 
         finalActions.AddRange(unravelActions);
+        finalActions.AddRange(shrinkActions);
+        finalActions.AddRange(ravelActions);
+
+        ravelActions = ravelActions.OrderBy(b => b.Time).ToList();
         finalActions = finalActions.OrderBy(b => b.Time).ToList();
+
+        BoardActionUtils.FilterBoardActions(ravelActions, finalActions);
 
         return finalActions;
 
@@ -342,68 +394,78 @@ public class State
     }
 
 
-    private List<BoardAction> Unravel2(Agent agent, Agent nextAgent, double time)
+    private List<BoardAction> Unravel(Agent agentInitial, Agent agent, Agent nextAgent, double time)
     {
         (int x, int y) newPosition = (nextAgent.PositionX, nextAgent.PositionY);
 
-        if (!agent.GetAllAgentPositions().Contains(newPosition))
+        if (!agentInitial.GetAllAgentPositions().Contains(newPosition))
         {
-            UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.FinalPositions.First().Value == (agent.PositionX, agent.PositionY) && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+            UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
+                t.FinalPositions.First().Value == (agent.PositionX - (agentInitial.PositionX - t.InitialPositions.First().Value.x), agent.PositionY - (agentInitial.PositionY - t.InitialPositions.First().Value.y))
+                && t.MinSize <= agentInitial.Volume && agentInitial.Volume < t.MaxSize) ?? null;
 
             if (unravelTemplate == null)
             {
                 return new List<BoardAction>();
             }
 
-            return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
+            Console.WriteLine("selected templare:" + unravelTemplate.Name);
+
+            return unravelTemplate.Apply(_platformRepository.Board[agentInitial.PositionX - unravelTemplate.InitialPositions.First().Value.x][agentInitial.PositionY - unravelTemplate.InitialPositions.First().Value.y].Id, time, 1);
         }
 
         return null;
     }
 
-    private List<BoardAction> ravel2(Agent finalAgent, Agent nextAgent, double time)
+    private List<BoardAction> Ravel(Agent finalAgent, Agent nextAgent, double time)
     {
         (int x, int y) newPosition = (nextAgent.PositionX, nextAgent.PositionY);
 
         if (finalAgent.GetAllAgentPositions().Contains(newPosition))
         {
-            RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.FinalPositions.First().Value == newPosition && t.MinSize <= finalAgent.Volume && finalAgent.Volume < t.MaxSize) ?? null;
+
+            RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => 
+                //Some magic to translate into the relative postion in order to compare
+                t.InitialPositions.First().Value == (nextAgent.PositionX - (finalAgent.PositionX - t.FinalPositions.First().Value.x) , nextAgent.PositionY - (finalAgent.PositionY - t.FinalPositions.First().Value.y))
+                && t.MinSize <= finalAgent.Volume && finalAgent.Volume < t.MaxSize) ?? null;
 
             if (ravelTemplate == null)
             {
                 return new List<BoardAction>();
             }
 
-            return ravelTemplate.Apply(_platformRepository.Board[nextAgent.PositionX][nextAgent.PositionY].Id, time, 1);
+
+            // Board[][] the wierd thing inside it to calculate the ofset of the template
+            return ravelTemplate.Apply(_platformRepository.Board[finalAgent.PositionX - ravelTemplate.FinalPositions.First().Value.x][finalAgent.PositionY - ravelTemplate.FinalPositions.First().Value.y].Id, time, 1);
         }
 
         return null;
     }
 
 
-    private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
-    {
-        UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+    //private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
+    //{
+    //    UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
-        if (unravelTemplate == null)
-        {
-            return new List<BoardAction>();
-        }
+    //    if (unravelTemplate == null)
+    //    {
+    //        return new List<BoardAction>();
+    //    }
 
-        return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
-    }
+    //    return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
+    //}
 
-    private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
-    {
-        RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+    //private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
+    //{
+    //    RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
-        if (ravelTemplate == null)
-        {
-            return new List<BoardAction>();
-        }
+    //    if (ravelTemplate == null)
+    //    {
+    //        return new List<BoardAction>();
+    //    }
 
-        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
-    }
+    //    return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
+    //}
 
 
 

@@ -17,5 +17,6 @@
         {
             return $"BoardAction(ElectrodeId: {ElectrodeId}, Action: {Action}, Time: {Time})";
         }
+
     }
 }

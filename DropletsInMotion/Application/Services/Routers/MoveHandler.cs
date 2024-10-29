@@ -66,28 +66,28 @@ public class MoveHandler
         return appliedMoves;
     }
 
-    public List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
-    {
-        UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+    //public List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
+    //{
+    //    UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
-        if (unravelTemplate == null)
-        {
-            return new List<BoardAction>();
-        }
+    //    if (unravelTemplate == null)
+    //    {
+    //        return new List<BoardAction>();
+    //    }
 
-        return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
-    }
+    //    return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
+    //}
 
-    public List<BoardAction> Ravel(Agent agent, Types.RouteAction action, double time)
-    {
-        RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+    //public List<BoardAction> Ravel(Agent agent, Types.RouteAction action, double time)
+    //{
+    //    RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
-        if (ravelTemplate == null)
-        {
-            return new List<BoardAction>();
-        }
+    //    if (ravelTemplate == null)
+    //    {
+    //        return new List<BoardAction>();
+    //    }
 
-        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time - ravelTemplate.Duration, 1);
-    }
+    //    return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time - ravelTemplate.Duration, 1);
+    //}
 
 }

@@ -168,8 +168,31 @@ public class TemplateRepository : ITemplateRepository
         ;
         ravelTemplate.Duration = _blocks.Last().TimeOffset;
 
-        RavelTemplates.Add(ravelTemplate);
+        Block firstBlock = _blocks.First();
+        var initialPositions = FindClusters(firstBlock.Template);
 
+        // Validate initial positions
+        if (initialPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The ravel template \"{ravelTemplate.Name}\" did not start with exactly 1 droplet!");
+        }
+        // Add the initial positions
+        initialPositions.ForEach(pos => ravelTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        // Find the end positions
+        Block finalBlock = _blocks.Last();
+        var finalPositions = FindClusters(finalBlock.Template);
+
+        // Validate final positions
+        if (finalPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The ravel template \"{ravelTemplate.Name}\" did not result in exactly 1 end droplets!");
+        }
+
+        // Add the final positions
+        finalPositions.ForEach(pos => ravelTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        RavelTemplates.Add(ravelTemplate);
 
         Console.WriteLine(ravelTemplate);
     }
@@ -181,8 +204,31 @@ public class TemplateRepository : ITemplateRepository
 
         unravelTemplate.Duration = _blocks.Last().TimeOffset;
 
-        UnravelTemplates.Add(unravelTemplate);
+        Block firstBlock = _blocks.First();
+        var initialPositions = FindClusters(firstBlock.Template);
 
+        // Validate initial positions
+        if (initialPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The unravel template \"{unravelTemplate.Name}\" did not start with exactly 1 droplet!");
+        }
+        // Add the initial positions
+        initialPositions.ForEach(pos => unravelTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        // Find the end positions
+        Block finalBlock = _blocks.Last();
+        var finalPositions = FindClusters(finalBlock.Template);
+
+        // Validate final positions
+        if (finalPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The unravel template \"{unravelTemplate.Name}\" did not result in exactly 1 end droplets!");
+        }
+
+        // Add the final positions
+        finalPositions.ForEach(pos => unravelTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
+        UnravelTemplates.Add(unravelTemplate);
 
         Console.WriteLine(unravelTemplate);
     }
