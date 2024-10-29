@@ -203,6 +203,12 @@ namespace DropletsInMotion.Application.Models
             return size;
         }
 
+        public int GetMaximumSnakeLength()
+        {
+            int maximumSnakeLength = (int)(Volume / _minimumMovementVolume);
+            return maximumSnakeLength;
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(PositionX, PositionY);

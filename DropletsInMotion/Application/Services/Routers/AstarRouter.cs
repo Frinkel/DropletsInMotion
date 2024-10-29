@@ -38,7 +38,7 @@ namespace DropletsInMotion.Application.Services.Routers
 
                     foreach (var returnState in chosenStates)
                     {
-                        if (returnState.IsOneGoalState())
+                        if (returnState.IsPossibleEndState())
                         {
                             return returnState;
                         }
