@@ -45,6 +45,10 @@ namespace DropletsInMotion.Presentation
         {
             _platformService.Load();
             Board = _platformService.Board;
+            Agent.SetMinimumMovementVolume(_platformRepository.MinimumMovementVolume);
+            Agent.SetMinSize1x1(_platformRepository.MinSize1x1);
+            Agent.SetMinSize2x2(_platformRepository.MinSize2x2);
+            Agent.SetMinSize3x3(_platformRepository.MinSize3x3);
         }
 
         public void Translate()
@@ -60,10 +64,6 @@ namespace DropletsInMotion.Presentation
             Commands = listener.Commands;
             _typeChecker.resetTypeEnviroments();
             _typeChecker.typeCheck(Commands);
-            Agent.SetMinimumMovementVolume(_platformRepository.MinimumMovementVolume);
-            Agent.SetMinSize1x1(_platformRepository.MinSize1x1);
-            Agent.SetMinSize2x2(_platformRepository.MinSize2x2);
-            Agent.SetMinSize3x3(_platformRepository.MinSize3x3);
 
             DependencyGraph = _dependencyBuilder.Build(Commands);
         }
