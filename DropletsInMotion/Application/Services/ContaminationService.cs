@@ -132,7 +132,8 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            PrintContaminationState(contaminationMap);
+            Console.WriteLine("BEFORE");
+            //PrintContaminationState(contaminationMap);
 
             // Apply contamination based on the templates
             foreach (var block in mergePositions.Template.Blocks)
@@ -141,19 +142,13 @@ namespace DropletsInMotion.Application.Services
                 {
                     foreach (var pos in cluster.Value)
                     {
-                        byte Tester(ScheduledPosition position)
-                        {
-                            Console.WriteLine(position);
-                            Console.WriteLine($"Template: {position.Template.Name}");
-                            throw new Exception("");
-                        }
 
                         var substanceId = cluster.Key switch
                         {
                             var name when name == inputAgent1.DropletName => inputAgent1.SubstanceId,
                             var name when name == inputAgent2.DropletName => inputAgent2.SubstanceId,
                             var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
-                            _ => Tester(mergePositions)
+                            _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
                         };
 
                         var contaminationPosX = pos.x + mergeX;
@@ -239,6 +234,10 @@ namespace DropletsInMotion.Application.Services
                 int canContChange4 = GetContaminationValue(mergeX + size, y3, contaminationMap);
                 ApplyIfInBounds(contaminationMap, mergeX + size, y4, (cont4 == 0 || cont4 == outputAgent.SubstanceId) && canContChange4 != 255 ? outputAgent.SubstanceId : (byte)255);
             }
+
+
+            Console.WriteLine("AFTER");
+            //PrintContaminationState(contaminationMap);
 
             return contaminationMap;
         }

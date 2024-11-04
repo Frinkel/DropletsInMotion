@@ -1,5 +1,5 @@
 {
-	"name": "Merge Horizontal 2x2",
+	"name": "Merge Horizontal 3x3",
 	"minSize": 2800,
 	"maxSize": 4000
 }

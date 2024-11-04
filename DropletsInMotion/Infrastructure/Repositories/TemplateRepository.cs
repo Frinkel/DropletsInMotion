@@ -238,6 +238,17 @@ public class TemplateRepository : ITemplateRepository
         // Find all the blocks and actions
         declareTemplate.Actions = ParseTemplateFile(template);
 
+        Block firstBlock = _blocks.First();
+        var initialPositions = FindClusters(firstBlock.Template);
+
+        // Validate initial positions
+        if (initialPositions.Count != 1)
+        {
+            throw new InvalidOperationException($"The declare template \"{declareTemplate.Name}\" did not start with exactly 1 droplet");
+        }
+        // Add the initial positions
+        initialPositions.ForEach(pos => declareTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
+
         DeclareTemplates.Add(declareTemplate);
 
         Console.WriteLine(declareTemplate);

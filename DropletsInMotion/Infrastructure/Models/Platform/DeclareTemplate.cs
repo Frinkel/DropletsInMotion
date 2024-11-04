@@ -20,7 +20,7 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
         public Dictionary<string, (int x, int y)> FinalPositions => throw new NotImplementedException();
 
-        public Dictionary<string, (int x, int y)> InitialPositions => throw new NotImplementedException();
+        public Dictionary<string, (int x, int y)> InitialPositions { get; set; } = new Dictionary<string, (int x, int y)>();
 
         public List<(int x, int y)> ContaminationPositions => throw new NotImplementedException();
 

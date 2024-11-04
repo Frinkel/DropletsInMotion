@@ -252,7 +252,7 @@ namespace DropletsInMotion.Application.Execution
                 throw new Exception($"Cannot dispense a new droplet at Position {reservoir.OutputX}, {reservoir.OutputY} since there is not template");
             }
 
-            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, Time, 1);
+            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX - declareTemplate.InitialPositions.First().Value.x][agent.PositionY - declareTemplate.InitialPositions.First().Value.y].Id, Time, 1);
             boardActions.AddRange(initialElectrodes);
 
         }
@@ -280,7 +280,7 @@ namespace DropletsInMotion.Application.Execution
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since there is not template");
             }
 
-            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, Time, 1);
+            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX - declareTemplate.InitialPositions.First().Value.x][agent.PositionY - declareTemplate.InitialPositions.First().Value.y].Id, Time, 1);
             boardActions.AddRange(initialElectrodes);
         }
 
