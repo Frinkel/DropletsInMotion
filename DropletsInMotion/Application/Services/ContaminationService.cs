@@ -1,4 +1,5 @@
 ﻿using DropletsInMotion.Application.Models;
+using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 
@@ -140,12 +141,19 @@ namespace DropletsInMotion.Application.Services
                 {
                     foreach (var pos in cluster.Value)
                     {
+                        byte Tester(ScheduledPosition position)
+                        {
+                            Console.WriteLine(position);
+                            Console.WriteLine($"Template: {position.Template.Name}");
+                            throw new Exception("");
+                        }
+
                         var substanceId = cluster.Key switch
                         {
                             var name when name == inputAgent1.DropletName => inputAgent1.SubstanceId,
                             var name when name == inputAgent2.DropletName => inputAgent2.SubstanceId,
                             var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
-                            _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
+                            _ => Tester(mergePositions)
                         };
 
                         var contaminationPosX = pos.x + mergeX;

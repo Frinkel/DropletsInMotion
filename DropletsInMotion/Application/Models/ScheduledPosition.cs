@@ -31,5 +31,10 @@ namespace DropletsInMotion.Application.Models
             OriginX = originX;
             OriginY = originY;
         }
+
+        public override string ToString()
+        {
+            return $"ScheduledPosition: [X1={X1}, Y1={Y1}, X2={X2}, Y2={Y2}, SingularX={SingularX}, SingularY={SingularY}, OriginX={OriginX}, OriginY={OriginY}]";
+        }
     }
 }

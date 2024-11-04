@@ -82,43 +82,81 @@ namespace DropletsInMotion.Application.Services
 
             agents.Add(newAgent.DropletName, newAgent);
 
-
-
-            // Map the cluster ID to the droplet ID
-            var initialPosition = mergePositions.Template.InitialPositions.First();
-            var initialX = initialPosition.Value.x + mergePositions.OriginX;
-            var initialY = initialPosition.Value.y + mergePositions.OriginY;
-
-            if (inputDroplet1.PositionX == initialX && inputDroplet1.PositionY == initialY)
-            {
-                foreach (var block in mergePositions.Template.Blocks)
-                {
-                    var mappedBlock = new Dictionary<string, List<(int x, int y)>>();
-
-                    foreach (var keyValuePair in block)
-                    {
-                        string dropletName = block.Count == 1
-                            ? newAgent.DropletName
-                            : (keyValuePair.Key == initialPosition.Key
-                                ? inputDroplet1.DropletName
-                                : inputDroplet2.DropletName);
-
-                        mappedBlock[dropletName] = keyValuePair.Value;
-                    }
-
-                    block.Clear();
-                    foreach (var kvp in mappedBlock)
-                    {
-                        block.Add(kvp.Key, kvp.Value);
-                    }
-                }
-            }
+            // Map template to droplets
+            mergePositions.Template = MapTemplateToDroplets(mergePositions, inputDroplet1, inputDroplet2, newAgent);
+            
 
             // Apply contamination
             _contaminationService.ApplyContaminationMerge(inputAgent1, inputAgent2, newAgent, mergePositions, contaminationMap);
 
             Console.WriteLine(outputDroplet);
             return mergeActions;
+        }
+
+
+        private MergeTemplate MapTemplateToDroplets(ScheduledPosition mergePositions, Droplet inputDroplet1, Droplet inputDroplet2, Agent newAgent)
+        {
+            // Map the cluster ID to the droplet ID
+            var mergeTemplate = mergePositions.Template as MergeTemplate;
+            var templateCopy = mergeTemplate.DeepCopy();
+
+            var initialPositions = templateCopy.InitialPositions;
+            var positionToDropletMap = new Dictionary<string, Droplet>();
+
+            foreach (var initialPosition in initialPositions)
+            {
+                var initialX = initialPosition.Value.x + mergePositions.OriginX;
+                var initialY = initialPosition.Value.y + mergePositions.OriginY;
+
+                if (inputDroplet1.PositionX == initialX && inputDroplet1.PositionY == initialY)
+                {
+                    positionToDropletMap[initialPosition.Key] = inputDroplet1;
+                }
+                else if (inputDroplet2.PositionX == initialX && inputDroplet2.PositionY == initialY)
+                {
+                    positionToDropletMap[initialPosition.Key] = inputDroplet2;
+                }
+                else
+                {
+                    throw new Exception($"None of the merge droplets matched the initial positions in the scheduled position");
+                }
+            }
+
+            foreach (var block in templateCopy.Blocks)
+            {
+                var mappedBlock = new Dictionary<string, List<(int x, int y)>>();
+
+                foreach (var keyValuePair in block)
+                {
+                    string dropletName;
+
+                    if (block.Count == 1)
+                    {
+                        dropletName = newAgent.DropletName;
+                    }
+                    else
+                    {
+                        if (positionToDropletMap.TryGetValue(keyValuePair.Key, out var droplet))
+                        {
+                            dropletName = droplet.DropletName;
+                        }
+                        else
+                        {
+                            throw new Exception($"The value {keyValuePair.Key} did not map to any droplet in {mergePositions.Template.Name}");
+                        }
+                    }
+
+                    mappedBlock[dropletName] = keyValuePair.Value;
+                }
+
+                block.Clear();
+                foreach (var kvp in mappedBlock)
+                {
+                    block.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return templateCopy;
         }
 
         public List<BoardAction> SplitByVolume(
