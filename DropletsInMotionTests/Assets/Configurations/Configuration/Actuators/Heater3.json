@@ -1,0 +1,5 @@
+{
+  "name": "Heater3",
+  "actuatorId": 3,
+  "validArguments": ["status", "temperature"]
+}

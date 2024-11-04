@@ -1,10 +1,13 @@
 {
   "name": "TempSensor1",
-  "sensorId": "3",
+  "sensorId": 1,
+  "coordinateX": 12,
+  "coordinateY": 16,
+
   "argumentHandlers": {
     "temperature": {
       "request": {
-        "sensorId": "3",
+        "sensorId": 1,
         "requestArgument": "read"
       },
       "response": "valueTemperature"

@@ -1,28 +1,30 @@
 {
-  "name": "RGB2",
-  "sensorId": "2",
+  "name": "RGB1",
+  "sensorId": 1,
+  "coordinateX": 9,
+  "coordinateY": 9,
 
   "argumentHandlers": {
     "red": {
       "request": {
-        "sensorId": "2",
+        "sensorId": 1,
         "requestArgument": "read"
       },
-      "response": "color.valueRed"
+      "response": "valueRed"
     },
     "green": {
       "request": {
-        "sensorId": "2",
+        "sensorId": 1,
         "requestArgument": "read"
       },
-      "response": "color.valueGreen"
+      "response": "valueGreen"
     },
     "blue": {
       "request": {
-        "sensorId": "2",
+        "sensorId": 1,
         "requestArgument": "read"
       },
-      "response": "color.valueBlue"
+      "response": "valueBlue"
     }
   }
 }

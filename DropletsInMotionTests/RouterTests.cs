@@ -41,8 +41,8 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 5, 1);
-            var a2 = new Agent("a2", 12, 5, 1);
+            var a1 = new Agent("a1", 5, 5, 400);
+            var a2 = new Agent("a2", 12, 5, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -66,9 +66,9 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 5, 1);
+            var a1 = new Agent("a1", 5, 5, 400);
             Agent.ResetSubstanceId();
-            var a2 = new Agent("a2", 12, 5, 1);
+            var a2 = new Agent("a2", 12, 5, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -90,7 +90,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 10, 1);
+            var a1 = new Agent("a1", 5, 10, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -116,7 +116,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 1);
+            var a1 = new Agent("a1", 0, 0, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -147,11 +147,11 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 1);
-            var a2 = new Agent("a2", 0, 5, 1);
-            var a3 = new Agent("a3", 0, 10, 1);
-            var a4 = new Agent("a4", 0, 15, 1);
-            var a5 = new Agent("a5", 0, 19, 1);
+            var a1 = new Agent("a1", 0, 0, 400);
+            var a2 = new Agent("a2", 0, 5, 400);
+            var a3 = new Agent("a3", 0, 10, 400);
+            var a4 = new Agent("a4", 0, 15, 400);
+            var a5 = new Agent("a5", 0, 19, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);

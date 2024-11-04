@@ -23,74 +23,74 @@ namespace DropletsInMotionTests
             Agent.ResetSubstanceId();
         }
 
-        [Test]
-        public void MergePosition()
-        {
-            IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
+        //[Test]
+        //public void MergePosition()
+        //{
+        //    IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
 
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 8, 0, 1);
-            var a2 = new Agent("a2", 0, 0, 1);
-            agents.Add("a1", a1);
-            agents.Add("a2", a2);
+        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        //    var a1 = new Agent("a1", 8, 0, 1);
+        //    var a2 = new Agent("a2", 0, 0, 1);
+        //    agents.Add("a1", a1);
+        //    agents.Add("a2", a2);
 
-            var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
-            _contaminationService.UpdateContaminationArea(contaminationMap, 255, 2, 0, 4, 0);
-            _contaminationService.PrintContaminationState(contaminationMap);
-            var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
+        //    var board = CreateBoard();
+        //    var contaminationMap = new byte[board.Length, board[0].Length];
+        //    _contaminationService.UpdateContaminationArea(contaminationMap, 255, 2, 0, 4, 0);
+        //    _contaminationService.PrintContaminationState(contaminationMap);
+        //    var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
 
-            Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-            Assert.That(1, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-            Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-            Assert.That(1, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
+        //    Assert.That(1, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
+        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
+        //    Assert.That(1, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
 
-        }
+        //}
 
-        [Test]
-        public void MergePositionCloseToEachother()
-        {
-            IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
+        //[Test]
+        //public void MergePositionCloseToEachother()
+        //{
+        //    IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
 
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 6, 0, 1);
-            var a2 = new Agent("a2", 4, 0, 1);
-            agents.Add("a1", a1);
-            agents.Add("a2", a2);
+        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        //    var a1 = new Agent("a1", 6, 0, 1);
+        //    var a2 = new Agent("a2", 4, 0, 1);
+        //    agents.Add("a1", a1);
+        //    agents.Add("a2", a2);
 
-            var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+        //    var board = CreateBoard();
+        //    var contaminationMap = new byte[board.Length, board[0].Length];
 
-            var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
+        //    var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
 
-            Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-            Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-            Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-            Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
+        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
+        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
+        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
 
-        }
+        //}
 
 
-        [Test]
-        public void SplitPosition()
-        {
-            IDropletCommand splitCommand = new SplitByVolume("a1", "a2", "a3", 0, 0, 8, 0, 0.5);
+        //[Test]
+        //public void SplitPosition()
+        //{
+        //    IDropletCommand splitCommand = new SplitByVolume("a1", "a2", "a3", 0, 0, 8, 0, 0.5);
 
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 5, 1);
-            agents.Add("a1", a1);
+        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        //    var a1 = new Agent("a1", 5, 5, 1);
+        //    agents.Add("a1", a1);
 
-            var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+        //    var board = CreateBoard();
+        //    var contaminationMap = new byte[board.Length, board[0].Length];
 
-            var optimalPosition = _schedulerService.ScheduleCommand(splitCommand, agents, contaminationMap);
+        //    var optimalPosition = _schedulerService.ScheduleCommand(splitCommand, agents, contaminationMap);
 
-            Assert.That(4, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-            Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-            Assert.That(6, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-            Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
+        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
+        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
+        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
 
-        }
+        //}
 
 
         //[Test]

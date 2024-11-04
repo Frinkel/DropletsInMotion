@@ -61,14 +61,24 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton<ITemplateRepository, TemplateRepository>();
 
 
-
             // Classes
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
             serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
+
             ServiceProvider = serviceCollection.BuildServiceProvider();
+
+
+            IFileService filerService = ServiceProvider.GetRequiredService<IFileService>();
+            IUserService userService = ServiceProvider.GetRequiredService<IUserService>();
+            userService.PlatformPath = filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            userService.ConfigurationPath = filerService.GetProjectDirectory() + "/Assets/Configurations/Configuration";
+            ITranslator translator = ServiceProvider.GetRequiredService<ITranslator>();
+            translator.Load();
+
+
         }
     }
 }

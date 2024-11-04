@@ -12,12 +12,12 @@ namespace DropletsInMotionTests
 {
     public class StateTests : TestBase
     {
-        private readonly ITemplateService _templateService;
+        private readonly ITemplateRepository _templateRepository;
         private readonly IContaminationService _contaminationService;
         private readonly IPlatformRepository _platformRepository;
         public StateTests()
         {
-            _templateService = ServiceProvider.GetRequiredService<ITemplateService>();
+            _templateRepository = ServiceProvider.GetRequiredService<ITemplateRepository>();
             _contaminationService = ServiceProvider.GetRequiredService<IContaminationService>();
             _platformRepository = ServiceProvider.GetRequiredService<IPlatformRepository>();
         }
@@ -36,7 +36,7 @@ namespace DropletsInMotionTests
             List<IDropletCommand> commands = new List<IDropletCommand>() { dropletCommand };
             List<string> routeableAgents = new List<string>() { "d1" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService,  _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands,  _contaminationService, _platformRepository, _templateRepository);
 
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
@@ -71,8 +71,7 @@ namespace DropletsInMotionTests
                     board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
                 }
             }
-            _templateService.Initialize(board);
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
@@ -95,7 +94,7 @@ namespace DropletsInMotionTests
             List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
             List<State> expandedStates = s1.GetExpandedStates();
 
@@ -115,7 +114,7 @@ namespace DropletsInMotionTests
             List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
@@ -142,7 +141,7 @@ namespace DropletsInMotionTests
             List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
@@ -168,7 +167,7 @@ namespace DropletsInMotionTests
             List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
             List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _templateService, _contaminationService, _platformRepository);
+            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
             Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
             jointAction.Add("d1", Types.RouteAction.MoveRight);
