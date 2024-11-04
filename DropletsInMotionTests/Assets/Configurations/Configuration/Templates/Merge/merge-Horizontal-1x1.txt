@@ -1,0 +1,14 @@
+{
+	"name": "Merge Horizontal 1x1",
+	"minSize": 350,
+	"maxSize": 1000
+}
+?
+0.0,
+102
+;
+0.5,
+111
+;
+1.0,
+010

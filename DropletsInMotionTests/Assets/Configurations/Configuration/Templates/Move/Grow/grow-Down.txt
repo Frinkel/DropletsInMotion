@@ -1,0 +1,16 @@
+{
+	"name": "grow down",
+	"minSize": 350,
+	"maxSize": 4000,
+	"direction": "moveDown"
+}
+?
+0.0,
+000
+010
+000
+;
+0.5,
+000
+010
+010

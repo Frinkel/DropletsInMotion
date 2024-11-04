@@ -25,7 +25,6 @@ public class State
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
     public List<IDropletCommand> Commands { get; set; }
-    private ITemplateService _templateHandler;
 
     private int? _cachedHash = null;
 
@@ -34,7 +33,7 @@ public class State
     private readonly ITemplateRepository _templateRepository;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, ITemplateService templateHandler, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
+    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
@@ -49,7 +48,6 @@ public class State
         ContaminationMap = (byte[,]) contaminationMap.Clone();
         Commands = commands;
         JointAction = null;
-        _templateHandler = templateHandler;
 
         Parent = null;
         G = 0;
@@ -66,7 +64,6 @@ public class State
         ContaminationMap = (byte[,])Parent.ContaminationMap.Clone();
         Commands = Parent.Commands;
         JointAction = jointAction;
-        _templateHandler = Parent._templateHandler;
         _contaminationService = Parent._contaminationService;
         _platformRepository = Parent._platformRepository;
         _templateRepository = Parent._templateRepository;
@@ -105,52 +102,6 @@ public class State
         watch.Stop();
         var elapsedMs = watch.Elapsed.Microseconds;
         Debugger.ElapsedTime.Add(elapsedMs);
-    }
-
-    public List<BoardAction> ExtractActionsOld(double time)
-    {
-        List<State> chosenStates = new List<State>();
-        State currentState = this;
-        while (currentState.Parent != null)
-        {
-            chosenStates.Add(currentState);
-            currentState = currentState.Parent;
-        }
-
-        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
-
-        List<BoardAction> finalActions = new List<BoardAction>();
-        double currentTime = time;
-
-        double scaleFactor = 1;
-
-        foreach (State state in chosenStates)
-        {
-            foreach (var actionKvp in state.JointAction)
-            {
-                if (actionKvp.Value == Types.RouteAction.NoOp)
-                {
-                    continue;
-                }
-                string dropletName = actionKvp.Key;
-                string routeAction = actionKvp.Value.Name;
-                var agents = state.Parent.Agents;
-
-                List<BoardAction> translatedActions = _templateHandler.ApplyTemplateScaled(routeAction, agents[dropletName], currentTime, scaleFactor);
-
-                finalActions.AddRange(translatedActions);
-
-            }
-
-
-            finalActions = finalActions.OrderBy(b => b.Time).ToList();
-            var totalTime = finalActions.Last().Time - currentTime;
-            currentTime = currentTime + (totalTime/scaleFactor);
-        }
-
-
-        return finalActions;
-
     }
 
     public List<BoardAction> ExtractActions(double time)
@@ -317,7 +268,6 @@ public class State
         BoardActionUtils.FilterBoardActions(ravelActions, finalActions);
 
         return finalActions;
-
     }
 
     private List<BoardAction> ShrinkSnake(Agent agent, double time)
@@ -431,81 +381,7 @@ public class State
 
         return null;
     }
-
-
-    //private List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
-    //{
-    //    UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
-
-    //    if (unravelTemplate == null)
-    //    {
-    //        return new List<BoardAction>();
-    //    }
-
-    //    return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
-    //}
-
-    //private List<BoardAction> Rawel(Agent agent, Types.RouteAction action, double time)
-    //{
-    //    RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
-
-    //    if (ravelTemplate == null)
-    //    {
-    //        return new List<BoardAction>();
-    //    }
-
-    //    return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1);
-    //}
-
-
-
-    public List<BoardAction> ExtractActionsToTime(double time)
-    {
-        List<State> chosenStates = new List<State>();
-        State currentState = this;
-        while (currentState.Parent != null)
-        {
-            chosenStates.Add(currentState);
-            currentState = currentState.Parent;
-        }
-
-        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
-
-        List<BoardAction> finalActions = new List<BoardAction>();
-        double currentTime = time;
-
-        foreach (State state in chosenStates)
-        {
-            foreach (var actionKvp in state.JointAction)
-            {
-                if (actionKvp.Value == Types.RouteAction.NoOp)
-                {
-                    continue;
-                }
-                string dropletName = actionKvp.Key;
-                string routeAction = actionKvp.Value.Name;
-                var agents = state.Parent.Agents;
-
-                List<BoardAction> translatedActions = _templateHandler.ApplyTemplate(routeAction, agents[dropletName], currentTime);
-
-                finalActions.AddRange(translatedActions);
-
-            }
-
-
-            finalActions = finalActions.OrderBy(b => b.Time).ToList();
-            currentTime = finalActions.Last().Time;
-        }
-
-        //Console.WriteLine("______---------_________");
-        //foreach (var action in finalActions)
-        //{
-        //    Console.WriteLine(action.ToString());
-        //}
-        return finalActions;
-
-    }
-
+    
     public List<State> GetExpandedStates()
     {
 

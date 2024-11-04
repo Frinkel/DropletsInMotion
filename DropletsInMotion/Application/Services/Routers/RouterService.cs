@@ -56,7 +56,7 @@ public class RouterService : IRouterService
             routableAgents.AddRange(command.GetInputDroplets());
         }
 
-        State s0 = new State(routableAgents, agents, contaminationMap, commands, _templateService, _contaminationService, _platformRepository, _templateRepository, Seed);
+        State s0 = new State(routableAgents, agents, contaminationMap, commands, _contaminationService, _platformRepository, _templateRepository, Seed);
         Frontier f = new Frontier();
         //AstarRouter astarRouter = new AstarRouter();
         State sFinal = astarRouter.Search(s0, f);

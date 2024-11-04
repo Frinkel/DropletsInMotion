@@ -1,0 +1,16 @@
+{
+	"name": "shrink up",
+	"minSize": 350,
+	"maxSize": 4000,
+	"direction": "moveUp"
+}
+?
+0.0,
+010
+010
+000
+;
+0.5,
+010
+000
+000
