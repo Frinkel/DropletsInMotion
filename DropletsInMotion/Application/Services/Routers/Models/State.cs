@@ -24,7 +24,7 @@ public class State
 
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
-    private List<IDropletCommand> Commands { get; set; }
+    public List<IDropletCommand> Commands { get; set; }
     private ITemplateService _templateHandler;
 
     private int? _cachedHash = null;
@@ -173,30 +173,18 @@ public class State
         List<BoardAction> finalActions = new List<BoardAction>();
 
         Dictionary<string, double> currentTimes = new Dictionary<string, double>();
+        Dictionary<string, bool> canRavel = new Dictionary<string, bool>();
+        Dictionary<string, bool> canUnravel = new Dictionary<string, bool>();
         Dictionary<string, bool> hasRaveled = new Dictionary<string, bool>();
-        Dictionary<string, bool> hasUnraveled = new Dictionary<string, bool>();
+        Dictionary<string, double> endUnravel = new Dictionary<string, double>();
+
 
         foreach (var actionKvp in chosenStates[0].JointAction)
         {
             currentTimes[actionKvp.Key] = time;
         }
 
-        State lastState = chosenStates.Last();
-        foreach (var actionKvp in lastState.JointAction)
-        {
-            IDropletCommand dropletCommand =
-                lastState.Commands.Find(c => c.GetInputDroplets().First() == actionKvp.Key);
 
-            if (IsGoalState(dropletCommand, lastState.Agents[actionKvp.Key]))
-            {
-                hasRaveled[actionKvp.Key] = false;
-            }
-            else
-            {
-                hasRaveled[actionKvp.Key] = true;
-            }
-            
-        }
 
 
 
@@ -207,19 +195,34 @@ public class State
         foreach (var actionKvp in firstState.JointAction)
         {
            string dropletName = actionKvp.Key;
-                Agent agent = firstState.Parent.Agents[dropletName];
+           endUnravel[dropletName] = 0;
+           canRavel[actionKvp.Key] = false;
+           hasRaveled[actionKvp.Key] = false;
+            Agent agent = firstState.Parent.Agents[dropletName];
                 if (agent.SnakeBody.Count == 1)
                 {
-                    hasUnraveled[actionKvp.Key] = false;
+                    canUnravel[actionKvp.Key] = true;
                 }
                 else
                 {
-                    hasUnraveled[actionKvp.Key] = true;
+                    canUnravel[actionKvp.Key] = false;
                 }
 
         }
 
-        
+        State lastState = chosenStates.Last();
+        foreach (var actionKvp in lastState.JointAction)
+        {
+            IDropletCommand dropletCommand =
+                lastState.Commands.Find(c => c.GetInputDroplets().First() == actionKvp.Key);
+
+            if (IsGoalState(dropletCommand, lastState.Agents[actionKvp.Key]))
+            {
+                canRavel[actionKvp.Key] = true;
+            }
+        }
+
+
         var ravelActions = new List<BoardAction>();
         var unravelActions = new List<BoardAction>();
         var shrinkActions = new List<BoardAction>();
@@ -238,30 +241,34 @@ public class State
                 var agents = state.Parent.Agents;
                 Agent agent = agents[dropletName];
                 Agent nextAgent = state.Agents[dropletName];
-
-
+                
                 var moveActions = ApplySnake(agent, nextAgent, actionKvp.Value, currentTime);
+                
                 finalActions.AddRange(moveActions);
                 var tempTime = moveActions.Last().Time;
 
-                if (!hasRaveled[dropletName])
+                if (canRavel[dropletName])
                 {
                     var ravelAction = Ravel(lastState.Agents[dropletName], nextAgent, tempTime);
                     if (ravelAction != null)
                     {
                         ravelActions.AddRange(ravelAction);
-                        hasRaveled[dropletName] = true;
-                        shrinkActions.AddRange(ShrinkSnake(nextAgent, tempTime));
+                        canRavel[dropletName] = false;
+                        hasRaveled[actionKvp.Key] = true;
+                        //We need to wait with the shrink until the unrawel is complete.
+                        var shrinkTime = endUnravel[dropletName] > tempTime ? endUnravel[dropletName] : tempTime;
+                        shrinkActions.AddRange(ShrinkSnake(nextAgent, shrinkTime));
                     }
                 }
 
-                if (!hasUnraveled[dropletName])
+                if (canUnravel[dropletName])
                 {
-                    var unravelAction = Unravel(firstState.Parent.Agents[dropletName], agent, nextAgent, currentTime);
+                    var unravelAction = Unravel(firstState.Parent.Agents[dropletName], agent, nextAgent, hasRaveled[actionKvp.Key], currentTime);
                     if (unravelAction != null)
                     {
+                        endUnravel[dropletName] = unravelAction.Count > 0 ? unravelAction.Last().Time : endUnravel[dropletName];
                         unravelActions.AddRange(unravelAction);
-                        hasUnraveled[dropletName] = true;
+                        canUnravel[dropletName] = false;
                     }
                 }
 
@@ -281,39 +288,22 @@ public class State
         currentTime = finalActions.Last().Time;
 
 
-        //State lastState = chosenStates.Last();
-        //foreach (var actionKvp in lastState.JointAction)
-        //{
-        //    if (actionKvp.Value != Types.RouteAction.NoOp)
-        //    {
-        //        string dropletName = actionKvp.Key;
-        //        Agent agent = lastState.Agents[dropletName];
+        foreach (var actionKvp in lastState.JointAction)
+        {
+            string dropletName = actionKvp.Key;
+            Agent agent = lastState.Agents[dropletName];
 
-        //        IDropletCommand dropletCommand =
-        //            lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
+            IDropletCommand dropletCommand =
+                lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
 
-        //        if(IsGoalState(dropletCommand, agent))
-        //        {
-        //            Console.WriteLine("sdkjfskdj" + currentTime);
-        //            var shrinkActions = ShrinkSnake(agent, currentTime);
-
-        //            //if (shrinkActions.Count == 0)
-        //            //{
-        //            //    continue;
-        //            //}
-        //            //double shrinkFinalTime = shrinkActions.Last().Time;
-
-        //            finalActions.AddRange(shrinkActions);
-        //            Console.WriteLine("232332:" + currentTime);
-        //            var ravelActions = Rawel(agent, actionKvp.Value, currentTime);
-        //            finalActions.AddRange(ravelActions);
-                    
-        //        }
-
-                
-
-        //    }
-        //}
+            if (IsGoalState(dropletCommand, agent))
+            {
+                while (agent.SnakeBody.Count > 1)
+                {
+                    agent.RemoveFromSnake();
+                }
+            }
+        }
 
 
 
@@ -351,7 +341,7 @@ public class State
         return boardActions;
     }
 
-    private List<BoardAction> ApplySnake(Agent agent, Agent nextAgent, Types.RouteAction action, double time)
+    private List<BoardAction> ApplySnake(Agent agent, Agent nextAgent, Types.RouteAction action,  double time)
     {
         var boardActions = new List<BoardAction>();
 
@@ -394,11 +384,11 @@ public class State
     }
 
 
-    private List<BoardAction> Unravel(Agent agentInitial, Agent agent, Agent nextAgent, double time)
+    private List<BoardAction> Unravel(Agent agentInitial, Agent agent, Agent nextAgent, bool mustUnravel, double time)
     {
         (int x, int y) newPosition = (nextAgent.PositionX, nextAgent.PositionY);
 
-        if (!agentInitial.GetAllAgentPositions().Contains(newPosition))
+        if (!agentInitial.GetAllAgentPositions().Contains(newPosition) || mustUnravel)
         {
             UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
                 t.FinalPositions.First().Value == (agent.PositionX - (agentInitial.PositionX - t.InitialPositions.First().Value.x), agent.PositionY - (agentInitial.PositionY - t.InitialPositions.First().Value.y))
@@ -409,7 +399,7 @@ public class State
                 return new List<BoardAction>();
             }
 
-            Console.WriteLine("selected templare:" + unravelTemplate.Name);
+            Console.WriteLine("Template name: " + unravelTemplate.Name);
 
             return unravelTemplate.Apply(_platformRepository.Board[agentInitial.PositionX - unravelTemplate.InitialPositions.First().Value.x][agentInitial.PositionY - unravelTemplate.InitialPositions.First().Value.y].Id, time, 1);
         }
@@ -768,6 +758,28 @@ public class State
 
     }
 
+    public bool IsPossibleEndState()
+    {
+        bool isOneGoalState = IsOneGoalState();
+
+        if (!isOneGoalState) return isOneGoalState;
+        
+
+        bool allGoalsReached = IsGoalState();
+        if (allGoalsReached) return allGoalsReached;
+        
+        //check that we dont terminate while we are in the process of unraveling a snake.
+        foreach (var agent in Agents)
+        {
+            if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength())
+            {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
 
     public bool IsGoalState(IDropletCommand dropletCommand)
     {
@@ -783,7 +795,7 @@ public class State
 
     }
 
-    public bool IsGoalState(IDropletCommand dropletCommand, Agent agent)
+    public static bool IsGoalState(IDropletCommand dropletCommand, Agent agent)
     {
         switch (dropletCommand)
         {

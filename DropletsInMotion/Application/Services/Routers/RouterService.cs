@@ -49,58 +49,6 @@ public class RouterService : IRouterService
     {
         AstarRouter astarRouter = new AstarRouter();
 
-
-        //List<State> finalStates = new List<State>();
-        //List<State> conflictingStates = new List<State>();
-
-
-
-        //foreach (var command in commands)
-        //{
-        //    List<string> routableAgents1 = new List<string>(command.GetInputDroplets());
-        //    State state = new State(routableAgents1, agents, contaminationMap, new List<IDropletCommand>() { command }, _templateService, _contaminationService, Seed);
-        //    Frontier f1 = new Frontier();
-        //    State sFinal1 = astarRouter.Search(state, f1);
-        //    finalStates.Add(sFinal1);
-        //}
-
-        //foreach (var finalState1 in finalStates)
-        //{
-        //    foreach (var finalState2 in finalStates)
-        //    {
-        //        if (finalState2 != finalState1)
-        //        {
-        //            if (ConflictingSates(finalState1, finalState2))
-        //            {
-        //                conflictingStates.Add(finalState1);
-        //                conflictingStates.Add(finalState2);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //if (conflictingStates.Count == 0)
-        //{
-        //    Console.WriteLine("No conflicting states found!");
-        //}
-        //else
-        //{
-        //    conflictingStates.ForEach(s => Console.WriteLine(s));
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         List<string> routableAgents = new List<string>();
 
         foreach (var command in commands)
@@ -175,8 +123,21 @@ public class RouterService : IRouterService
             }
         }
 
+        foreach (var actionKvp in sFinal.JointAction)
+        {
+            string dropletName = actionKvp.Key;
+            Agent agent = sFinal.Agents[dropletName];
 
-        routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
+            IDropletCommand dropletCommand =
+                sFinal.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
+
+            if (State.IsGoalState(dropletCommand, agent))
+            {
+                _contaminationService.ApplyContaminationWithSize(agent, contaminationMap);
+            }
+        }
+
+        //routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
 
         _contaminationService.PrintContaminationState(contaminationMap);
         
