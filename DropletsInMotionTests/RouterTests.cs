@@ -134,6 +134,36 @@ namespace DropletsInMotionTests
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 
+
+
+        [Test]
+        public void AStarSearchTestCase1()
+        {
+
+            IDropletCommand dropletCommand = new Move("a1", 12, 10);
+            var commands = new List<IDropletCommand>() { dropletCommand };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 10, 10, 400);
+            agents.Add("a1", a1);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.UpdateContaminationArea(contaminationMap, 255, 11, 8, 0, 5);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
+
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+
+
         [Test]
         public void AStarManyDropletsSimpleRoute()
         {
