@@ -11,7 +11,7 @@ namespace DropletsInMotion.Application.Services.Routers
 
         }
 
-        public State Search(State initialState, Frontier frontier)
+        public State? Search(State initialState, Frontier frontier)
         {
             initialState.IsGoalStateReachable();
 
@@ -20,7 +20,8 @@ namespace DropletsInMotion.Application.Services.Routers
 
             while (true)
             {
-                if (frontier.IsEmpty()) return initialState;
+                if (frontier.IsEmpty()) return null; //throw new Exception("No route can be found.");
+
                 State state = frontier.Pop();
 
                 if (state.IsGoalState())
@@ -53,13 +54,17 @@ namespace DropletsInMotion.Application.Services.Routers
                 }
 
                 explored.Add(state);
+                Debugger.ExploredStates += 1;
+                // TEMP
+                Debugger.Nodes.Add((state.Agents.First().Value.PositionX,
+                    state.Agents.First().Value.PositionY));
+
 
                 var expandedStates = state.GetExpandedStates();
                 foreach (var expandedState in expandedStates)
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        Debugger.ExploredStates += 1;
                         frontier.Add(expandedState);
                     }
                     else

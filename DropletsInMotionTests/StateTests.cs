@@ -42,9 +42,9 @@ namespace DropletsInMotionTests
             jointAction.Add("d1", Types.RouteAction.MoveRight);
 
             State s2 = new State(s1, jointAction);
-            Assert.That(s2.GetHeuristic(), Is.EqualTo(7));
+            Assert.That(s2.GetFScore(), Is.EqualTo(7));
             State s3 = new State(s2, jointAction);
-            Assert.That(s3.GetHeuristic(), Is.EqualTo(6));
+            Assert.That(s3.GetFScore(), Is.EqualTo(6));
         }
 
         [Test]

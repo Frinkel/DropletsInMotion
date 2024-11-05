@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
@@ -20,7 +21,7 @@ public class State
     public Dictionary<string, Agent> Agents { get; private set; }
     public int G { get; private set; }
     public State? Parent { get; private set; }
-    public Dictionary<string, Types.RouteAction>? JointAction { get; private set; }
+    public Dictionary<string, RouteAction>? JointAction { get; private set; }
 
     private int H { get; set; }
     private List<string> RoutableAgents { get; set; }
@@ -51,8 +52,8 @@ public class State
 
         Parent = null;
         G = 0;
+        H = CalculateHeuristic();
 
-        Seed = seed;
     }
 
     public State(State parent, Dictionary<string, Types.RouteAction> jointAction)
@@ -77,7 +78,7 @@ public class State
             Agents[kvp.Key] = (Agent)kvp.Value.Clone();
         }
 
-        var watch = System.Diagnostics.Stopwatch.StartNew();
+        //var watch = System.Diagnostics.Stopwatch.StartNew();
         foreach (var actionKvp in jointAction)
         {
             Agent agent = Agents[actionKvp.Key];
@@ -99,9 +100,10 @@ public class State
         }
 
         H = CalculateHeuristic();
-        watch.Stop();
-        var elapsedMs = watch.Elapsed.Microseconds;
-        Debugger.ElapsedTime.Add(elapsedMs);
+        
+        //watch.Stop();
+        //var elapsedMs = watch.Elapsed.Microseconds;
+        //Debugger.ElapsedTime.Add(elapsedMs);
     }
 
     public List<BoardAction> ExtractActions(double time)
@@ -134,10 +136,6 @@ public class State
         {
             currentTimes[actionKvp.Key] = time;
         }
-
-
-
-
 
 
         double currentTime = time;
@@ -419,11 +417,11 @@ public class State
             }
         }
 
-        Random random;
+        //Random random;
 
-        random = Seed != null ? new Random((int)Seed) : new Random();
+        //random = Seed != null ? new Random((int)Seed) : new Random();
 
-        expandedStates = expandedStates.OrderBy(x => random.Next()).ToList();
+        //expandedStates = expandedStates.OrderBy(x => random.Next()).ToList();
 
         return expandedStates;
     }
@@ -496,9 +494,9 @@ public class State
     }
 
 
-    public int GetHeuristic()
+    public int GetFScore()
     {
-        return H * 2 + G;
+        return H + G;
     }
 
     private int CalculateHeuristic()
@@ -510,19 +508,42 @@ public class State
             {
                 Agent agent = Agents[moveCommand.GetInputDroplets().First()];
 
+                if (!RoutableAgents.Contains(agent.DropletName)) continue;
+
                 int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
                                         Math.Abs(moveCommand.PositionY - agent.PositionY);
 
                 // Penalize states where the path to the goal is blocked
-                if (PathIsBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
+                if (IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
-                    manhattanDistance += 10;
+                    manhattanDistance += 2;
                 }
 
+                //if (  JointAction != null && !JointAction.ContainsKey("a2"))
+                //{
+                //    Console.WriteLine("ALL AGENTS");
+                //    foreach (var a in Agents)
+                //    {
+                //        Console.WriteLine(a.Key);
+                //    }
+
+                //    Console.WriteLine("ALL ROUTABLE AGENTS");
+                //    foreach (var a in RoutableAgents)
+                //    {
+                //        Console.WriteLine(a);
+                //    }
+
+                //    foreach (var kvp in JointAction)
+                //    {
+                //        Console.WriteLine($"Agent {kvp.Key}: {kvp.Value}");
+                //    }
+                //}
+
+
                 // Penalize the act of standing still
-                if (manhattanDistance != 0 && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+                if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
                 {
-                    manhattanDistance += 5;
+                    manhattanDistance += 1;
                 }
 
                 h += manhattanDistance;
@@ -536,7 +557,7 @@ public class State
         return h;
     }
 
-    private bool PathIsBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
+    private bool IsPathBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
     {
         int dx = Math.Abs(endX - startX);
         int dy = -Math.Abs(endY - startY);
@@ -563,45 +584,6 @@ public class State
             {
                 err += dx;
                 startY += sy;
-            }
-        }
-        return false;
-    }
-
-
-    // Helper method to check if an agent is near contamination
-    private bool IsNearContamination(int x, int y, Agent agent)
-    {
-        // Check surrounding cells for contamination
-        for (int dx = -2; dx <= 2; dx++)
-        {
-            for (int dy = -2; dy <= 2; dy++)
-            {
-                if (x + dx >= 0 && x + dx < ContaminationMap.GetLength(0) &&
-                    y + dy >= 0 && y + dy < ContaminationMap.GetLength(1) &&
-                    ContaminationMap[x + dx, y + dy] != 0 && ContaminationMap[x + dx, y + dy] != agent.SubstanceId)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    // Helper method to check if an agent is near another agent
-    private bool IsNearOtherAgent(Agent agent)
-    {
-        foreach (var otherAgent in Agents.Values)
-        {
-            if (agent != otherAgent)
-            {
-                int distX = Math.Abs(agent.PositionX - otherAgent.PositionX);
-                int distY = Math.Abs(agent.PositionY - otherAgent.PositionY);
-
-                if (distX <= 2 && distY <= 2)
-                {
-                    return true;
-                }
             }
         }
         return false;
@@ -719,10 +701,10 @@ public class State
 
         int hash = 17;
 
-        foreach (var value in ContaminationMap)
-        {
-            hash = hash * 31 + value;
-        }
+        //foreach (var value in ContaminationMap)
+        //{
+        //    hash = hash * 31 + value;
+        //}
         //hash = hash * 31 + ContaminationMapHash;
 
         foreach (var agent in Agents.Values)
@@ -746,29 +728,29 @@ public class State
         if (!AreAgentsEqual(Agents, otherState.Agents))
             return false;
 
-        if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
-            return false;
+        //if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
+        //    return false;
 
         return true;
     }
 
-    // TODO do we move this into the contamination service?
-    private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
-    {
-        if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
-            return false;
+    //// TODO do we move this into the contamination service?
+    //private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
+    //{
+    //    if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
+    //        return false;
 
-        for (int i = 0; i < map1.GetLength(0); i++)
-        {
-            for (int j = 0; j < map1.GetLength(1); j++)
-            {
-                if (map1[i, j] != map2[i, j])
-                    return false;
-            }
-        }
+    //    for (int i = 0; i < map1.GetLength(0); i++)
+    //    {
+    //        for (int j = 0; j < map1.GetLength(1); j++)
+    //        {
+    //            if (map1[i, j] != map2[i, j])
+    //                return false;
+    //        }
+    //    }
 
-        return true;
-    }
+    //    return true;
+    //}
 
     private bool AreAgentsEqual(Dictionary<string, Agent> agents1, Dictionary<string, Agent> agents2)
     {

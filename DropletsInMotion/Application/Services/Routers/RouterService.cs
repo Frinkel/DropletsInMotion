@@ -59,7 +59,9 @@ public class RouterService : IRouterService
         State s0 = new State(routableAgents, agents, contaminationMap, commands, _contaminationService, _platformRepository, _templateRepository, Seed);
         Frontier f = new Frontier();
         //AstarRouter astarRouter = new AstarRouter();
-        State sFinal = astarRouter.Search(s0, f);
+        State? sFinal = astarRouter.Search(s0, f);
+        
+        if (sFinal == null) return new List<BoardAction>();
 
 
         if (boundTime != null)
@@ -140,7 +142,7 @@ public class RouterService : IRouterService
         //routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
 
         _contaminationService.PrintContaminationState(contaminationMap);
-        
+
         return sFinal.ExtractActions(time);
     }
 
