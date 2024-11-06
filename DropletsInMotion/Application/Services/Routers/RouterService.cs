@@ -1,4 +1,7 @@
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices.JavaScript;
+using System.Security.Cryptography;
+using System.Security.Principal;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
@@ -7,6 +10,7 @@ using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
+using static DropletsInMotion.Application.Services.Routers.Models.Types;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -49,20 +53,83 @@ public class RouterService : IRouterService
     {
         AstarRouter astarRouter = new AstarRouter();
 
-        List<string> routableAgents = new List<string>();
+        //List<string> routableAgents = new List<string>();
 
-        foreach (var command in commands)
+
+        List<State> commitedStates = new List<State>();
+        State? sFinal = null;
+
+        // Generate all permutations of the commands list
+        var permutations = GetPermutations(commands, commands.Count);
+
+        foreach (var commandOrder in permutations)
         {
-            routableAgents.AddRange(command.GetInputDroplets());
+            
+            // Clear commitedStates for each new permutation attempt
+            commitedStates.Clear();
+            sFinal = null;
+
+            bool foundSolution = true;
+
+            foreach (var command in commandOrder)
+            {
+                // Initialize routable agents and reset contamination map if necessary
+                List<string> routableAgents = new List<string>();
+                routableAgents.AddRange(command.GetInputDroplets());
+
+                var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, (byte[,])contaminationMap.Clone());
+
+                // Create initial state and search for a solution
+                State s0 = new State(command.GetInputDroplets().First(), agents, reservedContaminationMap, new List<IDropletCommand>() { command }, commitedStates, _contaminationService, _platformRepository, _templateRepository, Seed);
+                Frontier f = new Frontier();
+                sFinal = astarRouter.Search(s0, f);
+
+                if (sFinal == null)
+                {
+                    // If no solution is found for this permutation, mark as unsuccessful and break out
+                    foundSolution = false;
+                    break;
+                }
+
+
+                //_contaminationService.PrintContaminationState(sFinal.ContaminationMap);
+
+                // Combine states if a partial solution is found for this command
+                CombineStates(commitedStates, sFinal);
+                //Console.WriteLine($"Found solution for {command.GetType().Name}");
+                //_contaminationService.PrintContaminationState(commitedStates.Last().ContaminationMap);
+
+            }
+
+            // If a solution was found for this permutation, break out of the loop
+            if (foundSolution && sFinal != null)
+            {
+                //if (commitedStates.Last().IsGoalState(commands))
+                //{
+                    Console.WriteLine("Solution found with this permutation!");
+                    break;
+                //}
+
+            }
         }
 
-        State s0 = new State(routableAgents, agents, contaminationMap, commands, _contaminationService, _platformRepository, _templateRepository, Seed);
-        Frontier f = new Frontier();
-        //AstarRouter astarRouter = new AstarRouter();
-        State? sFinal = astarRouter.Search(s0, f);
-        
-        if (sFinal == null) return new List<BoardAction>();
+        // If no solution was found across all permutations, throw an error
+        if (sFinal == null)
+        {
+            throw new InvalidOperationException("No solution found in any permutation of the commands!");
+        }
 
+        for (int i = 1; i < commitedStates.Count; i++)
+        {
+            commitedStates[i].Parent = commitedStates[i - 1];
+        }
+
+        sFinal = commitedStates.Last();
+        
+
+
+
+        sFinal = FindFirstGoalState(sFinal, commands);
 
         if (boundTime != null)
         {
@@ -125,15 +192,21 @@ public class RouterService : IRouterService
             }
         }
 
-        foreach (var actionKvp in sFinal.JointAction)
+        List<State> chosenStates2 = new List<State>();
+        State currentState2 = sFinal;
+        while (currentState2.Parent != null)
         {
-            string dropletName = actionKvp.Key;
+            chosenStates2.Add(currentState2);
+            currentState2 = currentState2.Parent;
+        }
+        chosenStates2 = chosenStates2.OrderBy(s => s.G).ToList();
+
+        foreach (var command in commands)
+        {
+            string dropletName = command.GetInputDroplets().First();
             Agent agent = sFinal.Agents[dropletName];
 
-            IDropletCommand dropletCommand =
-                sFinal.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
-
-            if (State.IsGoalState(dropletCommand, agent))
+            if (State.IsGoalState(command, agent))
             {
                 _contaminationService.ApplyContaminationWithSize(agent, contaminationMap);
             }
@@ -145,6 +218,177 @@ public class RouterService : IRouterService
 
         return sFinal.ExtractActions(time);
     }
+
+    public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
+    {
+        if (length == 1) return list.Select(t => new T[] { t });
+
+        return GetPermutations(list, length - 1)
+            .SelectMany(t => list.Where(e => !t.Contains(e)),
+                (t1, t2) => t1.Concat(new T[] { t2 }));
+    }
+
+    private List<State> CombineStates(List<State> commitedStates, State newState)
+    {
+        List<State> chosenStates = new List<State>();
+        State currentState = newState;
+        while (currentState.Parent != null)
+        {
+            chosenStates.Add(currentState);
+            currentState = currentState.Parent;
+        }
+        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+        // Get the last committed state
+        State lastCommittedState = commitedStates.LastOrDefault();
+
+        foreach (var state in chosenStates)
+        {
+            int index = commitedStates.FindIndex(s => s.G == state.G);
+            if (index >= 0)
+            {
+                var commitedState = commitedStates[index];
+
+                CombineStates(commitedState, state);
+            }
+            else
+            {
+                // Before adding the new state, ensure it has the correct positions for other agents
+                if (lastCommittedState != null)
+                {
+                    state.ContaminationMap = CombineContaminationMaps(lastCommittedState.ContaminationMap, state.ContaminationMap);
+
+                    foreach (var kvp in lastCommittedState.Agents)
+                    {
+                        string agentKey = kvp.Key;
+                        if (agentKey != state.RoutableAgent)
+                        {
+                            state.Agents[agentKey] = kvp.Value;
+                        }
+                    }
+
+
+                }
+                commitedStates.Add(state);
+
+                lastCommittedState = state;
+            }
+        }
+
+
+        int maxGInChosenStates = chosenStates.Count > 0 ? chosenStates[^1].G : -1; // Using C# 8.0 index from end operator
+
+
+        for (int i = 0; i < commitedStates.Count; i++)
+        {
+            var state = commitedStates[i];
+            if (state.G > maxGInChosenStates)
+            {
+                // Update the state to reflect the last state in chosenStates
+                var lastChosenState = chosenStates.LastOrDefault();
+                if (lastChosenState != null)
+                {
+                    // Update the RoutableAgent in this state
+                    state.Agents[lastChosenState.RoutableAgent] = (Agent)lastChosenState.Agents[lastChosenState.RoutableAgent].Clone();
+
+                    // Update the ContaminationMap
+                    state.ContaminationMap = CombineContaminationMaps(state.ContaminationMap, lastChosenState.ContaminationMap);
+
+                    // Update the JointAction
+                    if (lastChosenState.JointAction != null)
+                    {
+                        if (state.JointAction == null)
+                        {
+                            state.JointAction = new Dictionary<string, RouteAction>();
+                        }
+                        state.JointAction[lastChosenState.RoutableAgent] = lastChosenState.JointAction[lastChosenState.RoutableAgent];
+                    }
+                }
+            }
+        }
+
+
+
+        return commitedStates;
+    }
+
+    private void CombineStates(State oldState, State newState)
+    {
+        oldState.ContaminationMap = CombineContaminationMaps(oldState.ContaminationMap, newState.ContaminationMap);
+        
+        oldState.Agents[newState.RoutableAgent] = newState.Agents[newState.RoutableAgent];
+
+        foreach (var action in newState.JointAction)
+        {
+            oldState.JointAction[action.Key] = action.Value;
+        }
+    }
+
+    private byte[,] CombineContaminationMaps(byte[,] map1, byte[,] map2)
+    {
+        int width = map1.GetLength(0);
+        int height = map1.GetLength(1);
+        byte[,] resultMap = new byte[width, height];
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                byte v1 = map1[i, j];
+                byte v2 = map2[i, j];
+
+                if (v1 != 0 && v2 == 0)
+                {
+                    resultMap[i, j] = v1;
+                }
+                else if (v1 == 0 && v2 != 0)
+                {
+                    resultMap[i, j] = v2;
+                }
+                else if (v1 != 0 && v2 != 0)
+                {
+                    if (v1 == v2)
+                    {
+                        resultMap[i, j] = v1; // or v2, since they are equal
+                    }
+                    else
+                    {
+                        resultMap[i, j] = 255;
+                    }
+                }
+                else // Both v1 and v2 are zero
+                {
+                    resultMap[i, j] = 0;
+                }
+            }
+        }
+        return resultMap;
+    }
+
+
+
+    private State FindFirstGoalState(State state, List<IDropletCommand> commands)
+    {
+        List<State> chosenStates = new List<State>();
+        State currentState = state;
+        while (currentState.Parent != null)
+        {
+            currentState.Commands = commands;
+            chosenStates.Add(currentState);
+            currentState = currentState.Parent;
+        }
+        chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+
+        foreach (var returnState in chosenStates)
+        {
+            if (returnState.IsPossibleEndState())
+            {
+                return returnState;
+            }
+        }
+        return state;
+    }
+
 
     private bool ConflictingSates(State s1, State s2)
     {

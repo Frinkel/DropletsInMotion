@@ -1,4 +1,5 @@
 ﻿using DropletsInMotion.Application.Models;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -238,6 +239,20 @@ namespace DropletsInMotion.Application.Services
 
             Console.WriteLine("AFTER");
             //PrintContaminationState(contaminationMap);
+
+            return contaminationMap;
+        }
+
+        public byte[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents, byte[,] contaminationMap)
+        {
+            foreach (var command in commands)
+            {
+                var agent = agents[command.GetInputDroplets().First()];
+                Agent reserveAgent = (Agent) agent.Clone();
+                reserveAgent.PositionX = ((Move)command).PositionX;
+                reserveAgent.PositionY = ((Move)command).PositionY;
+                ApplyContaminationWithSize(reserveAgent, contaminationMap);
+            }
 
             return contaminationMap;
         }

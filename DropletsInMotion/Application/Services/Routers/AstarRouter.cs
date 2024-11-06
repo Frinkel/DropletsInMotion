@@ -26,8 +26,9 @@ namespace DropletsInMotion.Application.Services.Routers
 
                 if (state.IsGoalState())
                 {
-                    Console.WriteLine($"We reached a goal state at depth {state.G}");
+                    //Console.WriteLine($"We reached a goal state at depth {state.G}");
 
+                    return state;
                     List<State> chosenStates = new List<State>();
                     State currentState = state;
                     while (currentState.Parent != null)
@@ -47,11 +48,11 @@ namespace DropletsInMotion.Application.Services.Routers
 
                     return state;
                 }
-                else if (state.G >= 60)
-                {
-                    Console.WriteLine("This");
-                    return state;
-                }
+                //else if (state.G >= 600)
+                //{
+                //    Console.WriteLine("This");
+                //    return state;
+                //}
 
                 explored.Add(state);
                 Debugger.ExploredStates += 1;

@@ -193,10 +193,12 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
 
+                Console.WriteLine("AMOUNT OF ACION:" + boardActions.Count);
                 await SendActions(boardActions);
 
-                boardActions.Clear();
 
+
+                boardActions.Clear();
             }
 
             watch.Stop();

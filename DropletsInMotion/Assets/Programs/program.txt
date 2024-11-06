@@ -1,6 +1,19 @@
-Droplet(d1, 5, 6, 706);
-Droplet(d2, 11, 6, 706);
-Droplet(d3, 17, 6, 1970);
-Merge(d1, d2, d4, 8, 6);
-Move(d4, 8, 11);
-Merge(d4, d3, d3, 16, 14);
+Droplet(d1, 9, 7, 706);
+Droplet(d2, 11, 7, 706);
+Droplet(d3, 13, 7, 706);
+Droplet(d4, 15, 7, 706);
+Droplet(d5, 17, 7, 706);
+Droplet(d6, 19, 7, 706);
+
+Move(d1, 19, 11);
+Move(d2, 9, 11);
+Move(d3, 11, 11);
+Move(d4, 13, 11);
+Move(d5, 15, 11);
+Move(d6, 17, 11);
+
+
+
+//Merge(d1, d2, d4, 8, 6);
+//Move(d4, 8, 11);
+//Merge(d4, d3, d3, 16, 14);

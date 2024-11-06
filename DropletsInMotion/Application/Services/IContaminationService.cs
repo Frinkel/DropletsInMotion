@@ -1,5 +1,6 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -13,6 +14,9 @@ namespace DropletsInMotion.Application.Services
         void CopyContaminationMap(byte[,] source, byte[,] destination);
         byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap);
         void ApplyIfInBoundsWithContamination(byte[,] contaminationMap, int xPos, int yPos, byte substanceId);
+
+        public byte[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,
+            byte[,] contaminationMap);
 
         byte[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePosition, byte[,] contaminationMap);
         byte[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, byte[,] contaminationMap);

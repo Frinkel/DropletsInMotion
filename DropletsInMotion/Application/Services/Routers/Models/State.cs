@@ -17,15 +17,17 @@ public class State
 {
     private int? Seed = null;
 
-    public byte[,] ContaminationMap { get; private set; }
-    public Dictionary<string, Agent> Agents { get; private set; }
+    public byte[,] ContaminationMap { get; set; }
+    public Dictionary<string, Agent> Agents { get; set; }
     public int G { get; private set; }
-    public State? Parent { get; private set; }
-    public Dictionary<string, RouteAction>? JointAction { get; private set; }
-
+    public State? Parent { get; set; }
+    public Dictionary<string, RouteAction>? JointAction { get; set; }
+    public RouteAction Action { get; private set; }
     private int H { get; set; }
-    private List<string> RoutableAgents { get; set; }
+    public string RoutableAgent { get; set; }
     public List<IDropletCommand> Commands { get; set; }
+
+    public List<State> CommitedStates { get; set; }
 
     private int? _cachedHash = null;
 
@@ -34,13 +36,13 @@ public class State
     private readonly ITemplateRepository _templateRepository;
 
     // Initial state
-    public State(List<string> routableAgents, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
+    public State(string routableAgent, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, List<State> commitedStates, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
         _platformRepository = platformRepository;
         _templateRepository = templateRepository;
-        RoutableAgents = routableAgents;
+        RoutableAgent = routableAgent;
         Agents = new Dictionary<string, Agent>();
         foreach (var kvp in agents)
         {
@@ -48,6 +50,7 @@ public class State
         }
         ContaminationMap = (byte[,]) contaminationMap.Clone();
         Commands = commands;
+        CommitedStates = commitedStates;
         JointAction = null;
 
         Parent = null;
@@ -56,15 +59,18 @@ public class State
 
     }
 
-    public State(State parent, Dictionary<string, Types.RouteAction> jointAction)
+    public State(State parent, Types.RouteAction action)
     {
         Seed = parent.Seed;
 
         Parent = parent;
-        RoutableAgents = new List<string>(Parent.RoutableAgents);
+        RoutableAgent = parent.RoutableAgent;
         ContaminationMap = (byte[,])Parent.ContaminationMap.Clone();
         Commands = Parent.Commands;
-        JointAction = jointAction;
+        CommitedStates = Parent.CommitedStates;
+        Action = action;
+        JointAction = new Dictionary<string, RouteAction>();
+        JointAction[RoutableAgent] = action;
         _contaminationService = Parent._contaminationService;
         _platformRepository = Parent._platformRepository;
         _templateRepository = Parent._templateRepository;
@@ -79,25 +85,13 @@ public class State
         }
 
         //var watch = System.Diagnostics.Stopwatch.StartNew();
-        foreach (var actionKvp in jointAction)
-        {
-            Agent agent = Agents[actionKvp.Key];
-            agent.Execute(actionKvp.Value);
-            ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
-
-
-            // If a droplet is in its goal position we do not need to route it for child states
-            foreach (var command in Commands)
-            {
-                if (command is Move moveCommand)
-                {
-                    if (agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY)
-                    {
-                        RoutableAgents.Remove(agent.DropletName);
-                    }
-                }
-            }
-        }
+        //foreach (var actionKvp in jointAction)
+        //{
+        // EXECUTE THE ACTION
+        Agent agent = Agents[RoutableAgent];
+        agent.Execute(action);
+        ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+        //}
 
         H = CalculateHeuristic();
         
@@ -141,33 +135,32 @@ public class State
         double currentTime = time;
 
         State firstState = chosenStates.First();
-        foreach (var actionKvp in firstState.JointAction)
+        foreach (var agent in Agents)
         {
-           string dropletName = actionKvp.Key;
+           string dropletName = agent.Key;
            endUnravel[dropletName] = 0;
-           canRavel[actionKvp.Key] = false;
-           hasRaveled[actionKvp.Key] = false;
-            Agent agent = firstState.Parent.Agents[dropletName];
-                if (agent.SnakeBody.Count == 1)
-                {
-                    canUnravel[actionKvp.Key] = true;
-                }
-                else
-                {
-                    canUnravel[actionKvp.Key] = false;
-                }
+           canRavel[dropletName] = false;
+           hasRaveled[dropletName] = false;
+            Agent currentAgent = firstState.Parent.Agents[dropletName];
+            if (currentAgent.SnakeBody.Count == 1)
+            {
+                canUnravel[dropletName] = true;
+            }
+            else
+            {
+                canUnravel[dropletName] = false;
+            }
 
         }
 
         State lastState = chosenStates.Last();
-        foreach (var actionKvp in lastState.JointAction)
+        foreach (var command in Commands)
         {
-            IDropletCommand dropletCommand =
-                lastState.Commands.Find(c => c.GetInputDroplets().First() == actionKvp.Key);
+            var dropletName = command.GetInputDroplets().First();
 
-            if (IsGoalState(dropletCommand, lastState.Agents[actionKvp.Key]))
+            if (IsGoalState(command, lastState.Agents[dropletName]))
             {
-                canRavel[actionKvp.Key] = true;
+                canRavel[dropletName] = true;
             }
         }
 
@@ -237,15 +230,13 @@ public class State
         currentTime = finalActions.Last().Time;
 
 
-        foreach (var actionKvp in lastState.JointAction)
+        foreach (var command in Commands)
         {
-            string dropletName = actionKvp.Key;
+            var dropletName = command.GetInputDroplets().First();
             Agent agent = lastState.Agents[dropletName];
 
-            IDropletCommand dropletCommand =
-                lastState.Commands.Find(c => c.GetInputDroplets().First() == dropletName);
 
-            if (IsGoalState(dropletCommand, agent))
+            if (IsGoalState(command, agent))
             {
                 while (agent.SnakeBody.Count > 1)
                 {
@@ -253,6 +244,7 @@ public class State
                 }
             }
         }
+
 
 
 
@@ -309,7 +301,10 @@ public class State
             string direction = FindDirection(tailPositionNext, tailPosition);
 
             ShrinkTemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
-            boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[tailPosition.x][tailPosition.y].Id, time, 1));
+            if (shrinkTemplate != null)
+            {
+                boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[tailPosition.x][tailPosition.y].Id, time, 1));
+            }
         }
 
         return boardActions;
@@ -326,7 +321,7 @@ public class State
             ( < 0, _) => "moveLeft",
             (_, > 0) => "moveDown",
             (_, < 0) => "moveUp",
-            _ => throw new InvalidOperationException("No movement detected or invalid movement.")
+            _ => ""
         };
         return direction;
     }
@@ -385,36 +380,32 @@ public class State
 
         List<State> expandedStates = new List<State>();
 
-        Dictionary<string, List<Types.RouteAction>> applicableActions = new Dictionary<string, List<Types.RouteAction>>();
+        List<Types.RouteAction> applicableActions = new List<Types.RouteAction>();
 
-        foreach (string agentName in RoutableAgents)
+        Agent agent = Agents[RoutableAgent];
+        List<Types.RouteAction> possibleActions = Types.RouteAction.PossiblActions;
+
+
+        Dictionary<string, Agent> commitedAgentPositions = GetCommitedAgentPositions();
+        var commitedContaminations =
+            CommitedStates.Count > 0 ? CommitedStates.Last().ContaminationMap : ContaminationMap;
+
+        foreach (Types.RouteAction action in possibleActions)
         {
-            Agent agent = Agents[agentName];
-            List<Types.RouteAction> possibleActions = Types.RouteAction.PossiblActions;
-            List<Types.RouteAction> agentActions = new List<Types.RouteAction>();
-
-            foreach (Types.RouteAction action in possibleActions)
+            if (agent.IsMoveApplicable(action, commitedAgentPositions, commitedContaminations, this))
             {
-                if (agent.IsMoveApplicable(action, this))
-                {
-                    agentActions.Add(action);
-                }
+                applicableActions.Add(action);
             }
-            applicableActions.Add(agentName, agentActions);
         }
 
-        var jointActions = GetActionPermutations(applicableActions);
 
-
-        foreach (var jointAction in jointActions)
+        foreach (var action in applicableActions)
         {
-            if (!IsConflicting(jointAction))
-            {
-                State newState = new State(this, jointAction);
-                expandedStates.Add(newState);
+            State newState = new State(this, action);
+            expandedStates.Add(newState);
 
-                Debugger.ExpandedStates += 1;
-            }
+            Debugger.ExpandedStates += 1;
+        
         }
 
         //Random random;
@@ -425,6 +416,16 @@ public class State
 
         return expandedStates;
     }
+
+    private Dictionary<string, Agent> GetCommitedAgentPositions()
+    {
+        if(CommitedStates.Count == 0)
+        {
+            return new Dictionary<string, Agent>();
+        }
+        return CommitedStates.Count > G ? CommitedStates[G].Agents : CommitedStates.Last().Agents;
+    }
+
 
     private bool IsConflicting(Dictionary<string, Types.RouteAction> jointAction)
     {
@@ -508,8 +509,6 @@ public class State
             {
                 Agent agent = Agents[moveCommand.GetInputDroplets().First()];
 
-                if (!RoutableAgents.Contains(agent.DropletName)) continue;
-
                 int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
                                         Math.Abs(moveCommand.PositionY - agent.PositionY);
 
@@ -518,27 +517,6 @@ public class State
                 {
                     manhattanDistance += 2;
                 }
-
-                //if (  JointAction != null && !JointAction.ContainsKey("a2"))
-                //{
-                //    Console.WriteLine("ALL AGENTS");
-                //    foreach (var a in Agents)
-                //    {
-                //        Console.WriteLine(a.Key);
-                //    }
-
-                //    Console.WriteLine("ALL ROUTABLE AGENTS");
-                //    foreach (var a in RoutableAgents)
-                //    {
-                //        Console.WriteLine(a);
-                //    }
-
-                //    foreach (var kvp in JointAction)
-                //    {
-                //        Console.WriteLine($"Agent {kvp.Key}: {kvp.Value}");
-                //    }
-                //}
-
 
                 // Penalize the act of standing still
                 if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
@@ -600,7 +578,18 @@ public class State
             }
         }
         return true;
+    }
 
+    public bool IsGoalState(List<IDropletCommand> commands)
+    {
+        foreach (var command in commands)
+        {
+            if (!IsGoalState(command))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public bool IsOneGoalState()
@@ -660,7 +649,7 @@ public class State
             case Move moveCommand:
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
-                throw new InvalidOperationException("Trying to determine goalstate for unknown dropletCommand!");
+                throw new InvalidOperationException($"Trying to determine goalstate for unknown dropletCommand! {dropletCommand}");
                 break;
         }
 

@@ -77,10 +77,9 @@ namespace DropletsInMotion.Application.Models
             }
         }
 
-        public bool IsMoveApplicable(Types.RouteAction action, State state)
+        public bool IsMoveApplicable(Types.RouteAction action, Dictionary<string, Agent> otherAgents, byte[,] otherContaminationMap, State state)
         {
             var contamination = state.ContaminationMap;
-            var agents = state.Agents;
             var deltaX = PositionX + action.DropletXDelta;
             var deltaY = PositionY + action.DropletYDelta;
 
@@ -96,6 +95,11 @@ namespace DropletsInMotion.Application.Models
                 return false;
             }
 
+            if (otherContaminationMap[deltaX, deltaY] != 0 && otherContaminationMap[deltaX, deltaY] != SubstanceId)
+            {
+                return false;
+            }
+
             if (state.Parent != null &&
                 action.Type != Types.ActionType.NoOp &&
                 deltaX == state.Parent.Agents[DropletName].PositionX &&
@@ -106,7 +110,7 @@ namespace DropletsInMotion.Application.Models
 
 
             //Check for going near other agents of the same substance
-            foreach (var otherAgentKvp in agents)
+            foreach (var otherAgentKvp in otherAgents)
             {
                 var otherAgent = otherAgentKvp.Value;
                 if (otherAgent.SubstanceId != SubstanceId || otherAgent.DropletName == DropletName) continue; 

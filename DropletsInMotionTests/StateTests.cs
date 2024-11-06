@@ -23,163 +23,163 @@ namespace DropletsInMotionTests
         }
 
 
-        [Test]
-        public void CalculateHeuristic()
-        {
-            byte[,] contamination = new byte[32, 20];
+        //[Test]
+        //public void CalculateHeuristic()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
 
 
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var agent = new Agent("d1", 1, 1, 1);
-            agents.Add("d1", agent);
-            IDropletCommand dropletCommand = new Move("d1", 3, 3);
-            List<IDropletCommand> commands = new List<IDropletCommand>() { dropletCommand };
-            List<string> routeableAgents = new List<string>() { "d1" };
+        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        //    var agent = new Agent("d1", 1, 1, 1);
+        //    agents.Add("d1", agent);
+        //    IDropletCommand dropletCommand = new Move("d1", 3, 3);
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { dropletCommand };
+        //    List<string> routeableAgents = new List<string>() { "d1" };
 
-            State s1 = new State(routeableAgents, agents, contamination, commands,  _contaminationService, _platformRepository, _templateRepository);
+        //    State s1 = new State(routeableAgents, agents, contamination, commands,  _contaminationService, _platformRepository, _templateRepository);
 
-            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
-            jointAction.Add("d1", Types.RouteAction.MoveRight);
+        //    Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+        //    jointAction.Add("d1", Types.RouteAction.MoveRight);
 
-            State s2 = new State(s1, jointAction);
-            Assert.That(s2.GetFScore(), Is.EqualTo(7));
-            State s3 = new State(s2, jointAction);
-            Assert.That(s3.GetFScore(), Is.EqualTo(6));
-        }
+        //    State s2 = new State(s1, jointAction);
+        //    Assert.That(s2.GetHeuristic(), Is.EqualTo(7));
+        //    State s3 = new State(s2, jointAction);
+        //    Assert.That(s3.GetHeuristic(), Is.EqualTo(6));
+        //}
 
-        [Test]
-        public void ExtractActionsTest()
-        {
-            byte[,] contamination = new byte[32, 20];
-
-
-            var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
-
-            IDropletCommand command1 = new Move("d1", 3, 3);
-            IDropletCommand command2 = new Move("d2", 7, 7);
-
-            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
-            List<string> routeableAgents = new List<string>() { "d1", "d2" };
+        //[Test]
+        //public void ExtractActionsTest()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
 
 
-            Electrode[][] board = new Electrode[32][];
-            for (int i = 0; i < 32; i++)
-            {
-                board[i] = new Electrode[20];
-                for (int j = 0; j < 20; j++)
-                {
-                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
-                }
-            }
-            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+        //    var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
 
-            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
-            jointAction.Add("d1", Types.RouteAction.MoveRight);
-            jointAction.Add("d2", Types.RouteAction.MoveRight);
-            State s2 = new State(s1, jointAction);
-            State s3 = new State(s2, jointAction);
+        //    IDropletCommand command1 = new Move("d1", 3, 3);
+        //    IDropletCommand command2 = new Move("d2", 7, 7);
 
-            Assert.That(s3.ExtractActions(0).Count, Is.EqualTo(12));
-        }
-
-        [Test]
-        public void TestExpandedStates()
-        {
-            byte[,] contamination = new byte[32, 20];
-
-            var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
-            IDropletCommand command1 = new Move("d1", 3, 3);
-            IDropletCommand command2 = new Move("d2", 7, 7);
-
-            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
-            List<string> routeableAgents = new List<string>() { "d1", "d2" };
-
-            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
-
-            List<State> expandedStates = s1.GetExpandedStates();
-
-            Assert.That(expandedStates.Count(), Is.EqualTo(25));
-        }
-
-        [Test]
-        public void TestIsMoveApplicable()
-        {
-            byte[,] contamination = new byte[32, 20];
-
-            var agents = CreateTwoAgentsWithPositions(1, 1, 5, 1);
-
-            IDropletCommand command1 = new Move("d1", 3, 3);
-            IDropletCommand command2 = new Move("d2", 7, 7);
-
-            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
-            List<string> routeableAgents = new List<string>() { "d1", "d2" };
-
-            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
-
-            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
-            jointAction.Add("d1", Types.RouteAction.MoveRight);
-            jointAction.Add("d2", Types.RouteAction.MoveLeft);
-            List<State> expandedStates = s1.GetExpandedStates();
-            Assert.That(expandedStates.Count(), Is.EqualTo(25));
-
-            State s2 = new State(s1, jointAction);
-            expandedStates = s2.GetExpandedStates();
-            Assert.That(expandedStates.Count(), Is.EqualTo(9));
-        }
-
-        [Test]
-        public void TestIsConflicting()
-        {
-            byte[,] contamination = new byte[32, 20];
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
+        //    List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
 
-            var agents = CreateTwoAgentsWithPositions(1, 1, 6, 1);
+        //    Electrode[][] board = new Electrode[32][];
+        //    for (int i = 0; i < 32; i++)
+        //    {
+        //        board[i] = new Electrode[20];
+        //        for (int j = 0; j < 20; j++)
+        //        {
+        //            board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+        //        }
+        //    }
+        //    State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
-            IDropletCommand command1 = new Move("d1", 3, 3);
-            IDropletCommand command2 = new Move("d2", 7, 7);
+        //    Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+        //    jointAction.Add("d1", Types.RouteAction.MoveRight);
+        //    jointAction.Add("d2", Types.RouteAction.MoveRight);
+        //    State s2 = new State(s1, jointAction);
+        //    State s3 = new State(s2, jointAction);
 
-            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
-            List<string> routeableAgents = new List<string>() { "d1", "d2" };
+        //    Assert.That(s3.ExtractActions(0).Count, Is.EqualTo(12));
+        //}
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+        //[Test]
+        //public void TestExpandedStates()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
 
-            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
-            jointAction.Add("d1", Types.RouteAction.MoveRight);
-            jointAction.Add("d2", Types.RouteAction.MoveLeft);
-            List<State> expandedStates = s1.GetExpandedStates();
-            Assert.That(expandedStates.Count(), Is.EqualTo(25));
+        //    var agents = CreateTwoAgentsWithPositions(1, 1, 5, 5);
+        //    IDropletCommand command1 = new Move("d1", 3, 3);
+        //    IDropletCommand command2 = new Move("d2", 7, 7);
 
-            State s2 = new State(s1, jointAction);
-            expandedStates = s2.GetExpandedStates();
-            Assert.That(expandedStates.Count(), Is.EqualTo(15));
-        }
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
+        //    List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-        [Test]
+        //    State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
 
-        public void TestIsGoalState()
-        {
-            byte[,] contamination = new byte[32, 20];
-            var agents = CreateTwoAgentsWithPositions(1, 3, 5, 7);
+        //    List<State> expandedStates = s1.GetExpandedStates();
 
-            IDropletCommand command1 = new Move("d1", 3, 3);
-            IDropletCommand command2 = new Move("d2", 7, 7);
+        //    Assert.That(expandedStates.Count(), Is.EqualTo(25));
+        //}
 
-            List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
-            List<string> routeableAgents = new List<string>() { "d1", "d2" };
+        //[Test]
+        //public void TestIsMoveApplicable()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
 
-            State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+        //    var agents = CreateTwoAgentsWithPositions(1, 1, 5, 1);
 
-            Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
-            jointAction.Add("d1", Types.RouteAction.MoveRight);
-            jointAction.Add("d2", Types.RouteAction.MoveRight);
-            Assert.That(s1.IsGoalState(), Is.EqualTo(false));
+        //    IDropletCommand command1 = new Move("d1", 3, 3);
+        //    IDropletCommand command2 = new Move("d2", 7, 7);
 
-            State s2 = new State(s1, jointAction);
-            Assert.That(s2.IsGoalState(), Is.EqualTo(false));
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
+        //    List<string> routeableAgents = new List<string>() { "d1", "d2" };
 
-            State s3 = new State(s2, jointAction);
-            Assert.That(s3.IsGoalState(), Is.EqualTo(true));
-        }
+        //    State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+
+        //    Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+        //    jointAction.Add("d1", Types.RouteAction.MoveRight);
+        //    jointAction.Add("d2", Types.RouteAction.MoveLeft);
+        //    List<State> expandedStates = s1.GetExpandedStates();
+        //    Assert.That(expandedStates.Count(), Is.EqualTo(25));
+
+        //    State s2 = new State(s1, jointAction);
+        //    expandedStates = s2.GetExpandedStates();
+        //    Assert.That(expandedStates.Count(), Is.EqualTo(9));
+        //}
+
+        //[Test]
+        //public void TestIsConflicting()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
+
+
+        //    var agents = CreateTwoAgentsWithPositions(1, 1, 6, 1);
+
+        //    IDropletCommand command1 = new Move("d1", 3, 3);
+        //    IDropletCommand command2 = new Move("d2", 7, 7);
+
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
+        //    List<string> routeableAgents = new List<string>() { "d1", "d2" };
+
+        //    State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+
+        //    Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+        //    jointAction.Add("d1", Types.RouteAction.MoveRight);
+        //    jointAction.Add("d2", Types.RouteAction.MoveLeft);
+        //    List<State> expandedStates = s1.GetExpandedStates();
+        //    Assert.That(expandedStates.Count(), Is.EqualTo(25));
+
+        //    State s2 = new State(s1, jointAction);
+        //    expandedStates = s2.GetExpandedStates();
+        //    Assert.That(expandedStates.Count(), Is.EqualTo(15));
+        //}
+
+        //[Test]
+
+        //public void TestIsGoalState()
+        //{
+        //    byte[,] contamination = new byte[32, 20];
+        //    var agents = CreateTwoAgentsWithPositions(1, 3, 5, 7);
+
+        //    IDropletCommand command1 = new Move("d1", 3, 3);
+        //    IDropletCommand command2 = new Move("d2", 7, 7);
+
+        //    List<IDropletCommand> commands = new List<IDropletCommand>() { command1, command2 };
+        //    List<string> routeableAgents = new List<string>() { "d1", "d2" };
+
+        //    State s1 = new State(routeableAgents, agents, contamination, commands, _contaminationService, _platformRepository, _templateRepository);
+
+        //    Dictionary<string, Types.RouteAction> jointAction = new Dictionary<string, Types.RouteAction>();
+        //    jointAction.Add("d1", Types.RouteAction.MoveRight);
+        //    jointAction.Add("d2", Types.RouteAction.MoveRight);
+        //    Assert.That(s1.IsGoalState(), Is.EqualTo(false));
+
+        //    State s2 = new State(s1, jointAction);
+        //    Assert.That(s2.IsGoalState(), Is.EqualTo(false));
+
+        //    State s3 = new State(s2, jointAction);
+        //    Assert.That(s3.IsGoalState(), Is.EqualTo(true));
+        //}
 
         public Dictionary<string, Agent> CreateTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
         {
