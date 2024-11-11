@@ -297,7 +297,7 @@ namespace DropletsInMotionTests
 
             await _executionEngine.Execute();
 
-            Assert.That(_executionEngine.Time, Is.EqualTo(1));
+            Assert.That(_executionEngine.Time, Is.EqualTo(2.0d));
         }
 
     }

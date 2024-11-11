@@ -124,8 +124,12 @@ public class RouterService : IRouterService
             commitedStates[i].Parent = commitedStates[i - 1];
         }
 
+        if (commitedStates.Count == 0)
+        {
+            return new List<BoardAction>();
+        }
         sFinal = commitedStates.Last();
-        
+
 
 
 
@@ -214,7 +218,7 @@ public class RouterService : IRouterService
 
         //routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
 
-        _contaminationService.PrintContaminationState(contaminationMap);
+        //_contaminationService.PrintContaminationState(contaminationMap);
 
         return sFinal.ExtractActions(time);
     }

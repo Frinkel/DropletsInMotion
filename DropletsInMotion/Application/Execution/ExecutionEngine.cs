@@ -193,7 +193,7 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
 
-                Console.WriteLine("AMOUNT OF ACION:" + boardActions.Count);
+                //Console.WriteLine("AMOUNT OF ACION:" + boardActions.Count);
                 await SendActions(boardActions);
 
 
@@ -315,7 +315,7 @@ namespace DropletsInMotion.Application.Execution
                 var actualTime = await _communicationEngine.SendTimeRequest();
                 var boardActionTime = boardActions.First().Time;
 
-                Console.WriteLine(actualTime);
+                //Console.WriteLine(actualTime);
 
                 // Handle time desync
                 // TODO: Check if mix sends its own request, we should do it here!

@@ -1,5 +1,5 @@
 a = 5;
-Droplet(d1, a, 6, 1.2);
+Droplet(d1, a, 6, 400);
 i = 1;
 j = 0;
 while(i < 5) {

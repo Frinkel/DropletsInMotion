@@ -61,8 +61,6 @@ public class MoveHandler
             time += (totalTime / scaleFactor);
         }
 
-        appliedMoves.ForEach(x => Console.WriteLine(x));
-
         return appliedMoves;
     }
 
