@@ -133,8 +133,8 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            Console.WriteLine("BEFORE");
-            Console.WriteLine($"Merge template {mergePositions.Template.Name}");
+            //Console.WriteLine("BEFORE");
+            //Console.WriteLine($"Merge template {mergePositions.Template.Name}");
             PrintContaminationState(contaminationMap);
 
             // Apply contamination based on the templates
@@ -248,8 +248,8 @@ namespace DropletsInMotion.Application.Services
             }
 
 
-            Console.WriteLine("AFTER");
-            PrintContaminationState(contaminationMap);
+            //Console.WriteLine("AFTER");
+            //PrintContaminationState(contaminationMap);
 
             return contaminationMap;
         }
