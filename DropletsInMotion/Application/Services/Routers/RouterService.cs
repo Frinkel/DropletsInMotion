@@ -218,7 +218,7 @@ public class RouterService : IRouterService
 
         //routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
 
-        _contaminationService.PrintContaminationState(contaminationMap);
+        //_contaminationService.PrintContaminationState(contaminationMap);
 
         return sFinal.ExtractActions(time);
     }
