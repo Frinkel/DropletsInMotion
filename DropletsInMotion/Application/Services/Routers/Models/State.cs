@@ -421,7 +421,7 @@ public class State
     {
         if(CommitedStates.Count == 0)
         {
-            return new Dictionary<string, Agent>();
+            return Agents;
         }
         return CommitedStates.Count > G ? CommitedStates[G].Agents : CommitedStates.Last().Agents;
     }
