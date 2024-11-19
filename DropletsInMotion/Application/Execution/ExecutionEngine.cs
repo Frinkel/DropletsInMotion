@@ -74,9 +74,9 @@ namespace DropletsInMotion.Application.Execution
 
 
             Time = 0;
-            Console.WriteLine(Board[0][1]);
 
-            DependencyGraph.GenerateDotFile();
+            //Console.WriteLine(Board[0][1]);
+            //DependencyGraph.GenerateDotFile(); // TODO: Uncommented for now
 
             // Reset the execution
             ContaminationMap = new byte[Board.Length, Board[0].Length];
@@ -91,10 +91,11 @@ namespace DropletsInMotion.Application.Execution
 
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
-                foreach (var node in DependencyGraph.GetExecutableNodes())
-                {
-                    Console.WriteLine(node);
-                }
+                // TODO: Uncommented for now  
+                //foreach (var node in DependencyGraph.GetExecutableNodes())
+                //{
+                //    Console.WriteLine(node);
+                //}
 
                 List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
@@ -192,18 +193,10 @@ namespace DropletsInMotion.Application.Execution
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
-
-                //Console.WriteLine("AMOUNT OF ACION:" + boardActions.Count);
                 await SendActions(boardActions);
-
-
 
                 boardActions.Clear();
             }
-
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs.ToString());
 
         }
 
@@ -326,7 +319,7 @@ namespace DropletsInMotion.Application.Execution
                     Time = boardActions.Last().Time; 
                 }
 
-                Console.WriteLine("thetime" + boardActions.Last().Time);
+                //Console.WriteLine("thetime" + boardActions.Last().Time);
 
                 await _communicationEngine.SendActions(boardActions);
             }

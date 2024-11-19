@@ -65,8 +65,6 @@ namespace DropletsInMotion.Presentation.Services
                 string template = contentArr[1];
                 SplitTemplate splitTemplate = JsonSerializer.Deserialize<SplitTemplate>(content) ?? throw new InvalidOperationException("A split template configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added split template: {splitTemplate.Name}");
-
                 _templateRepository.AddSplit(splitTemplate, template);
             }
         }
@@ -88,8 +86,6 @@ namespace DropletsInMotion.Presentation.Services
                 string content = contentArr[0];
                 string template = contentArr[1];
                 MergeTemplate mergeTemplate = JsonSerializer.Deserialize<MergeTemplate>(content) ?? throw new InvalidOperationException("A merge template configuration did not correspond to the expected format!");
-
-                Console.WriteLine($"Added split template: {mergeTemplate.Name}");
 
                 _templateRepository.AddMerge(mergeTemplate, template);
             }
@@ -113,8 +109,6 @@ namespace DropletsInMotion.Presentation.Services
                 string template = contentArr[1];
                 RavelTemplate ravelTemplate = JsonSerializer.Deserialize<RavelTemplate>(content) ?? throw new InvalidOperationException("A ravel template configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added ravel template: {ravelTemplate.Name}");
-
                 _templateRepository.AddRavel(ravelTemplate, template);
             }
         }
@@ -136,8 +130,6 @@ namespace DropletsInMotion.Presentation.Services
                 string content = contentArr[0];
                 string template = contentArr[1];
                 GrowTemplate growTemplate = JsonSerializer.Deserialize<GrowTemplate>(content) ?? throw new InvalidOperationException("A grow template configuration did not correspond to the expected format!");
-
-                Console.WriteLine($"Added grow template: {growTemplate.Name}");
 
                 _templateRepository.AddGrow(growTemplate, template);
             }
@@ -162,8 +154,6 @@ namespace DropletsInMotion.Presentation.Services
                 string template = contentArr[1];
                 ShrinkTemplate shrinkTemplate = JsonSerializer.Deserialize<ShrinkTemplate>(content) ?? throw new InvalidOperationException("A shrink template configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added shrink template: {shrinkTemplate.Name}");
-
                 _templateRepository.AddShrink(shrinkTemplate, template);
             }
         }
@@ -185,8 +175,6 @@ namespace DropletsInMotion.Presentation.Services
                 string content = contentArr[0];
                 string template = contentArr[1];
                 DeclareTemplate declareTemplate = JsonSerializer.Deserialize<DeclareTemplate>(content) ?? throw new InvalidOperationException("A ravel template configuration did not correspond to the expected format!");
-
-                Console.WriteLine($"Added ravel template: {declareTemplate.Name}");
 
                 _templateRepository.AddDeclare(declareTemplate, template);
             }
@@ -210,8 +198,6 @@ namespace DropletsInMotion.Presentation.Services
                 string template = contentArr[1];
                 UnravelTemplate unravelTemplate = JsonSerializer.Deserialize<UnravelTemplate>(content) ?? throw new InvalidOperationException("A unravel template configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added unravel template: {unravelTemplate.Name}");
-
                 _templateRepository.AddUnravel(unravelTemplate, template);
             }
         }
@@ -226,12 +212,11 @@ namespace DropletsInMotion.Presentation.Services
                 string content = _fileService.ReadFileFromPath(sensorPath);
                 Sensor sensor = JsonSerializer.Deserialize<Sensor>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added sensor {sensor.Name}");
 
-                foreach (var kvp in sensor.ArgumentHandlers)
-                {
-                    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value.Request}");
-                }
+                //foreach (var kvp in sensor.ArgumentHandlers)
+                //{
+                //    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value.Request}");
+                //}
 
 
                 _deviceRepository.Sensors.Add(sensor.Name, sensor);
@@ -248,12 +233,12 @@ namespace DropletsInMotion.Presentation.Services
                 string content = _fileService.ReadFileFromPath(actuatorPath);
                 Actuator actuator = JsonSerializer.Deserialize<Actuator>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
 
-                Console.WriteLine($"Added actuator {actuator.Name}");
+                //Console.WriteLine($"Added actuator {actuator.Name}");
 
-                foreach (var kvp in actuator.Arguments)
-                {
-                    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value}");
-                }
+                //foreach (var kvp in actuator.Arguments)
+                //{
+                //    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value}");
+                //}
 
 
                 _deviceRepository.Actuators.Add(actuator.Name, actuator);
@@ -269,8 +254,6 @@ namespace DropletsInMotion.Presentation.Services
             {
                 string content = _fileService.ReadFileFromPath(reservoirPath);
                 Reservoir reservoir = JsonSerializer.Deserialize<Reservoir>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
-
-                Console.WriteLine($"Added reservoir:\n{reservoir}");
 
                 _deviceRepository.Reservoirs.Add(reservoir.Name, reservoir);
             }

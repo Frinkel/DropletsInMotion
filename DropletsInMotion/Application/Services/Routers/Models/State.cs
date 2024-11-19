@@ -342,8 +342,6 @@ public class State
                 return new List<BoardAction>();
             }
 
-            Console.WriteLine("Template name: " + unravelTemplate.Name);
-
             return unravelTemplate.Apply(_platformRepository.Board[agentInitial.PositionX - unravelTemplate.InitialPositions.First().Value.x][agentInitial.PositionY - unravelTemplate.InitialPositions.First().Value.y].Id, time, 1);
         }
 

@@ -35,7 +35,6 @@ namespace DropletsInMotion.Application.Services
                             if (moveDroplet.PositionX == moveCommand.PositionX &&
                                 moveDroplet.PositionY == moveCommand.PositionY)
                             {
-                                Console.WriteLine("REMOVEMOVE");
                                 node.MarkAsExecuted();
                             }
                         }
@@ -49,7 +48,6 @@ namespace DropletsInMotion.Application.Services
                                 mergeDroplet.PositionY == mergeCommand.PositionY)
                             {
                                 _commandLifetimeService.RemoveCommand((IDropletCommand) node.Command);
-                                Console.WriteLine("REMOVE MERGRE");
                                 node.MarkAsExecuted();
                             }
                         }
@@ -67,7 +65,6 @@ namespace DropletsInMotion.Application.Services
                                 splitDroplet2.PositionY == splitByRatio.PositionY2)
                             {
 
-                                Console.WriteLine("REMOVE SPLIT!");
                                 _commandLifetimeService.RemoveCommand((IDropletCommand)node.Command);
                                 node.MarkAsExecuted();
                             }
@@ -94,22 +91,20 @@ namespace DropletsInMotion.Application.Services
                     case Store storeCommand:
                         if (_storeService.IsStoreComplete(storeCommand.DropletName, currentTime))
                         {
-                            Console.WriteLine($"Droplet {storeCommand.DropletName} has completed its store time.");
+                            //Console.WriteLine($"Droplet {storeCommand.DropletName} has completed its store time.");
                             node.MarkAsExecuted();
                         }
                         break;
                     case WaitForUserInput command:
-                        Console.WriteLine("REMOVE WAIT FOR USER!");
                         node.MarkAsExecuted();
                         break;
                     case Wait command:
-                        Console.WriteLine("REMOVE WAIT!");
                         node.MarkAsExecuted();
                         break;
                     case Mix mixCommand:
                         if (_storeService.IsStoreComplete(mixCommand.DropletName, currentTime))
                         {
-                            Console.WriteLine($"Droplet {mixCommand.DropletName} has completed its mix.");
+                            //Console.WriteLine($"Droplet {mixCommand.DropletName} has completed its mix.");
                             node.MarkAsExecuted();
                         }
                         break;
@@ -134,7 +129,6 @@ namespace DropletsInMotion.Application.Services
                         DependencyNodeIf dependencyNodeIf = (DependencyNodeIf)node;
                         if (dependencyNodeIf.IsComplete())
                         {
-                            Console.WriteLine("IF command done");
                             node.MarkAsExecuted();
                         }
                         break;
@@ -150,7 +144,6 @@ namespace DropletsInMotion.Application.Services
                     case Waste wasteCommand:
                         if (!agents.ContainsKey(wasteCommand.DropletName))
                         {
-                            Console.WriteLine("WasteDone");
                             node.MarkAsExecuted();
                         }
                         break;

@@ -26,7 +26,7 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 
         public override string ToString()
         {
-            return $"Move(DropletName: {DropletName}, PositionX: {PositionXExpression}, PositionY: {PositionYExpression})";
+            return $"Move(DropletName: {DropletName}, PositionX: {PositionX}, PositionY: {PositionY})";
         }
         public List<string> GetInputDroplets()
         {

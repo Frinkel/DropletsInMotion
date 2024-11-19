@@ -114,8 +114,6 @@ public class TemplateRepository : ITemplateRepository
         }
 
         SplitTemplates.Add(splitTemplate);
-
-        Console.WriteLine(splitTemplate);
     }
 
     public void AddMerge(MergeTemplate mergeTemplate, string template)
@@ -157,8 +155,6 @@ public class TemplateRepository : ITemplateRepository
         finalPositions.ForEach(pos => mergeTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
 
         MergeTemplates.Add(mergeTemplate);
-
-        //Console.WriteLine(splitTemplate);
     }
 
     public void AddRavel(RavelTemplate ravelTemplate, string template)
@@ -194,7 +190,6 @@ public class TemplateRepository : ITemplateRepository
 
         RavelTemplates.Add(ravelTemplate);
 
-        Console.WriteLine(ravelTemplate);
     }
 
     public void AddUnravel(UnravelTemplate unravelTemplate, string template)
@@ -229,8 +224,6 @@ public class TemplateRepository : ITemplateRepository
         finalPositions.ForEach(pos => unravelTemplate.FinalPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
 
         UnravelTemplates.Add(unravelTemplate);
-
-        Console.WriteLine(unravelTemplate);
     }
 
     public void AddDeclare(DeclareTemplate declareTemplate, string template)
@@ -250,8 +243,6 @@ public class TemplateRepository : ITemplateRepository
         initialPositions.ForEach(pos => declareTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
 
         DeclareTemplates.Add(declareTemplate);
-
-        Console.WriteLine(declareTemplate);
     }
 
     public void AddGrow(GrowTemplate growTemplate, string template)
@@ -260,8 +251,6 @@ public class TemplateRepository : ITemplateRepository
         growTemplate.Actions = ParseTemplateFile(template);
 
         GrowTemplates.Add(growTemplate);
-
-        Console.WriteLine(growTemplate);
     }
 
     public void AddShrink(ShrinkTemplate shrinkTemplate, string template)
@@ -270,8 +259,6 @@ public class TemplateRepository : ITemplateRepository
         shrinkTemplate.Actions = ParseTemplateFile(template);
 
         ShrinkTemplates.Add(shrinkTemplate);
-
-        Console.WriteLine(shrinkTemplate);
     }
 
 

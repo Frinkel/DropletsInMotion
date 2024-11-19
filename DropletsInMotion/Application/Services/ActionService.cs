@@ -89,7 +89,6 @@ namespace DropletsInMotion.Application.Services
             // Apply contamination
             _contaminationService.ApplyContaminationMerge(inputAgent1, inputAgent2, newAgent, mergePositions, contaminationMap);
 
-            Console.WriteLine(outputDroplet);
             return mergeActions;
         }
 
@@ -358,7 +357,7 @@ namespace DropletsInMotion.Application.Services
 
             var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
             movesToExecute.Add(moveCommand);
-            Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
+            //Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
         }
 
 
@@ -383,7 +382,7 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.X1, mergePositions.Y1);
                 movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move dropletCommand added for droplet 1: {moveCommand}");
+                //Console.WriteLine($"Move dropletCommand added for droplet 1: {moveCommand}");
             }
 
             // Move inputDroplet2 to be next to the merge position
@@ -391,7 +390,7 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.X2, mergePositions.Y2);
                 movesToExecute.Add(moveCommand);
-                Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
+                //Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
 
             }
 

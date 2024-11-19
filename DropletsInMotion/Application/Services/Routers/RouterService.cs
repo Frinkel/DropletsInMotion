@@ -53,14 +53,13 @@ public class RouterService : IRouterService
     {
         AstarRouter astarRouter = new AstarRouter();
 
-        //List<string> routableAgents = new List<string>();
-
-
         List<State> commitedStates = new List<State>();
         State? sFinal = null;
 
         // Generate all permutations of the commands list
         var permutations = GetPermutations(commands, commands.Count);
+
+        var chosenPermutation = permutations.First();
 
         foreach (var commandOrder in permutations)
         {
@@ -96,22 +95,22 @@ public class RouterService : IRouterService
 
                 // Combine states if a partial solution is found for this command
                 CombineStates(commitedStates, sFinal);
-                //Console.WriteLine($"Found solution for {command.GetType().Name}");
-                //_contaminationService.PrintContaminationState(commitedStates.Last().ContaminationMap);
 
             }
 
             // If a solution was found for this permutation, break out of the loop
             if (foundSolution && sFinal != null)
             {
-                //if (commitedStates.Last().IsGoalState(commands))
-                //{
-                    Console.WriteLine("Solution found with this permutation!");
-                    break;
-                //}
-
+                chosenPermutation = commandOrder;
+                break;
             }
         }
+
+        //Console.WriteLine("Solution found with the following permutation:");
+        //foreach (var c in chosenPermutation)
+        //{
+        //    Console.WriteLine(c);
+        //}
 
         // If no solution was found across all permutations, throw an error
         if (sFinal == null)
@@ -128,13 +127,13 @@ public class RouterService : IRouterService
         {
             return new List<BoardAction>();
         }
+
         sFinal = commitedStates.Last();
-
-
 
 
         sFinal = FindFirstGoalState(sFinal, commands);
 
+        // TODO: Alex can we segregate this?
         if (boundTime != null)
         {
             List<State> chosenStates = new List<State>();
@@ -216,8 +215,7 @@ public class RouterService : IRouterService
             }
         }
 
-        //routableAgents.ForEach(agent => _contaminationService.ApplyContaminationWithSize(agents[agent], contaminationMap));
-
+        // TODO: Debug?
         //_contaminationService.PrintContaminationState(contaminationMap);
 
         return sFinal.ExtractActions(time);

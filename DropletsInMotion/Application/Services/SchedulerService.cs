@@ -196,8 +196,8 @@ namespace DropletsInMotion.Application.Services
 
                 if (bestPositions != null)
                 {
-                    Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
-                                      $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
+                    //Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
+                    //                  $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
 
                     return bestPositions;
                 }

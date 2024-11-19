@@ -140,7 +140,7 @@ public class SimulationCommunicationService : ICommunicationService
 
         string serializedObject = JsonSerializer.Serialize(requestDto);
 
-        Console.WriteLine($"Sending {serializedObject}");
+        //Console.WriteLine($"Sending {serializedObject}");
 
         var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
