@@ -288,7 +288,7 @@ public class TemplateRepository : ITemplateRepository
             var line = block.Template[i].Trim();
             for (int j = 0; j < cols; j++)
             {
-                grid[i, j] = line[j] - '0';  // Convert '0'/'1' characters to integers
+                grid[i, j] = line[j] - '0';  // Convert '0', '1', '2', etc., to integers
             }
         }
 
@@ -299,13 +299,13 @@ public class TemplateRepository : ITemplateRepository
         int[] dRow = { -1, 1, 0, 0 };
         int[] dCol = { 0, 0, -1, 1 };
 
-        void FloodFill(int r, int c, int id)
+        void FloodFill(int r, int c, int value)
         {
             Stack<(int r, int c)> stack = new Stack<(int r, int c)>();
             stack.Push((r, c));
             visited[r, c] = true;
 
-            string clusterId = id.ToString();
+            string clusterId = value.ToString();
             if (!clusters.ContainsKey(clusterId))
             {
                 clusters[clusterId] = new List<(int x, int y)>();
@@ -328,7 +328,7 @@ public class TemplateRepository : ITemplateRepository
                     int newCol = curC + dCol[i];
 
                     if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols &&
-                        !visited[newRow, newCol] && grid[newRow, newCol] != 0)
+                        !visited[newRow, newCol] && grid[newRow, newCol] == value)
                     {
                         visited[newRow, newCol] = true;
                         stack.Push((newRow, newCol));
@@ -339,23 +339,20 @@ public class TemplateRepository : ITemplateRepository
         }
 
         // Iterate over the grid to find clusters
-        int clusterId = 1;
         for (int r = 0; r < rows; r++)
         {
             for (int c = 0; c < cols; c++)
             {
-                if (grid[r, c] != 0 && !visited[r, c])
+                int value = grid[r, c];
+                if (value != 0 && !visited[r, c])
                 {
-                    FloodFill(r, c, clusterId);
-                    clusterId++;
+                    FloodFill(r, c, value);
                 }
             }
         }
 
         return clusters;
     }
-
-
 
 
 
