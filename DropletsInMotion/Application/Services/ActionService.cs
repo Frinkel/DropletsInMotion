@@ -123,13 +123,6 @@ namespace DropletsInMotion.Application.Services
             }
 
 
-            foreach (var kvp in positionToDropletMap)
-            {
-                Console.WriteLine($"{kvp.Key} -> {kvp.Value}");
-            }
-
-
-
             foreach (var block in templateCopy.Blocks)
             {
                 var mappedBlock = new Dictionary<string, List<(int x, int y)>>();
