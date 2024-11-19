@@ -134,13 +134,18 @@ namespace DropletsInMotion.Application.Services
             }
 
             Console.WriteLine("BEFORE");
-            //PrintContaminationState(contaminationMap);
+            Console.WriteLine($"Merge template {mergePositions.Template.Name}");
+            PrintContaminationState(contaminationMap);
 
             // Apply contamination based on the templates
             foreach (var block in mergePositions.Template.Blocks)
             {
+
                 foreach (var cluster in block)
                 {
+                    Console.WriteLine(cluster.Key);
+                    Console.WriteLine(cluster.Value.Count);
+
                     foreach (var pos in cluster.Value)
                     {
 
@@ -151,6 +156,10 @@ namespace DropletsInMotion.Application.Services
                             var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
                             _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
                         };
+
+
+                        if (block.Count <= 1) substanceId = outputAgent.SubstanceId;
+                        
 
                         var contaminationPosX = pos.x + mergeX;
                         var contaminationPosY = pos.y + mergeY;
@@ -175,6 +184,7 @@ namespace DropletsInMotion.Application.Services
 
                             foreach (var (xOffset, yOffset) in offsets)
                             {
+                                Console.WriteLine($"{contaminationPosX + xOffset} {contaminationPosY + yOffset}, substance {substanceId}");
                                 OverrideContaminations(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId, legalSubstances);
                             }
                         }
@@ -184,6 +194,7 @@ namespace DropletsInMotion.Application.Services
 
                             foreach (var (xOffset, yOffset) in offsets)
                             {
+                                Console.WriteLine($"{contaminationPosX + xOffset} {contaminationPosY + yOffset}, substance {substanceId}");
                                 ApplyIfInBoundsWithLegalSubstanceIds(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId, legalSubstances);
                             }
                         }
@@ -238,7 +249,7 @@ namespace DropletsInMotion.Application.Services
 
 
             Console.WriteLine("AFTER");
-            //PrintContaminationState(contaminationMap);
+            PrintContaminationState(contaminationMap);
 
             return contaminationMap;
         }

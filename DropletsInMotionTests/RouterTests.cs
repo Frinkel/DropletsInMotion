@@ -477,7 +477,6 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarFourDropletsCrissCross()
         {
-
             IDropletCommand dropletCommandA1 = new Move("a1", 15, 11);
             IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
             IDropletCommand dropletCommandA3 = new Move("a3", 11, 11);
