@@ -124,6 +124,27 @@ namespace DropletsInMotion.Application.Models
                 //}
             }
 
+            // Check constraints!
+            //Console.WriteLine(state.Constraints.Contains(new Constraint(DropletName, (deltaX, deltaY))));
+            if (state.Constraints.Contains(new Constraint(DropletName, (deltaX, deltaY))))
+            {
+                //Console.WriteLine("HERE");
+                return false;
+            }
+
+            //Console.WriteLine(state.Constraints.Contains(new Constraint(DropletName, (deltaX, deltaY))));
+            //foreach (var constraint in state.Constraints)
+            //{
+            //    if (constraint.Agent == DropletName && constraint.Position == (deltaX, deltaY))
+            //    {
+            //        //Console.WriteLine($"Move to ({deltaX}, {deltaY}) is constrained for agent {DropletName}.");
+            //        return false;
+            //    }
+            //}
+
+
+            //if(deltaX == 9 && deltaY == 10) Console.WriteLine($"THIS CANNOT HAPPEN?! {DropletName}");
+
             return true;
         }
 

@@ -406,6 +406,126 @@ namespace DropletsInMotionTests
         }
 
 
+        [Test]
+        public void AStarNewTest()
+        {
+
+            IDropletCommand dropletCommand = new Move("a1", 14, 10);
+            IDropletCommand dropletCommand2 = new Move("a2", 10, 19);
+            var commands = new List<IDropletCommand>() { dropletCommand, dropletCommand2 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 6, 10, 400);
+            //Agent.ResetSubstanceId();
+            var a2 = new Agent("a2", 10, 8, 400);
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.ApplyContamination(a2, contaminationMap);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 11, 5, 0, 10);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 5, 8, 0);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 15, 8, 0);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 5, 0, 10);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 11, 0, 4);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+
+            //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
+            //Debugger.PrintDuplicateCounts();
+
+
+            Assert.That(IsOneGoalState(commands, agents), Is.EqualTo(true));
+        }
+
+        [Test]
+        public void AStarNewTest2()
+        {
+
+            IDropletCommand dropletCommand = new Move("a1", 8, 5);
+            IDropletCommand dropletCommand2 = new Move("a2", 6, 7);
+            var commands = new List<IDropletCommand>() { dropletCommand, dropletCommand2 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 4, 5, 400);
+            //Agent.ResetSubstanceId();
+            var a2 = new Agent("a2", 10, 3, 400);
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.ApplyContamination(a2, contaminationMap);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 11, 5, 0, 10);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 5, 8, 0);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 15, 8, 0);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 5, 0, 10);
+            //_contaminationService.UpdateContaminationArea(contaminationMap, 255, 3, 11, 0, 4);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+
+            //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
+            //Debugger.PrintDuplicateCounts();
+
+
+            Assert.That(IsOneGoalState(commands, agents), Is.EqualTo(true));
+        }
+
+
+        [Test]
+        public void AStarFourDropletsCrissCross()
+        {
+
+            IDropletCommand dropletCommandA1 = new Move("a1", 15, 11);
+            IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
+            IDropletCommand dropletCommandA3 = new Move("a3", 11, 11);
+            IDropletCommand dropletCommandA4 = new Move("a4", 13, 11);
+
+            var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 9, 7, 400);
+            var a2 = new Agent("a2", 11, 7, 400);
+            var a3 = new Agent("a3", 13, 7, 400);
+            var a4 = new Agent("a4", 15, 7, 400);
+
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+            agents.Add("a3", a3);
+            agents.Add("a4", a4);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.ApplyContamination(a2, contaminationMap);
+            _contaminationService.ApplyContamination(a3, contaminationMap);
+            _contaminationService.ApplyContamination(a4, contaminationMap);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
+            //Debugger.PrintDuplicateCounts();
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+
 
         public bool IsOneGoalState(List<IDropletCommand> commands, Dictionary<string, Agent> droplets)
         {

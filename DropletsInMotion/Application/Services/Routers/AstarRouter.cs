@@ -23,27 +23,28 @@ namespace DropletsInMotion.Application.Services.Routers
                 if (frontier.IsEmpty()) return null; //throw new Exception("No route can be found.");
 
                 State state = frontier.Pop();
+                //Console.WriteLine(state.G);
 
                 if (state.IsGoalState())
                 {
-                    Console.WriteLine($"We reached a goal state at depth {state.G}");
+                    //Console.WriteLine($"We reached a goal state at depth {state.G}");
 
-                    List<State> chosenStates = new List<State>();
-                    State currentState = state;
-                    while (currentState.Parent != null)
-                    {
-                        chosenStates.Add(currentState);
-                        currentState = currentState.Parent;
-                    }
-                    chosenStates = chosenStates.OrderBy(s => s.G).ToList();
+                    //List<State> chosenStates = new List<State>();
+                    //State currentState = state;
+                    //while (currentState.Parent != null)
+                    //{
+                    //    chosenStates.Add(currentState);
+                    //    currentState = currentState.Parent;
+                    //}
+                    //chosenStates = chosenStates.OrderBy(s => s.G).ToList();
 
-                    foreach (var returnState in chosenStates)
-                    {
-                        if (returnState.IsPossibleEndState())
-                        {
-                            return returnState;
-                        }
-                    }
+                    //foreach (var returnState in chosenStates)
+                    //{
+                    //    if (returnState.IsPossibleEndState())
+                    //    {
+                    //        return returnState;
+                    //    }
+                    //}
 
                     return state;
                 }
