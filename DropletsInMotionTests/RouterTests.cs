@@ -443,6 +443,38 @@ namespace DropletsInMotionTests
 
 
         [Test]
+        public void AStarTwoDropletsSameSubstanceOneBigOneSmall()
+        {
+
+            IDropletCommand dropletCommandA2 = new Move("a2", 5, 7);
+
+            var commands = new List<IDropletCommand>() {  dropletCommandA2 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1",8, 5, 2827, 1);
+            var a2 = new Agent("a2", 15, 7, 706, 1);
+
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContaminationWithSize(a1, contaminationMap);
+            _contaminationService.ApplyContaminationWithSize(a2, contaminationMap);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
+            //Debugger.PrintDuplicateCounts();
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+
+        [Test]
         public void AStarFourDropletsCrissCross()
         {
             IDropletCommand dropletCommandA1 = new Move("a1", 15, 11);

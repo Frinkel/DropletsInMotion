@@ -122,6 +122,21 @@ namespace DropletsInMotion.Application.Models
                         return false;
                     }
                 }
+
+
+                if (otherAgent.GetMaximumSnakeLength() > otherAgentSnake.Count)
+                {
+                    var allOtherAgentPosition = otherAgent.GetAllAgentPositions();
+                    foreach (var (x, y) in allOtherAgentPosition)
+                    {
+                        if (Math.Abs(x - deltaX) <= 1 && Math.Abs(y - deltaY) <= 1)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+
                 //if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 && Math.Abs(otherAgent.PositionY - deltaY) <= 1)
                 //{
                 //    return false;
