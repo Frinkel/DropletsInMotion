@@ -26,33 +26,10 @@ namespace DropletsInMotion.Application.Services.Routers
 
                 if (state.IsGoalState())
                 {
-                    //Console.WriteLine($"We reached a goal state at depth {state.G}");
 
                     return state;
-                    List<State> chosenStates = new List<State>();
-                    State currentState = state;
-                    while (currentState.Parent != null)
-                    {
-                        chosenStates.Add(currentState);
-                        currentState = currentState.Parent;
-                    }
-                    chosenStates = chosenStates.OrderBy(s => s.G).ToList();
-
-                    foreach (var returnState in chosenStates)
-                    {
-                        if (returnState.IsPossibleEndState())
-                        {
-                            return returnState;
-                        }
-                    }
-
-                    return state;
+                    
                 }
-                //else if (state.G >= 600)
-                //{
-                //    Console.WriteLine("This");
-                //    return state;
-                //}
 
                 explored.Add(state);
                 Debugger.ExploredStates += 1;

@@ -668,6 +668,14 @@ public class State
                         throw new InvalidOperationException(
                             $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand}");
                     }
+                    if (agent.GetAgentSize() + moveCommand.PositionX > ContaminationMap.GetLength(0) ||
+                        agent.GetAgentSize() + moveCommand.PositionY > ContaminationMap.GetLength(1))
+                    {
+                        throw new InvalidOperationException(
+                            $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand} due to agent size.");
+                    }
+
+
                     break;
 
                 default:

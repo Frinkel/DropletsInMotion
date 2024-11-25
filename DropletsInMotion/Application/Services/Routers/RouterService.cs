@@ -72,10 +72,8 @@ public class RouterService : IRouterService
 
             foreach (var command in commandOrder)
             {
-                // Initialize routable agents and reset contamination map if necessary
                 List<string> routableAgents = new List<string>();
                 routableAgents.AddRange(command.GetInputDroplets());
-
                 var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, (byte[,])contaminationMap.Clone());
 
                 // Create initial state and search for a solution
@@ -85,13 +83,10 @@ public class RouterService : IRouterService
 
                 if (sFinal == null)
                 {
-                    // If no solution is found for this permutation, mark as unsuccessful and break out
                     foundSolution = false;
                     break;
                 }
 
-
-                //_contaminationService.PrintContaminationState(sFinal.ContaminationMap);
 
                 // Combine states if a partial solution is found for this command
                 CombineStates(commitedStates, sFinal);
@@ -217,7 +212,7 @@ public class RouterService : IRouterService
 
         // TODO: Debug?
         //_contaminationService.PrintContaminationState(contaminationMap);
-
+        Console.WriteLine(time);
         return sFinal.ExtractActions(time);
     }
 
@@ -251,7 +246,7 @@ public class RouterService : IRouterService
             {
                 var commitedState = commitedStates[index];
 
-                CombineStates(commitedState, state);
+                CombineState(commitedState, state);
             }
             else
             {
@@ -309,12 +304,10 @@ public class RouterService : IRouterService
             }
         }
 
-
-
         return commitedStates;
     }
 
-    private void CombineStates(State oldState, State newState)
+    private void CombineState(State oldState, State newState)
     {
         oldState.ContaminationMap = CombineContaminationMaps(oldState.ContaminationMap, newState.ContaminationMap);
         
@@ -351,14 +344,14 @@ public class RouterService : IRouterService
                 {
                     if (v1 == v2)
                     {
-                        resultMap[i, j] = v1; // or v2, since they are equal
+                        resultMap[i, j] = v1; 
                     }
                     else
                     {
                         resultMap[i, j] = 255;
                     }
                 }
-                else // Both v1 and v2 are zero
+                else 
                 {
                     resultMap[i, j] = 0;
                 }
@@ -366,8 +359,6 @@ public class RouterService : IRouterService
         }
         return resultMap;
     }
-
-
 
     private State FindFirstGoalState(State state, List<IDropletCommand> commands)
     {
@@ -390,7 +381,6 @@ public class RouterService : IRouterService
         }
         return state;
     }
-
 
     private bool ConflictingSates(State s1, State s2)
     {

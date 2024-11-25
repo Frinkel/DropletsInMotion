@@ -93,9 +93,7 @@ namespace DropletsInMotion.UI
                             break;
 
                         case (ProgramState.Completed):
-                            _consoleService.WriteEmptyLine(2);
                             _consoleService.WriteSuccess("Program compiled successfully!");
-                            _consoleService.WriteEmptyLine(2);
                             _currentState = ProgramState.WaitingForUserInput;
                             break;
 
