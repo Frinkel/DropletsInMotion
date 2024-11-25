@@ -1,3 +1,5 @@
 Droplet(d1, 5, 6, 706);
-Store(d1, 20);
+Droplet(d2, 11, 6, 706);
+Store(d1, 5);
 Move(d1, 5, 4);
+Move(d2, 21, 16);

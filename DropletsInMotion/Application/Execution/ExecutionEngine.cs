@@ -96,6 +96,7 @@ namespace DropletsInMotion.Application.Execution
                 //{
                 //    Console.WriteLine(node);
                 //}
+                //Console.WriteLine(Time);
 
                 List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);

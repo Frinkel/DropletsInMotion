@@ -11,6 +11,8 @@ using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using static DropletsInMotion.Application.Services.Routers.Models.Types;
+using System;
+using System.Collections.Generic;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -155,10 +157,19 @@ public class RouterService : IRouterService
                     string dropletName = actionKvp.Key;
                     string routeAction = actionKvp.Value.Name;
                     var parentAgents = state.Parent.Agents;
+                    var agent = parentAgents[dropletName];
 
-                    List<BoardAction> translatedActions = _templateService.ApplyTemplate(routeAction, parentAgents[dropletName], currentTime);
+                    //List<BoardAction> translatedActions = _templateService.ApplyTemplate(routeAction, parentAgents[dropletName], currentTime);
 
-                    finalActions.AddRange(translatedActions);
+                    GrowTemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == routeAction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+                    if (growTemplate != null)
+                    {
+                        finalActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, currentTime, 1));
+                    }
+
+                    //boardActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1));
+
+                    //finalActions.AddRange(translatedActions);
 
                 }
 
@@ -212,7 +223,7 @@ public class RouterService : IRouterService
 
         // TODO: Debug?
         //_contaminationService.PrintContaminationState(contaminationMap);
-        Console.WriteLine(time);
+        //Console.WriteLine(time);
         return sFinal.ExtractActions(time);
     }
 
@@ -403,6 +414,9 @@ public class RouterService : IRouterService
 
         return false;
     }
+
+
+
 
 
     // USED ONLY FOR TEST

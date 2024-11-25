@@ -729,7 +729,6 @@ public class State
         return true;
     }
 
-    //// TODO do we move this into the contamination service?
     //private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
     //{
     //    if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
