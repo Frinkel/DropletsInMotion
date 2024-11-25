@@ -109,7 +109,6 @@ namespace DropletsInMotion.Application.Execution
                 double executionTime = Time;
                 foreach (IDropletCommand command in commandsToExecute)
                 {
-                    Console.WriteLine(command.ToString());
                     switch (command)
                     {
                         case DropletDeclaration dropletCommand:
@@ -185,7 +184,6 @@ namespace DropletsInMotion.Application.Execution
                 if(boardActions.Count > 0) { executionTime = boardActions.Last().Time; }
 
                 double? boundTime = _timeService.CalculateBoundTime(Time, executionTime);
-                Console.WriteLine(Time);
 
                 if (movesToExecute.Count > 0)
                 {
@@ -197,8 +195,6 @@ namespace DropletsInMotion.Application.Execution
                 {
                     Time = boundTime != null ? (double)boundTime : Time;
                 }
-
-                Console.WriteLine($"Compile time { Time}");
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
