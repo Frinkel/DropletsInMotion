@@ -56,10 +56,10 @@ namespace DropletsInMotion.Application.Services
         {
             //Merge
             Droplet inputDroplet1 = agents[mergeCommand.InputName1]
-                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName1}.", mergeCommand.InputName1);
+                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName1}.");
 
             Droplet inputDroplet2 = agents[mergeCommand.InputName2]
-                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName2}.", mergeCommand.InputName2);
+                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName2}.");
 
 
             int outPutDropletX = mergePositions.SingularX;
