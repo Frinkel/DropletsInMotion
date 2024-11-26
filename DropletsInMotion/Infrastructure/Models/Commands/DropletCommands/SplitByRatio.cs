@@ -4,6 +4,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class SplitByRatio : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string InputName { get; }
         public string OutputName1 { get; }
         public string OutputName2 { get; }

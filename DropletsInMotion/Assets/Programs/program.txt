@@ -1,5 +1,7 @@
-Droplet(d1, 5, 6, 706);
-Droplet(d2, 11, 6, 706);
-Move(d1, 4, 13);
-Move(d2, 12, 14);
-Merge(d1, d2, d3, 8, 6);
+Droplet(d1, 0, 0, 706);
+Droplet(d2, 5, 0, 706);
+Droplet(d4, 5, 5, 706);
+//Move(d4, 5, 10);
+Merge(d1, d2, d3, 0, 5);
+Waste(d1, 1, 1);
+//Merge(d3, d9, d5, 0, 10);

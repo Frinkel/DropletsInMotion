@@ -6,6 +6,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class SensorCommand : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string SensorName { get; }
         public string Argument { get; }
         public string VariableName { get; }

@@ -11,6 +11,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
         public List<ICommand> ElseBlockCommands { get; }
         public bool Evaluation { get; set; }
         public bool HasBeenEvaluated { get; set; }
+        public int Line { get; set;}
+        public int Column { get; set; }
 
         public IfCommand(BooleanExpression condition, List<ICommand> ifBlockCommands, List<ICommand> elseBlockCommands = null)
         {

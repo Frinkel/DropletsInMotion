@@ -62,8 +62,8 @@ namespace DropletsInMotion.Presentation
             var tree = parser.program();
             ParseTreeWalker.Default.Walk(listener, tree);
             Commands = listener.Commands;
-            _typeChecker.resetTypeEnviroments();
-            _typeChecker.typeCheck(Commands);
+            _typeChecker.ResetTypeEnviroments();
+            _typeChecker.TypeCheck(Commands);
 
             DependencyGraph = _dependencyBuilder.Build(Commands);
         }

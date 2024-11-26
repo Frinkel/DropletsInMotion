@@ -40,24 +40,6 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
         public List<Dictionary<string, List<(int x, int y)>>> Blocks { get; set; } = new List<Dictionary<string, List<(int x, int y)>>>();
 
-        public List<BoardAction> Apply(int relativePosition, double time, double scale)
-        {
-            if (Actions == null || Actions.Count == 0)
-            {
-                throw new Exception($"Template {Name} has no action!");
-            }
-
-
-            List<BoardAction> finalActionDtos = new List<BoardAction>();
-            foreach (BoardAction boardAction in Actions)
-            {
-                BoardAction newAction = new BoardAction(boardAction.ElectrodeId + relativePosition, boardAction.Action,
-                    (boardAction.Time * scale) + time);
-                finalActionDtos.Add(newAction);
-            }
-            return finalActionDtos;
-        }
-
         public SplitTemplate DeepCopy()
         {
             var copy = new SplitTemplate(Name, MinSize, MaxSize, Ratio, new Dictionary<string, double>(RatioRelation));

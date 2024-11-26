@@ -1,8 +1,10 @@
 ﻿using System.Formats.Asn1;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.UI;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -39,13 +41,12 @@ namespace DropletsInMotion.Application.Services
 
 
                     var optimalPositions = FindOptimalPositions(mergeCommand.PositionX, mergeCommand.PositionY,
-                        d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, templates, mergeCommand);
+                        d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, agents, templates, mergeCommand);
 
                     return optimalPositions;
                     //return null;
 
                 case SplitByVolume splitByVolumeCommand:
-                    // Implement logic for SplitByVolume if needed
 
                     Agent dInput = agents[splitByVolumeCommand.InputName];
                     int dOutput1PositionX = splitByVolumeCommand.PositionX1;
@@ -60,7 +61,7 @@ namespace DropletsInMotion.Application.Services
 
 
                     optimalPositions = FindOptimalPositions(dInput.PositionX, dInput.PositionY,
-                        dOutput1PositionX, dOutput1PositionY, dOutput2PositionX, dOutput2PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, templates, splitByVolumeCommand);
+                        dOutput1PositionX, dOutput1PositionY, dOutput2PositionX, dOutput2PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, agents, templates, splitByVolumeCommand);
                     return optimalPositions;
                     
                 case SplitByRatio splitByRatioCommand:
@@ -76,7 +77,7 @@ namespace DropletsInMotion.Application.Services
 
 
         public ScheduledPosition FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, 
-                                                      byte d1SubstanceId, byte d2SubstanceId, List<ITemplate> templates, IDropletCommand command)
+                                                      byte d1SubstanceId, byte d2SubstanceId, Dictionary<string, Agent> agents, List<ITemplate> templates, IDropletCommand command)
         {
             int minBoundingX = Math.Min(commandX, Math.Min(d1X, d2X));
             int minBoundingY = Math.Min(commandY, Math.Min(d1Y, d2Y));
@@ -88,15 +89,33 @@ namespace DropletsInMotion.Application.Services
             int boardHeight = contaminationMap.GetLength(1);
 
 
+
+            List<(int x, int y)> allOtherAgentPositions = new List<(int x, int y)>();
+            foreach (var otherAgent in agents.Values)
+            {
+
+                if (command.GetInputDroplets().Contains(otherAgent.DropletName)) continue;
+
+                var otherAgentSnake = otherAgent.SnakeBody;
+                allOtherAgentPositions.AddRange(otherAgentSnake);
+
+                if (otherAgent.GetMaximumSnakeLength() > otherAgentSnake.Count)
+                {
+                    allOtherAgentPositions.AddRange(otherAgent.GetAllAgentPositions());
+                }
+            }
+
+            
+
+
+
             int increment = 0;
 
-            while (maxBoundingX < boardWidth && maxBoundingY < boardHeight && minBoundingX > 0 && minBoundingY > 0)
-            {
-                minBoundingX -= increment;
-                minBoundingY -= increment;
-                maxBoundingX += increment;
-                maxBoundingY += increment;
-
+            do {
+                minBoundingX = Math.Clamp(minBoundingX - increment, 0, boardWidth - 1);
+                minBoundingY = Math.Clamp(minBoundingY - increment, 0, boardHeight - 1);
+                maxBoundingX = Math.Clamp(maxBoundingX + increment, 0, boardWidth - 1);
+                maxBoundingY = Math.Clamp(maxBoundingY + increment, 0, boardHeight - 1);
 
                 int bestScore = int.MaxValue;
                 ScheduledPosition bestPositions = null;
@@ -188,26 +207,105 @@ namespace DropletsInMotion.Application.Services
                             continue;
                         }
 
+
+                        
+
+                        // Out-of-bounds template check and applicable check
+                        List<byte> substanceIds = new List<byte>() { d1SubstanceId, d2SubstanceId };
+                        bool templateOutOfBounds = IsTemplateApplicable(optimalPositions, boardWidth, boardHeight, contaminationMap, substanceIds, allOtherAgentPositions);
+                        
+
+                        if (templateOutOfBounds)
+                        {
+                            continue;
+                        }
+
+                        Console.WriteLine(templateOutOfBounds);
+                        if(optimalPositions != null)
+                        {
+                            Console.WriteLine($"Best positions at ({optimalPositions.X1}, {optimalPositions.Y1}), " +
+                                              $"and ({optimalPositions.X2}, {optimalPositions.Y2}) with a score of {totalScore}");
+                        }
                         bestScore = totalScore; 
                         bestPositions = optimalPositions;
                     }
                 }
 
 
+
                 if (bestPositions != null)
                 {
-                    //Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
-                    //                  $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
+                    Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
+                                      $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
+                    Console.WriteLine(bestPositions.Template.Name);
+                    
 
                     return bestPositions;
                 }
 
                 increment++;
-            }
+            } while (minBoundingX != 0 && maxBoundingX != boardWidth - 1 && minBoundingY != 0 && maxBoundingY != boardHeight - 1);
 
             throw new Exception($"There was no positions where command \"{command}\" could be applied!");
 
 
+        }
+
+
+        public bool IsTemplateApplicable(ScheduledPosition scheduledPosition, int boardWidth, int boardHeight, byte[,] contaminationMap, List<byte> substanceIds, List<(int x, int )> allOtherAgentPositions)
+        {
+            var offsets = new List<(int xOffset, int yOffset)>
+            {
+                (0, 0),   // Original position
+                (1, 0),   // Right
+                (-1, 0),  // Left
+                (0, 1),   // Down
+                (0, -1),  // Up
+                (1, -1),  // Bottom-right diagonal
+                (-1, 1),  // Top-left diagonal
+                (1, 1),   // Top-right diagonal
+                (-1, -1)  // Bottom-left diagonal
+            };
+
+            foreach (var val in scheduledPosition.Template.Blocks)
+            {
+                foreach (var kvp in val)
+                {
+                    foreach (var pos in kvp.Value)
+                    {
+                        var relativeX = pos.x + scheduledPosition.OriginX;
+                        var relativeY = pos.y + scheduledPosition.OriginY;
+
+                        if ((relativeX < 0 || relativeX >= boardWidth) ||
+                            (relativeY < 0 || relativeY >= boardHeight))
+                        {
+                            return true;
+                        }
+
+
+                        // TODO: The below check is not valid, as 255 can be between the merging droplets.
+                        // Check contamination on active electrodes
+                        //byte contamination = contaminationMap[relativeX, relativeY];
+
+                        //if (contamination != 0 && !substanceIds.Contains(contamination))
+                        //{
+                        //    Console.WriteLine($"There is another substance in the active electrodes! Substance id: {contamination}     {relativeX} {relativeY}");
+                        //    return true;
+                        //}
+
+
+                        //foreach (var (xOffset, yOffset) in offsets)
+                        //{
+                        //    var nRelativeX = Math.Clamp(relativeX + xOffset, 0, boardWidth - 1);
+                        //    var nRelativeY = Math.Clamp(relativeY + yOffset, 0, boardHeight - 1);
+
+                        //    if (allOtherAgentPositions.Contains((nRelativeX, nRelativeY))) return true;
+                        //}
+                    }
+                }
+            }
+
+            return false;
         }
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y,

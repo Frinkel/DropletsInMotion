@@ -66,7 +66,7 @@ public class MoveHandler
 
     public List<BoardAction> Unravel(Agent agentInitial, double time)
     {
-        UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
+        ITemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
             t.FinalPositions.First().Value == (agentInitial.GetAgentSize() - 2, -1)
             && t.MinSize <= agentInitial.Volume && agentInitial.Volume < t.MaxSize) ?? null;
 
@@ -84,13 +84,15 @@ public class MoveHandler
             t.InitialPositions.First().Value == (-1, agent.GetAgentSize() - 2)
             && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
 
+        ITemplate iRavelTemplate = ravelTemplate;
+
         if (ravelTemplate == null)
         {
             return new List<BoardAction>();
         }
 
 
-        return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX - ravelTemplate.FinalPositions.First().Value.x][agent.PositionY - ravelTemplate.FinalPositions.First().Value.y].Id, time - ravelTemplate.Duration, 1);
+        return iRavelTemplate.Apply(_platformRepository.Board[agent.PositionX - ravelTemplate.FinalPositions.First().Value.x][agent.PositionY - ravelTemplate.FinalPositions.First().Value.y].Id, time - ravelTemplate.Duration, 1);
     }
 
     //public List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)

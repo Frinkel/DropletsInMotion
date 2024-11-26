@@ -1,7 +1,7 @@
 ﻿using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 
-namespace DropletsInMotion.UI
+namespace DropletsInMotion.Presentation
 {
     public class ConsoleService : IConsoleService
     {
@@ -149,46 +149,46 @@ namespace DropletsInMotion.UI
         }
 
 
-        public void WriteSuccess(string message)
-        {
-            WriteColor(message, ConsoleColor.Green);
-        }
+        //public void WriteSuccess(string message)
+        //{
+        //    WriteColor(message, ConsoleColor.Green);
+        //}
 
-        public void Error(string message)
-        {
-            WriteColor(message, ConsoleColor.DarkRed);
-        }
+        //public void Error(string message)
+        //{
+        //    WriteColor(message, ConsoleColor.DarkRed);
+        //}
 
-        public void Info(string message)
-        {
-            WriteColor("Info: " + message, ConsoleColor.DarkCyan);
-        }
-        public void Warning(string message)
-        {
-            WriteColor("Warning: " + message, ConsoleColor.Yellow);
-        }
+        //public void Info(string message)
+        //{
+        //    WriteColor("Info: " + message, ConsoleColor.DarkCyan);
+        //}
+        //public void Warning(string message)
+        //{
+        //    WriteColor("Warning: " + message, ConsoleColor.Yellow);
+        //}
 
-        public void Debug(string message)
-        {
-            WriteColor("Debug: " + message, ConsoleColor.Green);
-        }
+        //public void Debug(string message)
+        //{
+        //    WriteColor("Debug: " + message, ConsoleColor.Green);
+        //}
 
-        public void WriteEmptyLine(int number)
-        {
-            for (int i = 0; i < number; i++)
-            {
-                WriteColor("");
-            }
-        }
+        //public void WriteEmptyLine(int number)
+        //{
+        //    for (int i = 0; i < number; i++)
+        //    {
+        //        WriteColor("");
+        //    }
+        //}
 
-        public void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
-        {
-            Console.BackgroundColor = backgroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
+        //public void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
+        //{
+        //    Console.BackgroundColor = backgroundColor;
+        //    Console.ForegroundColor = color;
+        //    Console.WriteLine(message);
 
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-        }
+        //    Console.BackgroundColor = ConsoleColor.Black;
+        //    Console.ForegroundColor = ConsoleColor.White;
+        //}
     }
 }

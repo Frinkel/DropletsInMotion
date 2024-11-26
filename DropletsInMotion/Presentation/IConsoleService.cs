@@ -1,4 +1,4 @@
-﻿namespace DropletsInMotion.UI
+﻿namespace DropletsInMotion.Presentation
 {
     public interface IConsoleService
     {
@@ -12,12 +12,12 @@
         void GetInitialInformation();
         string GetPathToBoardConfiguration();
         string GetPathToProgram();
-        void WriteSuccess(string message);
-        void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black);
-        void WriteEmptyLine(int number);
-        void Error(string message);
-        void Info(string message);
-        void Warning(string message);
-        void Debug(string message);
+        //void WriteSuccess(string message);
+        //void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black);
+        //void WriteEmptyLine(int number);
+        //void Error(string message);
+        //void Info(string message);
+        //void Warning(string message);
+        //void Debug(string message);
     }
 }

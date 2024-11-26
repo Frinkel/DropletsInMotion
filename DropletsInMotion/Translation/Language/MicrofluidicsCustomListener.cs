@@ -72,7 +72,8 @@ namespace DropletsInMotion.Presentation.Language
             var volumeExpression = CreateExpression(context.arithmeticExpression(2));
 
             IDropletCommand dropletDeclaration = new DropletDeclaration(dropletName, positionXExpression, positionYExpression, volumeExpression);
-
+            dropletDeclaration.Line = context.Start.Line;
+            dropletDeclaration.Column = context.Start.Column;
             Commands.Add(dropletDeclaration);
         }
 
@@ -84,6 +85,8 @@ namespace DropletsInMotion.Presentation.Language
             var newPositionY = CreateExpression(context.arithmeticExpression(1));
 
             IDropletCommand dropletCommand = new Move(dropletName, newPositionX, newPositionY);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -94,6 +97,8 @@ namespace DropletsInMotion.Presentation.Language
             var volume = CreateExpression(context.arithmeticExpression());
 
             IDropletCommand dropletCommand = new Dispense(dropletName, reservoirName, volume);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -109,6 +114,8 @@ namespace DropletsInMotion.Presentation.Language
             var ratio = CreateExpression(context.arithmeticExpression(4));
 
             IDropletCommand dropletCommand = new SplitByRatio(input, output1, output2, posX1, posY1, posX2, posY2, ratio);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -124,6 +131,8 @@ namespace DropletsInMotion.Presentation.Language
             var volume = CreateExpression(context.arithmeticExpression(4));
 
             IDropletCommand dropletCommand = new SplitByVolume(input, output1, output2, posX1, posY1, posX2, posY2, volume);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -136,6 +145,8 @@ namespace DropletsInMotion.Presentation.Language
             var posY = CreateExpression(context.arithmeticExpression(1));
 
             IDropletCommand dropletCommand = new Merge(input1, input2, output, posX, posY);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -149,6 +160,8 @@ namespace DropletsInMotion.Presentation.Language
             var repeatTimes = CreateExpression(context.arithmeticExpression(4));
 
             IDropletCommand dropletCommand = new Mix(name, posX, posY, distanceX, distanceY, repeatTimes);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -160,6 +173,8 @@ namespace DropletsInMotion.Presentation.Language
             var time = CreateExpression(context.arithmeticExpression(2));
 
             IDropletCommand dropletCommand = new Store(name, posX, posY, time);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -170,6 +185,8 @@ namespace DropletsInMotion.Presentation.Language
             var posY = CreateExpression(context.arithmeticExpression(1));
 
             IDropletCommand dropletCommand = new Waste(name, posX, posY);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -178,6 +195,8 @@ namespace DropletsInMotion.Presentation.Language
             var time = CreateExpression(context.arithmeticExpression());
 
             IDropletCommand dropletCommand = new Wait(time);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -188,12 +207,16 @@ namespace DropletsInMotion.Presentation.Language
             ArithmeticExpression valueExpression = CreateExpression(context.arithmeticExpression());
 
             ICommand assignCommand = new AssignCommand(variableName, valueExpression);
+            assignCommand.Line = context.Start.Line;
+            assignCommand.Column = context.Start.Column;
             Commands.Add(assignCommand);
         }
 
         public override void ExitWaitForUserInput(MicrofluidicsParser.WaitForUserInputContext context)
         {
             IDropletCommand dropletCommand = new WaitForUserInput();
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -205,6 +228,8 @@ namespace DropletsInMotion.Presentation.Language
             string dropletName = context.IDENTIFIER(1).GetText();
 
             IDropletCommand dropletCommand = new SensorCommand(variableName, sensorName, argument, dropletName);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
 
@@ -229,6 +254,8 @@ namespace DropletsInMotion.Presentation.Language
             }
 
             ICommand printCommand = new PrintCommand(arguments);
+            printCommand.Line = context.Start.Line;
+            printCommand.Column = context.Start.Column;
             Commands.Add(printCommand);
         }
 
@@ -260,7 +287,8 @@ namespace DropletsInMotion.Presentation.Language
             Console.WriteLine(keyValuePairs);
 
             IDropletCommand actuatorCommand = new ActuatorCommand(identifier, actuatorName, keyValuePairs);
-
+            actuatorCommand.Line = context.Start.Line;
+            actuatorCommand.Column = context.Start.Column;
             Commands.Add(actuatorCommand);
         }
 
@@ -378,6 +406,8 @@ namespace DropletsInMotion.Presentation.Language
 
             // Create the IfCommand and add it to the Commands list
             ICommand ifCommand = new IfCommand(condition, thenCommands, elseCommands);
+            ifCommand.Line = context.Start.Line;
+            ifCommand.Column = context.Start.Column;
             Commands.Add(ifCommand);
         }
 
@@ -391,6 +421,8 @@ namespace DropletsInMotion.Presentation.Language
 
             // Create the WhileCommand using the extracted block commands
             ICommand whileCommand = new WhileCommand(condition, blockCommands);
+            whileCommand.Line = context.Start.Line;
+            whileCommand.Column = context.Start.Column;
             Commands.Add(whileCommand);
         }
 

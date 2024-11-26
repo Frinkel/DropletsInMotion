@@ -8,8 +8,9 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
     {
         public BooleanExpression Condition { get; }
         public List<ICommand> Commands { get; }
-
         public bool Evaluation { get; set; }
+        public int Line { get; set; }
+        public int Column { get; set; }
 
         public WhileCommand(BooleanExpression condition, List<ICommand> commands)
         {

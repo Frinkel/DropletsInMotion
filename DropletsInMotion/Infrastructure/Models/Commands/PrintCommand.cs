@@ -7,6 +7,8 @@ using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 public class PrintCommand : ICommand
 {
     public List<object> Arguments { get; }
+    public int Line { get; set; }
+    public int Column { get; set; }
 
     public PrintCommand(List<object> arguments)
     {

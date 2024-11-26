@@ -18,6 +18,7 @@ using DropletsInMotion.UI;
 using Microsoft.Extensions.Configuration;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Presentation;
+using DropletsInMotion.Translation.Services;
 
 namespace DropletsInMotionTests
 {

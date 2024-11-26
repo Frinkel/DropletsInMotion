@@ -8,6 +8,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
 {
     public class ActuatorCommand : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string DropletName { get; }
         public string ActuatorName { get; }
         public Dictionary<string, double> KeyValuePairs { get; }

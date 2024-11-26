@@ -5,6 +5,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class Dispense : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string DropletName { get; }
 
         public string ReservoirName { get; }

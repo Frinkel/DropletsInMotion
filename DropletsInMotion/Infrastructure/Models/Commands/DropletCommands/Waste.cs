@@ -4,6 +4,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class Waste : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string DropletName { get; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }

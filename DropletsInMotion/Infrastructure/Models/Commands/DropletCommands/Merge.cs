@@ -4,6 +4,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class Merge : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string InputName1 { get; }
         public string InputName2 { get; }
         public string OutputName { get; }

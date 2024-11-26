@@ -6,5 +6,8 @@
         public List<string> GetInputVariables();
         public List<string> GetOutputVariables();
 
+        public int Line { get; set; }
+        public int Column { get; set; }
+
     }
 }

@@ -2,6 +2,8 @@
 {
     public class WaitForUserInput : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public WaitForUserInput() { }
 
         public override string ToString()

@@ -10,9 +10,11 @@ using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Communication.Simulator.Services;
+using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Translation.Services;
 
 
 namespace DropletsInMotion
@@ -23,6 +25,8 @@ namespace DropletsInMotion
         private static IConsoleService? _consoleService;
         private static IFileService? _fileService;
         private static ICommunicationEngine? _communicationEngine;
+        private static ILogger? _logger;
+        private static RuntimeExceptionHandler? _runtimeExceptionHandler;
 
         static async Task Main(string[] args)
         {
@@ -30,23 +34,45 @@ namespace DropletsInMotion
             {
                 _consoleService = serviceProvider.GetRequiredService<IConsoleService>();
                 _communicationEngine = serviceProvider.GetRequiredService<ICommunicationEngine>();
+                _logger = serviceProvider.GetRequiredService<ILogger>();
+                _runtimeExceptionHandler = serviceProvider.GetRequiredService<RuntimeExceptionHandler>();
 
-                try
+                _fileService = serviceProvider.GetRequiredService<IFileService>();
+
+                // Write the title onto the console
+                string asciiTitle = _fileService.ReadFileFromProjectDirectory("/assets/ascii_title.txt");
+                _logger.WriteColor(asciiTitle, ConsoleColor.Blue);
+                _logger.WriteEmptyLine(2);
+
+
+                StateManager stateManager = serviceProvider.GetRequiredService<StateManager>();
+
+                while (true)
                 {
-                    _fileService = serviceProvider.GetRequiredService<IFileService>();
+                    try
+                    {
+                        await stateManager.Start();
+                    }
+                    catch (Exception e)
+                    {
+                        //_logger.WriteColor(e.Message, ConsoleColor.DarkRed);
 
-                    // Write the title onto the console
-                    string asciiTitle = _fileService.ReadFileFromProjectDirectory("/assets/ascii_title.txt");
-                    _consoleService.WriteColor(asciiTitle, ConsoleColor.Blue);
-                    _consoleService.WriteEmptyLine(2);
+                        // Handle the runtime exception
+                        var action = _runtimeExceptionHandler.Handle(e);
 
-                    StateManager stateManager = serviceProvider.GetRequiredService<StateManager>();
-                    await stateManager.Start();
-                }
-                catch (Exception e)
-                {
-                    _consoleService.WriteColor(e.Message, ConsoleColor.DarkRed);
-                    throw;
+                        switch (action)
+                        {
+                            case RuntimeExceptionHandler.RuntimeExceptionAction.Reset:
+                                _logger.WriteEmptyLine(1);
+                                _logger.Info("Resetting the console state.");
+                                stateManager.ResetState();
+                                continue;
+
+
+                            case RuntimeExceptionHandler.RuntimeExceptionAction.Exit:
+                                break;
+                        }
+                    }
                 }
             }
         }
@@ -86,6 +112,8 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITypeChecker, TypeChecker>();
             serviceCollection.AddSingleton<IPlatformRepository, PlatformRepository>();
             serviceCollection.AddSingleton<ITemplateRepository, TemplateRepository>();
+            serviceCollection.AddSingleton<ILogger, Logger>();
+            serviceCollection.AddSingleton<RuntimeExceptionHandler>();
 
 
             // Classes

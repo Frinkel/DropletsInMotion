@@ -6,6 +6,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands
 {
     public class AssignCommand : ICommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string VariableName { get; }
         public ArithmeticExpression ValueExpression { get; }
 

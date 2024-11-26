@@ -4,6 +4,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class Wait : IDropletCommand
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public double Time { get; set; }
         public ArithmeticExpression TimeExpression { get; }
 

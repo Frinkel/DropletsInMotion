@@ -1,6 +1,9 @@
-﻿using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+﻿using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
+using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+
+namespace DropletsInMotion.Translation.Services;
 
 public class TypeChecker : ITypeChecker
 {
@@ -13,13 +16,13 @@ public class TypeChecker : ITypeChecker
         _droplets = new HashSet<string>();
     }
 
-    public void resetTypeEnviroments()
+    public void ResetTypeEnviroments()
     {
         _variables = new HashSet<string>();
         _droplets = new HashSet<string>();
     }
 
-    public void typeCheck(List<ICommand> commands)
+    public void TypeCheck(List<ICommand> commands)
     {
         foreach (var command in commands)
         {
@@ -94,7 +97,7 @@ public class TypeChecker : ITypeChecker
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unknown command: {command.GetType().Name}");
+                    throw new CommandException($"Unknown command: {command.GetType().Name}", command);
             }
         }
     }
@@ -107,7 +110,7 @@ public class TypeChecker : ITypeChecker
 
         if (_droplets.Contains(variableName))
         {
-            throw new InvalidOperationException($"Error: Variable '{variableName}' conflicts with a droplet name in command '{assignCommand}'.");
+            throw new CommandException($"Variable '{variableName}' conflicts with a droplet name in command '{assignCommand}'.", assignCommand);
         }
         _variables.Add(variableName);
     }
@@ -227,7 +230,7 @@ public class TypeChecker : ITypeChecker
     {
         VariablesExist(whileCommand.Condition.GetVariables(), whileCommand);
 
-        typeCheck(whileCommand.Commands);
+        TypeCheck(whileCommand.Commands);
     }
 
     private void IfStatement(IfCommand ifCommand)
@@ -237,21 +240,21 @@ public class TypeChecker : ITypeChecker
         var dropletStateBeforeIf = new HashSet<string>(_droplets);
 
         var dropletStateAfterIf = new HashSet<string>(_droplets); 
-        typeCheck(ifCommand.IfBlockCommands);
+        TypeCheck(ifCommand.IfBlockCommands);
         var dropletStateAfterThen = new HashSet<string>(_droplets); 
 
         _droplets = dropletStateAfterIf; 
         if (ifCommand.ElseBlockCommands.Count > 0)
         {
-            typeCheck(ifCommand.ElseBlockCommands);
+            TypeCheck(ifCommand.ElseBlockCommands);
             var dropletStateAfterElse = new HashSet<string>(_droplets); 
 
             if (!dropletStateAfterThen.SetEquals(dropletStateAfterElse))
             {
-                throw new InvalidOperationException(
+                throw new CommandException(
                     $"Error: The droplets in the 'then' and 'else' blocks do not match for the command {ifCommand}" +
                     $"Then block droplets: {string.Join(", ", dropletStateAfterThen)}, " +
-                    $"Else block droplets: {string.Join(", ", dropletStateAfterElse)}");
+                    $"Else block droplets: {string.Join(", ", dropletStateAfterElse)}", ifCommand);
             }
         }
 
@@ -270,7 +273,7 @@ public class TypeChecker : ITypeChecker
 
         if (_droplets.Contains(variableName))
         {
-            throw new InvalidOperationException($"Error: Variable '{variableName}' conflicts with a droplet name in command '{sensorCommand}'.");
+            throw new CommandException($"Error: Variable '{variableName}' conflicts with a droplet name in command '{sensorCommand}'.", sensorCommand);
         }
         _variables.Add(variableName);
     }
@@ -301,21 +304,21 @@ public class TypeChecker : ITypeChecker
             var inputDroplet = inputDroplets[0];
             if (!_droplets.Contains(inputDroplet))
             {
-                throw new InvalidOperationException($"Error: Input droplet '{inputDroplet}' is not defined in command '{command}'.");
+                throw new CommandException($"Input droplet '{inputDroplet}' does not exist.", command);
             }
             return;
         }
 
         if (inputDroplets.Count == 2 && inputDroplets[0] == inputDroplets[1])
         {
-            throw new InvalidOperationException($"Error: The input droplets '{inputDroplets[0]}' and '{inputDroplets[1]}' cannot have the same name in command '{command}'.");
+            throw new CommandException($"The input droplets '{inputDroplets[0]}' and '{inputDroplets[1]}' cannot have the same name in command '{command}'.", command);
         }
 
         foreach (var inputDroplet in inputDroplets)
         {
             if (!_droplets.Contains(inputDroplet))
             {
-                throw new InvalidOperationException($"Error: Input droplet '{inputDroplet}' is not defined in command '{command}'.");
+                throw new CommandException($"Droplet '{inputDroplet}' does not exist when the command is executed. ", command);
             }
         }
     }
@@ -327,21 +330,21 @@ public class TypeChecker : ITypeChecker
             var outputDroplet = outputDroplets[0];
             if (!inputDroplets.Contains(outputDroplet) && _droplets.Contains(outputDroplet))
             {
-                throw new InvalidOperationException($"Error: Output droplet '{outputDroplet}' already exists in command '{command}'.");
+                throw new CommandException($"Output droplet '{outputDroplet}' already exists in command '{command}'.", command);
             }
             return;
         }
 
         if (outputDroplets.Count == 2 && outputDroplets[0] == outputDroplets[1])
         {
-            throw new InvalidOperationException($"Error: The output droplets '{outputDroplets[0]}' and '{outputDroplets[1]}' cannot have the same name in command '{command}'.");
+            throw new CommandException($"The output droplets '{outputDroplets[0]}' and '{outputDroplets[1]}' cannot have the same name in command '{command}'.", command);
         }
 
         foreach (var outputDroplet in outputDroplets)
         {
             if (!inputDroplets.Contains(outputDroplet) && _droplets.Contains(outputDroplet))
             {
-                throw new InvalidOperationException($"Error: Output droplet '{outputDroplet}' already exists in command '{command}'.");
+                throw new CommandException($"Output droplet '{outputDroplet}' already exists in command '{command}'.", command);
             }
         }
     }
@@ -357,7 +360,7 @@ public class TypeChecker : ITypeChecker
         {
             if (_variables.Contains(outputDroplet))
             {
-                throw new InvalidOperationException($"Error: Droplet '{outputDroplet}' conflicts with a variable name in command '{command}'.");
+                throw new CommandException($"Droplet '{outputDroplet}' conflicts with a variable name in command '{command}'.", command);
             }
             if (!_droplets.Contains(outputDroplet))
             {
@@ -372,7 +375,7 @@ public class TypeChecker : ITypeChecker
         {
             if (!_variables.Contains(variable))
             {
-                throw new InvalidOperationException($"Error: Variable '{variable}' is not defined in command '{command}'.");
+                throw new CommandException($"Variable '{variable}' is not defined in command '{command}'.", command);
             }
         }
     }

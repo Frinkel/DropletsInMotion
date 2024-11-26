@@ -191,10 +191,12 @@ namespace DropletsInMotion.Application.Execution
                     Time = boundTime != null ? (double)boundTime : Time;
                 }
 
+                Console.WriteLine(Time);
+
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-
+                _contaminationService.PrintContaminationState(ContaminationMap);
                 boardActions.Clear();
             }
 
@@ -238,7 +240,7 @@ namespace DropletsInMotion.Application.Execution
             Agents.Add(dispenseCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
 
-            DeclareTemplate declareTemplate = _templateRepository?
+            ITemplate declareTemplate = _templateRepository?
                 .DeclareTemplates?
                 .Find(t => t.MinSize <= agent.Volume && agent.Volume < t.MaxSize);
 
@@ -266,7 +268,7 @@ namespace DropletsInMotion.Application.Execution
             Agents.Add(dropletCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContaminationWithSize(agent, ContaminationMap);
 
-            DeclareTemplate declareTemplate = _templateRepository?
+            ITemplate declareTemplate = _templateRepository?
                 .DeclareTemplates?
                 .Find(t => t.MinSize <= agent.Volume && agent.Volume < t.MaxSize);
 

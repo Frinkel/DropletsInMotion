@@ -273,7 +273,7 @@ public class State
             var nextToLast = snakeBody.Last();
             string direction = FindDirection(nextToLast, last);
 
-            ShrinkTemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+            ITemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
             boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[last.x][last.y].Id, time, 1));
             time = boardActions.Last().Time;
         }
@@ -285,7 +285,7 @@ public class State
     {
         var boardActions = new List<BoardAction>();
 
-        GrowTemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+        ITemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
         if (growTemplate == null)
         {
             throw new Exception($"No grow template found for agent {agent.DropletName}");
@@ -300,7 +300,7 @@ public class State
             var tailPositionNext = nextAgent.SnakeBody.Last();
             string direction = FindDirection(tailPositionNext, tailPosition);
 
-            ShrinkTemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
+            ITemplate? shrinkTemplate = _templateRepository?.ShrinkTemplates?.Find(t => t.Direction == direction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
             if (shrinkTemplate != null)
             {
                 boardActions.AddRange(shrinkTemplate.Apply(_platformRepository.Board[tailPosition.x][tailPosition.y].Id, time, 1));
@@ -333,7 +333,7 @@ public class State
 
         if (!agentInitial.GetAllAgentPositions().Contains(newPosition) || mustUnravel)
         {
-            UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
+            ITemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t =>
                 t.FinalPositions.First().Value == (agent.PositionX - (agentInitial.PositionX - t.InitialPositions.First().Value.x), agent.PositionY - (agentInitial.PositionY - t.InitialPositions.First().Value.y))
                 && t.MinSize <= agentInitial.Volume && agentInitial.Volume < t.MaxSize) ?? null;
 
@@ -355,7 +355,7 @@ public class State
         if (finalAgent.GetAllAgentPositions().Contains(newPosition))
         {
 
-            RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => 
+            ITemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => 
                 //Some magic to translate into the relative postion in order to compare
                 t.InitialPositions.First().Value == (nextAgent.PositionX - (finalAgent.PositionX - t.FinalPositions.First().Value.x) , nextAgent.PositionY - (finalAgent.PositionY - t.FinalPositions.First().Value.y))
                 && t.MinSize <= finalAgent.Volume && finalAgent.Volume < t.MaxSize) ?? null;

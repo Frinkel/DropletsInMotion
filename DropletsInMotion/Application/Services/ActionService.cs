@@ -4,7 +4,9 @@ using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DropletsInMotion.Application.Execution.Models;
@@ -12,6 +14,7 @@ using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Services;
+using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
@@ -53,10 +56,10 @@ namespace DropletsInMotion.Application.Services
         {
             //Merge
             Droplet inputDroplet1 = agents[mergeCommand.InputName1]
-                                    ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName1}.");
+                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName1}.", mergeCommand.InputName1);
 
             Droplet inputDroplet2 = agents[mergeCommand.InputName2]
-                                    ?? throw new InvalidOperationException($"No droplet found with name {mergeCommand.InputName2}.");
+                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName2}.", mergeCommand.InputName2);
 
 
             int outPutDropletX = mergePositions.SingularX;
@@ -97,6 +100,7 @@ namespace DropletsInMotion.Application.Services
         {
             // Map the cluster ID to the droplet ID
             var mergeTemplate = mergePositions.Template as MergeTemplate;
+            if (mergeTemplate == null) throw new TemplateException("The template was not on the expected type", mergePositions.Template);
             var templateCopy = mergeTemplate.DeepCopy();
 
             var initialPositions = templateCopy.InitialPositions;
@@ -117,7 +121,7 @@ namespace DropletsInMotion.Application.Services
                 }
                 else
                 {
-                    throw new Exception($"None of the merge droplets matched the initial positions in the scheduled position");
+                    throw new DropletNotFoundException($"None of the merge droplets ({inputDroplet1.DropletName}, {inputDroplet2.DropletName}) matched the initial positions in the scheduled merge position ({mergePositions.OriginX}, {mergePositions.OriginY})"); //TODO: Is it origin here?
                 }
             }
 
@@ -142,7 +146,7 @@ namespace DropletsInMotion.Application.Services
                         }
                         else
                         {
-                            throw new Exception($"The value {keyValuePair.Key} did not map to any droplet in {mergePositions.Template.Name}");
+                            throw new DropletNotFoundException($"The value {keyValuePair.Key} did not map to any droplet in {mergePositions.Template.Name}");
                         }
                     }
 
@@ -167,20 +171,20 @@ namespace DropletsInMotion.Application.Services
              ScheduledPosition splitPositions)
         {
             Agent inputDroplet = agents[splitCommand.InputName]
-                                   ?? throw new InvalidOperationException($"No droplet found with name {splitCommand.InputName}.");
+                                   ?? throw new CommandException($"No droplet found with name {splitCommand.InputName}.", splitCommand);
 
             // Ensure that the output droplet names are valid and unique
             if (agents.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
             {
-                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
+                throw new CommandException($"Droplet with name {splitCommand.OutputName1} already exists.", splitCommand);
             }
             if (agents.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
             {
-                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+                throw new CommandException($"Droplet with name {splitCommand.OutputName2} already exists.", splitCommand);
             }
             if (splitCommand.OutputName2 == splitCommand.OutputName1)
             {
-                throw new InvalidOperationException($"Droplets with the same names cannot be split.");
+                throw new CommandException($"Droplets with the same names cannot be split.", splitCommand);
             }
 
 
@@ -192,7 +196,7 @@ namespace DropletsInMotion.Application.Services
 
             if (!isBetweenHorizontally && !isBetweenVertically)
             {
-                throw new InvalidOperationException("Input droplet is not positioned between the specified split positions.");
+                throw new RuntimeException("Input droplet is not positioned between the specified split positions."); // TODO: What exception should this be?
             }
 
 
@@ -223,7 +227,7 @@ namespace DropletsInMotion.Application.Services
             if (_contaminationService.IsAreaContaminated(contaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX,
                     mixCommand.PositionY, mixCommand.Width, mixCommand.Height))
             {
-                throw new InvalidOperationException($"Mix not possible Area is contaminated.");
+                throw new ContaminationException($"Mix not possible Area is contaminated.", contaminationMap);
             }
             List<BoardAction> mixActions = new List<BoardAction>();
             double time1 = compilerTime;
