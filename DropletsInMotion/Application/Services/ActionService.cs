@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DropletsInMotion.Application.Execution.Models;
+using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
@@ -31,23 +32,22 @@ namespace DropletsInMotion.Application.Services
         private readonly IStoreService _storeService;
         private readonly ICommandLifetimeService _commandLifetimeService;
         private readonly IDeviceRepository _deviceRepository;
-        private readonly ITemplateRepository _templateRepository;
         private readonly IPlatformService _platformService;
         private readonly IPlatformRepository _platformRepository;
-
+        private readonly IAgentFactory _agentFactory;
 
         public ActionService(ITemplateService templateService, IContaminationService contaminationService, IStoreService storeService, 
                              ICommandLifetimeService commandLifetimeService, IDeviceRepository deviceRepository, ITemplateRepository templateRepository,
-                             IPlatformService platformService, IPlatformRepository platformRepository)
+                             IPlatformService platformService, IPlatformRepository platformRepository, IAgentFactory agentFactory)
         {
             _templateService = templateService;
             _contaminationService = contaminationService;
             _storeService = storeService;
             _commandLifetimeService = commandLifetimeService;
             _deviceRepository = deviceRepository;
-            _templateRepository = templateRepository;
             _platformService = platformService;
             _platformRepository = platformRepository;
+            _agentFactory = agentFactory;
             _moveHandler = new MoveHandler(_templateService, templateRepository, platformRepository);
 
         }
@@ -73,11 +73,13 @@ namespace DropletsInMotion.Application.Services
             Agent inputAgent1 = agents[inputDroplet1.DropletName];
             Agent inputAgent2 = agents[inputDroplet2.DropletName];
 
-            Agent newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
+            Agent newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
+
 
             if (inputAgent1.SubstanceId == inputAgent2.SubstanceId)
             {
-                newAgent = new Agent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, inputAgent1.SubstanceId);
+                newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY,
+                    outputDroplet.Volume, inputAgent1.SubstanceId);
             }
 
             agents.Remove(inputDroplet1.DropletName);
@@ -202,11 +204,12 @@ namespace DropletsInMotion.Application.Services
 
             Droplet outputDroplet1 = new Droplet(splitCommand.OutputName1, splitPositions.X1, splitPositions.Y1, inputDroplet.Volume - splitCommand.Volume);
             Droplet outputDroplet2 = new Droplet(splitCommand.OutputName2, splitPositions.X2, splitPositions.Y2, splitCommand.Volume);
-            
 
-            Agent newAgent1 = new Agent(outputDroplet1.DropletName, outputDroplet1.PositionX, outputDroplet1.PositionY, outputDroplet1.Volume, agents[inputDroplet.DropletName].SubstanceId);
-            Agent newAgent2 = new Agent(outputDroplet2.DropletName, outputDroplet2.PositionX, outputDroplet2.PositionY, outputDroplet2.Volume, agents[inputDroplet.DropletName].SubstanceId);
-            
+            Agent newAgent1 = _agentFactory.CreateAgent(outputDroplet1.DropletName, outputDroplet1.PositionX,
+                outputDroplet1.PositionY, outputDroplet1.Volume, agents[inputDroplet.DropletName].SubstanceId);
+            Agent newAgent2 = _agentFactory.CreateAgent(outputDroplet2.DropletName, outputDroplet2.PositionX, 
+                outputDroplet2.PositionY, outputDroplet2.Volume, agents[inputDroplet.DropletName].SubstanceId);
+
             agents.Remove(inputDroplet.DropletName);
 
             agents[outputDroplet1.DropletName] = newAgent1;

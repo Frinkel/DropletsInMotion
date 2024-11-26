@@ -181,14 +181,14 @@ namespace DropletsInMotionTests
         //    Assert.That(s3.IsGoalState(), Is.EqualTo(true));
         //}
 
-        public Dictionary<string, Agent> CreateTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
-        {
-            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var agent = new Agent("d1", agent1X, agent1Y, 1);
-            var agent2 = new Agent("d2", agent2X, agent2Y, 1);
-            agents.Add("d1", agent);
-            agents.Add("d2", agent2);
-            return agents;
-        }
+        //public Dictionary<string, Agent> CreateTwoAgentsWithPositions(int agent1X, int agent1Y, int agent2X, int agent2Y)
+        //{
+        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+        //    var agent = new Agent("d1", agent1X, agent1Y, 1);
+        //    var agent2 = new Agent("d2", agent2X, agent2Y, 1);
+        //    agents.Add("d1", agent);
+        //    agents.Add("d2", agent2);
+        //    return agents;
+        //}
     }
 }

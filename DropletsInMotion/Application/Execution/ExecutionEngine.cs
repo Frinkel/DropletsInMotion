@@ -1,6 +1,7 @@
 ﻿using System.Reflection.Metadata;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.ExecutionEngine.Models;
+using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
@@ -37,18 +38,20 @@ namespace DropletsInMotion.Application.Execution
         private readonly ICommandLifetimeService _commandLifetimeService;
         private readonly ITimeService _timeService;
         private readonly IActionService _actionService;
-        //private readonly ITemplateService _templateService;
         private readonly IDependencyService _dependencyService;
         private readonly ITranslator _translator;
         private readonly ICommunicationEngine _communicationEngine;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IAgentFactory _agentFactory;
 
         public ExecutionEngine(IContaminationService contaminationService, ISchedulerService schedulerService, 
                                 IStoreService storeService, ICommandLifetimeService commandLifetimeService, ITimeService timeService, 
                                 IActionService actionService, IRouterService routerService, IDependencyService dependencyService, 
-                                ITemplateService templateService, ITranslator translator, ICommunicationEngine communicationEngine, IDeviceRepository deviceRepository, ITemplateRepository templateRepository, IPlatformRepository platformRepository)
+                                ITranslator translator, ICommunicationEngine communicationEngine, 
+                                IDeviceRepository deviceRepository, ITemplateRepository templateRepository, IPlatformRepository platformRepository,
+                                IAgentFactory agentFactory)
         {
             _contaminationService = contaminationService;
             _schedulerService = schedulerService;
@@ -57,13 +60,13 @@ namespace DropletsInMotion.Application.Execution
             _timeService = timeService;
             _actionService = actionService;
             _router = routerService;
-            //_templateService = templateService;
             _dependencyService = dependencyService;
             _translator = translator;
             _communicationEngine = communicationEngine;
             _deviceRepository = deviceRepository;
             _templateRepository = templateRepository;
             _platformRepository = platformRepository;
+            _agentFactory = agentFactory;
         }
 
         public async Task Execute()
@@ -241,8 +244,10 @@ namespace DropletsInMotion.Application.Execution
             // Update time
             //executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
 
-            Agent agent = new Agent(dispenseCommand.DropletName, reservoir.OutputX,
-                reservoir.OutputY, dispenseCommand.Volume); // TODO: the reservoir should contain a substance id?
+
+            Agent agent = _agentFactory.CreateAgent(dispenseCommand.DropletName, reservoir.OutputX,
+                reservoir.OutputY, dispenseCommand.Volume);
+
             Agents.Add(dispenseCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
 
@@ -269,7 +274,8 @@ namespace DropletsInMotion.Application.Execution
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it is already contaminated");
             }
 
-            Agent agent = new Agent(dropletCommand.DropletName, dropletCommand.PositionX,
+
+            Agent agent = _agentFactory.CreateAgent(dropletCommand.DropletName, dropletCommand.PositionX,
                 dropletCommand.PositionY, dropletCommand.Volume);
             Agents.Add(dropletCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContaminationWithSize(agent, ContaminationMap);
