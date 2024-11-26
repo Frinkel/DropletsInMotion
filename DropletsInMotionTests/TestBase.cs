@@ -19,6 +19,8 @@ using Microsoft.Extensions.Configuration;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Translation.Services;
+using DropletsInMotion.Application.Factories;
+using DropletsInMotion.Infrastructure;
 
 namespace DropletsInMotionTests
 {
@@ -60,7 +62,10 @@ namespace DropletsInMotionTests
             serviceCollection.AddSingleton<ITypeChecker, TypeChecker>();
             serviceCollection.AddSingleton<IPlatformRepository, PlatformRepository>();
             serviceCollection.AddSingleton<ITemplateRepository, TemplateRepository>();
-
+            serviceCollection.AddSingleton<ILogger, Logger>();
+            serviceCollection.AddSingleton<RuntimeExceptionHandler>();
+            serviceCollection.AddSingleton<IAgentFactory, AgentFactory>();
+            serviceCollection.AddSingleton<IContaminationRepository, ContaminationRepository>();
 
             // Classes
             serviceCollection.AddSingleton<StateManager>();

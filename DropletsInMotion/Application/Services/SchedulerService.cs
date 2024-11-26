@@ -15,14 +15,6 @@ namespace DropletsInMotion.Application.Services
         //private Dictionary<string, Droplet> Droplets { get; set; }
 
 
-        enum Directions
-        {
-            LeftRight,
-            RightLeft,
-            UpDown,
-            DownUp
-        }
-
         public SchedulerService()
         {
 
@@ -220,26 +212,14 @@ namespace DropletsInMotion.Application.Services
                             continue;
                         }
 
-                        Console.WriteLine(templateOutOfBounds);
-                        if(optimalPositions != null)
-                        {
-                            Console.WriteLine($"Best positions at ({optimalPositions.X1}, {optimalPositions.Y1}), " +
-                                              $"and ({optimalPositions.X2}, {optimalPositions.Y2}) with a score of {totalScore}");
-                        }
                         bestScore = totalScore; 
                         bestPositions = optimalPositions;
                     }
                 }
 
 
-
                 if (bestPositions != null)
                 {
-                    Console.WriteLine($"Optimal positions at ({bestPositions.X1}, {bestPositions.Y1}), " +
-                                      $"and ({bestPositions.X2}, {bestPositions.Y2}) with a score of {bestScore}");
-                    Console.WriteLine(bestPositions.Template.Name);
-                    
-
                     return bestPositions;
                 }
 

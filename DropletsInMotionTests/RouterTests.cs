@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.Models;
+﻿using DropletsInMotion.Application.Factories;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Application.Services;
@@ -15,12 +16,14 @@ namespace DropletsInMotionTests
         private readonly ITemplateService _templateService;
         private readonly IContaminationService _contaminationService;
         private readonly IRouterService _routerService;
+        private readonly IAgentFactory _agentFactory;
 
         public RouterTests()
         {
             _templateService = ServiceProvider.GetRequiredService<ITemplateService>();
             _contaminationService = ServiceProvider.GetRequiredService<IContaminationService>();
             _routerService = ServiceProvider.GetRequiredService<IRouterService>();
+            _agentFactory = ServiceProvider.GetRequiredService<IAgentFactory>();
         }
 
         [SetUp]
@@ -42,8 +45,8 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 5, 400);
-            var a2 = new Agent("a2", 12, 5, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -69,9 +72,9 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 5, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400);
             Agent.ResetSubstanceId();
-            var a2 = new Agent("a2", 12, 5, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -93,7 +96,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 5, 10, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 5, 10, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -118,7 +121,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 0, 0, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -147,7 +150,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 10, 10, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 10, 10, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -178,7 +181,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 12, 10, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 12, 10, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -214,7 +217,7 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 31, 19, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 31, 19, 400);
             agents.Add("a1", a1);
 
             var board = CreateBoard();
@@ -255,11 +258,11 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 400);
-            var a2 = new Agent("a2", 0, 5, 400);
-            var a3 = new Agent("a3", 0, 10, 400);
-            var a4 = new Agent("a4", 0, 15, 400);
-            var a5 = new Agent("a5", 0, 19, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 0, 0, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 0, 5, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 0, 10, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 0, 15, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 0, 19, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -299,11 +302,11 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 400);
-            var a2 = new Agent("a2", 0, 5, 400);
-            var a3 = new Agent("a3", 0, 10, 400);
-            var a4 = new Agent("a4", 0, 15, 400);
-            var a5 = new Agent("a5", 0, 19, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 0, 0, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 0, 5, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 0, 10, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 0, 15, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 0, 19, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -340,11 +343,11 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 400);
-            var a2 = new Agent("a2", 0, 5, 400);
-            var a3 = new Agent("a3", 0, 10, 400);
-            var a4 = new Agent("a4", 0, 15, 400);
-            var a5 = new Agent("a5", 0, 19, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 0, 0, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 0, 5, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 0, 10, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 0, 15, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 0, 19, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -381,11 +384,11 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 0, 0, 400);
-            var a2 = new Agent("a2", 0, 5, 400);
-            var a3 = new Agent("a3", 0, 10, 400);
-            var a4 = new Agent("a4", 0, 15, 400);
-            var a5 = new Agent("a5", 0, 19, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 0, 0, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 0, 5, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 0, 10, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 0, 15, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 0, 19, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -419,8 +422,8 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 10, 1, 400);
-            var a2 = new Agent("a2", 10, 5, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 10, 1, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 10, 5, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -451,8 +454,8 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() {  dropletCommandA2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1",8, 5, 2827, 1);
-            var a2 = new Agent("a2", 15, 7, 706, 1);
+            var a1 = _agentFactory.CreateAgent("a1", 8, 5, 2827, 1);
+            var a2 = _agentFactory.CreateAgent("a2", 15, 7, 706, 1);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -485,10 +488,10 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() {  dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA1 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 9, 7, 400);
-            var a2 = new Agent("a2", 11, 7, 400);
-            var a3 = new Agent("a3", 13, 7, 400);
-            var a4 = new Agent("a4", 15, 7, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -529,13 +532,13 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5, dropletCommandA6, dropletCommandA7 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 9, 7, 400);
-            var a2 = new Agent("a2", 11, 7, 400);
-            var a3 = new Agent("a3", 13, 7, 400);
-            var a4 = new Agent("a4", 15, 7, 400);
-            var a5 = new Agent("a5", 17, 7, 400);
-            var a6 = new Agent("a6", 19, 7, 400);
-            var a7 = new Agent("a7", 21, 7, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 17, 7, 400);
+            var a6 = _agentFactory.CreateAgent("a6", 19, 7, 400);
+            var a7 = _agentFactory.CreateAgent("a7", 21, 7, 400);
 
 
             agents.Add("a1", a1);
@@ -586,16 +589,16 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5, dropletCommandA6, dropletCommandA7, dropletCommandA8, dropletCommandA9, dropletCommandA10 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 1, 0, 400);
-            var a2 = new Agent("a2", 3, 0, 400);
-            var a3 = new Agent("a3", 5, 0, 400);
-            var a4 = new Agent("a4", 7, 0, 400);
-            var a5 = new Agent("a5", 9, 0, 400);
-            var a6 = new Agent("a6", 11, 0, 400);
-            var a7 = new Agent("a7", 13, 0, 400);
-            var a8 = new Agent("a8", 15, 0, 400);
-            var a9 = new Agent("a9", 17, 0, 400);
-            var a10 = new Agent("a10", 19, 0, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 1, 0, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 3, 0, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 5, 0, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 7, 0, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 9, 0, 400);
+            var a6 = _agentFactory.CreateAgent("a6", 11, 0, 400);
+            var a7 = _agentFactory.CreateAgent("a7", 13, 0, 400);
+            var a8 = _agentFactory.CreateAgent("a8", 15, 0, 400);
+            var a9 = _agentFactory.CreateAgent("a9", 17, 0, 400);
+            var a10 = _agentFactory.CreateAgent("a10", 19, 0, 400);
 
 
             agents.Add("a1", a1);
@@ -642,9 +645,9 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, dropletCommand2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 6, 10, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 6, 10, 400);
             //Agent.ResetSubstanceId();
-            var a2 = new Agent("a2", 10, 8, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 10, 8, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -680,9 +683,9 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand2, dropletCommand };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 4, 5, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 4, 5, 400);
             //Agent.ResetSubstanceId();
-            var a2 = new Agent("a2", 10, 3, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 10, 3, 400);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
@@ -725,12 +728,12 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA6, dropletCommandA5, dropletCommandA4 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = new Agent("a1", 9, 7, 400);
-            var a2 = new Agent("a2", 11, 7, 400);
-            var a3 = new Agent("a3", 13, 7, 400);
-            var a4 = new Agent("a4", 15, 7, 400);
-            var a5 = new Agent("a5", 17, 7, 400);
-            var a6 = new Agent("a6", 19, 7, 400);
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 17, 7, 400);
+            var a6 = _agentFactory.CreateAgent("a6", 19, 7, 400);
 
 
             agents.Add("a1", a1);

@@ -405,8 +405,8 @@ public class RouterService : IRouterService
                 if (c1[i, j] != 0 && c2[i, j] != 0 && c1[i, j] != c2[i, j])
                 {
                     Console.WriteLine($"Conflict at {i}, {j}");
-                    _contaminationService.PrintContaminationState(c1);
-                    _contaminationService.PrintContaminationState(c2);
+                    //_contaminationService.PrintContaminationState(c1);
+                    //_contaminationService.PrintContaminationState(c2);
                     return true;
                 }
             }

@@ -125,8 +125,6 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
-            serviceCollection.AddTransient<Agent>();
-
             return serviceCollection.BuildServiceProvider();
         }
     }

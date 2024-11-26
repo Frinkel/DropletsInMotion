@@ -200,12 +200,12 @@ namespace DropletsInMotion.Application.Execution
                     Time = boundTime != null ? (double)boundTime : Time;
                 }
 
-                Console.WriteLine(Time);
+                //Console.WriteLine(Time);
 
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                _contaminationService.PrintContaminationState(ContaminationMap);
+                //_contaminationService.PrintContaminationState(ContaminationMap);
                 boardActions.Clear();
             }
 
