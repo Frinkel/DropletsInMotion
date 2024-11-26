@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Infrastructure.Exceptions;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands.Expressions
 {
@@ -33,7 +34,7 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.Expressions
                 "-" => leftValue - rightValue,
                 "*" => leftValue * rightValue,
                 "/" => rightValue != 0 ? leftValue / rightValue : throw new DivideByZeroException(),
-                _ => throw new InvalidOperationException($"Unknown operator: {Operator}")
+                _ => throw new RuntimeException($"Unknown operator: {Operator}")
             };
         }
 

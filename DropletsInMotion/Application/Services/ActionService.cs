@@ -56,10 +56,10 @@ namespace DropletsInMotion.Application.Services
         {
             //Merge
             Droplet inputDroplet1 = agents[mergeCommand.InputName1]
-                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName1}.");
+                                    ?? throw new CommandException($"No droplet found with name {mergeCommand.InputName1}.", mergeCommand);
 
             Droplet inputDroplet2 = agents[mergeCommand.InputName2]
-                                    ?? throw new DropletNotFoundException($"No droplet found with name {mergeCommand.InputName2}.");
+                                    ?? throw new CommandException($"No droplet found with name {mergeCommand.InputName2}.", mergeCommand);
 
 
             int outPutDropletX = mergePositions.SingularX;
@@ -223,7 +223,7 @@ namespace DropletsInMotion.Application.Services
         public List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime)
         {
             Agent inputDroplet = agents[mixCommand.DropletName]
-                                 ?? throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
+                                 ?? throw new CommandException($"No droplet found with name {mixCommand.DropletName}.", mixCommand);
             if (_contaminationService.IsAreaContaminated(contaminationMap, inputDroplet.SubstanceId, mixCommand.PositionX,
                     mixCommand.PositionY, mixCommand.Width, mixCommand.Height))
             {
@@ -269,7 +269,7 @@ namespace DropletsInMotion.Application.Services
 
             if (!agents.TryGetValue(mixCommand.DropletName, out var inputDroplet))
             {
-                throw new InvalidOperationException($"No droplet found with name {mixCommand.DropletName}.");
+                throw new CommandException($"No droplet found with name {mixCommand.DropletName}.", mixCommand);
             }
 
             if (inputDroplet.PositionX == mixCommand.PositionX && inputDroplet.PositionY == mixCommand.PositionY)
@@ -285,12 +285,12 @@ namespace DropletsInMotion.Application.Services
 
             if (!agents.TryGetValue(sensorCommand.DropletName, out var inputDroplet))
             {
-                throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
+                throw new CommandException($"No droplet found with name {sensorCommand.DropletName}.", sensorCommand);
             }
 
             if (!_deviceRepository.Sensors.TryGetValue(sensorCommand.SensorName, out var sensor))
             {
-                throw new InvalidOperationException($"No droplet found with name {sensorCommand.DropletName}.");
+                throw new CommandException($"No sensor found with name {sensorCommand.SensorName}.", sensorCommand);
             }
 
             if (inputDroplet.PositionX == sensor.CoordinateX && inputDroplet.PositionY == sensor.CoordinateY)
@@ -305,7 +305,7 @@ namespace DropletsInMotion.Application.Services
         {
             if (!agents.TryGetValue(wasteCommand.DropletName, out var inputDroplet))
             {
-                throw new InvalidOperationException($"No droplet found with name {wasteCommand.DropletName}.");
+                throw new CommandException($"No droplet found with name {wasteCommand.DropletName}.", wasteCommand);
             }
 
             if (inputDroplet.PositionX == wasteCommand.PositionX && inputDroplet.PositionY == wasteCommand.PositionY)
@@ -321,7 +321,7 @@ namespace DropletsInMotion.Application.Services
         {
             if (!agents.TryGetValue(storeCommand.DropletName, out var inputDroplet))
             {
-                throw new InvalidOperationException($"No droplet found with name {storeCommand.DropletName}.");
+                throw new CommandException($"No droplet found with name {storeCommand.DropletName}.", storeCommand);
             }
 
             if (storeCommand.StoreInPosition || inputDroplet.PositionX == storeCommand.PositionX && inputDroplet.PositionY == storeCommand.PositionY)
@@ -342,7 +342,7 @@ namespace DropletsInMotion.Application.Services
                 {
                     if (!agents.ContainsKey(inputDroplet))
                     {
-                        throw new InvalidOperationException($"No droplet found with name {inputDroplet} for dropletCommand {dropletCommand}.");
+                        throw new CommandException($"No droplet found with name {inputDroplet} for dropletCommand {dropletCommand}.", dropletCommand);
                     }
                 }
                 return true;
@@ -356,7 +356,7 @@ namespace DropletsInMotion.Application.Services
 
             if (!agents.TryGetValue(mergeCommand.OutputName, out var outDroplet))
             {
-                throw new InvalidOperationException($"No droplet found with name {mergeCommand.OutputName}.");
+                throw new CommandException($"No droplet found with name {mergeCommand.OutputName}.", mergeCommand);
             }
 
             var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
@@ -408,17 +408,17 @@ namespace DropletsInMotion.Application.Services
 
             if (agents.ContainsKey(splitCommand.OutputName1) && splitCommand.OutputName1 != splitCommand.InputName)
             {
-                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName1} already exists.");
+                throw new CommandException($"Droplet with name {splitCommand.OutputName1} already exists.", splitCommand);
             }
 
             if (agents.ContainsKey(splitCommand.OutputName2) && splitCommand.OutputName2 != splitCommand.InputName)
             {
-                throw new InvalidOperationException($"Droplet with name {splitCommand.OutputName2} already exists.");
+                throw new CommandException($"Droplet with name {splitCommand.OutputName2} already exists.", splitCommand);
             }
 
             if (splitCommand.OutputName2 == splitCommand.OutputName1)
             {
-                throw new InvalidOperationException($"Droplet with the same names can not be split.");
+                throw new CommandException($"Droplet with the same names can not be split.", splitCommand);
             }
 
             int splitPositionX = (splitPositions.X1 + splitPositions.X2) / 2;

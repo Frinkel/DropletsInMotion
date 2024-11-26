@@ -41,8 +41,15 @@ namespace DropletsInMotion.Infrastructure
 
                 case ContaminationException contaminationException:
                     _logger.WriteColor($"Exception connected to the resulting contamination.", ConsoleColor.Red);
+                    _logger.WriteColor($"Error Message: \"{contaminationException.Message}\"", ConsoleColor.Red);
                     _logger.WriteColor($"Contamination map:", ConsoleColor.Red);
                     _contaminationService.PrintContaminationState(contaminationException.ContaminationMap);
+                    return RuntimeExceptionAction.Reset;
+
+                case TemplateException templateException:
+                    _logger.WriteColor($"Exception occured related to \"{templateException.Template.Name}\".");
+                    _logger.WriteColor($"Error Message: \"{templateException.Message}\"", ConsoleColor.Red);
+
                     return RuntimeExceptionAction.Reset;
 
                 case PositionUnreachableException positionUnreachableException:

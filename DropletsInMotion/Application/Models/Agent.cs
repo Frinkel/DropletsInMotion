@@ -1,6 +1,7 @@
 ﻿using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using System.Drawing;
+using DropletsInMotion.Infrastructure.Exceptions;
 
 namespace DropletsInMotion.Application.Models
 {
@@ -36,7 +37,7 @@ namespace DropletsInMotion.Application.Models
         {
             if (_nextSubstanceId == 254)
             {
-                throw new InvalidOperationException("Maximum number of unique agents reached.");
+                throw new RuntimeException("Maximum number of unique agents reached.");
             }
 
             return _nextSubstanceId++;
@@ -73,7 +74,7 @@ namespace DropletsInMotion.Application.Models
                     //Move(action.DropletXDelta, action.DropletYDelta);
                     break;
                 default:
-                    throw new InvalidOperationException("Invalid action tried to be executed! (Agent.cs)");
+                    throw new RuntimeException("Invalid action tried to be executed! (Agent.cs)");
             }
         }
 
