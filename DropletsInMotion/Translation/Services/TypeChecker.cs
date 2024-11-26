@@ -9,11 +9,13 @@ public class TypeChecker : ITypeChecker
 {
     private HashSet<string> _variables;
     private HashSet<string> _droplets;
+    private IPlatformRepository _platformRepository;
 
-    public TypeChecker()
+    public TypeChecker(IPlatformRepository platformRepository)
     {
         _variables = new HashSet<string>();
         _droplets = new HashSet<string>();
+        _platformRepository = platformRepository;
     }
 
     public void ResetTypeEnviroments()
@@ -136,6 +138,7 @@ public class TypeChecker : ITypeChecker
         var variables = moveCommand.GetInputVariables();
         var nonDropletVariables = variables.Where(v => !droplets.Contains(v)).ToList();
         VariablesExist(nonDropletVariables, moveCommand);
+
     }
 
     private void Dispense(Dispense dispenseCommand)

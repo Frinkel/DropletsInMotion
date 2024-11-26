@@ -96,6 +96,7 @@ namespace DropletsInMotion.Application.Execution
                 //{
                 //    Console.WriteLine(node);
                 //}
+                //Console.WriteLine(Time);
 
                 List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
@@ -121,6 +122,11 @@ namespace DropletsInMotion.Application.Execution
 
                         case Move moveCommand:
                             moveCommand.Evaluate(Variables);
+                            if (moveCommand.PositionX >= _platformRepository.Board.Length || moveCommand.PositionY >= _platformRepository.Board[0].Length
+                                || moveCommand.PositionX < 0 || moveCommand.PositionY < 0)
+                            {
+                                throw new InvalidOperationException($"Error: {moveCommand} moves a droplets outside the board.");
+                            }
                             movesToExecute.Add(moveCommand);
                             break;
 

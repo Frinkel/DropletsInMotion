@@ -668,6 +668,14 @@ public class State
                         throw new InvalidOperationException(
                             $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand}");
                     }
+                    if (agent.GetAgentSize() + moveCommand.PositionX > ContaminationMap.GetLength(0) ||
+                        agent.GetAgentSize() + moveCommand.PositionY > ContaminationMap.GetLength(1))
+                    {
+                        throw new InvalidOperationException(
+                            $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand} due to agent size.");
+                    }
+
+
                     break;
 
                 default:
@@ -721,7 +729,6 @@ public class State
         return true;
     }
 
-    //// TODO do we move this into the contamination service?
     //private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
     //{
     //    if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))

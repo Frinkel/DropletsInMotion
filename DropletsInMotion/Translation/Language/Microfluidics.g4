@@ -61,8 +61,10 @@ mix
 
 // Store
 store
-    : 'Store' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')'
+    : 'Store' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')' # StoreWithPositions
+    | 'Store' '(' IDENTIFIER ',' arithmeticExpression ')' # StoreWithTimeOnly
     ;
+
 
 // Waste
 waste

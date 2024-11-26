@@ -165,7 +165,7 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(dropletCommand);
         }
 
-        public override void ExitStore(MicrofluidicsParser.StoreContext context)
+        public override void ExitStoreWithPositions(MicrofluidicsParser.StoreWithPositionsContext context)
         {
             string name = context.IDENTIFIER().GetText();
             var posX = CreateExpression(context.arithmeticExpression(0));
@@ -177,6 +177,17 @@ namespace DropletsInMotion.Presentation.Language
             dropletCommand.Column = context.Start.Column;
             Commands.Add(dropletCommand);
         }
+
+        public override void ExitStoreWithTimeOnly(MicrofluidicsParser.StoreWithTimeOnlyContext context)
+        {
+            string name = context.IDENTIFIER().GetText();
+            var time = CreateExpression(context.arithmeticExpression());
+
+            Commands.Add(new Store(name, time));
+        }
+
+
+
 
         public override void ExitWaste(MicrofluidicsParser.WasteContext context)
         {

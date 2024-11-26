@@ -324,7 +324,7 @@ namespace DropletsInMotion.Application.Services
                 throw new InvalidOperationException($"No droplet found with name {storeCommand.DropletName}.");
             }
 
-            if (inputDroplet.PositionX == storeCommand.PositionX && inputDroplet.PositionY == storeCommand.PositionY)
+            if (storeCommand.StoreInPosition || inputDroplet.PositionX == storeCommand.PositionX && inputDroplet.PositionY == storeCommand.PositionY)
             {
                 return true;
             }

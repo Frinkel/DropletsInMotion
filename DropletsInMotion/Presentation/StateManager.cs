@@ -83,9 +83,7 @@ namespace DropletsInMotion.Presentation
                             break;
 
                         case (ProgramState.Completed):
-                            _logger.WriteEmptyLine(2);
-                            _logger.WriteSuccess("Program compiled successfully!");
-                            _logger.WriteEmptyLine(2);
+                            _consoleService.WriteSuccess("Program compiled successfully!");
                             _currentState = ProgramState.WaitingForUserInput;
                             break;
 
