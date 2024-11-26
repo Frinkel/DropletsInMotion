@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.ExecutionEngine;
 using DropletsInMotion.Application.Factories;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication.Services;
@@ -116,7 +117,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ILogger, Logger>();
             serviceCollection.AddSingleton<RuntimeExceptionHandler>();
             serviceCollection.AddSingleton<IAgentFactory, AgentFactory>();
-
+            serviceCollection.AddSingleton<IContaminationRepository, ContaminationRepository>();
 
             // Classes
             serviceCollection.AddSingleton<StateManager>();
@@ -124,6 +125,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 
+            serviceCollection.AddTransient<Agent>();
 
             return serviceCollection.BuildServiceProvider();
         }
