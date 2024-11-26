@@ -2,11 +2,13 @@
 using DropletsInMotion.Infrastructure.Models.Platform;
 using System.Drawing;
 using DropletsInMotion.Infrastructure.Exceptions;
+using DropletsInMotion.Application.Services;
 
 namespace DropletsInMotion.Application.Models
 {
     public class Agent : Droplet
     {
+        private IContaminationService _contaminationService;
         private static byte _nextSubstanceId = 1;
         public byte SubstanceId;
         public LinkedList<(int x, int y)> SnakeBody = new LinkedList<(int x, int y)>();
@@ -15,22 +17,25 @@ namespace DropletsInMotion.Application.Models
         private static double _minSize2x2 = 0;
         private static double _minSize3x3 = 0;
 
-        public Agent(string dropletName, int positionX, int positionY, double volume) : base(dropletName, positionX, positionY, volume)
+        public Agent(string dropletName, int positionX, int positionY, double volume, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
         {
             SubstanceId = GetNextSubstanceId();
             SnakeBody.AddFirst((positionX, positionY));
+            _contaminationService = contaminationService;
         }
 
-        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId) : base(dropletName, positionX, positionY, volume)
+        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
         {
             SubstanceId = substanceId;
             SnakeBody.AddFirst((positionX, positionY));
+            _contaminationService = contaminationService;
         }
 
-        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId, LinkedList<(int x, int y)> snakeBody) : base(dropletName, positionX, positionY, volume)
+        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId, LinkedList<(int x, int y)> snakeBody, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
         {
             SubstanceId = substanceId;
             SnakeBody = snakeBody;
+            _contaminationService = contaminationService;
         }
 
         private static byte GetNextSubstanceId()
@@ -57,7 +62,7 @@ namespace DropletsInMotion.Application.Models
                 clonedSnakeBody.AddLast(bodyPart);
             }
 
-            return new Agent(DropletName, PositionX, PositionY, Volume, SubstanceId, clonedSnakeBody);
+            return new Agent(DropletName, PositionX, PositionY, Volume, SubstanceId, clonedSnakeBody, _contaminationService);
         }
 
         internal void Execute(Types.RouteAction action)

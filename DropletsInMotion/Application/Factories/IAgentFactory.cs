@@ -1,0 +1,10 @@
+﻿using DropletsInMotion.Application.Models;
+
+namespace DropletsInMotion.Application.Factories;
+
+public interface IAgentFactory
+{
+    Agent CreateAgent(string dropletName, int positionX, int positionY, double volume);
+    Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, byte substanceId);
+    Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, byte substanceId, LinkedList<(int x, int y)> snakeBody);
+}

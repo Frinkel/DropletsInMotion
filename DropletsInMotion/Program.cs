@@ -3,6 +3,7 @@ using DropletsInMotion.Communication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.ExecutionEngine;
+using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication.Services;
@@ -114,6 +115,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITemplateRepository, TemplateRepository>();
             serviceCollection.AddSingleton<ILogger, Logger>();
             serviceCollection.AddSingleton<RuntimeExceptionHandler>();
+            serviceCollection.AddSingleton<IAgentFactory, AgentFactory>();
 
 
             // Classes
