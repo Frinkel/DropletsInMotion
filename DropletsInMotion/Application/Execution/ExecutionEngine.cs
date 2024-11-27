@@ -27,7 +27,7 @@ namespace DropletsInMotion.Application.Execution
         public Dictionary<string, Double> Variables { get; set; } = new Dictionary<string, Double>();
 
         public double Time { get; set; }
-        private byte[,] ContaminationMap { get; set; }
+        private List<int>[,] ContaminationMap { get; set; }
 
         private DependencyGraph DependencyGraph;
 
@@ -82,7 +82,7 @@ namespace DropletsInMotion.Application.Execution
             //DependencyGraph.GenerateDotFile(); // TODO: Uncommented for now
 
             // Reset the execution
-            ContaminationMap = new byte[Board.Length, Board[0].Length];
+            ContaminationMap = _contaminationService.CreateContaminationMap(Board.Length, Board[0].Length);
             Agents.Clear();
             Agent.ResetSubstanceId();
 
@@ -268,15 +268,17 @@ namespace DropletsInMotion.Application.Execution
         private void HandleDropletDeclaration(DropletDeclaration dropletCommand, List<BoardAction> boardActions)
         {
 
-            var contamintation = ContaminationMap[dropletCommand.PositionX, dropletCommand.PositionY];
-            if (contamintation != 0)
+            string substanceId = dropletCommand.Substance;
+            var substance = _contaminationService.GetSubstanceId(substanceId);
+
+            if (_contaminationService.IsConflicting(ContaminationMap, dropletCommand.PositionX, dropletCommand.PositionY, substance))
             {
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it is already contaminated");
             }
 
 
             Agent agent = _agentFactory.CreateAgent(dropletCommand.DropletName, dropletCommand.PositionX,
-                dropletCommand.PositionY, dropletCommand.Volume);
+                dropletCommand.PositionY, dropletCommand.Volume, substance);
             Agents.Add(dropletCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContaminationWithSize(agent, ContaminationMap);
 

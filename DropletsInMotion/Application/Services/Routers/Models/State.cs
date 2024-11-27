@@ -17,7 +17,7 @@ public class State
 {
     private int? Seed = null;
 
-    public byte[,] ContaminationMap { get; set; }
+    public List<int>[,] ContaminationMap { get; set; }
     public Dictionary<string, Agent> Agents { get; set; }
     public int G { get; private set; }
     public State? Parent { get; set; }
@@ -36,7 +36,7 @@ public class State
     private readonly ITemplateRepository _templateRepository;
 
     // Initial state
-    public State(string routableAgent, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<IDropletCommand> commands, List<State> commitedStates, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
+    public State(string routableAgent, Dictionary<string, Agent> agents, List<int>[,] contaminationMap, List<IDropletCommand> commands, List<State> commitedStates, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
     {
         Seed = seed;
         _contaminationService = contaminationService;
@@ -48,7 +48,7 @@ public class State
         {
             Agents[kvp.Key] = (Agent)kvp.Value.Clone();
         }
-        ContaminationMap = (byte[,]) contaminationMap.Clone();
+        ContaminationMap = _contaminationService.CloneContaminationMap(contaminationMap);
         Commands = commands;
         CommitedStates = commitedStates;
         JointAction = null;
@@ -65,13 +65,14 @@ public class State
 
         Parent = parent;
         RoutableAgent = parent.RoutableAgent;
-        ContaminationMap = (byte[,])Parent.ContaminationMap.Clone();
         Commands = Parent.Commands;
         CommitedStates = Parent.CommitedStates;
         Action = action;
         JointAction = new Dictionary<string, RouteAction>();
         JointAction[RoutableAgent] = action;
         _contaminationService = Parent._contaminationService;
+        ContaminationMap = _contaminationService.CloneContaminationMap(Parent.ContaminationMap);
+
         _platformRepository = Parent._platformRepository;
         _templateRepository = Parent._templateRepository;
 
@@ -544,7 +545,7 @@ public class State
 
         while (true)
         {
-            if (ContaminationMap[startX, startY] != 0 && ContaminationMap[startX, startY] != agent.SubstanceId)
+            if (_contaminationService.IsConflicting(ContaminationMap, startX, startY, agent.SubstanceId))
                 return true;
 
             if (startX == endX && startY == endY) break;
@@ -662,8 +663,7 @@ public class State
                 case Move moveCommand:
                     var agent = Agents[moveCommand.GetInputDroplets().First()];
                     //return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
-                    var goalPositionContamination = ContaminationMap[moveCommand.PositionX,moveCommand.PositionY];
-                    if (goalPositionContamination != 0 && goalPositionContamination != agent.SubstanceId)
+                    if (_contaminationService.IsConflicting(ContaminationMap, moveCommand.PositionX, moveCommand.PositionY, agent.SubstanceId))
                     {
                         throw new InvalidOperationException(
                             $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand}");

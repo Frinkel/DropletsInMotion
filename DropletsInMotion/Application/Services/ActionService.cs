@@ -52,7 +52,7 @@ namespace DropletsInMotion.Application.Services
 
         }
 
-        public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions)
+        public List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, List<int>[,] contaminationMap, double time, ScheduledPosition mergePositions)
         {
             //Merge
             Droplet inputDroplet1 = agents[mergeCommand.InputName1]
@@ -168,7 +168,7 @@ namespace DropletsInMotion.Application.Services
         public List<BoardAction> SplitByVolume(
              Dictionary<string, Agent> agents,
              SplitByVolume splitCommand,
-             byte[,] contaminationMap,
+             List<int>[,] contaminationMap,
              double time,
              ScheduledPosition splitPositions)
         {
@@ -223,7 +223,7 @@ namespace DropletsInMotion.Application.Services
             return splitActions;
         }
 
-        public List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime)
+        public List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, List<int>[,] contaminationMap, double compilerTime)
         {
             Agent inputDroplet = agents[mixCommand.DropletName]
                                  ?? throw new CommandException($"No droplet found with name {mixCommand.DropletName}.", mixCommand);

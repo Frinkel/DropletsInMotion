@@ -45,13 +45,21 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400);
-            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400);
+
+
+            var a1Substance = _contaminationService.GetSubstanceId("");
+            var a2Substance = _contaminationService.GetSubstanceId("");
+
+            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400, a1Substance);
+            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400, a2Substance);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
+
+
+
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
             _contaminationService.ApplyContaminationWithSize(a1, contaminationMap);
             _contaminationService.ApplyContaminationWithSize(a2, contaminationMap);
 
@@ -60,6 +68,7 @@ namespace DropletsInMotionTests
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -72,18 +81,29 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommand, command2 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400);
-            Agent.ResetSubstanceId();
-            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400);
+
+
+            var a1Substance = _contaminationService.GetSubstanceId("Water");
+            var a2Substance = _contaminationService.GetSubstanceId("Water");
+
+            var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400, a1Substance);
+            var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400, a2Substance);
             agents.Add("a1", a1);
             agents.Add("a2", a2);
 
+            //var a1 = _agentFactory.CreateAgent("a1", 5, 5, 400);
+            //Agent.ResetSubstanceId();
+            //var a2 = _agentFactory.CreateAgent("a2", 12, 5, 400);
+            //agents.Add("a1", a1);
+            //agents.Add("a2", a2);
+
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
+            //_contaminationService.PrintContaminationMap(contaminationMap);
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -100,7 +120,7 @@ namespace DropletsInMotionTests
             agents.Add("a1", a1);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -125,7 +145,7 @@ namespace DropletsInMotionTests
             agents.Add("a1", a1);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -154,7 +174,7 @@ namespace DropletsInMotionTests
             agents.Add("a1", a1);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -185,7 +205,7 @@ namespace DropletsInMotionTests
             agents.Add("a1", a1);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -221,7 +241,7 @@ namespace DropletsInMotionTests
             agents.Add("a1", a1);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -271,7 +291,7 @@ namespace DropletsInMotionTests
             agents.Add("a5", a5);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -315,7 +335,7 @@ namespace DropletsInMotionTests
             agents.Add("a5", a5);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -356,7 +376,7 @@ namespace DropletsInMotionTests
             agents.Add("a5", a5);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -397,7 +417,7 @@ namespace DropletsInMotionTests
             agents.Add("a5", a5);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -429,7 +449,7 @@ namespace DropletsInMotionTests
             agents.Add("a2", a2);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -461,7 +481,7 @@ namespace DropletsInMotionTests
             agents.Add("a2", a2);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -488,10 +508,18 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() {  dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA1 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400);
-            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400);
-            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400);
-            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400);
+
+
+            var a1Substance = _contaminationService.GetSubstanceId("");
+            var a2Substance = _contaminationService.GetSubstanceId("");
+            var a3Substance = _contaminationService.GetSubstanceId("");
+            var a4Substance = _contaminationService.GetSubstanceId("");
+
+
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400, a1Substance);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400, a2Substance);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400, a3Substance);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400, a4Substance);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);
@@ -499,7 +527,7 @@ namespace DropletsInMotionTests
             agents.Add("a4", a4);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -550,7 +578,7 @@ namespace DropletsInMotionTests
             agents.Add("a7", a7);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -613,7 +641,7 @@ namespace DropletsInMotionTests
             agents.Add("a10", a10);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -652,7 +680,7 @@ namespace DropletsInMotionTests
             agents.Add("a2", a2);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -690,7 +718,7 @@ namespace DropletsInMotionTests
             agents.Add("a2", a2);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 
@@ -744,7 +772,7 @@ namespace DropletsInMotionTests
             agents.Add("a6", a6);
 
             var board = CreateBoard();
-            var contaminationMap = new byte[board.Length, board[0].Length];
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
             _routerService.Initialize(board, 1);
 

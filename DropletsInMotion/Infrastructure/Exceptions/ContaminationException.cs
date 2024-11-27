@@ -4,14 +4,14 @@ namespace DropletsInMotion.Infrastructure.Exceptions
 {
     public class ContaminationException : Exception
     {
-        public byte[,] ContaminationMap { get; }
+        public List<int>[,] ContaminationMap { get; }
 
-        public ContaminationException(string message, byte[,] contaminationMap) : base(message)
+        public ContaminationException(string message, List<int>[,] contaminationMap) : base(message)
         {
             ContaminationMap = contaminationMap;
         }
 
-        public ContaminationException(string message, byte[,] contaminationMap, Exception innerException) : base(message, innerException)
+        public ContaminationException(string message, List<int>[,] contaminationMap, Exception innerException) : base(message, innerException)
         {
             ContaminationMap = contaminationMap;
         }

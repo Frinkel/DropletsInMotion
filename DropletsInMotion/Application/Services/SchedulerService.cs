@@ -14,13 +14,13 @@ namespace DropletsInMotion.Application.Services
         //private List<IDropletCommand> CommandList { get; set; }
         //private Dictionary<string, Droplet> Droplets { get; set; }
 
-
-        public SchedulerService()
+        IContaminationService _contaminationService;
+        public SchedulerService(IContaminationService contaminationService)
         {
-
+            _contaminationService = contaminationService;
         }
 
-        public ScheduledPosition ScheduleCommand(IDropletCommand dropletCommand, Dictionary<string, Agent> agents, byte[,] contaminationMap, List<ITemplate> templates)
+        public ScheduledPosition ScheduleCommand(IDropletCommand dropletCommand, Dictionary<string, Agent> agents, List<int>[,] contaminationMap, List<ITemplate> templates)
         {
             switch (dropletCommand)
             {
@@ -28,8 +28,8 @@ namespace DropletsInMotion.Application.Services
                     Agent d1 = agents[mergeCommand.InputName1];
                     Agent d2 = agents[mergeCommand.InputName2];
 
-                    byte d1SubstanceId = agents[d1.DropletName].SubstanceId;
-                    byte d2SubstanceId = agents[d2.DropletName].SubstanceId;
+                    int d1SubstanceId = agents[d1.DropletName].SubstanceId;
+                    int d2SubstanceId = agents[d2.DropletName].SubstanceId;
 
 
                     var optimalPositions = FindOptimalPositions(mergeCommand.PositionX, mergeCommand.PositionY,
@@ -68,8 +68,8 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public ScheduledPosition FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, byte[,] contaminationMap, 
-                                                      byte d1SubstanceId, byte d2SubstanceId, Dictionary<string, Agent> agents, List<ITemplate> templates, IDropletCommand command)
+        public ScheduledPosition FindOptimalPositions(int commandX, int commandY, int d1X, int d1Y, int d2X, int d2Y, List<int>[,] contaminationMap, 
+                                                      int d1SubstanceId, int d2SubstanceId, Dictionary<string, Agent> agents, List<ITemplate> templates, IDropletCommand command)
         {
             int minBoundingX = Math.Min(commandX, Math.Min(d1X, d2X));
             int minBoundingY = Math.Min(commandY, Math.Min(d1Y, d2Y));
@@ -116,9 +116,15 @@ namespace DropletsInMotion.Application.Services
                 {
                     for (int y = minBoundingY; y <= maxBoundingY; y++)
                     {
-                        byte contamination = contaminationMap[x, y];
-                        if (contamination != 0 && contamination != 255 &&
-                            contamination != d1SubstanceId && contamination != d2SubstanceId)
+                        //int contamination = contaminationMap[x, y];
+                        //if (contamination != 0 && contamination != 255 &&
+                        //    contamination != d1SubstanceId && contamination != d2SubstanceId)
+                        //{
+                        //    continue;
+                        //}
+
+                        if(_contaminationService.IsConflicting(contaminationMap, x, y, d1SubstanceId)
+                           && _contaminationService.IsConflicting(contaminationMap, x, y, d2SubstanceId))
                         {
                             continue;
                         }
@@ -142,17 +148,15 @@ namespace DropletsInMotion.Application.Services
                             continue;
                         }
 
-                        byte d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
-                            optimalPositions.Y1];
-                        byte d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
-                            optimalPositions.Y2];
-                        if (d1OptimalPositionContamination == 255 || d1OptimalPositionContamination != 0 &&
-                            d1OptimalPositionContamination != d1SubstanceId)
+                        //int d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
+                        //    optimalPositions.Y1];
+                        //int d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
+                        //    optimalPositions.Y2];
+                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X1, optimalPositions.Y1, d1SubstanceId))
                         {
                             continue;
                         }
-                        if (d2OptimalPositionContamination == 255 || d2OptimalPositionContamination != 0 &&
-                            d2OptimalPositionContamination != d2SubstanceId)
+                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X2, optimalPositions.Y2, d2SubstanceId))
                         {
                             continue;
                         }
@@ -203,7 +207,7 @@ namespace DropletsInMotion.Application.Services
                         
 
                         // Out-of-bounds template check and applicable check
-                        List<byte> substanceIds = new List<byte>() { d1SubstanceId, d2SubstanceId };
+                        List<int> substanceIds = new List<int>() { d1SubstanceId, d2SubstanceId };
                         bool templateOutOfBounds = IsTemplateApplicable(optimalPositions, boardWidth, boardHeight, contaminationMap, substanceIds, allOtherAgentPositions);
                         
 
@@ -232,7 +236,7 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-        public bool IsTemplateApplicable(ScheduledPosition scheduledPosition, int boardWidth, int boardHeight, byte[,] contaminationMap, List<byte> substanceIds, List<(int x, int )> allOtherAgentPositions)
+        public bool IsTemplateApplicable(ScheduledPosition scheduledPosition, int boardWidth, int boardHeight, List<int>[,] contaminationMap, List<int> substanceIds, List<(int x, int )> allOtherAgentPositions)
         {
             var offsets = new List<(int xOffset, int yOffset)>
             {
@@ -265,7 +269,7 @@ namespace DropletsInMotion.Application.Services
 
                         // TODO: The below check is not valid, as 255 can be between the merging droplets.
                         // Check contamination on active electrodes
-                        //byte contamination = contaminationMap[relativeX, relativeY];
+                        //int contamination = contaminationMap[relativeX, relativeY];
 
                         //if (contamination != 0 && !substanceIds.Contains(contamination))
                         //{

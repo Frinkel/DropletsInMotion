@@ -71,11 +71,23 @@ namespace DropletsInMotion.Presentation.Language
             var positionYExpression = CreateExpression(context.arithmeticExpression(1));
             var volumeExpression = CreateExpression(context.arithmeticExpression(2));
 
-            IDropletCommand dropletDeclaration = new DropletDeclaration(dropletName, positionXExpression, positionYExpression, volumeExpression);
+            // Check for the optional STRING parameter
+            string substance = context.STRING() != null
+                ? context.STRING().GetText().Trim('"') // Remove quotes from the STRING
+                : ""; // Default to an empty string if not present
+
+            IDropletCommand dropletDeclaration = new DropletDeclaration(
+                dropletName,
+                positionXExpression,
+                positionYExpression,
+                volumeExpression,
+                substance // Pass the substance string
+            );
             dropletDeclaration.Line = context.Start.Line;
             dropletDeclaration.Column = context.Start.Column;
             Commands.Add(dropletDeclaration);
         }
+
 
 
         public override void ExitMoveDroplet(MicrofluidicsParser.MoveDropletContext context)

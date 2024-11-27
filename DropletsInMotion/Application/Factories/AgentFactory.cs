@@ -23,12 +23,12 @@ namespace DropletsInMotion.Application.Factories
             return new Agent(dropletName, positionX, positionY, volume, _contaminationService);
         }
 
-        public Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, byte substanceId)
+        public Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, int substanceId)
         {
             return new Agent(dropletName, positionX, positionY, volume, substanceId, _contaminationService);
         }
 
-        public Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, byte substanceId, LinkedList<(int x, int y)> snakeBody)
+        public Agent CreateAgent(string dropletName, int positionX, int positionY, double volume, int substanceId, LinkedList<(int x, int y)> snakeBody)
         {
             return new Agent(dropletName, positionX, positionY, volume, substanceId, snakeBody, _contaminationService);
         }
