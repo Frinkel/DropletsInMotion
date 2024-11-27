@@ -118,6 +118,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<RuntimeExceptionHandler>();
             serviceCollection.AddSingleton<IAgentFactory, AgentFactory>();
             serviceCollection.AddSingleton<IContaminationRepository, ContaminationRepository>();
+            serviceCollection.AddSingleton<IContaminationConfigLoader, ContaminationConfigLoader>();
 
             // Classes
             serviceCollection.AddSingleton<StateManager>();

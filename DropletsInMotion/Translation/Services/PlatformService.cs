@@ -212,13 +212,6 @@ namespace DropletsInMotion.Presentation.Services
                 string content = _fileService.ReadFileFromPath(sensorPath);
                 Sensor sensor = JsonSerializer.Deserialize<Sensor>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
 
-
-                //foreach (var kvp in sensor.ArgumentHandlers)
-                //{
-                //    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value.Request}");
-                //}
-
-
                 _deviceRepository.Sensors.Add(sensor.Name, sensor);
             }
         }
@@ -232,14 +225,6 @@ namespace DropletsInMotion.Presentation.Services
             {
                 string content = _fileService.ReadFileFromPath(actuatorPath);
                 Actuator actuator = JsonSerializer.Deserialize<Actuator>(content) ?? throw new InvalidOperationException("A sensor configuration did not correspond to the expected format!");
-
-                //Console.WriteLine($"Added actuator {actuator.Name}");
-
-                //foreach (var kvp in actuator.Arguments)
-                //{
-                //    Console.WriteLine($"Argument {kvp.Key}:\n{kvp.Value}");
-                //}
-
 
                 _deviceRepository.Actuators.Add(actuator.Name, actuator);
             }
@@ -264,22 +249,18 @@ namespace DropletsInMotion.Presentation.Services
             string jsonContent = File.ReadAllText(_userService.PlatformPath);
             RootObject rootObject = JsonSerializer.Deserialize<RootObject>(jsonContent);
 
-            // Filter electrodes with names starting with "arrel"
             var filteredElectrodes = rootObject.Electrodes
                 .Where(e => e.Name.StartsWith("arrel", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            // Determine the smallest and largest X and Y coordinates
             int minX = filteredElectrodes.Min(e => e.PositionX);
             int maxX = filteredElectrodes.Max(e => e.PositionX);
             int minY = filteredElectrodes.Min(e => e.PositionY);
             int maxY = filteredElectrodes.Max(e => e.PositionY);
 
-            // Determine board dimensions based on the electrode size
             int gridSizeX = (maxX - minX) / filteredElectrodes[0].SizeX + 1;
             int gridSizeY = (maxY - minY) / filteredElectrodes[0].SizeY + 1;
 
-            // Initialize the board
             Board = new Electrode[gridSizeX][];
 
             for (int i = 0; i < gridSizeX; i++)
@@ -287,7 +268,6 @@ namespace DropletsInMotion.Presentation.Services
                 Board[i] = new Electrode[gridSizeY];
             }
 
-            // Place electrodes on the board
             foreach (var electrodeJson in filteredElectrodes)
             {
                 int x = (electrodeJson.PositionX - minX) / electrodeJson.SizeX;
@@ -312,13 +292,10 @@ namespace DropletsInMotion.Presentation.Services
             _platformRepository.MinSize1x1 = platformInfo.Movement.MinSize1x1;
             _platformRepository.MinSize2x2 = platformInfo.Movement.MinSize2x2;
             _platformRepository.MinSize3x3 = platformInfo.Movement.MinSize3x3;
-
-
         }
 
         public void PrintBoard()
         {
-            // Determine the maximum number of digits for proper alignment
             int maxDigits = Board
                 .SelectMany(row => row)
                 .Where(electrode => electrode != null)
@@ -334,12 +311,10 @@ namespace DropletsInMotion.Presentation.Services
                 {
                     if (Board[i][j] != null)
                     {
-                        // Print each ElectrodeId with a fixed width
                         Console.Write(Board[i][j].Id.ToString().PadLeft(maxDigits) + " ");
                     }
                     else
                     {
-                        // Print an empty space with the same width
                         Console.Write(new string(' ', maxDigits) + " ");
                     }
                 }

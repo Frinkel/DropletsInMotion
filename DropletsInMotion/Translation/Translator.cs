@@ -15,6 +15,7 @@ using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
+using DropletsInMotion.Translation.Services;
 
 namespace DropletsInMotion.Presentation
 {
@@ -30,8 +31,9 @@ namespace DropletsInMotion.Presentation
         private readonly IFileService _fileService;
         private readonly ITypeChecker _typeChecker;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IContaminationConfigLoader _contaminationConfigLoader;
 
-        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService, ITypeChecker typeChecker, IPlatformRepository platformRepository)
+        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService, ITypeChecker typeChecker, IPlatformRepository platformRepository, IContaminationConfigLoader contaminationConfigLoader)
         {
             _platformService = platformService;
             _userService = userService;
@@ -39,11 +41,13 @@ namespace DropletsInMotion.Presentation
             _fileService = fileService;
             _typeChecker = typeChecker;
             _platformRepository = platformRepository;
+            _contaminationConfigLoader = contaminationConfigLoader;
         }
 
         public void Load()
         {
             _platformService.Load();
+            _contaminationConfigLoader.Load();
             Board = _platformService.Board;
             Agent.SetMinimumMovementVolume(_platformRepository.MinimumMovementVolume);
             Agent.SetMinSize1x1(_platformRepository.MinSize1x1);
