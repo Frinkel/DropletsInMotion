@@ -211,23 +211,11 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             }
         }
 
+        // Convert to the data structure of the repository
         _contaminationRepository.ContaminationTable = Enumerable.Range(0, cTable.GetLength(0))
             .Select(i => Enumerable.Range(0, cTable.GetLength(1))
                 .Select(j => cTable[i, j] != 0).ToList())
             .ToList();
-
-
-        Console.WriteLine("*************");
-        foreach (var bl in _contaminationRepository.ContaminationTable)
-        {
-            foreach (var b in bl)
-            {
-                Console.Write(b);
-            }
-
-            Console.WriteLine();
-        }
-
 
 
         Console.WriteLine("Contamination table");
@@ -358,7 +346,12 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             }
         }
 
-       
+        // Convert to the data structure of the repository
+        _contaminationRepository.MergeTable = Enumerable.Range(0, mTable.GetLength(0))
+            .Select(i => Enumerable.Range(0, mTable.GetLength(1))
+                .Select(j => mTable[i, j]).ToList())
+            .ToList();
+
         Console.WriteLine("Merge table");
         for (int i = 0; i < mTable.GetLength(0); i++)
         {
