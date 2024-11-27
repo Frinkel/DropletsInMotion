@@ -101,8 +101,8 @@ namespace DropletsInMotion.Application.Services
                 return false;
             }
 
-            var substanceFromIndex = _contaminationRepository.SubstanceTable[substanceId].Item2.contTableFrom;
-            if(substanceFromIndex == -1)
+            var substanceInContaminationTable1 = _contaminationRepository.SubstanceTable[substanceId].Item2;
+            if(!substanceInContaminationTable1)
             {
                 if(contaminationValues.Count == 0 ||
                    (contaminationValues.Count == 1 && contaminationValues[0] == substanceId))
@@ -129,9 +129,12 @@ namespace DropletsInMotion.Application.Services
 
             foreach (var value in contaminationValues)
             {
-                var substanceToIndex = _contaminationRepository.SubstanceTable[value].Item2.contTableFrom;
-                if (substanceToIndex == -1 ||
-                    _contaminationRepository.ContaminationTable[substanceFromIndex][substanceToIndex])
+                var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
+                Console.WriteLine(substanceInContaminationTable2);
+                Console.WriteLine($"{substanceId}, {value}");
+
+                if (!substanceInContaminationTable2 ||
+                    _contaminationRepository.ContaminationTable[substanceId][value])
                 {
                     return true;
                 }
@@ -142,11 +145,11 @@ namespace DropletsInMotion.Application.Services
 
         public int GetResultingSubstanceId(List<int>[,] contaminationMap, int substance1, int substance2)
         {
-            var substance1MergeIndex = _contaminationRepository.SubstanceTable[substance1].Item2.contTableFrom;
-            var substance2MergeIndex = _contaminationRepository.SubstanceTable[substance2].Item2.contTableFrom;
-            if (substance2MergeIndex != -1 && substance2MergeIndex != -1)
+            var substance1InMergeTable = _contaminationRepository.SubstanceTable[substance1].Item2;
+            var substance2InMergeTable = _contaminationRepository.SubstanceTable[substance2].Item2;
+            if (substance1InMergeTable && substance2InMergeTable)
             {
-                return _contaminationRepository.MergeTable[substance1MergeIndex][substance2MergeIndex];
+                return _contaminationRepository.MergeTable[substance1][substance2];
             }
 
             int mergedSubstanceId = _contaminationRepository.GetMergeSubstanceValue(substance1, substance2);
@@ -156,7 +159,7 @@ namespace DropletsInMotion.Application.Services
             }
 
             string newSubstanceName = _contaminationRepository.SubstanceTable[substance1].Item1 + "_" + _contaminationRepository.SubstanceTable[substance2].Item1;
-            _contaminationRepository.SubstanceTable.Add((newSubstanceName, (-1, -1, -1, -1)));
+            _contaminationRepository.SubstanceTable.Add((newSubstanceName, false));
 
             var newSubstanceId = _contaminationRepository.SubstanceTable.Count - 1;
             _contaminationRepository.MergeSubstanceTable.Add((substance1,substance2), newSubstanceId);
@@ -215,7 +218,7 @@ namespace DropletsInMotion.Application.Services
 
         public int GetNewSubstance(string name)
         {
-            _contaminationRepository.SubstanceTable.Add((name, (-1, -1, -1, -1)));
+            _contaminationRepository.SubstanceTable.Add((name, false));
             return _contaminationRepository.SubstanceTable.Count - 1;
         }
 

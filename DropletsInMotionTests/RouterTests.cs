@@ -1,4 +1,5 @@
-﻿using DropletsInMotion.Application.Factories;
+﻿using System.Runtime.CompilerServices;
+using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Services.Routers;
@@ -6,6 +7,7 @@ using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests
@@ -17,6 +19,7 @@ namespace DropletsInMotionTests
         private readonly IContaminationService _contaminationService;
         private readonly IRouterService _routerService;
         private readonly IAgentFactory _agentFactory;
+        private readonly IContaminationRepository _contaminationRepository;
 
         public RouterTests()
         {
@@ -24,6 +27,7 @@ namespace DropletsInMotionTests
             _contaminationService = ServiceProvider.GetRequiredService<IContaminationService>();
             _routerService = ServiceProvider.GetRequiredService<IRouterService>();
             _agentFactory = ServiceProvider.GetRequiredService<IAgentFactory>();
+            _contaminationRepository = ServiceProvider.GetRequiredService<IContaminationRepository>();
         }
 
         [SetUp]
@@ -500,6 +504,18 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarFourDropletsCrissCross()
         {
+            Console.WriteLine("*************");
+            foreach (var bl in _contaminationRepository.ContaminationTable)
+            {
+                foreach (var b in bl)
+                {
+                    Console.Write(b);
+                }
+
+                Console.WriteLine();
+            }
+
+
             IDropletCommand dropletCommandA1 = new Move("a1", 15, 11);
             IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
             IDropletCommand dropletCommandA3 = new Move("a3", 11, 11);

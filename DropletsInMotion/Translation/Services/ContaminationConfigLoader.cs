@@ -21,8 +21,8 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
     private readonly IUserService _userService;
 
 
-    private List<string> ContaminationTableHeaders { get; set; }
-    private List<string> MergeTableHeaders { get; set; }
+    private List<string> ContaminationTableHeaders { get; set; } = new List<string>();
+    private List<string> MergeTableHeaders { get; set; } = new List<string>();
 
     private List<string> CombinedHeaders { get; set; }
 
@@ -53,30 +53,33 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
         if (_userService.ContaminationTablePath == null)
         {
             _contaminationRepository.ContaminationTable = new List<List<bool>>();
-            return;
+        }
+        else
+        {
+            ContaminationTableContent = _fileService.ReadFileFromPath(_userService.ContaminationTablePath).Split("\n");
+            var contaminationDelimiter = DetectDelimiter(ContaminationTableContent);
+            ContaminationDelimiter = contaminationDelimiter;
+            var contaminationHeaders = GetHeader(ContaminationTableContent, contaminationDelimiter);
+            ContaminationTableHeaders = contaminationHeaders;
+
         }
 
         if (_userService.MergeTablePath == null)
         {
             _contaminationRepository.MergeTable = new List<List<int>>();
-            return;
+        }
+        else
+        {
+            MergeTableContent = _fileService.ReadFileFromPath(_userService.MergeTablePath).Split("\n");
+            var mergeDelimiter = DetectDelimiter(MergeTableContent);
+            MergeDelimiter = mergeDelimiter;
+            var mergeHeaders = GetHeader(MergeTableContent, mergeDelimiter);
+            MergeTableHeaders = mergeHeaders;
+
         }
 
-        ContaminationTableContent = _fileService.ReadFileFromPath(_userService.ContaminationTablePath).Split("\n");
-        MergeTableContent = _fileService.ReadFileFromPath(_userService.MergeTablePath).Split("\n");
 
-        var contaminationDelimiter = DetectDelimiter(ContaminationTableContent);
-        var mergeDelimiter = DetectDelimiter(MergeTableContent);
-
-        ContaminationDelimiter = contaminationDelimiter;
-        MergeDelimiter = mergeDelimiter;
-
-        var contaminationHeaders = GetHeader(ContaminationTableContent, contaminationDelimiter);
-        var mergeHeaders = GetHeader(MergeTableContent, mergeDelimiter);
-        ContaminationTableHeaders = contaminationHeaders;
-        MergeTableHeaders = mergeHeaders;
-
-        var combinedHeaders = contaminationHeaders.Union(mergeHeaders).ToList();
+        var combinedHeaders = ContaminationTableHeaders.Union(MergeTableHeaders).ToList();
         CombinedHeaders = combinedHeaders;
 
         // Add the base values to the substance table
@@ -116,7 +119,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
     private List<string> GetHeader(string[] lines, char delimiter)
     {
         var headerString = lines.First();
-        var header = headerString.Split(delimiter).ToList();
+        var header = headerString.Split(delimiter).ToList(); 
 
         header.RemoveAll(s => string.IsNullOrWhiteSpace(s.Trim()));
         header = header.Select(s => s.Trim()).ToList();
@@ -143,44 +146,49 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             }
         }
 
-        var linesWithoutHeader = ContaminationTableContent.Skip(1).ToList();
-
-        for (int i = 0; i < linesWithoutHeader.Count; i++)
+        if (_userService.ContaminationTablePath != null)
         {
-            var line = linesWithoutHeader[i];
-            if (line.Trim() == "") continue;
+            var linesWithoutHeader = ContaminationTableContent.Skip(1).ToList();
 
-            var parts = line.Split(ContaminationDelimiter);
-            var rowIdentifier = parts.First();
+            for (int i = 0; i < linesWithoutHeader.Count; i++)
+            {
+                var line = linesWithoutHeader[i];
+                if (line.Trim() == "") continue;
 
-            var rowIndex = CombinedHeaders.IndexOf(rowIdentifier);
+                var parts = line.Split(ContaminationDelimiter);
+                var rowIdentifier = parts.First();
 
-            var partsWithoutIdentifier = parts.Skip(1).ToList();
-            if (partsWithoutIdentifier == null) throw new Exception("There were no parts in the contamination table");
+                var rowIndex = CombinedHeaders.IndexOf(rowIdentifier);
+
+                var partsWithoutIdentifier = parts.Skip(1).ToList();
+                if (partsWithoutIdentifier == null)
+                    throw new Exception("There were no parts in the contamination table");
 
 
-            for (int j = 0; j < partsWithoutIdentifier.Count(); j++){
-                var part = partsWithoutIdentifier[j];
-                var trimmedPart = part.Trim();
-
-                var currentIdentifier = ContaminationTableHeaders[j];
-                var columnIndex = CombinedHeaders.IndexOf(currentIdentifier);
-
-                if (rowIndex == columnIndex && trimmedPart == "")
+                for (int j = 0; j < partsWithoutIdentifier.Count(); j++)
                 {
-                    cTable[rowIndex, columnIndex] = 0;
-                }
-                else if (trimmedPart == "" || trimmedPart != "0")
-                {
-                    cTable[rowIndex, columnIndex] = 1;
-                }
-                else
-                {
-                    cTable[rowIndex, columnIndex] = 0;
+                    var part = partsWithoutIdentifier[j];
+                    var trimmedPart = part.Trim();
+
+                    var currentIdentifier = ContaminationTableHeaders[j];
+                    var columnIndex = CombinedHeaders.IndexOf(currentIdentifier);
+
+                    if (rowIndex == columnIndex && trimmedPart == "")
+                    {
+                        cTable[rowIndex, columnIndex] = 0;
+                    }
+                    else if (trimmedPart == "" || trimmedPart != "0")
+                    {
+                        cTable[rowIndex, columnIndex] = 1;
+                    }
+                    else
+                    {
+                        cTable[rowIndex, columnIndex] = 0;
+                    }
+
                 }
 
             }
-
         }
 
 
@@ -207,8 +215,21 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             .Select(i => Enumerable.Range(0, cTable.GetLength(1))
                 .Select(j => cTable[i, j] != 0).ToList())
             .ToList();
-        
-        
+
+
+        Console.WriteLine("*************");
+        foreach (var bl in _contaminationRepository.ContaminationTable)
+        {
+            foreach (var b in bl)
+            {
+                Console.Write(b);
+            }
+
+            Console.WriteLine();
+        }
+
+
+
         Console.WriteLine("Contamination table");
         for (int i = 0; i < cTable.GetLength(0); i++)
         {
@@ -316,8 +337,6 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
                     }
                     else
                     {
-                        mTable[i, j] = -1;
-
                         var rowIdentifier = CombinedHeaders[i];
                         var columnIdentifier = CombinedHeaders[j];
 
