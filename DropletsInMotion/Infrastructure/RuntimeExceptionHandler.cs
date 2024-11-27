@@ -43,7 +43,7 @@ namespace DropletsInMotion.Infrastructure
                     _logger.WriteColor($"Exception connected to the resulting contamination.", ConsoleColor.Red);
                     _logger.WriteColor($"Error Message: \"{contaminationException.Message}\"", ConsoleColor.Red);
                     _logger.WriteColor($"Contamination map:", ConsoleColor.Red);
-                    _contaminationService.PrintContaminationState(contaminationException.ContaminationMap);
+                    _contaminationService.PrintContaminationMap(contaminationException.ContaminationMap);
                     return RuntimeExceptionAction.Reset;
 
                 case TemplateException templateException:

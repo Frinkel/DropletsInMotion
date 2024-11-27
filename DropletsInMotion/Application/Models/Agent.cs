@@ -9,8 +9,8 @@ namespace DropletsInMotion.Application.Models
     public class Agent : Droplet
     {
         private IContaminationService _contaminationService;
-        private static byte _nextSubstanceId = 1;
-        public byte SubstanceId;
+        private static int _nextSubstanceId = 1;
+        public int SubstanceId;
         public LinkedList<(int x, int y)> SnakeBody = new LinkedList<(int x, int y)>();
         private static double _minimumMovementVolume = 0;
         private static double _minSize1x1 = 0;
@@ -24,21 +24,21 @@ namespace DropletsInMotion.Application.Models
             _contaminationService = contaminationService;
         }
 
-        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
+        public Agent(string dropletName, int positionX, int positionY, double volume, int substanceId, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
         {
             SubstanceId = substanceId;
             SnakeBody.AddFirst((positionX, positionY));
             _contaminationService = contaminationService;
         }
 
-        public Agent(string dropletName, int positionX, int positionY, double volume, byte substanceId, LinkedList<(int x, int y)> snakeBody, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
+        public Agent(string dropletName, int positionX, int positionY, double volume, int substanceId, LinkedList<(int x, int y)> snakeBody, IContaminationService contaminationService) : base(dropletName, positionX, positionY, volume)
         {
             SubstanceId = substanceId;
             SnakeBody = snakeBody;
             _contaminationService = contaminationService;
         }
 
-        private static byte GetNextSubstanceId()
+        private static int GetNextSubstanceId()
         {
             if (_nextSubstanceId == 254)
             {
@@ -83,7 +83,7 @@ namespace DropletsInMotion.Application.Models
             }
         }
 
-        public bool IsMoveApplicable(Types.RouteAction action, Dictionary<string, Agent> otherAgents, byte[,] otherContaminationMap, State state)
+        public bool IsMoveApplicable(Types.RouteAction action, Dictionary<string, Agent> otherAgents, List<int>[,] otherContaminationMap, State state)
         {
             var contamination = state.ContaminationMap;
             var deltaX = PositionX + action.DropletXDelta;
@@ -96,12 +96,12 @@ namespace DropletsInMotion.Application.Models
             }
 
             // check for contaminations
-            if (contamination[deltaX, deltaY] != 0 && contamination[deltaX, deltaY] != SubstanceId)
+            if (_contaminationService.IsConflicting(contamination, deltaX, deltaY, SubstanceId))
             {
                 return false;
             }
 
-            if (otherContaminationMap[deltaX, deltaY] != 0 && otherContaminationMap[deltaX, deltaY] != SubstanceId)
+            if (_contaminationService.IsConflicting(otherContaminationMap, deltaX, deltaY, SubstanceId))
             {
                 return false;
             }

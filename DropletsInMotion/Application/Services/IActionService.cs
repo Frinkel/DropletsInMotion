@@ -12,10 +12,10 @@ namespace DropletsInMotion.Application.Services
 {
     public interface IActionService
     {
-        List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, byte[,] contaminationMap, double time, ScheduledPosition mergePositions);
-        List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, byte[,] contaminationMap, 
+        List<BoardAction> Merge(Dictionary<string, Agent> agents, Merge mergeCommand, List<int>[,] contaminationMap, double time, ScheduledPosition mergePositions);
+        List<BoardAction> SplitByVolume(Dictionary<string, Agent> agents, SplitByVolume splitCommand, List<int>[,] contaminationMap, 
             double time, ScheduledPosition splitPositions);
-        List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, byte[,] contaminationMap, double compilerTime);
+        List<BoardAction> Mix(Dictionary<string, Agent> agents, Mix mixCommand, List<int>[,] contaminationMap, double compilerTime);
         bool InPositionToMix(Mix mixCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
         bool InPositionToStore(Store storeCommand, Dictionary<string, Agent> agents, List<IDropletCommand> movesToExecute);
         bool DropletsExistAndCommandInProgress(IDropletCommand dropletCommand, Dictionary<string, Agent> agents);

@@ -51,7 +51,7 @@ public class RouterService : IRouterService
         _templateService.Initialize(Board);
     }
 
-    public List<BoardAction> Route(Dictionary<string, Agent> agents, List<IDropletCommand> commands, byte[,] contaminationMap, double time, double? boundTime = null)
+    public List<BoardAction> Route(Dictionary<string, Agent> agents, List<IDropletCommand> commands, List<int>[,] contaminationMap, double time, double? boundTime = null)
     {
         AstarRouter astarRouter = new AstarRouter();
 
@@ -76,7 +76,7 @@ public class RouterService : IRouterService
             {
                 List<string> routableAgents = new List<string>();
                 routableAgents.AddRange(command.GetInputDroplets());
-                var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, (byte[,])contaminationMap.Clone());
+                var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
                 // Create initial state and search for a solution
                 State s0 = new State(command.GetInputDroplets().First(), agents, reservedContaminationMap, new List<IDropletCommand>() { command }, commitedStates, _contaminationService, _platformRepository, _templateRepository, Seed);
@@ -330,46 +330,33 @@ public class RouterService : IRouterService
         }
     }
 
-    private byte[,] CombineContaminationMaps(byte[,] map1, byte[,] map2)
+    private List<int>[,] CombineContaminationMaps(List<int>[,] map1, List<int>[,] map2)
     {
         int width = map1.GetLength(0);
         int height = map1.GetLength(1);
-        byte[,] resultMap = new byte[width, height];
+        List<int>[,] resultMap = new List<int>[width, height];
 
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
-                byte v1 = map1[i, j];
-                byte v2 = map2[i, j];
+                // Create a new list for the result cell
+                resultMap[i, j] = new List<int>(map1[i, j]);
 
-                if (v1 != 0 && v2 == 0)
+                // Add values from map2, avoiding duplicates
+                foreach (var value in map2[i, j])
                 {
-                    resultMap[i, j] = v1;
-                }
-                else if (v1 == 0 && v2 != 0)
-                {
-                    resultMap[i, j] = v2;
-                }
-                else if (v1 != 0 && v2 != 0)
-                {
-                    if (v1 == v2)
+                    if (!resultMap[i, j].Contains(value))
                     {
-                        resultMap[i, j] = v1; 
+                        resultMap[i, j].Add(value);
                     }
-                    else
-                    {
-                        resultMap[i, j] = 255;
-                    }
-                }
-                else 
-                {
-                    resultMap[i, j] = 0;
                 }
             }
         }
+
         return resultMap;
     }
+
 
     private State FindFirstGoalState(State state, List<IDropletCommand> commands)
     {
@@ -391,28 +378,6 @@ public class RouterService : IRouterService
             }
         }
         return state;
-    }
-
-    private bool ConflictingSates(State s1, State s2)
-    {
-        byte[,] c1 = s1.ContaminationMap;
-        byte[,] c2 = s2.ContaminationMap;
-
-        for (int i = 0; i < c1.GetLength(0); i++)
-        {
-            for (int j = 0; j < c1.GetLength(1); j++)
-            {
-                if (c1[i, j] != 0 && c2[i, j] != 0 && c1[i, j] != c2[i, j])
-                {
-                    Console.WriteLine($"Conflict at {i}, {j}");
-                    //_contaminationService.PrintContaminationState(c1);
-                    //_contaminationService.PrintContaminationState(c2);
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
 

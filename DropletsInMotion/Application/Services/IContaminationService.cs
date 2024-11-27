@@ -6,19 +6,33 @@ namespace DropletsInMotion.Application.Services
 {
     public interface IContaminationService
     {
-        byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap);
+        //byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap);
         //byte[,] ApplyContaminationMerge(Agent agent, byte[,] contaminationMap);
-        bool IsAreaContaminated(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height);
-        void UpdateContaminationArea(byte[,] contaminationMap, byte substanceId, int startX, int startY, int width, int height);
+        bool IsAreaContaminated(List<int>[,] contaminationMap, int substanceId, int startX, int startY, int width, int height);
+        void UpdateContaminationArea(List<int>[,] contaminationMap, int substanceId, int startX, int startY, int width, int height);
         void PrintContaminationState(byte[,] contaminationMap);
-        void CopyContaminationMap(byte[,] source, byte[,] destination);
-        byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap);
-        void ApplyIfInBoundsWithContamination(byte[,] contaminationMap, int xPos, int yPos, byte substanceId);
+        void CopyContaminationMap(List<int>[,] source, List<int>[,] destination);
+        //byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap);
+        //void ApplyIfInBoundsWithContamination(byte[,] contaminationMap, int xPos, int yPos, byte substanceId);
 
-        public byte[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,
-            byte[,] contaminationMap);
+        //public byte[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,
+        //    byte[,] contaminationMap);
 
-        byte[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePosition, byte[,] contaminationMap);
-        byte[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, byte[,] contaminationMap);
+        List<int>[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePosition, List<int>[,] contaminationMap);
+        List<int>[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, List<int>[,] contaminationMap);
+        void ApplyIfInBounds(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId);
+        List<int>[,] ApplyContamination(Agent agent, List<int>[,] contaminationMap);
+        List<int>[,] ApplyContaminationWithSize(Agent agent, List<int>[,] contaminationMap);
+        bool IsConflicting(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId);
+        int GetResultingSubstanceId(List<int>[,] contaminationMap, int substance1, int substance2);
+        List<int>[,] CloneContaminationMap(List<int>[,] contaminationMap);
+        List<int>[,] CreateContaminationMap(int rows, int cols);
+        public List<int>[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,
+            List<int>[,] contaminationMap);
+
+        int GetSubstanceId(string substanceName);
+        byte[,] CreateByteArrayFromContaminationMap(List<int>[,] contaminationMap);
+        public void PrintContaminationMap(List<int>[,] contaminationMap);
+
     }
 }

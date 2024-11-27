@@ -28,7 +28,7 @@ command
 
 // Declarations
 dropletDeclaration
-    : 'Droplet' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')'
+    : 'Droplet' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression (',' STRING)? ')'    
     ;
 
 dispense

@@ -11,25 +11,28 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public double Volume { get; set; }
+        public string Substance { get; set; }
 
         public ArithmeticExpression PositionXExpression { get; }
         public ArithmeticExpression PositionYExpression { get; }
         public ArithmeticExpression VolumeExpression { get; }
 
-        public DropletDeclaration(string dropletName, int positionX, int positionY, double volume)
+        public DropletDeclaration(string dropletName, int positionX, int positionY, double volume, string substance)
         {
             DropletName = dropletName;
             PositionX = positionX;
             PositionY = positionY;
             Volume = volume;
+            Substance = substance;
         }
 
-        public DropletDeclaration(string dropletName, ArithmeticExpression positionXExpression, ArithmeticExpression positionYExpression, ArithmeticExpression volumeExpression)
+        public DropletDeclaration(string dropletName, ArithmeticExpression positionXExpression, ArithmeticExpression positionYExpression, ArithmeticExpression volumeExpression, string substance)
         {
             DropletName = dropletName;
             PositionXExpression = positionXExpression;
             PositionYExpression = positionYExpression;
             VolumeExpression = volumeExpression;
+            Substance = substance;
         }
 
         public override string ToString()
