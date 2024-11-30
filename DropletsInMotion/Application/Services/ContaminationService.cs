@@ -130,8 +130,9 @@ namespace DropletsInMotion.Application.Services
             foreach (var value in contaminationValues)
             {
                 var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
-                Console.WriteLine(substanceInContaminationTable2);
-                Console.WriteLine($"{substanceId}, {value}");
+                //Console.WriteLine(substanceInContaminationTable2);
+                //Console.WriteLine($"{substanceId}, {value}");
+                //Console.WriteLine(_contaminationRepository.ContaminationTable[substanceId][value]);
 
                 if (!substanceInContaminationTable2 ||
                     _contaminationRepository.ContaminationTable[substanceId][value])
@@ -143,7 +144,7 @@ namespace DropletsInMotion.Application.Services
             return false;
         }
 
-        public int GetResultingSubstanceId(List<int>[,] contaminationMap, int substance1, int substance2)
+        public int GetResultingSubstanceId(int substance1, int substance2)
         {
             var substance1InMergeTable = _contaminationRepository.SubstanceTable[substance1].Item2;
             var substance2InMergeTable = _contaminationRepository.SubstanceTable[substance2].Item2;
@@ -376,10 +377,23 @@ namespace DropletsInMotion.Application.Services
         // Apply contamination for a merge while taking the template into account
         public List<int>[,] ApplyContaminationMerge(Agent inputAgent1, Agent inputAgent2, Agent outputAgent, ScheduledPosition mergePositions, List<int>[,] contaminationMap)
         {
-            //int mergeX = mergePositions.OriginX;
-            //int mergeY = mergePositions.OriginY;
+            int mergeX = mergePositions.OriginX;
+            int mergeY = mergePositions.OriginY;
 
-            //int size = outputAgent.GetAgentSize();
+            int size = outputAgent.GetAgentSize();
+
+            // Populate the initial area with the new agent substance
+            for (int i = -1; i <= size; i++)
+            {
+                for (int j = -1; j <= size; j++)
+                {
+                    ApplyIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, outputAgent.SubstanceId);
+                }
+            }
+
+
+            PrintContaminationMap(contaminationMap);
+
 
             //// Overwrite initial area with new agent substance
             //for (int i = -1; i <= size; i++)
@@ -414,7 +428,7 @@ namespace DropletsInMotion.Application.Services
 
 
             //            if (block.Count <= 1) substanceId = outputAgent.SubstanceId;
-                        
+
 
             //            var contaminationPosX = pos.x + mergeX;
             //            var contaminationPosY = pos.y + mergeY;

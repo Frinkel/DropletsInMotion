@@ -24,7 +24,7 @@ namespace DropletsInMotion.Application.Services
         List<int>[,] ApplyContamination(Agent agent, List<int>[,] contaminationMap);
         List<int>[,] ApplyContaminationWithSize(Agent agent, List<int>[,] contaminationMap);
         bool IsConflicting(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId);
-        int GetResultingSubstanceId(List<int>[,] contaminationMap, int substance1, int substance2);
+        int GetResultingSubstanceId(int substance1, int substance2);
         List<int>[,] CloneContaminationMap(List<int>[,] contaminationMap);
         List<int>[,] CreateContaminationMap(int rows, int cols);
         public List<int>[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,

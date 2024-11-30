@@ -73,14 +73,16 @@ namespace DropletsInMotion.Application.Services
             Agent inputAgent1 = agents[inputDroplet1.DropletName];
             Agent inputAgent2 = agents[inputDroplet2.DropletName];
 
-            Agent newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume);
+
+            var newSubstanceId = _contaminationService.GetResultingSubstanceId(inputAgent1.SubstanceId, inputAgent2.SubstanceId);
+            Agent newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, newSubstanceId);
 
 
-            if (inputAgent1.SubstanceId == inputAgent2.SubstanceId)
-            {
-                newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY,
-                    outputDroplet.Volume, inputAgent1.SubstanceId);
-            }
+            //if (inputAgent1.SubstanceId == inputAgent2.SubstanceId)
+            //{
+            //    newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY,
+            //        outputDroplet.Volume, GetResultingSubstanceId);
+            //}
 
             agents.Remove(inputDroplet1.DropletName);
             agents.Remove(inputDroplet2.DropletName);

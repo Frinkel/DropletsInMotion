@@ -1,7 +1,3 @@
-Droplet(d1, 0, 0, 706);
-Droplet(d2, 5, 0, 706);
-Droplet(d4, 5, 5, 706);
-//Move(d4, 5, 10);
-Merge(d1, d2, d3, 0, 5);
-//Waste(d1, 1, 1);
-//Merge(d3, d9, d5, 0, 10);
+Droplet(d1, 0, 0, 706, "H2O");
+Droplet(d2, 15, 0, 706, "Blood");
+Merge(d1, d2, d3, 10, 10);

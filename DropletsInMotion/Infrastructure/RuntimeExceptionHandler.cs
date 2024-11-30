@@ -36,7 +36,7 @@ namespace DropletsInMotion.Infrastructure
                                        $"\n\tError Message: \"{typeCheckerException.Message}\"", ConsoleColor.Red);
                     _logger.WriteEmptyLine(1);
                     _logger.WriteColor("Tip: Fix the issue and re-upload the program with the command 'reupload'", ConsoleColor.Yellow);
-
+                    throw typeCheckerException;
                     return RuntimeExceptionAction.Reset;
 
                 case ContaminationException contaminationException:
