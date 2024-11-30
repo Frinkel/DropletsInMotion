@@ -205,7 +205,7 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                _contaminationService.PrintContaminationMap(ContaminationMap);
+                //_contaminationService.PrintContaminationMap(ContaminationMap);
                 boardActions.Clear();
             }
 

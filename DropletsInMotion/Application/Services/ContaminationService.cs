@@ -391,86 +391,64 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
+            Console.WriteLine("After step 1");
+            PrintContaminationMap(contaminationMap);
 
+            // Apply contamination based on the template
+            foreach (var block in mergePositions.Template.Blocks)
+            {
+
+                foreach (var cluster in block)
+                {
+                    var substanceId = cluster.Key switch
+                    {
+                        var name when name == inputAgent1.DropletName => inputAgent1.SubstanceId,
+                        var name when name == inputAgent2.DropletName => inputAgent2.SubstanceId,
+                        var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
+                        _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
+                    };
+
+                    if (substanceId == inputAgent1.SubstanceId || substanceId == inputAgent2.SubstanceId) continue; // TODO: Temporary fix
+
+                    foreach (var pos in cluster.Value)
+                    {
+
+                        if (block.Count <= 1) substanceId = outputAgent.SubstanceId;
+
+
+                        var contaminationPosX = pos.x + mergeX;
+                        var contaminationPosY = pos.y + mergeY;
+
+                        // Define the offsets for our padding of the contamination
+                        var offsets = new List<(int xOffset, int yOffset)>
+                        {
+                            (0, 0),   // Original position
+                            (1, 0),   // Right
+                            (-1, 0),  // Left
+                            (0, 1),   // Down
+                            (0, -1),  // Up
+                            (1, -1),  // Bottom-right diagonal
+                            (-1, 1),  // Top-left diagonal
+                            (1, 1),   // Top-right diagonal
+                            (-1, -1)  // Bottom-left diagonal
+                        };
+
+                        // TODO: Do we have to consider the initial when the substances are the input, they will self contaminate?
+                        foreach (var (xOffset, yOffset) in offsets)
+                        {
+                            Console.WriteLine($"{substanceId} -> {contaminationPosX + xOffset} {contaminationPosY + yOffset}");
+                            ApplyIfInBounds(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId);
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine("After step 2");
             PrintContaminationMap(contaminationMap);
 
 
-            //// Overwrite initial area with new agent substance
-            //for (int i = -1; i <= size; i++)
-            //{
-            //    for (int j = -1; j <= size; j++)
-            //    {
-            //        ApplyIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, outputAgent.SubstanceId);
-            //    }
-            //}
-
-
-            ////Console.WriteLine("BEFORE");
-            ////Console.WriteLine($"Merge template {mergePositions.Template.Name}");
-            ////PrintContaminationState(contaminationMap);
-            //// Apply contamination based on the templates
-            //foreach (var block in mergePositions.Template.Blocks)
-            //{
-
-            //    foreach (var cluster in block)
-            //    {
-
-            //        foreach (var pos in cluster.Value)
-            //        {
-
-            //            var substanceId = cluster.Key switch
-            //            {
-            //                var name when name == inputAgent1.DropletName => inputAgent1.SubstanceId,
-            //                var name when name == inputAgent2.DropletName => inputAgent2.SubstanceId,
-            //                var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
-            //                _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
-            //            };
-
-
-            //            if (block.Count <= 1) substanceId = outputAgent.SubstanceId;
-
-
-            //            var contaminationPosX = pos.x + mergeX;
-            //            var contaminationPosY = pos.y + mergeY;
-
-            //            // Define the offsets for our padding of the contamination
-            //            var offsets = new List<(int xOffset, int yOffset)>
-            //            {
-            //                (0, 0),   // Original position
-            //                (1, 0),   // Right
-            //                (-1, 0),  // Left
-            //                (0, 1),   // Down
-            //                (0, -1),  // Up
-            //                (1, -1),  // Bottom-right diagonal
-            //                (-1, 1),  // Top-left diagonal
-            //                (1, 1),   // Top-right diagonal
-            //                (-1, -1)  // Bottom-left diagonal
-            //            };
-
-            //            if (substanceId == outputAgent.SubstanceId)
-            //            {
-            //                var legalSubstances = new List<byte> { inputAgent1.SubstanceId, inputAgent2.SubstanceId, outputAgent.SubstanceId };
-
-            //                foreach (var (xOffset, yOffset) in offsets)
-            //                {
-            //                    OverrideContaminations(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId, legalSubstances);
-            //                }
-            //            }
-            //            else
-            //            {
-            //                var legalSubstances = new List<byte> { substanceId, outputAgent.SubstanceId };
-
-            //                foreach (var (xOffset, yOffset) in offsets)
-            //                {
-            //                    ApplyIfInBoundsWithLegalSubstanceIds(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId, legalSubstances);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-
-
-            //int GetContaminationValue(int x, int y, byte[,] contaminationMap)
+            // TODO: I do not think we need this with the new contamination map?
+            //List<int> GetContaminationValue(int x, int y, List<int>[,] contaminationMap)
             //{
             //    int rowCount = contaminationMap.GetLength(0);
             //    int colCount = contaminationMap.GetLength(1);
