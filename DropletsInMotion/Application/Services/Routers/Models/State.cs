@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -26,6 +26,8 @@ public class State
     private int H { get; set; }
     public string RoutableAgent { get; set; }
     public List<IDropletCommand> Commands { get; set; }
+
+    public Dictionary<(int x, int y), List<int>> ContaminationChanges { get; set; }
 
     public List<State> CommitedStates { get; set; }
 
@@ -56,7 +58,7 @@ public class State
         Parent = null;
         G = 0;
         H = CalculateHeuristic();
-
+        ContaminationChanges = new Dictionary<(int x, int y), List<int>>();
     }
 
     public State(State parent, Types.RouteAction action)
@@ -72,6 +74,23 @@ public class State
         JointAction = new Dictionary<string, RouteAction>();
         JointAction[RoutableAgent] = action;
         _contaminationService = Parent._contaminationService;
+        ContaminationChanges = new Dictionary<(int x, int y), List<int>>();
+        
+        foreach (var kvp in Parent.ContaminationChanges)
+        {
+            List<int> newList = new List<int>(kvp.Value.Count);
+
+            kvp.Value.ForEach((item) =>
+            {
+                newList.Add(item);
+            });
+
+            ContaminationChanges[kvp.Key] = newList;
+        }
+
+
+        ContaminationMap = Parent.ContaminationMap;
+
         _platformRepository = Parent._platformRepository;
         _templateRepository = Parent._templateRepository;
 
@@ -99,6 +118,32 @@ public class State
         //var elapsedMs = watch.Elapsed.Microseconds;
         //Debugger.ElapsedTime.Add(elapsedMs);
     }
+
+    public List<int> GetContamination(int x, int y)
+    {
+        if (ContaminationChanges.TryGetValue((x, y), out var values))
+        {
+            return values;
+        }
+        else if (Parent != null)
+        {
+            return Parent.GetContamination(x, y);
+        }
+        else
+        {
+            // Return initial contamination values (empty list)
+            return new List<int>();
+        }
+    }
+
+    public void SetContamination(int x, int y, List<int> values)
+    {
+        ContaminationChanges[(x, y)] = values;
+    }
+
+
+
+
 
     public List<BoardAction> ExtractActions(double time)
     {
