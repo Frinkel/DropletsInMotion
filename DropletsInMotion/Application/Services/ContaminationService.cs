@@ -1,4 +1,5 @@
 ﻿using DropletsInMotion.Application.Models;
+using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
@@ -21,6 +22,93 @@ namespace DropletsInMotion.Application.Services
         }
 
         //List<int>[,] array = new List<int>[rows, cols];
+
+        public void ApplyContamination(Agent agent, State state)
+        {
+            var x = agent.PositionX;
+            var y = agent.PositionY;
+
+            // Apply contamination to the agent's position and its 8 neighbors
+            ApplyIfInBounds(state, x, y, agent.SubstanceId);
+            ApplyIfInBounds(state, x + 1, y, agent.SubstanceId);
+            ApplyIfInBounds(state, x - 1, y, agent.SubstanceId);
+            ApplyIfInBounds(state, x, y + 1, agent.SubstanceId);
+            ApplyIfInBounds(state, x, y - 1, agent.SubstanceId);
+            ApplyIfInBounds(state, x + 1, y + 1, agent.SubstanceId);
+            ApplyIfInBounds(state, x + 1, y - 1, agent.SubstanceId);
+            ApplyIfInBounds(state, x - 1, y + 1, agent.SubstanceId);
+            ApplyIfInBounds(state, x - 1, y - 1, agent.SubstanceId);
+        }
+
+        private void ApplyIfInBounds(State state, int xPos, int yPos, int substanceId)
+        {
+            //TODO add length and width as global values
+            int rowCount = state.ContaminationMap.GetLength(0);
+            int colCount = state.ContaminationMap.GetLength(1);
+
+            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
+            {
+
+                var contaminationValues = state.GetContamination(xPos, yPos);
+
+                if (!contaminationValues.Contains(substanceId))
+                {
+                    var updatedContaminationValues = new List<int>(contaminationValues)
+                    {
+                        substanceId
+                    };
+
+                    state.SetContamination(xPos, yPos, updatedContaminationValues);
+                }
+            }
+
+        }
+
+
+
+
+        public bool IsConflicting(List<int> contaminationValues, int substanceId)
+        {
+            if (contaminationValues.Count == 0)
+            {
+                return false;
+            }
+
+            var substanceInContaminationTable1 = _contaminationRepository.SubstanceTable[substanceId].Item2;
+            if (!substanceInContaminationTable1)
+            {
+                if (contaminationValues.Count == 0 ||
+                   (contaminationValues.Count == 1 && contaminationValues[0] == substanceId))
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            foreach (var value in contaminationValues)
+            {
+                var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
+                //Console.WriteLine(substanceInContaminationTable2);
+                //Console.WriteLine($"{substanceId}, {value}");
+                //Console.WriteLine(_contaminationRepository.ContaminationTable[substanceId][value]);
+
+                if (!substanceInContaminationTable2 ||
+                    _contaminationRepository.ContaminationTable[substanceId][value])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+
+
+
+
+
+
 
         public void ApplyIfInBounds(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId)
         {

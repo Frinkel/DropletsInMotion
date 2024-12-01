@@ -34,5 +34,8 @@ namespace DropletsInMotion.Application.Services
         byte[,] CreateByteArrayFromContaminationMap(List<int>[,] contaminationMap);
         public void PrintContaminationMap(List<int>[,] contaminationMap);
 
+        public void ApplyContamination(Agent agent, State state);
+        public bool IsConflicting(List<int> contaminationValues, int substanceId);
+
     }
 }

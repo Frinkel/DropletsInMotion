@@ -16,7 +16,6 @@ namespace DropletsInMotion.Application.Services.Routers.Models;
 public class State
 {
     private int? Seed = null;
-
     public List<int>[,] ContaminationMap { get; set; }
     public Dictionary<string, Agent> Agents { get; set; }
     public int G { get; private set; }
@@ -26,6 +25,8 @@ public class State
     private int H { get; set; }
     public string RoutableAgent { get; set; }
     public List<IDropletCommand> Commands { get; set; }
+
+    public Dictionary<(int x, int y), List<int>> ContaminationChanges { get; set; }
 
     public List<State> CommitedStates { get; set; }
 
@@ -52,7 +53,7 @@ public class State
         Commands = commands;
         CommitedStates = commitedStates;
         JointAction = null;
-
+        ContaminationChanges = new Dictionary<(int x, int y), List<int>>();
         Parent = null;
         G = 0;
         H = CalculateHeuristic();
@@ -71,7 +72,23 @@ public class State
         JointAction = new Dictionary<string, RouteAction>();
         JointAction[RoutableAgent] = action;
         _contaminationService = Parent._contaminationService;
-        ContaminationMap = _contaminationService.CloneContaminationMap(Parent.ContaminationMap);
+
+        ContaminationChanges = new Dictionary<(int x, int y), List<int>>();
+
+        foreach (var kvp in Parent.ContaminationChanges)
+        {
+            List<int> newList = new List<int>(kvp.Value.Count);
+
+            kvp.Value.ForEach((item) =>
+            {
+                newList.Add(item);
+            });
+
+            ContaminationChanges[kvp.Key] = newList;
+        }
+
+
+        ContaminationMap = Parent.ContaminationMap;
 
         _platformRepository = Parent._platformRepository;
         _templateRepository = Parent._templateRepository;
@@ -91,7 +108,7 @@ public class State
         // EXECUTE THE ACTION
         Agent agent = Agents[RoutableAgent];
         agent.Execute(action);
-        ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);
+        _contaminationService.ApplyContamination(agent, this);
         //}
 
         H = CalculateHeuristic();
@@ -99,6 +116,28 @@ public class State
         //watch.Stop();
         //var elapsedMs = watch.Elapsed.Microseconds;
         //Debugger.ElapsedTime.Add(elapsedMs);
+    }
+
+
+    public List<int> GetContamination(int x, int y)
+    {
+        List<int> contamination = new List<int>();
+        contamination.AddRange(ContaminationMap[x, y]);
+
+        if (ContaminationChanges.TryGetValue((x, y), out var values))
+        {
+            contamination.AddRange(values);
+            return contamination;
+        }
+        else
+        {
+            return contamination;
+        }
+    }
+
+    public void SetContamination(int x, int y, List<int> values)
+    {
+        ContaminationChanges[(x, y)] = values;
     }
 
     public List<BoardAction> ExtractActions(double time)

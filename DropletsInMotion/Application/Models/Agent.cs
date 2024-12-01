@@ -96,7 +96,7 @@ namespace DropletsInMotion.Application.Models
             }
 
             // check for contaminations
-            if (_contaminationService.IsConflicting(contamination, deltaX, deltaY, SubstanceId))
+            if (_contaminationService.IsConflicting(state.GetContamination(deltaX, deltaY), SubstanceId))
             {
                 return false;
             }

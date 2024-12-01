@@ -13,6 +13,7 @@ using DropletsInMotion.Infrastructure.Repositories;
 using static DropletsInMotion.Application.Services.Routers.Models.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -83,6 +84,8 @@ public class RouterService : IRouterService
                 Frontier f = new Frontier();
                 sFinal = astarRouter.Search(s0, f);
 
+                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
+
                 if (sFinal == null)
                 {
                     foundSolution = false;
@@ -92,7 +95,9 @@ public class RouterService : IRouterService
 
                 // Combine states if a partial solution is found for this command
                 CombineStates(commitedStates, sFinal);
+                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
 
+                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
             }
 
             // If a solution was found for this permutation, break out of the loop
@@ -265,6 +270,8 @@ public class RouterService : IRouterService
                 if (lastCommittedState != null)
                 {
                     state.ContaminationMap = CombineContaminationMaps(lastCommittedState.ContaminationMap, state.ContaminationMap);
+                    state.ContaminationMap = CombineContaminationMapAndContaminationChanges(state.ContaminationMap, state.ContaminationChanges);
+
 
                     foreach (var kvp in lastCommittedState.Agents)
                     {
@@ -284,7 +291,7 @@ public class RouterService : IRouterService
         }
 
 
-        int maxGInChosenStates = chosenStates.Count > 0 ? chosenStates[^1].G : -1; // Using C# 8.0 index from end operator
+        int maxGInChosenStates = chosenStates.Count > 0 ? chosenStates[^1].G : -1; 
 
 
         for (int i = 0; i < commitedStates.Count; i++)
@@ -320,8 +327,9 @@ public class RouterService : IRouterService
 
     private void CombineState(State oldState, State newState)
     {
-        oldState.ContaminationMap = CombineContaminationMaps(oldState.ContaminationMap, newState.ContaminationMap);
-        
+        //oldState.ContaminationMap = CombineContaminationMaps(oldState.ContaminationMap, newState.ContaminationMap);
+        oldState.ContaminationMap = CombineContaminationMapAndContaminationChanges(oldState.ContaminationMap, newState.ContaminationChanges);
+
         oldState.Agents[newState.RoutableAgent] = newState.Agents[newState.RoutableAgent];
 
         foreach (var action in newState.JointAction)
@@ -329,6 +337,87 @@ public class RouterService : IRouterService
             oldState.JointAction[action.Key] = action.Value;
         }
     }
+
+    private List<int>[,] CombineContaminationMapAndContaminationChanges(List<int>[,] map1, Dictionary<(int x, int y), List<int>> contaminationChanges)
+    {
+        int width = map1.GetLength(0);
+        int height = map1.GetLength(1);
+        List<int>[,] resultMap = _contaminationService.CloneContaminationMap(map1);
+
+        foreach (var kvp in contaminationChanges)
+        {
+            var (x, y) = kvp.Key;
+            var changesList = kvp.Value;
+
+            foreach (var substanceId in changesList)
+            {
+                if (!resultMap[x,y].Contains(substanceId))
+                {
+                    resultMap[x, y].Add(substanceId);
+                }
+            }
+        }
+
+        return resultMap;
+    }
+
+    public void ApplyContaminationChangesToMap(
+        Dictionary<(int x, int y), List<int>> contaminationChanges,
+        List<int>[,] contaminationMap)
+    {
+        foreach (var kvp in contaminationChanges)
+        {
+            var (x, y) = kvp.Key;
+            var changesList = kvp.Value;
+
+            //// Ensure coordinates are within bounds
+            //if (x < 0 || x >= contaminationMap.GetLength(0) ||
+            //    y < 0 || y >= contaminationMap.GetLength(1))
+            //{
+            //    continue; // Skip out-of-bounds entries
+            //}
+
+            var mapList = contaminationMap[x, y];
+
+            //if (mapList == null)
+            //{
+            //    // If the map list is null, create a new list with the changes
+            //    contaminationMap[x, y] = new List<int>(changesList);
+            //}
+            //else
+            //{
+                // Add each substanceId from changesList to mapList if not already present
+                foreach (var substanceId in changesList)
+                {
+                    if (!mapList.Contains(substanceId))
+                    {
+                        mapList.Add(substanceId);
+                    }
+                }
+            //}
+        }
+    }
+
+    //public void ApplyAllContaminationChangesToMap(State state, List<int>[,] contaminationMap)
+    //{
+    //    // Create a stack to hold states
+    //    var stateStack = new Stack<State>();
+
+    //    // Traverse up the parent chain and collect states
+    //    while (state != null)
+    //    {
+    //        stateStack.Push(state);
+    //        state = state.Parent;
+    //    }
+
+    //    // Apply contamination changes from the earliest state to the latest
+    //    while (stateStack.Count > 0)
+    //    {
+    //        var currentState = stateStack.Pop();
+    //        ApplyContaminationChangesToMap(currentState.ContaminationChanges, contaminationMap);
+    //    }
+    //}
+
 
     private List<int>[,] CombineContaminationMaps(List<int>[,] map1, List<int>[,] map2)
     {
