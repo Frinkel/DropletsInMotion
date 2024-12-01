@@ -1,4 +1,5 @@
 ﻿using System.Formats.Asn1;
+using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Models;
@@ -208,10 +209,10 @@ namespace DropletsInMotion.Application.Services
 
                         // Out-of-bounds template check and applicable check
                         List<int> substanceIds = new List<int>() { d1SubstanceId, d2SubstanceId };
-                        bool templateOutOfBounds = IsTemplateApplicable(optimalPositions, boardWidth, boardHeight, contaminationMap, substanceIds, allOtherAgentPositions);
+                        bool isTemplateApplicable = IsTemplateApplicable(optimalPositions, boardWidth, boardHeight, contaminationMap, substanceIds, allOtherAgentPositions);
                         
 
-                        if (templateOutOfBounds)
+                        if (!isTemplateApplicable)
                         {
                             continue;
                         }
@@ -260,36 +261,38 @@ namespace DropletsInMotion.Application.Services
                         var relativeX = pos.x + scheduledPosition.OriginX;
                         var relativeY = pos.y + scheduledPosition.OriginY;
 
+                        // Ensure the template is within bounds of the board
                         if ((relativeX < 0 || relativeX >= boardWidth) ||
                             (relativeY < 0 || relativeY >= boardHeight))
                         {
-                            return true;
+                            return false;
                         }
 
 
-                        // TODO: The below check is not valid, as 255 can be between the merging droplets.
                         // Check contamination on active electrodes
-                        //int contamination = contaminationMap[relativeX, relativeY];
+                        List<int> contaminations = contaminationMap[relativeX, relativeY];
 
-                        //if (contamination != 0 && !substanceIds.Contains(contamination))
-                        //{
-                        //    Console.WriteLine($"There is another substance in the active electrodes! Substance id: {contamination}     {relativeX} {relativeY}");
-                        //    return true;
-                        //}
+                        // Check to see if there are values in the contamination that are not in the substance ids
+                        var anyIllegalSubstances = contaminations.Except(substanceIds).Any();
 
+                        if (anyIllegalSubstances)
+                        {
+                            return false;
+                        }
 
-                        //foreach (var (xOffset, yOffset) in offsets)
-                        //{
-                        //    var nRelativeX = Math.Clamp(relativeX + xOffset, 0, boardWidth - 1);
-                        //    var nRelativeY = Math.Clamp(relativeY + yOffset, 0, boardHeight - 1);
+                        // Check to see if there is another agent too close to the template
+                        foreach (var (xOffset, yOffset) in offsets)
+                        {
+                            var nRelativeX = Math.Clamp(relativeX + xOffset, 0, boardWidth - 1);
+                            var nRelativeY = Math.Clamp(relativeY + yOffset, 0, boardHeight - 1);
 
-                        //    if (allOtherAgentPositions.Contains((nRelativeX, nRelativeY))) return true;
-                        //}
+                            if (allOtherAgentPositions.Contains((nRelativeX, nRelativeY))) return false;
+                        }
                     }
                 }
             }
 
-            return false;
+            return true;
         }
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y,

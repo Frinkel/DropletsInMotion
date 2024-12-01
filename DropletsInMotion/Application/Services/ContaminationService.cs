@@ -9,18 +9,12 @@ namespace DropletsInMotion.Application.Services
 {
     public class ContaminationService : IContaminationService
     {
-        private readonly IConfiguration _configuration;
-        private readonly IPlatformRepository _platformRepository;
         private readonly IContaminationRepository _contaminationRepository;
 
         public ContaminationService(IConfiguration configuration, IPlatformRepository platformRepository, IContaminationRepository contaminationRepository)
         {
-            _configuration = configuration;
-            _platformRepository = platformRepository;
             _contaminationRepository = contaminationRepository;
         }
-
-        //List<int>[,] array = new List<int>[rows, cols];
 
         public void ApplyIfInBounds(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId)
         {
@@ -37,14 +31,25 @@ namespace DropletsInMotion.Application.Services
             }
         }
 
+        public void RemoveIfInBounds(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId)
+        {
+            int rowCount = contaminationMap.GetLength(0);
+            int colCount = contaminationMap.GetLength(1);
+
+            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
+            {
+                var contaminations = contaminationMap[xPos, yPos];
+                if (contaminations.Contains(substanceId))
+                {
+                    contaminations.Remove(substanceId);
+                }
+            }
+        }
+
         public List<int>[,] ApplyContamination(Agent agent, List<int>[,] contaminationMap)
         {
             var x = agent.PositionX;
             var y = agent.PositionY;
-
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
 
             // Apply contamination to the agent's position and its 8 neighbors
             ApplyIfInBounds(contaminationMap, x, y, agent.SubstanceId);
@@ -67,25 +72,10 @@ namespace DropletsInMotion.Application.Services
 
             int size = agent.GetAgentSize();
 
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < size; j++)
-                {
-                    ApplyIfInBounds(contaminationMap, x + i, y + j, agent.SubstanceId);
-                }
-            }
-
             for (int i = -1; i <= size; i++)
             {
                 for (int j = -1; j <= size; j++)
                 {
-                    if (i >= 0 && i < size && j >= 0 && j < size)
-                    {
-                        continue;
-                    }
                     ApplyIfInBounds(contaminationMap, x + i, y + j, agent.SubstanceId);
                 }
             }
@@ -245,118 +235,6 @@ namespace DropletsInMotion.Application.Services
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public void ApplyIfInBoundsWithContamination(byte[,] contaminationMap, int xPos, int yPos, byte substanceId)
-        {
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                byte oldValue = contaminationMap[xPos, yPos];
-                byte newValue = (byte)(oldValue == 0 || oldValue == substanceId ? substanceId : 255);
-
-                contaminationMap[xPos, yPos] = newValue;
-            }
-        }
-
-        public void ApplyIfInBounds(byte[,] contaminationMap, int xPos, int yPos, byte substanceId)
-        {
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                contaminationMap[xPos, yPos] = substanceId;
-            }
-        }
-
-        public void ApplyIfInBoundsWithLegalSubstanceIds(byte[,] contaminationMap, int xPos, int yPos, byte substanceId, List<byte> legalSubstanceIds)
-        {
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                byte contaminationValue = contaminationMap[xPos, yPos];
-                byte newValue = (byte)(contaminationValue != 255 && legalSubstanceIds.Contains(contaminationValue) ? contaminationValue : 255);
-                newValue = contaminationValue == 0 ? substanceId : newValue;
-                
-
-                contaminationMap[xPos, yPos] = newValue;
-            }
-        }
-
-
-        public void OverrideContaminations(byte[,] contaminationMap, int xPos, int yPos, byte substanceId, List<byte> overrideableSubstanceIds)
-        {
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
-            {
-                byte contaminationValue = contaminationMap[xPos, yPos];
-                byte newValue = (byte)((contaminationValue != 255 && overrideableSubstanceIds.Contains(contaminationValue)) || contaminationValue == 0 ? substanceId : 255);
-
-                contaminationMap[xPos, yPos] = newValue;
-            }
-        }
-
-
-        //public byte[,] ApplyContamination(Agent agent, byte[,] contaminationMap)
-        //{
-        //    var x = agent.PositionX;
-        //    var y = agent.PositionY;
-
-        //    int rowCount = contaminationMap.GetLength(0);
-        //    int colCount = contaminationMap.GetLength(1);
-
-
-        //    // Apply contamination to the agent's position and its 8 neighbors
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x, y, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x + 1, y, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x - 1, y, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x, y + 1, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x, y - 1, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x + 1, y + 1, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x + 1, y - 1, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x - 1, y + 1, agent.SubstanceId);
-        //    ApplyIfInBoundsWithContamination(contaminationMap, x - 1, y - 1, agent.SubstanceId);
-
-        //    return contaminationMap;
-        //}
-
-
-
         // Apply contamination for a split while taking the template into account
         public List<int>[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, List<int>[,] contaminationMap)
         {
@@ -382,40 +260,28 @@ namespace DropletsInMotion.Application.Services
 
             int size = outputAgent.GetAgentSize();
 
-            // Populate the initial area with the new agent substance
-            for (int i = -1; i <= size; i++)
+            // Reserve and populate the initial area with the new agent substance
+            ApplyContaminationWithSize(outputAgent, contaminationMap);
+            for (int i = 0; i <= size - 1; i++)
             {
-                for (int j = -1; j <= size; j++)
+                for (int j = 0; j <= size - 1; j++)
                 {
-                    ApplyIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, outputAgent.SubstanceId);
+                    RemoveIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, inputAgent1.SubstanceId);
+                    RemoveIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, inputAgent2.SubstanceId);
                 }
             }
-
-            Console.WriteLine("After step 1");
-            PrintContaminationMap(contaminationMap);
 
             // Apply contamination based on the template
             foreach (var block in mergePositions.Template.Blocks)
             {
+                if (block.Count > 1) continue;
 
                 foreach (var cluster in block)
                 {
-                    var substanceId = cluster.Key switch
-                    {
-                        var name when name == inputAgent1.DropletName => inputAgent1.SubstanceId,
-                        var name when name == inputAgent2.DropletName => inputAgent2.SubstanceId,
-                        var name when name == outputAgent.DropletName => outputAgent.SubstanceId,
-                        _ => throw new Exception($"No agent mapping with for agent {cluster.Key}")
-                    };
-
-                    if (substanceId == inputAgent1.SubstanceId || substanceId == inputAgent2.SubstanceId) continue; // TODO: Temporary fix
+                    var substanceId = outputAgent.SubstanceId;
 
                     foreach (var pos in cluster.Value)
                     {
-
-                        if (block.Count <= 1) substanceId = outputAgent.SubstanceId;
-
-
                         var contaminationPosX = pos.x + mergeX;
                         var contaminationPosY = pos.y + mergeY;
 
@@ -433,141 +299,16 @@ namespace DropletsInMotion.Application.Services
                             (-1, -1)  // Bottom-left diagonal
                         };
 
-                        // TODO: Do we have to consider the initial when the substances are the input, they will self contaminate?
                         foreach (var (xOffset, yOffset) in offsets)
                         {
-                            Console.WriteLine($"{substanceId} -> {contaminationPosX + xOffset} {contaminationPosY + yOffset}");
                             ApplyIfInBounds(contaminationMap, contaminationPosX + xOffset, contaminationPosY + yOffset, substanceId);
                         }
                     }
                 }
             }
 
-            Console.WriteLine("After step 2");
-            PrintContaminationMap(contaminationMap);
-
-
-            // TODO: I do not think we need this with the new contamination map?
-            //List<int> GetContaminationValue(int x, int y, List<int>[,] contaminationMap)
-            //{
-            //    int rowCount = contaminationMap.GetLength(0);
-            //    int colCount = contaminationMap.GetLength(1);
-
-            //    if (x >= 0 && x < rowCount && y >= 0 && y < colCount)
-            //    {
-            //        return contaminationMap[x, y];
-            //    }
-
-            //    return 255;
-            //}
-
-            //mergeX = mergePositions.SingularX;
-            //mergeY = mergePositions.SingularY;
-
-            //// Calculate contamination overlaps
-            //for (int i = 0; i <= size + 1; i++)
-            //{
-            //    int x1 = mergeX - 1 + i;
-            //    int y1 = mergeY - 2;
-            //    int cont1 = GetContaminationValue(x1, y1, contaminationMap);
-            //    int canContChange1 = GetContaminationValue(x1, mergeY - 1, contaminationMap);
-            //    ApplyIfInBounds(contaminationMap, x1, mergeY - 1, (cont1 == 0 || cont1 == outputAgent.SubstanceId) && canContChange1 != 255 ? outputAgent.SubstanceId : (byte)255);
-
-            //    int x2 = mergeX - 1 + i;
-            //    int y2 = mergeY + size + 1;
-            //    int cont2 = GetContaminationValue(x2, y2, contaminationMap);
-            //    int canContChange2 = GetContaminationValue(x2, mergeY + size, contaminationMap);
-            //    ApplyIfInBounds(contaminationMap, x2, mergeY + size, (cont2 == 0 || cont2 == outputAgent.SubstanceId) && canContChange2 != 255 ? outputAgent.SubstanceId : (byte)255);
-
-            //    int x3 = mergeX - 2;
-            //    int y3 = mergeY - 1 + i;
-            //    int cont3 = GetContaminationValue(x3, y3, contaminationMap);
-            //    int canContChange3 = GetContaminationValue(mergeX - 1, y3, contaminationMap);
-            //    ApplyIfInBounds(contaminationMap, mergeX - 1, y3, (cont3 == 0 || cont3 == outputAgent.SubstanceId) && canContChange3 != 255 ? outputAgent.SubstanceId : (byte)255);
-
-            //    int x4 = mergeX + size + 1;
-            //    int y4 = mergeY - 1 + i;
-            //    int cont4 = GetContaminationValue(x4, y4, contaminationMap);
-            //    int canContChange4 = GetContaminationValue(mergeX + size, y3, contaminationMap);
-            //    ApplyIfInBounds(contaminationMap, mergeX + size, y4, (cont4 == 0 || cont4 == outputAgent.SubstanceId) && canContChange4 != 255 ? outputAgent.SubstanceId : (byte)255);
-            //}
-
-
-            ////Console.WriteLine("AFTER");
-            ////PrintContaminationState(contaminationMap);
-
             return contaminationMap;
         }
-
-        //public byte[,] ReserveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents, byte[,] contaminationMap)
-        //{
-        //    foreach (var command in commands)
-        //    {
-        //        var agent = agents[command.GetInputDroplets().First()];
-        //        Agent reserveAgent = (Agent) agent.Clone();
-        //        reserveAgent.PositionX = ((Move)command).PositionX;
-        //        reserveAgent.PositionY = ((Move)command).PositionY;
-        //        ApplyContaminationWithSize(reserveAgent, contaminationMap);
-        //    }
-
-        //    return contaminationMap;
-        //}
-
-
-        //public byte[,] ApplyContaminationWithSize(Agent agent, byte[,] contaminationMap)
-        //{
-        //    var x = agent.PositionX;
-        //    var y = agent.PositionY;
-
-        //    int size = agent.GetAgentSize();
-
-        //    int rowCount = contaminationMap.GetLength(0);
-        //    int colCount = contaminationMap.GetLength(1);
-
-
-        //    // Loop over the area of the droplet, size x size
-        //    for (int i = 0; i < size; i++)
-        //    {
-        //        for (int j = 0; j < size; j++)
-        //        {
-        //            // Apply contamination to the droplet area
-        //            ApplyIfInBoundsWithContamination(contaminationMap, x + i, y + j, agent.SubstanceId);
-        //        }
-        //    }
-
-        //    // Apply contamination to the neighbors around the droplet area
-        //    for (int i = -1; i <= size; i++)
-        //    {
-        //        for (int j = -1; j <= size; j++)
-        //        {
-        //            if (i >= 0 && i < size && j >= 0 && j < size)
-        //            {
-        //                // Skip the internal droplet cells that are already contaminated
-        //                continue;
-        //            }
-
-        //            // Apply contamination to the neighboring cells
-        //            ApplyIfInBoundsWithContamination(contaminationMap, x + i, y + j, agent.SubstanceId);
-        //        }
-        //    }
-
-        //    return contaminationMap;
-        //}
-
-
-        //private int GetAgentSize(Agent agent)
-        //{
-        //    int size = 1;
-        //    if (agent.Volume > _platformRepository.MinSize2x2)
-        //    {
-        //        size = 2;
-        //    }
-        //    if (agent.Volume > _platformRepository.MinSize3x3)
-        //    {
-        //        size = 3;
-        //    }
-        //    return size;
-        //}
 
 
         public void PrintContaminationMap(List<int>[,] contaminationMap)
@@ -613,35 +354,6 @@ namespace DropletsInMotion.Application.Services
             }
         }
 
-
-
-        // TEMP FUNCTIONS
-        public void PrintContaminationState(byte[,] contaminationMap)
-        {
-            // Determine the maximum number of digits for proper alignment
-            int maxDigits = 3;
-
-            int rowCount = contaminationMap.GetLength(0);
-            int colCount = contaminationMap.GetLength(1);
-
-            for (int j = 0; j < colCount; j++)
-            {
-                for (int i = 0; i < rowCount; i++)
-                {
-                    byte value = contaminationMap[i, j];
-
-                    // Set the color based on the value using a hash function
-                    SetColorForValue(value);
-
-                    // Print each ElectrodeId with a fixed width
-                    Console.Write(value.ToString().PadLeft(maxDigits) + " ");
-
-                    // Reset color after printing
-                    Console.ResetColor();
-                }
-                Console.WriteLine();
-            }
-        }
 
         public bool IsAreaContaminated(List<int>[,] contaminationMap, int substanceId, int startX, int startY, int width, int height)
         {
@@ -782,34 +494,6 @@ namespace DropletsInMotion.Application.Services
                 }
             }
         }
-
-
-        public byte[,] CreateByteArrayFromContaminationMap(List<int>[,] contaminationMap)
-        {
-            int rows = contaminationMap.GetLength(0);
-            int cols = contaminationMap.GetLength(1);
-            byte[,] byteArray = new byte[rows, cols];
-
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    if (contaminationMap[i, j].Count > 0)
-                    {
-                        // Take the first value of the list and cast to byte
-                        byteArray[i, j] = (byte)contaminationMap[i, j][0];
-                    }
-                    else
-                    {
-                        // Default to 255 if the list is empty
-                        byteArray[i, j] = 255;
-                    }
-                }
-            }
-
-            return byteArray;
-        }
-
 
 
     }

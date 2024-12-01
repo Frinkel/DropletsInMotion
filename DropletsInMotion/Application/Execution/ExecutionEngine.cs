@@ -205,7 +205,7 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                //_contaminationService.PrintContaminationMap(ContaminationMap);
+                _contaminationService.PrintContaminationMap(ContaminationMap);
                 boardActions.Clear();
             }
 
@@ -398,6 +398,7 @@ namespace DropletsInMotion.Application.Execution
 
 
                 var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents, ContaminationMap, eligibleMergeTemplates);
+                Console.WriteLine($"Optimal pos for merge {mergePositions.X1} {mergePositions.Y1}, {mergePositions.X2} {mergePositions.Y2}");
                 if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions, agents))
                 {
                     _commandLifetimeService.StoreCommand(mergeCommand);
