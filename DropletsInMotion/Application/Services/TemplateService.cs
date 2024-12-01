@@ -10,10 +10,6 @@ namespace DropletsInMotion.Application.Services
         public List<(string, List<BoardAction>)> Templates { get; private set; } = new List<(string, List<BoardAction>)>();
         public Electrode[][] Board { get; set; }
 
-        public TemplateService()
-        {
-        }
-
         public void Initialize(Electrode[][] board)
         {
             Board = board;
