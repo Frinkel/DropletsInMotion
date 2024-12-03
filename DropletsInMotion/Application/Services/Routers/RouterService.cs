@@ -75,8 +75,8 @@ public class RouterService : IRouterService
 
             foreach (var command in commandOrder)
             {
-                List<string> routableAgents = new List<string>();
-                routableAgents.AddRange(command.GetInputDroplets());
+                //List<string> routableAgents = new List<string>();
+                //routableAgents.AddRange(command.GetInputDroplets());
                 var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
                 // Create initial state and search for a solution

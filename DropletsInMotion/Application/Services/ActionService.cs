@@ -91,7 +91,6 @@ namespace DropletsInMotion.Application.Services
 
             // Map template to droplets
             mergePositions.Template = MapTemplateToDroplets(mergePositions, inputDroplet1, inputDroplet2, newAgent);
-            
 
             // Apply contamination
             _contaminationService.ApplyContaminationMerge(inputAgent1, inputAgent2, newAgent, mergePositions, contaminationMap);

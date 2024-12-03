@@ -129,10 +129,7 @@ namespace DropletsInMotion.Application.Services
             if (xPos >= 0 && xPos < rowCount && yPos >= 0 && yPos < colCount)
             {
                 var contaminations = contaminationMap[xPos, yPos];
-                if (contaminations.Contains(substanceId))
-                {
-                    contaminations.Remove(substanceId);
-                }
+                contaminations.Remove(substanceId);
             }
         }
 
@@ -193,31 +190,54 @@ namespace DropletsInMotion.Application.Services
             }
 
 
-            //foreach (var value in contaminationValues)
-            //{
-            //    var substanceToIndex = _contaminationRepository.SubstanceTable[value].Item2.contTableFrom;
-            //    if (substanceToIndex == -1)
-            //    {
-            //        return true;
-            //    }
-            //    bool isConflicting = _contaminationRepository.ContaminationTable[substanceFromIndex][substanceToIndex];
-            //    if (isConflicting)
-            //    {
-            //        return true;
-            //    }
-            //}
-
             foreach (var value in contaminationValues)
             {
                 var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
-                //Console.WriteLine(substanceInContaminationTable2);
-                //Console.WriteLine($"{substanceId}, {value}");
-                //Console.WriteLine(_contaminationRepository.ContaminationTable[substanceId][value]);
 
                 if (!substanceInContaminationTable2 ||
                     _contaminationRepository.ContaminationTable[substanceId][value])
                 {
                     return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsConflicting(List<int>[,] contaminationMap, int xPos, int yPos, List<int> substanceIds)
+        {
+            List<int> contaminationValues = contaminationMap[xPos, yPos];
+            if (contaminationValues.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var substanceId in substanceIds)
+            {
+                var substanceInContaminationTable1 = _contaminationRepository.SubstanceTable[substanceId].Item2;
+                if (!substanceInContaminationTable1)
+                {
+                    if (contaminationValues.Count == 0 ||
+                        !contaminationValues.Except(substanceIds).Any())
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+                
+
+                foreach (var value in contaminationValues)
+                {
+                    if (substanceIds.Contains(value)) continue;
+
+                    var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
+
+                    if (!substanceInContaminationTable2 ||
+                        _contaminationRepository.ContaminationTable[substanceId][value])
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -352,9 +372,9 @@ namespace DropletsInMotion.Application.Services
 
             // Reserve and populate the initial area with the new agent substance
             ApplyContaminationWithSize(outputAgent, contaminationMap);
-            for (int i = 0; i <= size - 1; i++)
+            for (int i = -1; i <= size; i++)
             {
-                for (int j = 0; j <= size - 1; j++)
+                for (int j = -1; j <= size; j++)
                 {
                     RemoveIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, inputAgent1.SubstanceId);
                     RemoveIfInBounds(contaminationMap, outputAgent.PositionX + i, outputAgent.PositionY + j, inputAgent2.SubstanceId);

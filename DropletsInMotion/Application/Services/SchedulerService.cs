@@ -124,8 +124,7 @@ namespace DropletsInMotion.Application.Services
                         //    continue;
                         //}
 
-                        if(_contaminationService.IsConflicting(contaminationMap, x, y, d1SubstanceId)
-                           && _contaminationService.IsConflicting(contaminationMap, x, y, d2SubstanceId))
+                        if (_contaminationService.IsConflicting(contaminationMap, x, y, new List<int>(){d1SubstanceId, d2SubstanceId}))
                         {
                             continue;
                         }
@@ -231,9 +230,9 @@ namespace DropletsInMotion.Application.Services
                 increment++;
             } while (minBoundingX != 0 && maxBoundingX != boardWidth - 1 && minBoundingY != 0 && maxBoundingY != boardHeight - 1);
 
+
+
             throw new Exception($"There was no positions where command \"{command}\" could be applied!");
-
-
         }
 
 
