@@ -234,7 +234,19 @@ public class TypeChecker : ITypeChecker
     {
         VariablesExist(whileCommand.Condition.GetVariables(), whileCommand);
 
+        var dropletStateBeforeWhile = new HashSet<string>(_droplets);
+
         TypeCheck(whileCommand.Commands);
+
+        var dropletStateAfterWhile = new HashSet<string>(_droplets);
+        if (!dropletStateBeforeWhile.SetEquals(dropletStateAfterWhile))
+        {
+            throw new CommandException(
+                $"Error: The state of droplets is altered in the while loop {whileCommand}" +
+                $"Droplets before the while loop: {string.Join(", ", dropletStateBeforeWhile)}, " +
+                $"Droplets after the while loop: {string.Join(", ", dropletStateAfterWhile)}", whileCommand);
+        }
+
     }
 
     private void IfStatement(IfCommand ifCommand)
