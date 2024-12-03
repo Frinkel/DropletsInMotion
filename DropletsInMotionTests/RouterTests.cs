@@ -391,7 +391,7 @@ namespace DropletsInMotionTests
 
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
-            Debugger.PrintDuplicateCounts();
+            //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 
@@ -576,22 +576,14 @@ namespace DropletsInMotionTests
             var commands = new List<IDropletCommand>() { dropletCommandA1, dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA5, dropletCommandA6, dropletCommandA7 };
 
             Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-            
-            var a1Substance = _contaminationService.GetSubstanceId("");
-            var a2Substance = _contaminationService.GetSubstanceId("");
-            var a3Substance = _contaminationService.GetSubstanceId("");
-            var a4Substance = _contaminationService.GetSubstanceId("");
-            var a5Substance = _contaminationService.GetSubstanceId("");
-            var a6Substance = _contaminationService.GetSubstanceId("");
-            var a7Substance = _contaminationService.GetSubstanceId("");
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400);
+            var a5 = _agentFactory.CreateAgent("a5", 17, 7, 400);
+            var a6 = _agentFactory.CreateAgent("a6", 19, 7, 400);
+            var a7 = _agentFactory.CreateAgent("a7", 21, 7, 400);
 
-            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400, a1Substance);
-            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400, a2Substance);
-            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400, a3Substance);
-            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400, a4Substance);
-            var a5 = _agentFactory.CreateAgent("a5", 17, 7, 400, a5Substance);
-            var a6 = _agentFactory.CreateAgent("a6", 19, 7, 400, a6Substance);
-            var a7 = _agentFactory.CreateAgent("a7", 21, 7, 400, a7Substance);
 
             agents.Add("a1", a1);
             agents.Add("a2", a2);

@@ -34,8 +34,6 @@ namespace DropletsInMotion.Application.Services.Routers
                 explored.Add(state);
                 Debugger.ExploredStates += 1;
                 // TEMP
-                Debugger.Nodes.Add((state.Agents.First().Value.PositionX,
-                    state.Agents.First().Value.PositionY));
 
 
                 var expandedStates = state.GetExpandedStates();
