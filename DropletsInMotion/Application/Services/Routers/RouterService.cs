@@ -354,9 +354,9 @@ public class RouterService : IRouterService
 
     private List<int>[,] CombineContaminationMapAndContaminationChanges(List<int>[,] map1, Dictionary<(int x, int y), List<int>> contaminationChanges)
     {
-        int width = map1.GetLength(0);
-        int height = map1.GetLength(1);
-        List<int>[,] resultMap = _contaminationService.CloneContaminationMap(map1);
+        //int width = map1.GetLength(0);
+        //int height = map1.GetLength(1);
+        List<int>[,] resultMap = map1;
 
         foreach (var kvp in contaminationChanges)
         {
