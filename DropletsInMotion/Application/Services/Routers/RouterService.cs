@@ -64,6 +64,8 @@ public class RouterService : IRouterService
 
         var chosenPermutation = permutations.First();
 
+        var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
+
         foreach (var commandOrder in permutations)
         {
             
@@ -77,7 +79,6 @@ public class RouterService : IRouterService
             {
                 //List<string> routableAgents = new List<string>();
                 //routableAgents.AddRange(command.GetInputDroplets());
-                var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
                 // Create initial state and search for a solution
                 State s0 = new State(command.GetInputDroplets().First(), agents, reservedContaminationMap, new List<IDropletCommand>() { command }, commitedStates, _contaminationService, _platformRepository, _templateRepository, Seed);
@@ -189,6 +190,19 @@ public class RouterService : IRouterService
         }
 
         _contaminationService.CopyContaminationMap(sFinal.ContaminationMap, contaminationMap);
+        //remove reservations
+        _contaminationService.RemoveContaminations(commands, agents, contaminationMap);
+        foreach (var (agentName, agent) in sFinal.Agents)
+        {
+            if (agent.SnakeBody.Count == 1)
+            {
+                _contaminationService.ApplyContaminationWithSize(agent, contaminationMap);
+            }
+            else
+            {
+                _contaminationService.ApplyContamination(agent, contaminationMap);
+            }
+        }
 
 
         foreach (var agentKvp in sFinal.Agents)
@@ -227,8 +241,8 @@ public class RouterService : IRouterService
         }
 
         // TODO: Debug?
-        //_contaminationService.PrintContaminationState(contaminationMap);
-        //Console.WriteLine(time);
+        //_contaminationService.PrintContaminationMap(contaminationMap);
+        //Console.WriteLine();
         return sFinal.ExtractActions(time);
     }
 
