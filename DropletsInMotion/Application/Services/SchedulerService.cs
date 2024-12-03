@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Models;
+using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.UI;
@@ -117,12 +118,6 @@ namespace DropletsInMotion.Application.Services
                 {
                     for (int y = minBoundingY; y <= maxBoundingY; y++)
                     {
-                        //int contamination = contaminationMap[x, y];
-                        //if (contamination != 0 && contamination != 255 &&
-                        //    contamination != d1SubstanceId && contamination != d2SubstanceId)
-                        //{
-                        //    continue;
-                        //}
 
                         if (_contaminationService.IsConflicting(contaminationMap, x, y, new List<int>(){d1SubstanceId, d2SubstanceId}))
                         {
@@ -148,15 +143,12 @@ namespace DropletsInMotion.Application.Services
                             continue;
                         }
 
-                        //int d1OptimalPositionContamination = contaminationMap[optimalPositions.X1,
-                        //    optimalPositions.Y1];
-                        //int d2OptimalPositionContamination = contaminationMap[optimalPositions.X2,
-                        //    optimalPositions.Y2];
-                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X1, optimalPositions.Y1, d1SubstanceId))
+
+                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X1, optimalPositions.Y1, new List<int>() { d1SubstanceId, d2SubstanceId }))
                         {
                             continue;
                         }
-                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X2, optimalPositions.Y2, d2SubstanceId))
+                        if (_contaminationService.IsConflicting(contaminationMap, optimalPositions.X2, optimalPositions.Y2, new List<int>() { d1SubstanceId, d2SubstanceId }))
                         {
                             continue;
                         }
@@ -232,7 +224,7 @@ namespace DropletsInMotion.Application.Services
 
 
 
-            throw new Exception($"There was no positions where command \"{command}\" could be applied!");
+            throw new CommandException($"There was no positions where command \"{command}\" could be applied!", command);
         }
 
 
@@ -306,7 +298,7 @@ namespace DropletsInMotion.Application.Services
                     return FindOptimalDirections(originX, originY, target1X, target1Y, target2X, target2Y, templates, splitCommand);
 
                 default:
-                    throw new Exception($"Schedular cannot schedule the command: {command}");
+                    throw new CommandException($"Scheduler does not know the command.", command);
             }
         }
 

@@ -60,7 +60,7 @@ public class State
 
     }
 
-    public State(State parent, Types.RouteAction action)
+    public State(State parent, RouteAction action)
     {
         Seed = parent.Seed;
 
@@ -214,7 +214,7 @@ public class State
             foreach (var actionKvp in state.JointAction)
             {
                 
-                if (actionKvp.Value == Types.RouteAction.NoOp)
+                if (actionKvp.Value == RouteAction.NoOp)
                 {
                     continue;
                 }
@@ -321,7 +321,7 @@ public class State
         return boardActions;
     }
 
-    private List<BoardAction> ApplySnake(Agent agent, Agent nextAgent, Types.RouteAction action,  double time)
+    private List<BoardAction> ApplySnake(Agent agent, Agent nextAgent, RouteAction action,  double time)
     {
         var boardActions = new List<BoardAction>();
 
@@ -418,17 +418,17 @@ public class State
 
         List<State> expandedStates = new List<State>();
 
-        List<Types.RouteAction> applicableActions = new List<Types.RouteAction>();
+        List<RouteAction> applicableActions = new List<RouteAction>();
 
         Agent agent = Agents[RoutableAgent];
-        List<Types.RouteAction> possibleActions = Types.RouteAction.PossiblActions;
+        List<RouteAction> possibleActions = RouteAction.PossiblActions;
 
 
         Dictionary<string, Agent> commitedAgentPositions = GetCommitedAgentPositions();
         var commitedContaminations =
             CommitedStates.Count > 0 ? CommitedStates.Last().ContaminationMap : ContaminationMap;
 
-        foreach (Types.RouteAction action in possibleActions)
+        foreach (RouteAction action in possibleActions)
         {
             if (agent.IsMoveApplicable(action, commitedAgentPositions, commitedContaminations, this))
             {
@@ -465,7 +465,7 @@ public class State
     }
 
 
-    private bool IsConflicting(Dictionary<string, Types.RouteAction> jointAction)
+    private bool IsConflicting(Dictionary<string, RouteAction> jointAction)
     {
         Dictionary<string, Tuple<int, int>> agentDestinations = new Dictionary<string, Tuple<int, int>>();
         foreach (var action in jointAction)
@@ -476,14 +476,14 @@ public class State
 
         foreach (var action in jointAction)
         {
-            if (action.Value.Type == Types.ActionType.NoOp)
+            if (action.Value.Type == ActionType.NoOp)
             {
                 continue;
             }
 
             foreach (var otherAction in jointAction)
             {
-                if (action.Key == otherAction.Key || otherAction.Value.Type == Types.ActionType.NoOp)
+                if (action.Key == otherAction.Key || otherAction.Value.Type == ActionType.NoOp)
                 {
                     continue;
                 }
@@ -501,25 +501,25 @@ public class State
         return false;
     }
 
-    static List<Dictionary<string, Types.RouteAction>> GetActionPermutations(Dictionary<string, List<Types.RouteAction>> agentActions)
+    static List<Dictionary<string, RouteAction>> GetActionPermutations(Dictionary<string, List<RouteAction>> agentActions)
     {
         var agents = agentActions.Keys.ToList();
 
-        List<Dictionary<string, Types.RouteAction>> result = new List<Dictionary<string, Types.RouteAction>>();
-        GeneratePermutations(agentActions, new Dictionary<string, Types.RouteAction>(), agents, 0, result);
+        List<Dictionary<string, RouteAction>> result = new List<Dictionary<string, RouteAction>>();
+        GeneratePermutations(agentActions, new Dictionary<string, RouteAction>(), agents, 0, result);
         return result;
     }
 
     static void GeneratePermutations(
-        Dictionary<string, List<Types.RouteAction>> agentActions,
-        Dictionary<string, Types.RouteAction> current,
+        Dictionary<string, List<RouteAction>> agentActions,
+        Dictionary<string, RouteAction> current,
         List<string> agents,
         int depth,
-        List<Dictionary<string, Types.RouteAction>> result)
+        List<Dictionary<string, RouteAction>> result)
     {
         if (depth == agents.Count)
         {
-            result.Add(new Dictionary<string, Types.RouteAction>(current));
+            result.Add(new Dictionary<string, RouteAction>(current));
             return;
         }
         string agent = agents[depth];
@@ -557,7 +557,7 @@ public class State
                 }
 
                 // Penalize the act of standing still
-                if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == Types.ActionType.NoOp)
+                if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == ActionType.NoOp)
                 {
                     manhattanDistance += 1;
                 }
@@ -656,7 +656,7 @@ public class State
         //check that we dont terminate while we are in the process of unraveling a snake.
         foreach (var agent in Agents)
         {
-            if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength()-1)
+            if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength())
             {
                 return false;
             }

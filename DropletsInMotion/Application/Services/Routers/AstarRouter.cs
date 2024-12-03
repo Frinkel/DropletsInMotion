@@ -33,8 +33,6 @@ namespace DropletsInMotion.Application.Services.Routers
 
                 explored.Add(state);
                 Debugger.ExploredStates += 1;
-                // TEMP
-
 
                 var expandedStates = state.GetExpandedStates();
                 foreach (var expandedState in expandedStates)
@@ -46,7 +44,6 @@ namespace DropletsInMotion.Application.Services.Routers
                     else
                     {
                         Debugger.ExistingStates += 1;
-                        //Console.WriteLine($"State already exists {expandedState.GetHashCode()}");
                     }
                 }
 
