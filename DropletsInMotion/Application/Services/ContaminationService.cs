@@ -420,6 +420,39 @@ namespace DropletsInMotion.Application.Services
             return contaminationMap;
         }
 
+        public List<int>[,] RemoveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents, List<int>[,] contaminationMap)
+        {
+            foreach (var command in commands)
+            {
+                var agent = agents[command.GetInputDroplets().First()];
+                Agent reserveAgent = (Agent)agent.Clone();
+                reserveAgent.PositionX = ((Move)command).PositionX;
+                reserveAgent.PositionY = ((Move)command).PositionY;
+                RemoveContaminationWithSize(reserveAgent, contaminationMap);
+            }
+
+            return contaminationMap;
+        }
+
+        public List<int>[,] RemoveContaminationWithSize(Agent agent, List<int>[,] contaminationMap)
+        {
+            var x = agent.PositionX;
+            var y = agent.PositionY;
+
+            int size = agent.GetAgentSize();
+
+            for (int i = -1; i <= size; i++)
+            {
+                for (int j = -1; j <= size; j++)
+                {
+                    RemoveIfInBounds(contaminationMap, x + i, y + j, agent.SubstanceId);
+                }
+            }
+
+            return contaminationMap;
+        }
+
+
 
         public void PrintContaminationMap(List<int>[,] contaminationMap)
         {

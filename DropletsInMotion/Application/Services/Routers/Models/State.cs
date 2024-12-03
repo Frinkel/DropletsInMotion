@@ -652,11 +652,11 @@ public class State
 
         bool allGoalsReached = IsGoalState();
         if (allGoalsReached) return allGoalsReached;
-        
+
         //check that we dont terminate while we are in the process of unraveling a snake.
         foreach (var agent in Agents)
         {
-            if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength())
+            if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength()-1)
             {
                 return false;
             }

@@ -28,5 +28,11 @@ namespace DropletsInMotion.Application.Services
         public void ApplyContamination(Agent agent, State state);
         public bool IsConflicting(List<int> contaminationValues, int substanceId);
 
+        public List<int>[,] RemoveContaminationWithSize(Agent agent, List<int>[,] contaminationMap);
+
+        public List<int>[,] RemoveContaminations(List<IDropletCommand> commands, Dictionary<string, Agent> agents,
+            List<int>[,] contaminationMap);
+
+
     }
 }
