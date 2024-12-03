@@ -17,6 +17,7 @@ using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Translation.Services;
+using Spectre.Console;
 
 
 namespace DropletsInMotion
@@ -43,9 +44,8 @@ namespace DropletsInMotion
 
                 // Write the title onto the console
                 string asciiTitle = _fileService.ReadFileFromProjectDirectory("/assets/ascii_title.txt");
-                _logger.WriteColor(asciiTitle, ConsoleColor.Blue);
+                _logger.WriteColor(asciiTitle, Color.Blue);
                 _logger.WriteEmptyLine(2);
-
 
                 StateManager stateManager = serviceProvider.GetRequiredService<StateManager>();
 
@@ -61,7 +61,7 @@ namespace DropletsInMotion
 
                         // Handle the runtime exception
                         var action = _runtimeExceptionHandler.Handle(e);
-
+                        throw e;
                         switch (action)
                         {
                             case RuntimeExceptionHandler.RuntimeExceptionAction.Reset:

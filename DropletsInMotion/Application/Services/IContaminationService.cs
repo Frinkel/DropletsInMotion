@@ -28,5 +28,7 @@ namespace DropletsInMotion.Application.Services
         public void ApplyContamination(Agent agent, State state);
         public bool IsConflicting(List<int> contaminationValues, int substanceId);
 
+        public void RenderGrid(List<int>[,] grid);
+
     }
 }

@@ -4,6 +4,7 @@ using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Presentation;
+using Spectre.Console;
 
 namespace DropletsInMotion.Infrastructure
 {
@@ -21,33 +22,33 @@ namespace DropletsInMotion.Infrastructure
 
         public RuntimeExceptionAction Handle(Exception ex)
         {
-            _logger.WriteColor("An error occured while compiling the protocol!", ConsoleColor.Yellow, ConsoleColor.DarkRed);
+            _logger.WriteColor("An error occured while compiling the protocol!", Color.Yellow, Color.DarkRed);
 
             switch (ex)
             {
                 case DropletNotFoundException dropletNotFoundException:
-                    _logger.WriteColor($"Error Message: \"{dropletNotFoundException.Message}\"", ConsoleColor.Red);
+                    _logger.WriteColor($"Error Message: \"{dropletNotFoundException.Message}\"", Color.Red);
                     return RuntimeExceptionAction.Reset;
 
                 case CommandException typeCheckerException:
-                    _logger.WriteColor($"Exception occured in file: '{_userService.ProgramPath}'", ConsoleColor.Red);
+                    _logger.WriteColor($"Exception occured in file: '{_userService.ProgramPath}'", Color.Red);
 
                     _logger.WriteColor($"On line {typeCheckerException.Command.Line} in '{typeCheckerException.Command}':" +
-                                       $"\n\tError Message: \"{typeCheckerException.Message}\"", ConsoleColor.Red);
+                                       $"\n\tError Message: \"{typeCheckerException.Message}\"", Color.Red);
                     _logger.WriteEmptyLine(1);
-                    _logger.WriteColor("Tip: Fix the issue and re-upload the program with the command 'reupload'", ConsoleColor.Yellow);
+                    _logger.WriteColor("Tip: Fix the issue and re-upload the program with the command 'reupload'", Color.Yellow);
                     return RuntimeExceptionAction.Reset;
 
                 case ContaminationException contaminationException:
-                    _logger.WriteColor($"Exception connected to the resulting contamination.", ConsoleColor.Red);
-                    _logger.WriteColor($"Error Message: \"{contaminationException.Message}\"", ConsoleColor.Red);
-                    _logger.WriteColor($"Contamination map:", ConsoleColor.Red);
+                    _logger.WriteColor($"Exception connected to the resulting contamination.", Color.Red);
+                    _logger.WriteColor($"Error Message: \"{contaminationException.Message}\"", Color.Red);
+                    _logger.WriteColor($"Contamination map:", Color.Red);
                     _contaminationService.PrintContaminationMap(contaminationException.ContaminationMap);
                     return RuntimeExceptionAction.Reset;
 
                 case TemplateException templateException:
                     _logger.WriteColor($"Exception occured related to \"{templateException.Template.Name}\".");
-                    _logger.WriteColor($"Error Message: \"{templateException.Message}\"", ConsoleColor.Red);
+                    _logger.WriteColor($"Error Message: \"{templateException.Message}\"", Color.Red);
 
                     return RuntimeExceptionAction.Reset;
 

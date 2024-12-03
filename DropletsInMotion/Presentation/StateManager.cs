@@ -100,12 +100,12 @@ namespace DropletsInMotion.Presentation
 
                     // TODO: Simplify this for user
                     //_consoleService.WriteColor(e.Message, ConsoleColor.DarkRed);
-                    //_logger.Error("An error occurred:");
-                    //_logger.Error($"Message: {e.Message}");
-                    //_logger.Error($"Source: {e.Source}");
-                    //_logger.Error($"TargetSite: {e.TargetSite}");
-                    //_logger.Error($"StackTrace: {e.StackTrace}");
-                    //_logger.WriteEmptyLine(2);
+                    _logger.Error("An error occurred:");
+                    _logger.Error($"Message: {e.Message}");
+                    _logger.Error($"Source: {e.Source}");
+                    _logger.Error($"TargetSite: {e.TargetSite}");
+                    _logger.Error($"StackTrace: {e.StackTrace}");
+                    _logger.WriteEmptyLine(2);
 
                     _currentState = ProgramState.WaitingForUserInput;
                     throw;
@@ -264,7 +264,7 @@ namespace DropletsInMotion.Presentation
         private void PrintCommands()
         {
             _logger.WriteColor("Available commands:");
-            _logger.WriteColor("  start / [Enter]  - Start compiling the program");
+            _logger.WriteColor("  start / [[Enter]]  - Start compiling the program");
             _logger.WriteColor("  reupload         - Re-upload the program");
             _logger.WriteColor("  disconnect       - Disconnect the client and return to waiting for a new connection");
             _logger.WriteColor("  stop / quit / q  - Stop the communication and exit the program");

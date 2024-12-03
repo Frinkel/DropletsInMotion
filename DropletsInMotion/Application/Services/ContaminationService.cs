@@ -4,6 +4,7 @@ using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
+using Spectre.Console;
 using System.Xml.Linq;
 
 namespace DropletsInMotion.Application.Services
@@ -516,83 +517,83 @@ namespace DropletsInMotion.Application.Services
             }
         }
 
-        private static void SetColorForValue(byte value)
-        {
-            // Handle 0 as a special case
-            if (value == 0)
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-            }
-            else
-            {
-                // Get a unique color for each value using a hash function
-                var rgbColor = GetRGBFromHash(value);
+        //private static void SetColorForValue(byte value)
+        //{
+        //    // Handle 0 as a special case
+        //    if (value == 0)
+        //    {
+        //        Console.ForegroundColor = ConsoleColor.Gray;
+        //    }
+        //    else
+        //    {
+        //        // Get a unique color for each value using a hash function
+        //        var rgbColor = GetRGBFromHash(value);
 
-                // Convert RGB to closest ConsoleColor
-                var consoleColor = GetConsoleColorFromRGB(rgbColor.R, rgbColor.G, rgbColor.B);
-                Console.BackgroundColor = consoleColor;
-            }
-        }
+        //        // Convert RGB to closest ConsoleColor
+        //        var consoleColor = GetConsoleColorFromRGB(rgbColor.R, rgbColor.G, rgbColor.B);
+        //        Console.BackgroundColor = consoleColor;
+        //    }
+        //}
 
-        // Method to generate an RGB color from a hash of the value
-        private static (byte R, byte G, byte B) GetRGBFromHash(byte value)
-        {
-            // Hash the value (using a simple hash function for demonstration)
-            int hash = (int)(value * 2654435761); // A simple, fast hash function
+        //// Method to generate an RGB color from a hash of the value
+        //private static (byte R, byte G, byte B) GetRGBFromHash(byte value)
+        //{
+        //    // Hash the value (using a simple hash function for demonstration)
+        //    int hash = (int)(value * 2654435761); // A simple, fast hash function
 
-            // Extract RGB components from the hash
-            byte r = (byte)(hash >> 16 & 0xFF);
-            byte g = (byte)(hash >> 8 & 0xFF);
-            byte b = (byte)(hash & 0xFF);
+        //    // Extract RGB components from the hash
+        //    byte r = (byte)(hash >> 16 & 0xFF);
+        //    byte g = (byte)(hash >> 8 & 0xFF);
+        //    byte b = (byte)(hash & 0xFF);
 
-            return (r, g, b);
-        }
+        //    return (r, g, b);
+        //}
 
-        // Convert RGB to a ConsoleColor (approximation due to limited colors in Console)
-        private static ConsoleColor GetConsoleColorFromRGB(byte r, byte g, byte b)
-        {
-            // Calculate the brightness level as an average of the RGB components
-            int brightness = (r + g + b) / 3;
+        //// Convert RGB to a ConsoleColor (approximation due to limited colors in Console)
+        //private static ConsoleColor GetConsoleColorFromRGB(byte r, byte g, byte b)
+        //{
+        //    // Calculate the brightness level as an average of the RGB components
+        //    int brightness = (r + g + b) / 3;
 
-            // Check which ranges each component falls into to decide on the color
-            if (brightness < 64)
-            {
-                if (r > g && r > b) return ConsoleColor.DarkRed;
-                if (g > r && g > b) return ConsoleColor.DarkGreen;
-                if (b > r && b > g) return ConsoleColor.DarkBlue;
-                return ConsoleColor.Black;
-            }
-            else if (brightness < 128)
-            {
-                if (r > g && r > b) return ConsoleColor.Red;
-                if (g > r && g > b) return ConsoleColor.Green;
-                if (b > r && b > g) return ConsoleColor.Blue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.DarkGray;
-            }
-            else if (brightness < 192)
-            {
-                if (r > g && r > b) return ConsoleColor.DarkYellow;
-                if (g > r && g > b) return ConsoleColor.DarkGreen;
-                if (b > r && b > g) return ConsoleColor.DarkBlue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.Gray;
-            }
-            else
-            {
-                if (r > g && r > b) return ConsoleColor.Red;
-                if (g > r && g > b) return ConsoleColor.Green;
-                if (b > r && b > g) return ConsoleColor.Blue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.White;
-            }
-        }
+        //    // Check which ranges each component falls into to decide on the color
+        //    if (brightness < 64)
+        //    {
+        //        if (r > g && r > b) return ConsoleColor.DarkRed;
+        //        if (g > r && g > b) return ConsoleColor.DarkGreen;
+        //        if (b > r && b > g) return ConsoleColor.DarkBlue;
+        //        return ConsoleColor.Black;
+        //    }
+        //    else if (brightness < 128)
+        //    {
+        //        if (r > g && r > b) return ConsoleColor.Red;
+        //        if (g > r && g > b) return ConsoleColor.Green;
+        //        if (b > r && b > g) return ConsoleColor.Blue;
+        //        if (r == g && r > b) return ConsoleColor.Yellow;
+        //        if (r == b && r > g) return ConsoleColor.Magenta;
+        //        if (g == b && g > r) return ConsoleColor.Cyan;
+        //        return ConsoleColor.DarkGray;
+        //    }
+        //    else if (brightness < 192)
+        //    {
+        //        if (r > g && r > b) return ConsoleColor.DarkYellow;
+        //        if (g > r && g > b) return ConsoleColor.DarkGreen;
+        //        if (b > r && b > g) return ConsoleColor.DarkBlue;
+        //        if (r == g && r > b) return ConsoleColor.Yellow;
+        //        if (r == b && r > g) return ConsoleColor.Magenta;
+        //        if (g == b && g > r) return ConsoleColor.Cyan;
+        //        return ConsoleColor.Gray;
+        //    }
+        //    else
+        //    {
+        //        if (r > g && r > b) return ConsoleColor.Red;
+        //        if (g > r && g > b) return ConsoleColor.Green;
+        //        if (b > r && b > g) return ConsoleColor.Blue;
+        //        if (r == g && r > b) return ConsoleColor.Yellow;
+        //        if (r == b && r > g) return ConsoleColor.Magenta;
+        //        if (g == b && g > r) return ConsoleColor.Cyan;
+        //        return ConsoleColor.White;
+        //    }
+        //}
 
         public void CopyContaminationMap(List<int>[,] source, List<int>[,] destination)
         {
@@ -603,6 +604,70 @@ namespace DropletsInMotion.Application.Services
                     destination[i, j] = source[i, j] != null ? new List<int>(source[i, j]) : null;
                 }
             }
+        }
+
+
+
+
+        public void RenderGrid(List<int>[,] grid)
+        {
+            var table = new Table
+            {
+                Border = TableBorder.None
+            };
+
+            // Add columns dynamically based on the grid height (flipped axis)
+            for (int row = 0; row < grid.GetLength(0); row++)
+            {
+                table.AddColumn(new TableColumn("").Centered());
+            }
+
+            // Generate rows (flip axis)
+            for (int col = 0; col < grid.GetLength(1); col++)
+            {
+                var rowCells = new List<string>();
+                for (int row = 0; row < grid.GetLength(0); row++)
+                {
+                    var cellContent = grid[row, col]; // Swap row and column here
+                    if (cellContent.Count == 0)
+                    {
+                        // Empty cell
+                        rowCells.Add("[white on black] 0 [/]");
+                    }
+                    else
+                    {
+                        // Generate a color based on the list contents
+                        var backgroundColor = GetDeterministicColor(cellContent);
+                        string values = string.Join(",", cellContent);
+                        rowCells.Add($"[white on {backgroundColor}] {values} [/]");
+                    }
+                }
+                table.AddRow(rowCells.ToArray());
+            }
+
+            // Render the table
+            AnsiConsole.Write(table);
+        }
+
+
+        static string GetDeterministicColor(List<int> values)
+        {
+            values.Sort();
+            // Generate a deterministic hash for the list
+            int hash = string.Join(",", values).GetHashCode();
+
+            // Use the hash to generate RGB values
+            int r = (hash & 0xFF0000) >> 16; // Extract red component
+            int g = (hash & 0x00FF00) >> 8;  // Extract green component
+            int b = (hash & 0x0000FF);       // Extract blue component
+
+            // Ensure values are within the valid range (0-255)
+            r = Math.Abs(r) % 256;
+            g = Math.Abs(g) % 256;
+            b = Math.Abs(b) % 256;
+
+            // Format the RGB values as a hex string
+            return $"#{r:X2}{g:X2}{b:X2}";
         }
 
 

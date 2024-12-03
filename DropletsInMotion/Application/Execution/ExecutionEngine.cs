@@ -206,6 +206,7 @@ namespace DropletsInMotion.Application.Execution
 
                 await SendActions(boardActions);
                 //_contaminationService.PrintContaminationMap(ContaminationMap);
+                //_contaminationService.RenderGrid(ContaminationMap);
                 boardActions.Clear();
             }
 
