@@ -511,7 +511,7 @@ namespace DropletsInMotion.Application.Services
                     //byte oldValue = contaminationMap[x, y];
                     //byte newValue = (byte)(oldValue == 0 || oldValue == substanceId ? substanceId : 255);
                     //contaminationMap[x, y] = newValue;
-                    ApplyIfInBounds(contaminationMap, x, x, substanceId);
+                    ApplyIfInBounds(contaminationMap, x, y, substanceId);
                 }
             }
         }
