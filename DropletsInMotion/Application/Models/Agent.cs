@@ -158,7 +158,7 @@ namespace DropletsInMotion.Application.Models
             PositionY = y;
             SnakeBody.AddFirst((x, y));
             int maximumSnakeLength = GetMaximumSnakeLength();
-            if (SnakeBody.Count > maximumSnakeLength)
+            if (SnakeBody.Count > maximumSnakeLength + 1)
             {
                 SnakeBody.RemoveLast();
             }
