@@ -21,6 +21,7 @@ using DropletsInMotion.Presentation;
 using DropletsInMotion.Translation.Services;
 using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Infrastructure;
+using DropletsInMotion.Translation;
 
 namespace DropletsInMotionTests
 {

@@ -10,7 +10,7 @@
 
         // Methods
         void GetInitialInformation();
-        string GetPathToBoardConfiguration();
+        string GetPathToPlatform();
         string GetPathToProgram();
         //void WriteSuccess(string message);
         //void WriteColor(string message, ConsoleColor color = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black);

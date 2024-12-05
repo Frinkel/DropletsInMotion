@@ -16,6 +16,7 @@ using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Translation;
 using DropletsInMotion.Translation.Services;
 
 
@@ -57,9 +58,6 @@ namespace DropletsInMotion
                     }
                     catch (Exception e)
                     {
-                        //_logger.WriteColor(e.Message, ConsoleColor.DarkRed);
-
-                        // Handle the runtime exception
                         var action = _runtimeExceptionHandler.Handle(e);
 
                         switch (action)
@@ -72,7 +70,7 @@ namespace DropletsInMotion
 
 
                             case RuntimeExceptionHandler.RuntimeExceptionAction.Exit:
-                                break;
+                                throw;
                         }
                     }
                 }

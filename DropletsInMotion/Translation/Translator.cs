@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Infrastructure.Services;
-using DropletsInMotion.Presentation.Services;
+﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using Antlr4.Runtime;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Presentation.Language;
-using static MicrofluidicsParser;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
+using DropletsInMotion.Infrastructure.Services;
+using DropletsInMotion.Presentation;
+using DropletsInMotion.Presentation.Language;
+using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Translation.Services;
 
-namespace DropletsInMotion.Presentation
+namespace DropletsInMotion.Translation
 {
     public class Translator : ITranslator
     {
@@ -32,8 +26,9 @@ namespace DropletsInMotion.Presentation
         private readonly ITypeChecker _typeChecker;
         private readonly IPlatformRepository _platformRepository;
         private readonly IContaminationConfigLoader _contaminationConfigLoader;
+        private readonly IContaminationRepository _contaminationRepository;
 
-        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService, ITypeChecker typeChecker, IPlatformRepository platformRepository, IContaminationConfigLoader contaminationConfigLoader)
+        public Translator(IPlatformService platformService, IUserService userService, IDependencyBuilder dependencyBuilder, IFileService fileService, ITypeChecker typeChecker, IPlatformRepository platformRepository, IContaminationConfigLoader contaminationConfigLoader, IContaminationRepository contaminationRepository)
         {
             _platformService = platformService;
             _userService = userService;
@@ -42,6 +37,7 @@ namespace DropletsInMotion.Presentation
             _typeChecker = typeChecker;
             _platformRepository = platformRepository;
             _contaminationConfigLoader = contaminationConfigLoader;
+            _contaminationRepository = contaminationRepository;
         }
 
         public void Load()
@@ -57,6 +53,8 @@ namespace DropletsInMotion.Presentation
 
         public void Translate()
         {
+            _contaminationRepository.ResetContaminationSubstances();
+
             var programContent = _fileService.ReadFileFromPath(_userService.ProgramPath);
             var inputStream = new AntlrInputStream(programContent);
             var lexer = new MicrofluidicsLexer(inputStream);

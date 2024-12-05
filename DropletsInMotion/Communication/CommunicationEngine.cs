@@ -97,7 +97,7 @@ namespace DropletsInMotion.Communication
         {
             if (!_isServerRunning || _communicationService == null)
             {
-                throw new InvalidOperationException("Tried to send request without a open communication channel!");
+                throw new InvalidOperationException("Tried to send request without a open communication channel!"); // TODO: Communication error here!
             }
 
             return await _communicationService.SendActuatorRequest(actuator, time);

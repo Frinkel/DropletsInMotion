@@ -246,6 +246,11 @@ namespace DropletsInMotion.Presentation.Services
 
         public void LoadBoardFromJson()
         {
+            if (!File.Exists(_userService.PlatformPath))
+            {
+                throw new FileNotFoundException("Platform file not found!");
+            }
+
             string jsonContent = File.ReadAllText(_userService.PlatformPath);
             RootObject rootObject = JsonSerializer.Deserialize<RootObject>(jsonContent);
 

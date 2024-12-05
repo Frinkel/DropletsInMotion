@@ -86,7 +86,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
         Console.WriteLine("Headers");
         foreach (var s in combinedHeaders)
         {
-            _contaminationRepository.SubstanceTable.Add((s, true));
+            _contaminationRepository.InitialSubstanceTable.Add((s, true));
             Console.Write(s + " ");
         }
         Console.WriteLine();
@@ -288,8 +288,8 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
                 {
                     if (addedIdentifiers.Contains(rowIdentifier + "_" + columnIdentifier) || addedIdentifiers.Contains(columnIdentifier + "_" + rowIdentifier)) continue;
 
-                    int index = _contaminationRepository.SubstanceTable.Count;
-                    _contaminationRepository.SubstanceTable.Add((rowIdentifier + "_" + columnIdentifier, false));
+                    int index = _contaminationRepository.InitialSubstanceTable.Count;
+                    _contaminationRepository.InitialSubstanceTable.Add((rowIdentifier + "_" + columnIdentifier, false));
 
                     addedIdentifiers.Add(rowIdentifier + "_" + columnIdentifier);
                     addedIdentifiers.Add(columnIdentifier + "_"  + rowIdentifier);
@@ -331,8 +331,8 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
                         if (addedIdentifiers.Contains(rowIdentifier + "_" + columnIdentifier) || addedIdentifiers.Contains(columnIdentifier + "_" + rowIdentifier)) continue;
 
 
-                        int index = _contaminationRepository.SubstanceTable.Count;
-                        _contaminationRepository.SubstanceTable.Add((rowIdentifier + "_" + columnIdentifier, false));
+                        int index = _contaminationRepository.InitialSubstanceTable.Count;
+                        _contaminationRepository.InitialSubstanceTable.Add((rowIdentifier + "_" + columnIdentifier, false));
 
                         addedIdentifiers.Add(rowIdentifier + "_" + columnIdentifier);
                         addedIdentifiers.Add(columnIdentifier + "_" + rowIdentifier);

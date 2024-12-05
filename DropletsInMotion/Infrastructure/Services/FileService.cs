@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MicrofluidicsParser;
-
-namespace DropletsInMotion.Infrastructure.Services
+﻿namespace DropletsInMotion.Infrastructure.Services
 {
     public class FileService : IFileService
     {
-        public FileService()
-        {
-
-        }
 
         public string ReadFileFromPath(string path)
         {

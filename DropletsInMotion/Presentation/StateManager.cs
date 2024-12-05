@@ -115,25 +115,8 @@ namespace DropletsInMotion.Presentation
 
         private async Task<ProgramState> HandleCompilation()
         {
-            //// Parse the contents
-            //var inputStream = new AntlrInputStream(_programContent);
-            //var lexer = new MicrofluidicsLexer(inputStream);
-            //var commonTokenStream = new CommonTokenStream(lexer);
-            //var parser = new MicrofluidicsParser(commonTokenStream);
-            //var listener = new MicrofluidicsCustomListener();
-            //var tree = parser.program();
-            //ParseTreeWalker.Default.Walk(listener, tree);
-
-            //// TODO: Remove
-            //foreach (var elem in listener.Commands)
-            //{
-            //    Console.WriteLine(elem.ToString());
-            //}
-
-            // TODO: Maybe the compiler should return a status code for the compilation.
             IExecutionEngine executionEngine = _serviceProvider.GetRequiredService<IExecutionEngine>();
             await executionEngine.Execute();
-
 
             return ProgramState.Completed;
         }
@@ -225,6 +208,18 @@ namespace DropletsInMotion.Presentation
                             return ProgramState.CompilingProgram;
 
                         case "reupload":
+                            _userService.ProgramPath = null;
+                            _userService.ConfigurationPath = null;
+                            _userService.MergeTablePath = null;
+                            _userService.ContaminationTablePath = null;
+                            return ProgramState.GettingInitialInformation;
+
+                        case "reupload p":
+                            _userService.ProgramPath = null;
+                            return ProgramState.GettingInitialInformation;
+
+                        case "reupload c":
+                            _userService.ConfigurationPath = null;
                             return ProgramState.GettingInitialInformation;
 
                         case "disconnect":
@@ -265,7 +260,9 @@ namespace DropletsInMotion.Presentation
         {
             _logger.WriteColor("Available commands:");
             _logger.WriteColor("  start / [Enter]  - Start compiling the program");
-            _logger.WriteColor("  reupload         - Re-upload the program");
+            _logger.WriteColor("  reupload         - Re-upload the everything");
+            _logger.WriteColor("  reupload p       - Re-upload the program");
+            _logger.WriteColor("  reupload c       - Re-upload the configuration");
             _logger.WriteColor("  disconnect       - Disconnect the client and return to waiting for a new connection");
             _logger.WriteColor("  stop / quit / q  - Stop the communication and exit the program");
             _logger.WriteEmptyLine(2);
