@@ -7,6 +7,7 @@ using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
+using DropletsInMotion.Communication.Physical;
 using DropletsInMotion.Communication.Services;
 using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
@@ -31,6 +32,7 @@ namespace DropletsInMotion
         private static ILogger? _logger;
         private static RuntimeExceptionHandler? _runtimeExceptionHandler;
 
+
         static async Task Main(string[] args)
         {
             using (var serviceProvider = Setup())
@@ -39,7 +41,6 @@ namespace DropletsInMotion
                 _communicationEngine = serviceProvider.GetRequiredService<ICommunicationEngine>();
                 _logger = serviceProvider.GetRequiredService<ILogger>();
                 _runtimeExceptionHandler = serviceProvider.GetRequiredService<RuntimeExceptionHandler>();
-
                 _fileService = serviceProvider.GetRequiredService<IFileService>();
 
                 // Write the title onto the console
@@ -121,6 +122,7 @@ namespace DropletsInMotion
             // Classes
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<PhysicalCommunicationService>();
             serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 

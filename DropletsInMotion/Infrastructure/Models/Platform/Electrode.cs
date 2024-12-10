@@ -9,11 +9,16 @@
         public int CoordinateX { get; set; }
         public int CoordinateY { get; set; }
 
-        public Electrode(int id, int coordinateX, int coordinateY)
+        public int ElectrodeId { get; set; }
+        public int DriverId { get; set; }
+
+        public Electrode(int id, int coordinateX, int coordinateY, int electrodeId, int driverId)
         {
             Id = id;
             CoordinateX = coordinateX;
             CoordinateY = coordinateY;
+            ElectrodeId = electrodeId;
+            DriverId = driverId;
         }
 
         public override string ToString()

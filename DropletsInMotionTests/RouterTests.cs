@@ -852,7 +852,7 @@ namespace DropletsInMotionTests
                 board[i] = new Electrode[20];
                 for (int j = 0; j < 20; j++)
                 {
-                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j);
+                    board[i][j] = new Electrode((i + 1) + (j * 32), i, j, 0, 0);
                 }
             }
             return board;

@@ -6,6 +6,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Communication.Models;
+using DropletsInMotion.Communication.Physical;
 using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Repositories;
 
@@ -63,7 +64,13 @@ namespace DropletsInMotion.Communication
             }
             else
             {
-                throw new NotImplementedException();
+                // INSTANTIATE
+                var service = _serviceProvider.GetRequiredService<PhysicalCommunicationService>();
+                await service.StartCommunication();
+                _isServerRunning = true; // DO we need this?
+                return service;
+
+                //throw new NotImplementedException("SUP");
             }
         }
 

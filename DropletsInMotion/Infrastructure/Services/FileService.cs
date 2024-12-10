@@ -13,7 +13,7 @@
             throw new FileNotFoundException($"The file on path '{path}' was not found.");
         }
 
-        public string ReadFileFromProjectDirectory(string intermediatePath)
+        public string ReadFileFromProjectDirectory2(string intermediatePath)
         {
             string path = GetProjectDirectory() + intermediatePath;
 
@@ -23,6 +23,17 @@
             }
 
             throw new FileNotFoundException($"The file on path '{path}' was not found.");
+        }
+
+        public string ReadFileFromProjectDirectory(string intermediatePath)
+        {
+            string runtimePath = AppContext.BaseDirectory + intermediatePath;
+            if (File.Exists(runtimePath))
+            {
+                return File.ReadAllText(runtimePath);
+            }
+
+            throw new FileNotFoundException($"The file on path '{intermediatePath}' was not found in either development or runtime locations.");
         }
 
         public string GetProjectDirectory()

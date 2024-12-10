@@ -205,7 +205,7 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                _contaminationService.PrintContaminationMap(ContaminationMap);
+                //_contaminationService.PrintContaminationMap(ContaminationMap);
                 boardActions.Clear();
             }
 
@@ -236,7 +236,6 @@ namespace DropletsInMotion.Application.Execution
 
             foreach (var kvp in reservoir.DispenseSequence)
             {
-                
                 BoardAction b = new BoardAction(Convert.ToInt32(kvp["id"]), Convert.ToInt32(kvp["status"]), kvp["time"] + Time);
                 boardActions.Add(b);
             }

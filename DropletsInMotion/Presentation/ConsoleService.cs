@@ -223,7 +223,7 @@ namespace DropletsInMotion.Presentation
                 return path;
             }
 
-            path = ReadFolderFromUserPath("Enter to the configuration folder:");
+            path = ReadFolderFromUserPath("Enter path to the configuration folder:");
 
             // This should in theory not happen
             if (!Directory.Exists(path))

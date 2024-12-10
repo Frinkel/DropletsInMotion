@@ -21,11 +21,7 @@ namespace DropletsInMotion.Presentation
         private readonly IFileService _fileService;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        //private IDeviceRepository _deviceRepository;
-
         private readonly ITranslator _translator;
-        //private IDeviceTemplateService _deviceTemplateService;
-
         private ProgramState _currentState = ProgramState.GettingInitialInformation;
 
         private string? _programContent;
@@ -113,6 +109,11 @@ namespace DropletsInMotion.Presentation
             }
         }
 
+        public void Exit()
+        {
+
+        }
+
         private async Task<ProgramState> HandleCompilation()
         {
             IExecutionEngine executionEngine = _serviceProvider.GetRequiredService<IExecutionEngine>();
@@ -159,7 +160,8 @@ namespace DropletsInMotion.Presentation
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    _userService.Communication = IUserService.CommunicationType.Physical;
+                    //throw new NotImplementedException();
                 }
             }
 
