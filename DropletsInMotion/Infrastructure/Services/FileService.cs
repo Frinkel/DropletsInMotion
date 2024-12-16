@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MicrofluidicsParser;
-
-namespace DropletsInMotion.Infrastructure.Services
+﻿namespace DropletsInMotion.Infrastructure.Services
 {
     public class FileService : IFileService
     {
-        public FileService()
-        {
-
-        }
 
         public string ReadFileFromPath(string path)
         {
@@ -24,7 +13,7 @@ namespace DropletsInMotion.Infrastructure.Services
             throw new FileNotFoundException($"The file on path '{path}' was not found.");
         }
 
-        public string ReadFileFromProjectDirectory(string intermediatePath)
+        public string ReadFileFromProjectDirectory2(string intermediatePath)
         {
             string path = GetProjectDirectory() + intermediatePath;
 
@@ -34,6 +23,17 @@ namespace DropletsInMotion.Infrastructure.Services
             }
 
             throw new FileNotFoundException($"The file on path '{path}' was not found.");
+        }
+
+        public string ReadFileFromProjectDirectory(string intermediatePath)
+        {
+            string runtimePath = AppContext.BaseDirectory + intermediatePath;
+            if (File.Exists(runtimePath))
+            {
+                return File.ReadAllText(runtimePath);
+            }
+
+            throw new FileNotFoundException($"The file on path '{intermediatePath}' was not found in either development or runtime locations.");
         }
 
         public string GetProjectDirectory()

@@ -7,6 +7,7 @@ using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
+using DropletsInMotion.Communication.Physical;
 using DropletsInMotion.Communication.Services;
 using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
@@ -16,6 +17,7 @@ using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Translation;
 using DropletsInMotion.Translation.Services;
 
 
@@ -30,6 +32,7 @@ namespace DropletsInMotion
         private static ILogger? _logger;
         private static RuntimeExceptionHandler? _runtimeExceptionHandler;
 
+
         static async Task Main(string[] args)
         {
             using (var serviceProvider = Setup())
@@ -38,7 +41,6 @@ namespace DropletsInMotion
                 _communicationEngine = serviceProvider.GetRequiredService<ICommunicationEngine>();
                 _logger = serviceProvider.GetRequiredService<ILogger>();
                 _runtimeExceptionHandler = serviceProvider.GetRequiredService<RuntimeExceptionHandler>();
-
                 _fileService = serviceProvider.GetRequiredService<IFileService>();
 
                 // Write the title onto the console
@@ -57,9 +59,6 @@ namespace DropletsInMotion
                     }
                     catch (Exception e)
                     {
-                        //_logger.WriteColor(e.Message, ConsoleColor.DarkRed);
-
-                        // Handle the runtime exception
                         var action = _runtimeExceptionHandler.Handle(e);
 
                         switch (action)
@@ -72,7 +71,7 @@ namespace DropletsInMotion
 
 
                             case RuntimeExceptionHandler.RuntimeExceptionAction.Exit:
-                                break;
+                                throw;
                         }
                     }
                 }
@@ -123,6 +122,7 @@ namespace DropletsInMotion
             // Classes
             serviceCollection.AddSingleton<StateManager>();
             serviceCollection.AddSingleton<SimulationCommunicationService>();
+            serviceCollection.AddSingleton<PhysicalCommunicationService>();
             serviceCollection.AddSingleton<ITranslator, Translator>();
             serviceCollection.AddSingleton<IExecutionEngine, ExecutionEngine>();
 

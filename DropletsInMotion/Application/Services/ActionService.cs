@@ -20,6 +20,7 @@ using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Translation.Services;
 
 namespace DropletsInMotion.Application.Services
 {

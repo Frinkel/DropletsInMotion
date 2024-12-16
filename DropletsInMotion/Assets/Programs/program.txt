@@ -2,5 +2,4 @@ Droplet(d1, 0, 0, 706, "H2O");
 Droplet(d2, 15, 0, 706, "Blood");
 Droplet(d4, 5, 0, 706, "Bile");
 Move(d4, 5, 10);
-Merge(d1, d2, d3, 0, 10);
-// d3 -> BW
+//Merge(d1, d2, d3, 0, 10);

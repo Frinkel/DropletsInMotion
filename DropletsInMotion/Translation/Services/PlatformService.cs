@@ -5,6 +5,7 @@ using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Infrastructure.Repositories;
 using System.IO;
 using DropletsInMotion.Communication.Models;
+using DropletsInMotion.Translation.Services;
 
 namespace DropletsInMotion.Presentation.Services
 {
@@ -246,6 +247,11 @@ namespace DropletsInMotion.Presentation.Services
 
         public void LoadBoardFromJson()
         {
+            if (!File.Exists(_userService.PlatformPath))
+            {
+                throw new FileNotFoundException("Platform file not found!");
+            }
+
             string jsonContent = File.ReadAllText(_userService.PlatformPath);
             RootObject rootObject = JsonSerializer.Deserialize<RootObject>(jsonContent);
 
@@ -273,7 +279,7 @@ namespace DropletsInMotion.Presentation.Services
                 int x = (electrodeJson.PositionX - minX) / electrodeJson.SizeX;
                 int y = (electrodeJson.PositionY - minY) / electrodeJson.SizeY;
 
-                Board[x][y] = new Electrode(electrodeJson.Id, x, y);
+                Board[x][y] = new Electrode(electrodeJson.Id, x, y, electrodeJson.ElectrodeID, electrodeJson.DriverID);
             }
 
             _platformRepository.Board = Board;

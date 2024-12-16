@@ -2,13 +2,22 @@
 using System.Globalization;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Application.Services
 {
     public class TemplateService : ITemplateService
     {
+
+        private readonly IPlatformRepository _platformRepository;
+
         public List<(string, List<BoardAction>)> Templates { get; private set; } = new List<(string, List<BoardAction>)>();
-        public Electrode[][] Board { get; set; }
+        public Electrode[][]? Board { get; set; }
+
+        public TemplateService(IPlatformRepository platformRepository)
+        {
+            _platformRepository = platformRepository;
+        }
 
         public void Initialize(Electrode[][] board)
         {

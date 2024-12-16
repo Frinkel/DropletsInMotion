@@ -220,7 +220,8 @@ namespace DropletsInMotion.Application.Services
                 }
 
                 increment++;
-            } while (minBoundingX != 0 && maxBoundingX != boardWidth - 1 && minBoundingY != 0 && maxBoundingY != boardHeight - 1);
+            } while ((minBoundingX != 0 || maxBoundingX != boardWidth - 1) ||
+                     (minBoundingY != 0 || maxBoundingY != boardHeight - 1));
 
 
 
@@ -357,7 +358,7 @@ namespace DropletsInMotion.Application.Services
 
             if (chosenTemplate == null)
             {
-                throw new Exception("No template was chosen");
+                throw new Exception("No template was chosen"); // TODO: REDO EXCEPTION
             }
 
             ScheduledPosition optimalPosition =
