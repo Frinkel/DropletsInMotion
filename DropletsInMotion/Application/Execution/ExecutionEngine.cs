@@ -71,7 +71,7 @@ namespace DropletsInMotion.Application.Execution
 
         public async Task Execute()
         {
-            _translator.Translate();
+            _translator.Translate(); // TODO: Move to state manager
 
             Board = _translator.Board;
             DependencyGraph = _translator.DependencyGraph;
