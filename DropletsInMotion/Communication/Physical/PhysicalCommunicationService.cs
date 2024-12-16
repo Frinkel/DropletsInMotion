@@ -5,6 +5,7 @@ using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Translation.Services;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
 
 
@@ -44,7 +45,8 @@ namespace DropletsInMotion.Communication.Physical
                 Parity = Parity.None,        // No parity bit
                 DataBits = 8,                // 8 data bits
                 StopBits = StopBits.One,     // 1 stop bit
-                Handshake = Handshake.None   // No flow control
+                Handshake = Handshake.None,   // No flow control
+                Encoding = Encoding.GetEncoding(28591)
             };
 
             _serialPort.Open();
