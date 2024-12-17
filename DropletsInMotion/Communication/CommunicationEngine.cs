@@ -131,7 +131,7 @@ namespace DropletsInMotion.Communication
             await StopCommunication();
         }
 
-        private async Task StopCommunication()
+        public async Task StopCommunication()
         {
             if (_isServerRunning && _communicationService != null)
             {
