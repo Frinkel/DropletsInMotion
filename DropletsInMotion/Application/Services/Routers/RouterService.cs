@@ -14,6 +14,7 @@ using static DropletsInMotion.Application.Services.Routers.Models.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
@@ -35,14 +36,16 @@ public class RouterService : IRouterService
     private readonly ITemplateService _templateService;
     private readonly IPlatformRepository _platformRepository;
     private readonly ITemplateRepository _templateRepository;
+    private readonly IContaminationRepository _contaminationRepository;
 
 
-    public RouterService(IContaminationService contaminationService, ITemplateService templateService, IPlatformRepository platformRepository, ITemplateRepository templateRepository)
+    public RouterService(IContaminationService contaminationService, ITemplateService templateService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, IContaminationRepository contaminationRepository)
     {
         _templateService = templateService;
         _contaminationService = contaminationService;
         _platformRepository = platformRepository;
         _templateRepository = templateRepository;
+        _contaminationRepository = contaminationRepository;
     }
 
     public void Initialize(Electrode[][] board, int? seed = null)
@@ -60,15 +63,42 @@ public class RouterService : IRouterService
         State? sFinal = null;
 
         // Generate all permutations of the commands list
-        var permutations = GetPermutations(commands, commands.Count);
+        var permutations = GetPermutations(commands, commands.Count).ToList();
 
-        var chosenPermutation = permutations.First();
+
+
+        // Initialize the stopwatch
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        // Perform the sorting operation
+        //var sortedPermutations = permutations
+        //    .OrderBy(permutation => ScorePermutation(permutation, agents))
+        //    .ToList();
+
+        var sortedPermutations = permutations.ToList()
+            .AsParallel()
+            .Select(p => new
+            {
+                Permutation = p,
+                Score = ScorePermutation(p, agents)
+            })
+            .OrderBy(x => x.Score)
+            .Select(x => x.Permutation)
+            .ToList();
+
+        // Stop the stopwatch
+        stopwatch.Stop();
+
+        // Output the elapsed time
+        Console.WriteLine($"Sorting permutations took {stopwatch.Elapsed.TotalMilliseconds} ms");
+
 
         var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
         foreach (var commandOrder in permutations)
         {
-            
+            Debugger.Permutations++;
+
             // Clear commitedStates for each new permutation attempt
             commitedStates.Clear();
             sFinal = null;
@@ -77,15 +107,14 @@ public class RouterService : IRouterService
 
             foreach (var command in commandOrder)
             {
-                //List<string> routableAgents = new List<string>();
-                //routableAgents.AddRange(command.GetInputDroplets());
+
+                if (command.GetType() != typeof(Move)) throw new Exception($"Trying to route an unroutable command {command.GetType().ToString().Split(".").Last()}");
+
 
                 // Create initial state and search for a solution
                 State s0 = new State(command.GetInputDroplets().First(), agents, reservedContaminationMap, new List<IDropletCommand>() { command }, commitedStates, _contaminationService, _platformRepository, _templateRepository, Seed);
                 Frontier f = new Frontier();
                 sFinal = astarRouter.Search(s0, f);
-
-                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
 
                 if (sFinal == null)
                 {
@@ -95,16 +124,13 @@ public class RouterService : IRouterService
 
 
                 // Combine states if a partial solution is found for this command
-                CombineStates(commitedStates, sFinal);
-                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
-
-                //_contaminationService.PrintContaminationMap(sFinal.ContaminationMap);
+                commitedStates = CombineStates(commitedStates, sFinal);
             }
 
             // If a solution was found for this permutation, break out of the loop
             if (foundSolution && sFinal != null)
             {
-                chosenPermutation = commandOrder;
+                //chosenPermutation = commandOrder;
                 break;
             }
         }
@@ -245,6 +271,63 @@ public class RouterService : IRouterService
         //Console.WriteLine();
         return sFinal.ExtractActions(time);
     }
+
+    private double ScorePermutation(IEnumerable<IDropletCommand> permutation, Dictionary<string, Agent> agents)
+    {
+        double score = 0;
+        int position = 0;
+        int substanceCount = _contaminationRepository.SubstanceTable.Count;
+        int contaminationTableCount = _contaminationRepository.ContaminationTable.Count;
+        int fullContaminating = substanceCount - contaminationTableCount;
+
+        //Console.WriteLine("*************** Permutation ***************");
+
+        foreach (var command in permutation)
+        {
+            position++;
+
+            var inputDroplets = command.GetInputDroplets();
+            var success = agents.TryGetValue(inputDroplets.First(), out var agent);
+
+            if (!success)
+                throw new Exception($"Could not find {inputDroplets.First()} in the routable agents.");
+
+            var isInContaminationTable = _contaminationRepository.SubstanceTable[agent.SubstanceId].Item2;
+            if (isInContaminationTable)
+            {
+                var rowIndex = agent.SubstanceId;
+
+                if (rowIndex >= contaminationTableCount)
+                    throw new Exception($"Row index {rowIndex} is out of bounds for the contamination table.");
+
+                for (int colIndex = 0; colIndex < contaminationTableCount; colIndex++)
+                {
+                    var relation = _contaminationRepository.ContaminationTable[colIndex][rowIndex];
+
+                    if (relation)
+                    {
+                        score += 1 * (1.0 / position);
+                    }
+                }
+
+                //Console.WriteLine($"Full is: {fullContaminating}");
+                //Console.WriteLine($"All is: {_contaminationRepository.SubstanceTable.Count}");
+                score += fullContaminating;
+            }
+            else
+            {
+                score += substanceCount * (1.0 / position);
+            }
+
+            //Console.WriteLine($"TYPE IS: {command.GetType()}");
+            //Console.WriteLine("Agent " + inputDroplets.First());
+            //Console.WriteLine("Score so far: " + score);
+            //Console.WriteLine("----------");
+        }
+
+        return score;
+    }
+
 
     public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
     {

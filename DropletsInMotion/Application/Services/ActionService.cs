@@ -200,7 +200,7 @@ namespace DropletsInMotion.Application.Services
 
             if (!isBetweenHorizontally && !isBetweenVertically)
             {
-                throw new RuntimeException("Input droplet is not positioned between the specified split positions."); // TODO: What exception should this be?
+                throw new RuntimeException("Input droplet is not positioned between the specified split positions.");
             }
 
 

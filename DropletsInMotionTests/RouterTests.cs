@@ -39,6 +39,7 @@ namespace DropletsInMotionTests
             Debugger.ExploredStates = 0;
             Debugger.Nodes = new List<(int x, int y)>();
             Debugger.ElapsedTime.Clear();
+            Debugger.Permutations = 0;
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -133,7 +134,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -158,7 +159,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
@@ -168,7 +169,7 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarSearchTestCase1()
         {
-            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             IDropletCommand dropletCommand = new Move("a1", 12, 10);
             var commands = new List<IDropletCommand>() { dropletCommand };
@@ -187,7 +188,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
             //Debugger.PrintDuplicateCounts();
@@ -199,7 +200,7 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarSearchHorseShoe()
         {
-            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             IDropletCommand dropletCommand = new Move("a1", 10, 10);
             var commands = new List<IDropletCommand>() { dropletCommand };
@@ -222,7 +223,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
             //Debugger.PrintDuplicateCounts();
@@ -235,7 +236,7 @@ namespace DropletsInMotionTests
         [Test]
         public void AStarTheMaze()
         {
-            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            //Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             IDropletCommand dropletCommand = new Move("a1", 0, 0);
             var commands = new List<IDropletCommand>() { dropletCommand };
@@ -259,7 +260,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
             //Debugger.PrintDuplicateCounts();
@@ -307,7 +308,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
 
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -348,7 +349,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -389,7 +390,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -430,7 +431,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -462,7 +463,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -494,7 +495,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -553,7 +554,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -615,7 +616,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -681,7 +682,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
@@ -717,7 +718,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
             //Debugger.PrintDuplicateCounts();
@@ -755,7 +756,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
             //Debugger.Nodes.ForEach(p => Console.Write($"({p.x} {p.y}) "));
             //Debugger.PrintDuplicateCounts();
@@ -815,7 +816,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));

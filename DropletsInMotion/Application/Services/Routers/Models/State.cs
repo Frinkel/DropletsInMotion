@@ -705,7 +705,7 @@ public class State
                     if (_contaminationService.IsConflicting(ContaminationMap, moveCommand.PositionX, moveCommand.PositionY, agent.SubstanceId))
                     {
                         throw new InvalidOperationException(
-                            $"Impossible for droplet {agent.DropletName} to reach the position in command {moveCommand}");
+                            $"Impossible for droplet '{agent.DropletName}' to reach the position in command {moveCommand}");
                     }
                     if (agent.GetAgentSize() + moveCommand.PositionX > ContaminationMap.GetLength(0) ||
                         agent.GetAgentSize() + moveCommand.PositionY > ContaminationMap.GetLength(1))

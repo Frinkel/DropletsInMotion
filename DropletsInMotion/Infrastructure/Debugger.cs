@@ -16,6 +16,8 @@ namespace DropletsInMotion.Infrastructure
         
         public static List<(int x, int y)> Nodes = new List<(int x, int y)>();
 
+        public static int Permutations { get; set; }
+
 
         public static void PrintDuplicateCounts()
         {
