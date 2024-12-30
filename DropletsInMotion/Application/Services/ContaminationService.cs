@@ -263,8 +263,11 @@ namespace DropletsInMotion.Application.Services
             _contaminationRepository.SubstanceTable.Add((newSubstanceName, false));
 
             var newSubstanceId = _contaminationRepository.SubstanceTable.Count - 1;
-            _contaminationRepository.MergeSubstanceTable.Add((substance1,substance2), newSubstanceId);
-
+            var key = (substance1, substance2);
+            if (!_contaminationRepository.MergeSubstanceTable.ContainsKey(key))
+            {
+                _contaminationRepository.MergeSubstanceTable.Add(key, newSubstanceId);
+            }
             return newSubstanceId;
         }
 
