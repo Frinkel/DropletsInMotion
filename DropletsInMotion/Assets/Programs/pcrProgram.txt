@@ -1,6 +1,6 @@
 // Input DNA and PCRmix droplets
-Droplet(DNA, 0, 0, 1);
-Droplet(PCRmix, 0, 19, 1);
+Droplet(DNA, 0, 0, 400);
+Droplet(PCRmix, 0, 19, 400);
 
 // Turn heaters on
 Actuator("Heater1", temperature=95);
@@ -10,11 +10,11 @@ Actuator("Heater3", temperature=72);
 // Variables
 poolingInterval = 5;
 storeTime = 5; // This should be 30 seconds for the real PCR protocol
-cycles = 1; // This should be 30 cycles for the real PCR protocol
-mixCycles = 1; // This should be 30 cycles for the real PCR protocol
+cycles = 2; // This should be 30 cycles for the real PCR protocol
+mixCycles = 2; // This should be 30 cycles for the real PCR protocol
 denaturationTemp = 94;
-annealingTemp = 54;
-extensionTemp = 71;
+annealingTemp = 55;
+extensionTemp = 72;
 
 
 // Merge DNA and PCRmix
@@ -22,17 +22,6 @@ Merge(DNA, PCRmix, mergedDroplet, 2, 7);
 
 // Mix the merges substance
 Mix(mergedDroplet, 2, 7, 5, 5, mixCycles);
-
-// Get the temperature of the droplet
-s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
-
-// Wait for the droplet to reach the temperature
-while(s1Temp < denaturationTemp) {
-	Store(mergedDroplet, 12, 16, poolingInterval);
-	s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
-};
-Store(mergedDroplet, 12, 16, storeTime);
-
 
 // Begin the cycles
 i = 0;
@@ -43,7 +32,7 @@ while(i < cycles) {
 	while(s1Temp < denaturationTemp) {
 		Store(mergedDroplet, 12, 16, poolingInterval);
 		s1Temp = Sensor(mergedDroplet, "TempSensor1", "temperature");
-	}
+	};
 	Store(mergedDroplet, 12, 16, storeTime);
 
 
@@ -53,7 +42,7 @@ while(i < cycles) {
 	while(s2Temp < annealingTemp) {
 		Store(mergedDroplet, 12, 3, poolingInterval);
 		s2Temp = Sensor(mergedDroplet, "TempSensor2", "temperature");
-	}
+	};
 	Store(mergedDroplet, 12, 3, storeTime);
 
 
@@ -63,11 +52,11 @@ while(i < cycles) {
 	while(s3Temp < extensionTemp) {
 		Store(mergedDroplet, 21, 16, poolingInterval);
 		s3Temp = Sensor(mergedDroplet, "TempSensor3", "temperature");
-	}
+	};
 	Store(mergedDroplet, 21, 16, storeTime);
 
 	i = i + 1;
-}
+};
 
 // Output
 Move(mergedDroplet, 21, 0);

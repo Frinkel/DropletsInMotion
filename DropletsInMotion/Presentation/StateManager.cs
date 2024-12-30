@@ -225,14 +225,14 @@ namespace DropletsInMotion.Presentation
                             return ProgramState.GettingInitialInformation;
 
                         case "disconnect":
-                            //await _communicationEngine.StopCommunication()!;
+                            await _communicationEngine.StopCommunication()!;
                             return ProgramState.WaitingForClientConnection;
 
                         case "stop":
                         case "quit":
                         case "q":
                             _logger.WriteColor("Exiting the program...");
-                            //await _communicationEngine.StopCommunication()!;
+                            await _communicationEngine.StopCommunication()!;
                             Environment.Exit(0);
                             break;
 

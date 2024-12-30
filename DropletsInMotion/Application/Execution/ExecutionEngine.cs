@@ -275,22 +275,37 @@ namespace DropletsInMotion.Application.Execution
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it is already contaminated");
             }
 
-
-            Agent agent = _agentFactory.CreateAgent(dropletCommand.DropletName, dropletCommand.PositionX,
+            Agent potentialAgent = _agentFactory.CreateAgent(dropletCommand.DropletName, dropletCommand.PositionX,
                 dropletCommand.PositionY, dropletCommand.Volume, substance);
-            Agents.Add(dropletCommand.DropletName, agent);
-            ContaminationMap = _contaminationService.ApplyContaminationWithSize(agent, ContaminationMap);
+
+            // Get the positions the new droplet will occupy
+            var newDropletPositions = potentialAgent.GetAllAgentPositions();
+
+            // Check if any of the new droplet's positions conflict with existing droplets
+            foreach (var agent in Agents.Values)
+            {
+                var agentPositions = agent.GetAllAgentPositions();
+                if (newDropletPositions.Any(newPos => agentPositions.Any(existingPos => newPos.x == existingPos.x && newPos.y == existingPos.y)))
+                {
+                    throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since it conflicts with another droplet's position");
+                }
+            }
+
+            // Add the new agent to the Agents list after all checks pass
+            Agents.Add(dropletCommand.DropletName, potentialAgent);
+
+            ContaminationMap = _contaminationService.ApplyContaminationWithSize(potentialAgent, ContaminationMap);
 
             ITemplate declareTemplate = _templateRepository?
                 .DeclareTemplates?
-                .Find(t => t.MinSize <= agent.Volume && agent.Volume < t.MaxSize);
+                .Find(t => t.MinSize <= potentialAgent.Volume && potentialAgent.Volume < t.MaxSize);
 
             if (declareTemplate == null)
             {
                 throw new Exception($"Cannot declare a new droplet at Position {dropletCommand.PositionX}, {dropletCommand.PositionY} since there is not template");
             }
 
-            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[agent.PositionX - declareTemplate.InitialPositions.First().Value.x][agent.PositionY - declareTemplate.InitialPositions.First().Value.y].Id, Time, 1);
+            List<BoardAction> initialElectrodes = declareTemplate.Apply(_platformRepository.Board[potentialAgent.PositionX - declareTemplate.InitialPositions.First().Value.x][potentialAgent.PositionY - declareTemplate.InitialPositions.First().Value.y].Id, Time, 1);
             boardActions.AddRange(initialElectrodes);
         }
 

@@ -13,4 +13,5 @@ public interface ICommunicationEngine
     event EventHandler? ClientDisconnected;
     Task<bool> SendActuatorRequest(Actuator actuator, double time);
     Task<double> SendTimeRequest();
+    Task StopCommunication();
 }

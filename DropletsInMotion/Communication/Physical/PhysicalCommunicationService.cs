@@ -5,6 +5,7 @@ using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Translation.Services;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
 
 
@@ -44,18 +45,25 @@ namespace DropletsInMotion.Communication.Physical
                 Parity = Parity.None,        // No parity bit
                 DataBits = 8,                // 8 data bits
                 StopBits = StopBits.One,     // 1 stop bit
-                Handshake = Handshake.None   // No flow control
+                Handshake = Handshake.None,   // No flow control
+                Encoding = Encoding.GetEncoding(28591)
             };
 
             _serialPort.Open();
             _logger.Info($"Serial port '{_serialPort.PortName}' opened");
             _logger.Info("Sending initial commands..");
             SendCommand("shv 1 280 \r");
+            await Task.Delay(1000);
+            
             SendCommand("hvpoe 1 1 \r");
+            await Task.Delay(1000);
+
             SendCommand("clra 0 \r");
+            await Task.Delay(1000);
+
             SendCommand("clra 1 \r");
 
-            await Task.Delay(100);
+            await Task.Delay(1000);
         }
 
         public async Task StopCommunication()
@@ -68,6 +76,15 @@ namespace DropletsInMotion.Communication.Physical
 
             // Closing command
             SendCommand("hvpoe 1 0");
+            await Task.Delay(100);
+
+            SendCommand("clra 0 \r");
+            await Task.Delay(100);
+
+            SendCommand("clra 1 \r");
+            await Task.Delay(100);
+
+
             _serialPort.Close();
             _logger.Info($"Serial port '{_serialPort.PortName}' closed");
         }
@@ -159,7 +176,7 @@ namespace DropletsInMotion.Communication.Physical
                 }
                 else
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(100);
                 }
 
 
@@ -226,7 +243,9 @@ namespace DropletsInMotion.Communication.Physical
             if (_serialPort.IsOpen)
             {
                 _logger.Debug($"Sent: {command}");
-                //_serialPort.Write(command);
+                var sendCommand = command + " \r";
+                char[] output = sendCommand.ToCharArray();
+                _serialPort.Write(output, 0, output.Length);
             }
             else
             {
@@ -262,6 +281,7 @@ namespace DropletsInMotion.Communication.Physical
 
                 if (string.IsNullOrEmpty(portName))
                 {
+                    
                     _logger.WriteEmptyLine(1);
                     _logger.WriteColor("Please choose a valid port.", ConsoleColor.DarkRed, ConsoleColor.DarkYellow);
                     _logger.WriteEmptyLine(1);
