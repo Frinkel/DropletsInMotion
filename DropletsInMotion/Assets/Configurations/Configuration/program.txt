@@ -1,9 +1,6 @@
-Droplet(d1, 9, 9, 706, "H2O");
-Droplet(some, 10, 19, 706);
-//Droplet(d2, 15, 0, 706, "Blood");
-//Droplet(d4, 10, 0, 706, "Bile");
-Move(d1, 0, 12);
-Move(d1, 0, 0);
-Move(some, 10, 18);
-Merge(d1, some, d3, 15, 15);
-// d3 -> BW
+Droplet(w, 0, 4, 400, "H2O");
+Droplet(o, 3, 2, 400, "Blood");
+
+
+Move(o, 0, 6);
+Move(w, 31, 4);
