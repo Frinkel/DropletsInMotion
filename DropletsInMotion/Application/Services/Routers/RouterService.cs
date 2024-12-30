@@ -63,7 +63,7 @@ public class RouterService : IRouterService
         State? sFinal = null;
 
         // Generate all permutations of the commands list
-        var permutations = GetPermutations(commands, commands.Count).ToList();
+        var permutations = GetPermutations(commands, commands.Count);
 
 
 
@@ -71,20 +71,18 @@ public class RouterService : IRouterService
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         // Perform the sorting operation
-        //var sortedPermutations = permutations
-        //    .OrderBy(permutation => ScorePermutation(permutation, agents))
-        //    .ToList();
+        var sortedPermutations = permutations
+            .OrderBy(permutation => ScorePermutation(permutation, agents));
 
-        var sortedPermutations = permutations.ToList()
-            .AsParallel()
-            .Select(p => new
-            {
-                Permutation = p,
-                Score = ScorePermutation(p, agents)
-            })
-            .OrderBy(x => x.Score)
-            .Select(x => x.Permutation)
-            .ToList();
+        //var sortedPermutations = permutations
+        //    .AsParallel()
+        //    .Select(p => new
+        //    {
+        //        Permutation = p,
+        //        Score = ScorePermutation(p, agents)
+        //    })
+        //    .OrderBy(x => x.Score)
+        //    .Select(x => x.Permutation);
 
         // Stop the stopwatch
         stopwatch.Stop();
@@ -95,7 +93,7 @@ public class RouterService : IRouterService
 
         var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
-        foreach (var commandOrder in permutations)
+        foreach (var commandOrder in sortedPermutations)
         {
             Debugger.Permutations++;
 
@@ -327,6 +325,20 @@ public class RouterService : IRouterService
 
         return score;
     }
+
+
+    //public static List<List<IDropletCommand>> GetPermutations(List<IDropletCommand> commands, int length)
+    //{
+    //    if (length == 1)
+    //        return commands.Select(cmd => new List<IDropletCommand> { cmd }).ToList();
+
+    //    return GetPermutations(commands, length - 1)
+    //        .SelectMany(
+    //            partialPermutation => commands.Where(cmd => !partialPermutation.Contains(cmd)),
+    //            (partialPermutation, nextCommand) => partialPermutation.Concat(new List<IDropletCommand> { nextCommand }).ToList()
+    //        )
+    //        .ToList();
+    //}
 
 
     public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
