@@ -290,74 +290,18 @@ public class RouterService : IRouterService
         return score;
     }
 
-
-    //private double ScorePermutation(IEnumerable<IDropletCommand> permutation, Dictionary<string, Agent> agents)
-    //{
-    //    double score = 0;
-    //    int position = 0;
-    //    int substanceCount = _contaminationRepository.SubstanceTable.Count;
-    //    int contaminationTableCount = _contaminationRepository.ContaminationTable.Count;
-    //    int fullContaminating = substanceCount - contaminationTableCount;
-
-    //    //Console.WriteLine("*************** Permutation ***************");
-
-    //    foreach (var command in permutation)
-    //    {
-    //        position++;
-
-    //        var inputDroplets = command.GetInputDroplets();
-    //        var success = agents.TryGetValue(inputDroplets.First(), out var agent);
-
-    //        if (!success)
-    //            throw new Exception($"Could not find {inputDroplets.First()} in the routable agents.");
-
-    //        var isInContaminationTable = _contaminationRepository.SubstanceTable[agent.SubstanceId].Item2;
-    //        if (isInContaminationTable)
-    //        {
-    //            var rowIndex = agent.SubstanceId;
-
-    //            if (rowIndex >= contaminationTableCount)
-    //                throw new Exception($"Row index {rowIndex} is out of bounds for the contamination table.");
-
-    //            for (int colIndex = 0; colIndex < contaminationTableCount; colIndex++)
-    //            {
-    //                var relation = _contaminationRepository.ContaminationTable[colIndex][rowIndex];
-
-    //                if (relation)
-    //                {
-    //                    score += 1 * (1.0 / position);
-    //                }
-    //            }
-
-    //            //Console.WriteLine($"Full is: {fullContaminating}");
-    //            //Console.WriteLine($"All is: {_contaminationRepository.SubstanceTable.Count}");
-    //            score += fullContaminating;
-    //        }
-    //        else
-    //        {
-    //            score += substanceCount * (1.0 / position);
-    //        }
-
-    //        //Console.WriteLine($"TYPE IS: {command.GetType()}");
-    //        //Console.WriteLine("Agent " + inputDroplets.First());
-    //        //Console.WriteLine("Score so far: " + score);
-    //        //Console.WriteLine("----------");
-    //    }
-
-    //    return score;
-    //}
-
-
-    public static IEnumerable<IEnumerable<T>> GetScoredPermutations<T>(IEnumerable<T> list, int length, Func<T, double> heuristic)
+    public static IEnumerable<IEnumerable<IDropletCommand>> GetScoredPermutations(IEnumerable<IDropletCommand> moves, int length, Func<IDropletCommand, double> heuristic)
     {
-        var sortedList = list.OrderBy(heuristic);
+        var scoredMoves = moves.OrderBy(heuristic);
 
-        if (length == 1) return sortedList.Select(t => new T[] { t });
+        if (length == 1)
+            return scoredMoves.Select(t => new[] { t });
 
-        return GetScoredPermutations(sortedList, length - 1, heuristic)
-            .SelectMany(t => sortedList.Where(e => !t.Contains(e)),
-                (t1, t2) => t1.Concat(new T[] { t2 }));
+        return GetScoredPermutations(scoredMoves, length - 1, heuristic)
+            .SelectMany(t => scoredMoves.Where(e => !t.Contains(e)),
+                (t1, t2) => t1.Concat(new[] { t2 }));
     }
+
 
 
     //public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
