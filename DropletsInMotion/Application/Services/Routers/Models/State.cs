@@ -550,20 +550,40 @@ public class State
                 int manhattanDistance = Math.Abs(moveCommand.PositionX - agent.PositionX) +
                                         Math.Abs(moveCommand.PositionY - agent.PositionY);
 
-                // Penalize states where the path to the goal is blocked
-                if (IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
+                h += manhattanDistance;
+
+                // Reward open paths
+                if (!IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
-                    manhattanDistance += 2;
+                    h -= 2;
+                    //h += 2;
                 }
 
                 // Penalize the act of standing still
-                if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == ActionType.NoOp)
+                //if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == ActionType.NoOp)
+                //{
+                //    manhattanDistance += 1;
+                //}
+
+                // Prioritize moving along existing contamination
+                if (Action != null && agent.IsMoveApplicable(Action, Agents, ContaminationMap, this))
                 {
-                    manhattanDistance += 1;
+                    var moveDeltaX = agent.PositionX + Action.DropletXDelta;
+                    var moveDeltaY = agent.PositionY + Action.DropletYDelta;
+
+                    var contaminationAfterMove = ContaminationMap[moveDeltaX, moveDeltaY];
+
+                    if (contaminationAfterMove.Contains(agent.SubstanceId) && !_contaminationService.IsConflicting(ContaminationMap, moveDeltaX, moveDeltaY, agent.SubstanceId))
+                    {
+                        h -= 1;
+                    }
                 }
 
-                h += manhattanDistance;
 
+
+                //double epsilon = 0.01;
+                //double euclideanDistance = Math.Sqrt(Math.Pow(moveCommand.PositionX - agent.PositionX, 2) + Math.Pow(moveCommand.PositionY - agent.PositionY, 2));
+                //h += (int)Math.Round(euclideanDistance * epsilon);
             }
             else
             {
@@ -573,7 +593,7 @@ public class State
         return h;
     }
 
-    private bool IsPathBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
+    private bool IsPathBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 5)
     {
         int dx = Math.Abs(endX - startX);
         int dy = -Math.Abs(endY - startY);
@@ -743,6 +763,7 @@ public class State
 
         foreach (var agent in Agents.Values)
         {
+            hash = hash * 31 + agent.DropletName.GetHashCode();
             hash = hash * 31 + agent.PositionX.GetHashCode();
             hash = hash * 31 + agent.PositionY.GetHashCode();
         }

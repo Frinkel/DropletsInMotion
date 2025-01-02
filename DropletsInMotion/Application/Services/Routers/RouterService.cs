@@ -247,7 +247,7 @@ public class RouterService : IRouterService
     {
         int substanceCount = _contaminationRepository.SubstanceTable.Count;
         int contaminationTableCount = _contaminationRepository.ContaminationTable.Count;
-        int fullContaminating = substanceCount - contaminationTableCount;
+        int fullContaminatingCount = substanceCount - contaminationTableCount;
 
         var inputDroplets = command.GetInputDroplets();
         var success = agents.TryGetValue(inputDroplets.First(), out var agent);
@@ -257,30 +257,28 @@ public class RouterService : IRouterService
 
         double score = 0;
 
+        var substanceId = agent.SubstanceId;
+
         // Check if the agent's substance is in the contamination table
-        var isInContaminationTable = _contaminationRepository.SubstanceTable[agent.SubstanceId].Item2;
+        var isInContaminationTable = _contaminationRepository.SubstanceTable[substanceId].Item2;
         if (isInContaminationTable)
         {
-            var rowIndex = agent.SubstanceId;
-
-            if (rowIndex >= contaminationTableCount)
-                throw new Exception($"Row index {rowIndex} is out of bounds for the contamination table.");
 
             for (int colIndex = 0; colIndex < contaminationTableCount; colIndex++)
             {
-                var relation = _contaminationRepository.ContaminationTable[colIndex][rowIndex];
+                var relation = _contaminationRepository.ContaminationTable[colIndex][substanceId];
 
                 if (relation)
                 {
-                    score += 1; // Prioritize earlier positions
+                    score += 1;
                 }
             }
 
-            score += fullContaminating;
+            score += fullContaminatingCount;
         }
         else
         {
-            score += substanceCount; // Penalize if not in contamination table
+            score += substanceCount - 1;
         }
 
         //Console.WriteLine($"TYPE IS: {command.GetType()}");

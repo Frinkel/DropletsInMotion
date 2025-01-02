@@ -2,16 +2,20 @@
 
 public class Frontier
 {
-    private readonly PriorityQueue<State, int> _queue;
+    private readonly PriorityQueue<State, (int, int)> _queue;
 
     public Frontier()
     {
-        _queue = new PriorityQueue<State, int>();
+        _queue = new PriorityQueue<State, (int, int)>();
     }
 
     public void Add(State state)
     {
-        _queue.Enqueue(state, state.GetFScore());
+        int fScore = state.GetFScore();
+        int gScore = state.G;
+
+        // Lexicographical priority (F, G)
+        _queue.Enqueue(state, (fScore, gScore));
     }
 
     public State Pop()

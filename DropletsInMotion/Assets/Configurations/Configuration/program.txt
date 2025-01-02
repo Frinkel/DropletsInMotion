@@ -1,6 +1,15 @@
-Droplet(w, 0, 4, 400, "H2O");
-Droplet(o, 3, 2, 400, "Blood");
+//Droplet(w, 5, 3, 400);
+Droplet(o, 0, 0, 400, "Blood");
 
 
-Move(o, 0, 6);
-Move(w, 31, 4);
+//Move(o, 10, 0);
+
+//Wait(1);
+//Move(w, 5, 10);
+
+Move(o, 10, 10);
+Move(o, 5, 0);
+Move(o, 0, 0);
+
+//Move(o, 0, 6);
+//Move(w, 31, 4);
