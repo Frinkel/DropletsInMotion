@@ -15,7 +15,7 @@ public class Frontier
         int gScore = state.G;
 
         // Lexicographical priority (F, G)
-        _queue.Enqueue(state, (fScore, gScore));
+        _queue.Enqueue(state, (fScore, -gScore));
     }
 
     public State Pop()
