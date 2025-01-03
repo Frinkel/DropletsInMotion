@@ -593,7 +593,7 @@ public class State
         return h;
     }
 
-    private bool IsPathBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 5)
+    private bool IsPathBlocked(int startX, int startY, int endX, int endY, Agent agent, int maxDepth = 15)
     {
         int dx = Math.Abs(endX - startX);
         int dy = -Math.Abs(endY - startY);
