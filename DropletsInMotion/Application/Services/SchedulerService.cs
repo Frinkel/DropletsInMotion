@@ -99,9 +99,6 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            
-
-
 
             int increment = 0;
 
@@ -305,8 +302,6 @@ namespace DropletsInMotion.Application.Services
 
         private ScheduledPosition FindOptimalDirections(int originX, int originY, int target1X, int target1Y, int target2X, int target2Y, List<ITemplate> templates, Merge mergeCommand)
         {
-            
-
             ITemplate chosenTemplate = null;
             int cost = Int32.MaxValue;
             int d1OptimalX = target1X;
@@ -358,7 +353,7 @@ namespace DropletsInMotion.Application.Services
 
             if (chosenTemplate == null)
             {
-                throw new Exception("No template was chosen"); // TODO: REDO EXCEPTION
+                throw new Exception("No template could be found for the position"); // TODO: REDO EXCEPTION
             }
 
             ScheduledPosition optimalPosition =

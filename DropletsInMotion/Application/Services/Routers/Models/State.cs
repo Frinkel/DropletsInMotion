@@ -36,6 +36,10 @@ public class State
     private readonly IPlatformRepository _platformRepository;
     private readonly ITemplateRepository _templateRepository;
 
+
+    private readonly Dictionary<State, int> stateCosts = new Dictionary<State, int>();
+
+
     // Initial state
     public State(string routableAgent, Dictionary<string, Agent> agents, List<int>[,] contaminationMap, List<IDropletCommand> commands, List<State> commitedStates, IContaminationService contaminationService, IPlatformRepository platformRepository, ITemplateRepository templateRepository, int? seed = null)
     {
@@ -102,9 +106,7 @@ public class State
             Agents[kvp.Key] = (Agent)kvp.Value.Clone();
         }
 
-        //var watch = System.Diagnostics.Stopwatch.StartNew();
-        //foreach (var actionKvp in jointAction)
-        //{
+
         // EXECUTE THE ACTION
         Agent agent = Agents[RoutableAgent];
         agent.Execute(action);
@@ -112,10 +114,6 @@ public class State
         //}
 
         H = CalculateHeuristic();
-        
-        //watch.Stop();
-        //var elapsedMs = watch.Elapsed.Microseconds;
-        //Debugger.ElapsedTime.Add(elapsedMs);
     }
 
 

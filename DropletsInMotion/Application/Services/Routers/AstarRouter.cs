@@ -6,10 +6,7 @@ namespace DropletsInMotion.Application.Services.Routers
     public class AstarRouter
     {
 
-        public AstarRouter()
-        {
-
-        }
+        public AstarRouter() { }
 
         public State? Search(State initialState, Frontier frontier)
         {
