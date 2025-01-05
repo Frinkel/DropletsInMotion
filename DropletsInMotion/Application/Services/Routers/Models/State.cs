@@ -772,6 +772,9 @@ public class State
 
     public override bool Equals(object obj)
     {
+        if (Action != null && Action.Type == ActionType.NoOp)
+            return false;
+
         if (ReferenceEquals(this, obj))
             return true;
 

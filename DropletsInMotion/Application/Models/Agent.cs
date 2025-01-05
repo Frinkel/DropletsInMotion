@@ -106,20 +106,21 @@ namespace DropletsInMotion.Application.Models
                 return false;
             }
 
-            if (state.Parent != null &&
-                action.Type != Types.ActionType.NoOp &&
-                deltaX == state.Parent.Agents[DropletName].PositionX &&
-                deltaY == state.Parent.Agents[DropletName].PositionY)
-            {
-                return false;
-            }
-
+            //if (state.Parent != null &&
+            //    action.Type != Types.ActionType.NoOp &&
+            //    deltaX == state.Parent.Agents[DropletName].PositionX &&
+            //    deltaY == state.Parent.Agents[DropletName].PositionY)
+            //{
+            //    return false;
+            //}
 
             //Check for going near other agents of the same substance
             foreach (var otherAgentKvp in otherAgents)
             {
                 var otherAgent = otherAgentKvp.Value;
-                if (otherAgent.SubstanceId != SubstanceId || otherAgent.DropletName == DropletName) continue; 
+                
+                if (otherAgent.DropletName == DropletName) continue;
+
                 var otherAgentSnake = otherAgent.SnakeBody;
                 foreach (var (x, y) in otherAgentSnake)
                 {
