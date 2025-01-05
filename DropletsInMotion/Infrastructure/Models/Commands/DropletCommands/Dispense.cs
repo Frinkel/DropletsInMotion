@@ -12,6 +12,8 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
         public string ReservoirName { get; }
 
         public double Volume { get; set; }
+
+        public bool Completed { get; set; } = false;
         public ArithmeticExpression VolumeExpression { get; }
 
         public Dispense(string name, string reservoirName, double volume)
@@ -52,11 +54,15 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
         {
             var res = VolumeExpression.GetVariables();
             res.AddRange(GetInputDroplets());
+            res.AddRange(new List<string>(){ ReservoirName });
             return res;
         }
         public List<string> GetOutputVariables()
         {
-            return GetOutputDroplets();
+            var res = GetOutputDroplets();
+            res.AddRange(new List<string>() { ReservoirName });
+
+            return res;
         }
     }
 }

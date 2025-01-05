@@ -99,8 +99,12 @@ public class TypeChecker : ITypeChecker
                     Waste(wasteCommand);
                     break;
 
+                case DeclareDispenserCommand declareDispenserCommand:
+                    DeclareDispenser(declareDispenserCommand);
+                    break;
+
                 default:
-                    throw new CommandException($"Unknown command: {command.GetType().Name}", command);
+                    throw new CommandException($"Typechecker: Unknown command: {command.GetType().Name}", command);
             }
         }
     }
@@ -154,6 +158,19 @@ public class TypeChecker : ITypeChecker
 
         UpdateDeclaredDroplets(inputDroplets, outputDroplets, dispenseCommand);
     }
+
+    private void DeclareDispenser(DeclareDispenserCommand declareDispenserCommand)
+    {
+        var dispenserName = declareDispenserCommand.DispenserIdentifier;
+
+        if (_variables.Contains(dispenserName) || _droplets.Contains(dispenserName))
+        {
+            throw new CommandException($"Dispenser name '{dispenserName}' is already in use.", declareDispenserCommand);
+        }
+
+        _variables.Add(dispenserName);
+    }
+
 
     private void Mix(Mix mixCommand)
     {

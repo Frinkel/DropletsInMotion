@@ -23,7 +23,7 @@ namespace DropletsInMotion.Application.Execution
         public Electrode[][] Board { get; set; }
 
         public Dictionary<string, Agent> Agents { get; set; } = new Dictionary<string, Agent>();
-
+        public Dictionary<string, DeclareDispenserCommand> Dispensers { get; set; } = new Dictionary<string, DeclareDispenserCommand>();
         public Dictionary<string, Double> Variables { get; set; } = new Dictionary<string, Double>();
 
         public double Time { get; set; }
@@ -84,6 +84,7 @@ namespace DropletsInMotion.Application.Execution
             // Reset the execution
             ContaminationMap = _contaminationService.CreateContaminationMap(Board.Length, Board[0].Length);
             Agents.Clear();
+            Dispensers.Clear();
             Agent.ResetSubstanceId();
 
             _router.Initialize(Board);
@@ -117,6 +118,10 @@ namespace DropletsInMotion.Application.Execution
                     {
                         case DropletDeclaration dropletCommand:
                             HandleDropletDeclaration(dropletCommand, boardActions);
+                            break;
+
+                        case DeclareDispenserCommand declareDispenserCommand:
+                            HandleDeclareDispenserCommand(declareDispenserCommand);
                             break;
 
                         case Dispense dispenseCommand:
@@ -228,12 +233,52 @@ namespace DropletsInMotion.Application.Execution
             }
         }
 
+        private void HandleDeclareDispenserCommand(DeclareDispenserCommand declareDispenserCommand)
+        {
+            if (Dispensers.ContainsKey(declareDispenserCommand.DispenserIdentifier))
+            {
+                throw new Exception($"Cannot declare dispenser {declareDispenserCommand.DispenserIdentifier} since it already exists");
+            }
+            if (!_deviceRepository.Reservoirs.TryGetValue(declareDispenserCommand.DispenserName, out Reservoir reservoir))
+            {
+                throw new Exception($"No reservoir with name {declareDispenserCommand.DispenserName}");
+            }
+
+            Dispensers.Add(declareDispenserCommand.DispenserIdentifier, declareDispenserCommand);
+        }
+
         private void HandleDispense(Dispense dispenseCommand, List<BoardAction> boardActions, Dictionary<string, Agent> agents)
         {
-            if (!_deviceRepository.Reservoirs.TryGetValue(dispenseCommand.ReservoirName, out Reservoir reservoir))
+            if (!Dispensers.TryGetValue(dispenseCommand.ReservoirName, out DeclareDispenserCommand declareDispenserCommand))
+            {
+                throw new Exception($"No dispenser with name {dispenseCommand.ReservoirName}");
+            }
+
+            if (!_deviceRepository.Reservoirs.TryGetValue(declareDispenserCommand.DispenserName, out Reservoir reservoir))
             {
                 throw new Exception($"No reservoir with name {dispenseCommand.ReservoirName}");
             }
+
+            string substance = declareDispenserCommand.Substance;
+            var substanceId = _contaminationService.GetSubstanceId(substance);
+
+            Agent agent = _agentFactory.CreateAgent(dispenseCommand.DropletName, reservoir.OutputX,
+                reservoir.OutputY, dispenseCommand.Volume, substanceId);
+
+            // Get the positions the new droplet will occupy
+            var newDropletPositions = agent.GetAllAgentPositions();
+
+            // Check if any of the new droplet's positions conflict with existing droplets
+            foreach (var agent1 in Agents.Values)
+            {
+                var agentPositions = agent1.GetAllAgentPositions();
+                if (newDropletPositions.Any(newPos => agentPositions.Any(existingPos => newPos.x == existingPos.x && newPos.y == existingPos.y)))
+                {
+                    return;
+                }
+            }
+            dispenseCommand.Completed = true;
+
 
             foreach (var kvp in reservoir.DispenseSequence)
             {
@@ -245,8 +290,7 @@ namespace DropletsInMotion.Application.Execution
             //executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
 
 
-            Agent agent = _agentFactory.CreateAgent(dispenseCommand.DropletName, reservoir.OutputX,
-                reservoir.OutputY, dispenseCommand.Volume);
+
 
             Agents.Add(dispenseCommand.DropletName, agent);
             ContaminationMap = _contaminationService.ApplyContamination(agent, ContaminationMap);

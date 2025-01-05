@@ -69,7 +69,6 @@ namespace DropletsInMotionTests
             .ToList() ?? new List<ITemplate>();
 
             var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap, eligibleMergeTemplates);
-            Console.WriteLine(optimalPosition);
 
             Assert.That(7, Is.EqualTo(optimalPosition.X1));
             Assert.That(1, Is.EqualTo(optimalPosition.Y2));
@@ -78,48 +77,91 @@ namespace DropletsInMotionTests
 
         }
 
-        //[Test]
-        //public void MergePositionCloseToEachother()
-        //{
-        //    IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
+        [Test]
+        public void MergePositionCloseToEachother()
+        {
+            var board = CreateBoard();
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
-        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-        //    var a1 = new Agent("a1", 6, 0, 1);
-        //    var a2 = new Agent("a2", 4, 0, 1);
-        //    agents.Add("a1", a1);
-        //    agents.Add("a2", a2);
+            foreach (var bl in _contaminationRepository.ContaminationTable)
+            {
+                foreach (var b in bl)
+                {
+                    Console.Write(b);
+                }
 
-        //    var board = CreateBoard();
-        //    var contaminationMap = new byte[board.Length, board[0].Length];
+                Console.WriteLine();
+            }
 
-        //    var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
+            IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
 
-        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = _agentFactory.CreateAgent("a1", 6, 0, 380, 1);
+            var a2 = _agentFactory.CreateAgent("a2", 4, 0, 380, 1);
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
 
-        //}
+            List<ITemplate> eligibleMergeTemplates = _templateRepository?
+                .MergeTemplates?
+                .FindAll(t => t.MinSize <= a1.Volume + a2.Volume && a1.Volume + a2.Volume < t.MaxSize)
+                ?.Cast<ITemplate>()
+                .ToList() ?? new List<ITemplate>();
+
+            var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap, eligibleMergeTemplates);
+
+            Assert.That(6, Is.EqualTo(optimalPosition.X1));
+            Assert.That(0, Is.EqualTo(optimalPosition.Y2));
+            Assert.That(4, Is.EqualTo(optimalPosition.X2));
+            Assert.That(0, Is.EqualTo(optimalPosition.Y2));
+
+            //var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
+
+            //Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
+            //Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
+            //Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
+            //Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+
+        }
 
 
         //[Test]
         //public void SplitPosition()
         //{
+        //    var board = CreateBoard();
+        //    var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
+
+        //    foreach (var bl in _contaminationRepository.ContaminationTable)
+        //    {
+        //        foreach (var b in bl)
+        //        {
+        //            Console.Write(b);
+        //        }
+
+        //        Console.WriteLine();
+        //    }
+
         //    IDropletCommand splitCommand = new SplitByVolume("a1", "a2", "a3", 0, 0, 8, 0, 0.5);
 
         //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-        //    var a1 = new Agent("a1", 5, 5, 1);
+        //    var a1 = _agentFactory.CreateAgent("a1", 5, 5, 800, 1);
+
         //    agents.Add("a1", a1);
 
-        //    var board = CreateBoard();
-        //    var contaminationMap = new byte[board.Length, board[0].Length];
+        //    List<ITemplate> eligibleSplitTemplates = _templateRepository?
+        //        .SplitTemplates?
+        //        .FindAll(t => t.MinSize <= a1.Volume && a1.Volume < t.MaxSize)
+        //        ?.Cast<ITemplate>()
+        //        .ToList() ?? new List<ITemplate>();
 
-        //    var optimalPosition = _schedulerService.ScheduleCommand(splitCommand, agents, contaminationMap);
-
-        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-        //    Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+        //    var optimalPosition = _schedulerService.ScheduleCommand(splitCommand, agents, contaminationMap, eligibleSplitTemplates);
+        //    //Assert.That(6, Is.EqualTo(optimalPosition.X1));
+        //    //Assert.That(0, Is.EqualTo(optimalPosition.Y2));
+        //    //Assert.That(4, Is.EqualTo(optimalPosition.X2));
+        //    //Assert.That(0, Is.EqualTo(optimalPosition.Y2));
+        //    //Assert.That(4, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
+        //    //Assert.That(0, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
+        //    //Assert.That(6, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
+        //    //Assert.That(0, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
 
         //}
 
