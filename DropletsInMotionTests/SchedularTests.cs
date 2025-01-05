@@ -1,7 +1,9 @@
-﻿using DropletsInMotion.Application.Models;
+﻿using DropletsInMotion.Application.Factories;
+using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests
@@ -10,11 +12,18 @@ namespace DropletsInMotionTests
     {
         private readonly IContaminationService _contaminationService;
         private readonly ISchedulerService _schedulerService;
+        private readonly IAgentFactory _agentFactory;
+        private readonly IContaminationRepository _contaminationRepository;
+        private readonly ITemplateRepository _templateRepository;
 
         public SchedularTests()
         {
             _contaminationService = ServiceProvider.GetRequiredService<IContaminationService>();
             _schedulerService = ServiceProvider.GetRequiredService<ISchedulerService>();
+            _agentFactory = ServiceProvider.GetRequiredService<IAgentFactory>();
+            _contaminationRepository = ServiceProvider.GetRequiredService<IContaminationRepository>();
+            _templateRepository = ServiceProvider.GetRequiredService<ITemplateRepository>();
+
         }
 
         [SetUp]
@@ -23,29 +32,51 @@ namespace DropletsInMotionTests
             Agent.ResetSubstanceId();
         }
 
-        //[Test]
-        //public void MergePosition()
-        //{
-        //    IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
+        [Test]
+        public void MergePosition()
+        {
+            var board = CreateBoard();
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
 
-        //    Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
-        //    var a1 = new Agent("a1", 8, 0, 1);
-        //    var a2 = new Agent("a2", 0, 0, 1);
-        //    agents.Add("a1", a1);
-        //    agents.Add("a2", a2);
+            foreach (var bl in _contaminationRepository.ContaminationTable)
+            {
+                foreach (var b in bl)
+                {
+                    Console.Write(b);
+                }
 
-        //    var board = CreateBoard();
-        //    var contaminationMap = new byte[board.Length, board[0].Length];
-        //    _contaminationService.UpdateContaminationArea(contaminationMap, 255, 2, 0, 4, 0);
-        //    _contaminationService.PrintContaminationState(contaminationMap);
-        //    var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap);
+                Console.WriteLine();
+            }
 
-        //    Assert.That(6, Is.EqualTo(optimalPosition.Value.Item1.optimalX));
-        //    Assert.That(1, Is.EqualTo(optimalPosition.Value.Item1.optimalY));
-        //    Assert.That(4, Is.EqualTo(optimalPosition.Value.Item2.optimalX));
-        //    Assert.That(1, Is.EqualTo(optimalPosition.Value.Item2.optimalY));
+            IDropletCommand mergeCommand = new Merge("a1", "a2", "a3", 5, 5);
 
-        //}
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = _agentFactory.CreateAgent("a1", 8, 0, 706, 1);
+            var a2 = _agentFactory.CreateAgent("a2", 0, 0, 706, 1);
+
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+
+            _contaminationService.UpdateContaminationArea(contaminationMap, 2, 2, 0, 4, 0);
+
+            var a1Substance = _contaminationService.GetSubstanceId("A");
+            var a2Substance = _contaminationService.GetSubstanceId("b");
+
+            List<ITemplate> eligibleMergeTemplates = _templateRepository?
+            .MergeTemplates?
+            .FindAll(t => t.MinSize <= a1.Volume + a2.Volume && a1.Volume + a2.Volume < t.MaxSize)
+            ?.Cast<ITemplate>()
+            .ToList() ?? new List<ITemplate>();
+
+            var optimalPosition = _schedulerService.ScheduleCommand(mergeCommand, agents, contaminationMap, eligibleMergeTemplates);
+            Console.WriteLine(optimalPosition);
+
+            Assert.That(7, Is.EqualTo(optimalPosition.X1));
+            Assert.That(1, Is.EqualTo(optimalPosition.Y2));
+            Assert.That(4, Is.EqualTo(optimalPosition.X2));
+            Assert.That(1, Is.EqualTo(optimalPosition.Y2));
+
+        }
 
         //[Test]
         //public void MergePositionCloseToEachother()
