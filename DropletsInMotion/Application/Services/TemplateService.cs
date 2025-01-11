@@ -1,8 +1,7 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using System.Globalization;
-using DropletsInMotion.Application.Execution.Models;
+﻿using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
+using System.Globalization;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -22,10 +21,10 @@ namespace DropletsInMotion.Application.Services
         public void Initialize(Electrode[][] board)
         {
             Board = board;
-            string workingDirectory = Environment.CurrentDirectory;
-            string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
-            string templatesPath = Path.Combine(projectDirectory, "Assets", "Templates");
-            LoadTemplatesFromFiles(templatesPath);
+            //string workingDirectory = Environment.CurrentDirectory;
+            //string projectDirectory = Directory.GetParent(workingDirectory)?.Parent?.Parent?.FullName ?? "";
+            //string templatesPath = Path.Combine(projectDirectory, "Assets", "Templates");
+            //LoadTemplatesFromFiles(templatesPath);
         }
 
         public void LoadTemplatesFromFiles(string folderPath)

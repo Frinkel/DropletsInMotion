@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Physical;
-using DropletsInMotion.Communication.Services;
+//using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Communication
@@ -16,20 +16,15 @@ namespace DropletsInMotion.Communication
     {
         private ICommunicationService? _communicationService;
         private readonly IServiceProvider _serviceProvider;
-        private ICommunicationTemplateService _communicationTemplateService;
-        private IDeviceRepository _deviceRepository;
 
         public event EventHandler? ClientConnected;
         public event EventHandler? ClientDisconnected;
 
         private bool _isServerRunning = false;
 
-        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, ICommunicationTemplateService communicationTemplateService, IDeviceRepository deviceRepository)
+        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService)
         {
             _serviceProvider = serviceProvider;
-            _communicationTemplateService = communicationTemplateService;
-            _deviceRepository = deviceRepository;
-
             userService.CommunicationTypeChanged += OnCommunicationTypeChanged;
         }
 
@@ -64,13 +59,10 @@ namespace DropletsInMotion.Communication
             }
             else
             {
-                // INSTANTIATE
                 var service = _serviceProvider.GetRequiredService<PhysicalCommunicationService>();
                 await service.StartCommunication();
-                _isServerRunning = true; // DO we need this?
+                _isServerRunning = true;
                 return service;
-
-                //throw new NotImplementedException("SUP");
             }
         }
 
@@ -94,7 +86,7 @@ namespace DropletsInMotion.Communication
         {
             if (!_isServerRunning || _communicationService == null)
             {
-                throw new InvalidOperationException("Tried to send request without a open communication channel!");
+                throw new InvalidOperationException("Tried to send request without an open communication channel!");
             }
 
             return await _communicationService.SendSensorRequest(sensor, handler, time);
@@ -104,7 +96,7 @@ namespace DropletsInMotion.Communication
         {
             if (!_isServerRunning || _communicationService == null)
             {
-                throw new InvalidOperationException("Tried to send request without a open communication channel!"); // TODO: Communication error here!
+                throw new InvalidOperationException("Tried to send request without an open communication channel!"); // TODO: Communication error here!
             }
 
             return await _communicationService.SendActuatorRequest(actuator, time);

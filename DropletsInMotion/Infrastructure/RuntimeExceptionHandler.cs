@@ -54,6 +54,11 @@ namespace DropletsInMotion.Infrastructure
                 case PositionUnreachableException positionUnreachableException:
                     _logger.WriteColor($"E");
                     return RuntimeExceptionAction.Reset;
+
+                case DirectoryNotFoundException directoryNotFoundException:
+                    _logger.WriteColor($"Directory not found: {directoryNotFoundException.Message}");
+                    return RuntimeExceptionAction.Reset;
+
                 default:
                     _logger.Warning($"Unhandled exception: {ex.Message}");
                     return RuntimeExceptionAction.Exit;

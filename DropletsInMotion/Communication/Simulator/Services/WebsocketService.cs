@@ -149,7 +149,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
         }
 
 
-
         private void HandleReceivedMessages(WebSocketReceiveResult result, byte[] buffer)
         {
             var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
@@ -202,7 +201,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
         }
 
-        public async Task<WebSocketMessage<object>> SendRequestAndWaitForResponseAsync(string requestId, string message, CancellationToken cancellationToken)
+        public async Task<WebSocketMessage<object>> SendRequestResponseAsync(string requestId, string message, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<WebSocketMessage<object>>();
             _pendingRequests[requestId] = tcs;

@@ -1,15 +1,15 @@
-//Droplet(w, 5, 3, 400);
-Droplet(o, 0, 0, 400, "Blood");
+Droplet(w, 5, 0, 1001, "H2O");
+//Droplet(b, 10, 0, 360, "Blood");
+
+s1Temp = Sensor(w, "TempSensor1","temperature");
+SplitByRatio(w, w1, w2, 10, 10, 0, 10, 0.5);
 
 
-//Move(o, 10, 0);
+//Merge(w, b, bw, 5, 5);
 
-//Wait(1);
-//Move(w, 5, 10);
+//Move(w, 4, 2);
+//Move(b, 1, 0);
 
-Move(o, 10, 10);
-Move(o, 5, 0);
-Move(o, 0, 0);
 
-//Move(o, 0, 6);
-//Move(w, 31, 4);
+
+

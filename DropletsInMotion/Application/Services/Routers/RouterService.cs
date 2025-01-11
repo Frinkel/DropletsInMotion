@@ -101,16 +101,10 @@ public class RouterService : IRouterService
             // If a solution was found for this permutation, break out of the loop
             if (foundSolution && sFinal != null)
             {
-                //chosenPermutation = commandOrder;
                 break;
             }
         }
 
-        //Console.WriteLine("Solution found with the following permutation:");
-        //foreach (var c in chosenPermutation)
-        //{
-        //    Console.WriteLine(c);
-        //}
 
         // If no solution was found across all permutations, throw an error
         if (sFinal == null)

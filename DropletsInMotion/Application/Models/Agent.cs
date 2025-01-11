@@ -85,6 +85,9 @@ namespace DropletsInMotion.Application.Models
 
         public bool IsMoveApplicable(Types.RouteAction action, Dictionary<string, Agent> otherAgents, List<int>[,] otherContaminationMap, State state)
         {
+            if (action.Type == Types.ActionType.NoOp) return false; // TODO: We do not consider states where we NOOP for now, so we do not consider the action!
+
+
             var contamination = state.ContaminationMap;
             var deltaX = PositionX + action.DropletXDelta;
             var deltaY = PositionY + action.DropletYDelta;
@@ -114,6 +117,7 @@ namespace DropletsInMotion.Application.Models
             //    return false;
             //}
 
+
             //Check for going near other agents of the same substance
             foreach (var otherAgentKvp in otherAgents)
             {
@@ -122,6 +126,8 @@ namespace DropletsInMotion.Application.Models
                 if (otherAgent.DropletName == DropletName) continue;
 
                 var otherAgentSnake = otherAgent.SnakeBody;
+
+
                 foreach (var (x, y) in otherAgentSnake)
                 {
                     if (Math.Abs(x - deltaX) <= 1 && Math.Abs(y - deltaY) <= 1)
@@ -130,6 +136,14 @@ namespace DropletsInMotion.Application.Models
                     }
                 }
 
+                foreach (var (x, y) in SnakeBody)
+                {
+
+                    if (Math.Abs(x - otherAgent.PositionX) <= 1 && Math.Abs(y - otherAgent.PositionY) <= 1)
+                    {
+                        return false;
+                    }
+                }
 
                 if (otherAgent.GetMaximumSnakeLength() > otherAgentSnake.Count)
                 {
@@ -142,7 +156,7 @@ namespace DropletsInMotion.Application.Models
                         }
                     }
                 }
-
+                    
 
                 //if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 && Math.Abs(otherAgent.PositionY - deltaY) <= 1)
                 //{

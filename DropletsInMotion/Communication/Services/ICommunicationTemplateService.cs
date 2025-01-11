@@ -1,11 +1,11 @@
-﻿using DropletsInMotion.Communication.Models;
+﻿//using DropletsInMotion.Communication.Models;
 
-namespace DropletsInMotion.Communication.Services;
+//namespace DropletsInMotion.Communication.Services;
 
-public interface ICommunicationTemplateService
-{
-    //Dictionary<string, Sensor> Sensors { get; set; }
+//public interface ICommunicationTemplateService
+//{
+//    //Dictionary<string, Sensor> Sensors { get; set; }
 
-    void LoadTemplates();
-    void PrintAvailableSensors();
-}
+//    void LoadTemplates();
+//    void PrintAvailableSensors();
+//}

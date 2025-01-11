@@ -36,6 +36,7 @@ namespace DropletsInMotion.Application.Services.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
+                        if(expandedState.Action.Type == 0) Console.WriteLine("NOOP");
                         frontier.Add(expandedState);
                     }
                     else

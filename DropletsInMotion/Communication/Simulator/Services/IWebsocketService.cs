@@ -30,7 +30,7 @@ namespace DropletsInMotion.Communication.Simulator.Services
         /// <param name="message">The request message.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The response message from the client.</returns>
-        Task<WebSocketMessage<object>> SendRequestAndWaitForResponseAsync(string requestId, string message, CancellationToken cancellationToken);
+        Task<WebSocketMessage<object>> SendRequestResponseAsync(string requestId, string message, CancellationToken cancellationToken);
 
         /// <summary>
         /// Closes all active WebSocket connections asynchronously.

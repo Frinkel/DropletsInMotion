@@ -14,7 +14,6 @@ using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Communication;
 using DropletsInMotion.Communication.Models;
-using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
