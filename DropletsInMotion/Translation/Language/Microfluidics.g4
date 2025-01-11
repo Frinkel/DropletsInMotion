@@ -8,6 +8,7 @@ program
 // Commands
 command
     : dropletDeclaration
+    | dispenserDeclaration
     | dispense
     | moveDroplet
     | splitByRatio
@@ -31,8 +32,12 @@ dropletDeclaration
     : 'Droplet' '(' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression (',' STRING)? ')'    
     ;
 
+dispenserDeclaration
+    : 'DeclareDispenser' '(' IDENTIFIER ',' STRING  ',' STRING')'
+    ;
+
 dispense
-    : 'Dispense' '(' IDENTIFIER ',' STRING ',' arithmeticExpression ')'
+    : 'Dispense' '(' IDENTIFIER ',' IDENTIFIER ',' arithmeticExpression ')'
     ;
 
 // Move

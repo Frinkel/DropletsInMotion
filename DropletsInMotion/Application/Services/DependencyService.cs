@@ -148,6 +148,13 @@ namespace DropletsInMotion.Application.Services
                         }
                         break;
 
+                    case Dispense dispenseCommand:
+                        if(dispenseCommand.Completed)
+                        {
+                            node.MarkAsExecuted();
+                        }
+                        break;
+
                     default:
                         node.MarkAsExecuted();
                         break;

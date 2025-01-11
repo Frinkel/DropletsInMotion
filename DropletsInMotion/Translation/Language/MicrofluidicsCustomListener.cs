@@ -102,10 +102,22 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(dropletCommand);
         }
 
+        public override void ExitDispenserDeclaration(MicrofluidicsParser.DispenserDeclarationContext context)
+        {
+            string dispenserIdentifer = context.IDENTIFIER().GetText();
+            string dispenserName = context.STRING(0).GetText().Trim('"');
+            string substance = context.STRING(1).GetText().Trim('"');
+
+            IDropletCommand declareDispenserCommand = new DeclareDispenserCommand(dispenserIdentifer, dispenserName, substance);
+            declareDispenserCommand.Line = context.Start.Line;
+            declareDispenserCommand.Column = context.Start.Column;
+            Commands.Add(declareDispenserCommand);
+        }
+
         public override void ExitDispense(MicrofluidicsParser.DispenseContext context)
         {
-            string dropletName = context.IDENTIFIER().GetText();
-            string reservoirName = context.STRING().GetText().Trim('"');
+            string dropletName = context.IDENTIFIER(0).GetText();
+            string reservoirName = context.IDENTIFIER(1).GetText();
             var volume = CreateExpression(context.arithmeticExpression());
 
             IDropletCommand dropletCommand = new Dispense(dropletName, reservoirName, volume);
