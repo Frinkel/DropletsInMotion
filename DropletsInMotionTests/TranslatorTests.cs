@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests
 {
-    public class TranslatorTests : TestBase
+    public class TypeCheckerTests : TestBase
     {
         private readonly ITranslator _translator;
         private readonly IUserService _userService;
@@ -19,7 +19,7 @@ namespace DropletsInMotionTests
         private string projectDirectory;
         private string platformPath;
 
-        public TranslatorTests()
+        public TypeCheckerTests()
         {
             _translator = ServiceProvider.GetRequiredService<ITranslator>();
             _userService = ServiceProvider.GetRequiredService<IUserService>();

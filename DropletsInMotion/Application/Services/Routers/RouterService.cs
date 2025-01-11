@@ -315,80 +315,64 @@ public class RouterService : IRouterService
     {
         List<State> chosenStates = new List<State>();
         State currentState = newState;
-        while (currentState.Parent != null)
+        while (currentState != null)
         {
             chosenStates.Add(currentState);
             currentState = currentState.Parent;
         }
         chosenStates = chosenStates.OrderBy(s => s.G).ToList();
 
-        // Get the last committed state
-        State lastCommittedState = commitedStates.LastOrDefault();
+        State? lastCommittedState = commitedStates.LastOrDefault();
 
         foreach (var state in chosenStates)
         {
             int index = commitedStates.FindIndex(s => s.G == state.G);
             if (index >= 0)
             {
-                var commitedState = commitedStates[index];
+                CombineState(commitedStates[index], state);
 
-                CombineState(commitedState, state);
+                lastCommittedState = commitedStates[index];
             }
             else
             {
-                // Before adding the new state, ensure it has the correct positions for other agents
                 if (lastCommittedState != null)
                 {
-                    state.ContaminationMap = CombineContaminationMaps(lastCommittedState.ContaminationMap, state.ContaminationMap);
-                    state.ContaminationMap = CombineContaminationMapAndContaminationChanges(state.ContaminationMap, state.ContaminationChanges);
+                    var cloneMap = _contaminationService.CloneContaminationMap(
+                        lastCommittedState.ContaminationMap
+                    );
 
+                    cloneMap = CombineContaminationMaps(cloneMap, state.ContaminationMap);
+                    cloneMap = CombineContaminationMapAndContaminationChanges(
+                        cloneMap,
+                        state.ContaminationChanges
+                    );
 
+                    state.ContaminationMap = cloneMap;
+
+                    // iv. Copy other agents' positions if needed
                     foreach (var kvp in lastCommittedState.Agents)
                     {
-                        string agentKey = kvp.Key;
-                        if (agentKey != state.RoutableAgent)
+                        if (kvp.Key != state.RoutableAgent)
                         {
-                            state.Agents[agentKey] = kvp.Value;
+                            state.Agents[kvp.Key] = (Agent)kvp.Value.Clone();
                         }
                     }
-
-
                 }
                 commitedStates.Add(state);
-
                 lastCommittedState = state;
             }
         }
 
-
-        int maxGInChosenStates = chosenStates.Count > 0 ? chosenStates[^1].G : -1; 
-
-
+        int maxG = chosenStates.Any() ? chosenStates[^1].G : -1;
         for (int i = 0; i < commitedStates.Count; i++)
         {
-            var state = commitedStates[i];
-            if (state.G > maxGInChosenStates)
+            var cs = commitedStates[i];
+            if (cs.G > maxG && lastCommittedState != null)
             {
-                // Update the state to reflect the last state in chosenStates
-                var lastChosenState = chosenStates.LastOrDefault();
-                if (lastChosenState != null)
-                {
-                    // Update the RoutableAgent in this state
-                    state.Agents[lastChosenState.RoutableAgent] = (Agent)lastChosenState.Agents[lastChosenState.RoutableAgent].Clone();
-
-                    // Update the ContaminationMap
-                    state.ContaminationMap = CombineContaminationMaps(state.ContaminationMap, lastChosenState.ContaminationMap);
-
-                    // Update the JointAction
-                    if (lastChosenState.JointAction != null)
-                    {
-                        if (state.JointAction == null)
-                        {
-                            state.JointAction = new Dictionary<string, RouteAction>();
-                        }
-                        state.JointAction[lastChosenState.RoutableAgent] = lastChosenState.JointAction[lastChosenState.RoutableAgent];
-                    }
-                }
+                var cloneMap = _contaminationService.CloneContaminationMap(
+                    lastCommittedState.ContaminationMap
+                );
+                cs.ContaminationMap = cloneMap;
             }
         }
 
@@ -397,14 +381,24 @@ public class RouterService : IRouterService
 
     private void CombineState(State oldState, State newState)
     {
-        //oldState.ContaminationMap = CombineContaminationMaps(oldState.ContaminationMap, newState.ContaminationMap);
-        oldState.ContaminationMap = CombineContaminationMapAndContaminationChanges(oldState.ContaminationMap, newState.ContaminationChanges);
+        var mergedMap = _contaminationService.CloneContaminationMap(oldState.ContaminationMap);
+
+        mergedMap = CombineContaminationMaps(mergedMap, newState.ContaminationMap);
+        mergedMap = CombineContaminationMapAndContaminationChanges(
+            mergedMap,
+            newState.ContaminationChanges
+        );
+
+        oldState.ContaminationMap = mergedMap;
 
         oldState.Agents[newState.RoutableAgent] = newState.Agents[newState.RoutableAgent];
 
-        foreach (var action in newState.JointAction)
+        if (newState.JointAction != null)
         {
-            oldState.JointAction[action.Key] = action.Value;
+            foreach (var kvp in newState.JointAction)
+            {
+                oldState.JointAction[kvp.Key] = kvp.Value;
+            }
         }
     }
 
