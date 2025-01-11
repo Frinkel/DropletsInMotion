@@ -6,21 +6,25 @@ using DropletsInMotion.Communication.Models;
 using System.Reflection;
 using System;
 using DropletsInMotion.Application.Execution.Models;
+using DropletsInMotion.Infrastructure;
 
 namespace DropletsInMotion.Communication.Simulator;
 
 public class SimulationCommunicationService : ICommunicationService
 {
     private readonly IWebsocketService _websocketService;
+    private readonly ILogger _logger;
 
     private CancellationTokenSource? _cancellationTokenSource;
     public Task? WebSocketTask { get; private set; }
 
     public event EventHandler? ClientDisconnected;
 
-    public SimulationCommunicationService(IWebsocketService websocketService)
+
+    public SimulationCommunicationService(IWebsocketService websocketService, ILogger logger)
     {
         _websocketService = websocketService;
+        _logger = logger;
         _websocketService.ClientDisconnected += OnClientDisconnected;
     }
 
@@ -65,6 +69,7 @@ public class SimulationCommunicationService : ICommunicationService
         await _websocketService.SendMessageToAllAsync(serializedObject, _cancellationTokenSource.Token);
     }
 
+
     public async Task<double> SendSensorRequest(Sensor sensor, SensorHandler sensorHandler, double time)
     {
         RequestWrapper requestWrapper = new RequestWrapper(sensorHandler.Request, time);
@@ -74,7 +79,7 @@ public class SimulationCommunicationService : ICommunicationService
 
         string serializedObject = JsonSerializer.Serialize(sensorRequestDto);
 
-        var response = await _websocketService.SendRequestAndWaitForResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+        var response = await _websocketService.SendRequestResponseAsync(sensorRequestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
 
         switch (response.Type)
@@ -117,12 +122,12 @@ public class SimulationCommunicationService : ICommunicationService
 
         string serializedObject = JsonSerializer.Serialize(requestDto);
 
-        var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+        var response = await _websocketService.SendRequestResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
         switch (response.Type)
         {
             case (WebSocketResponseTypes.Actuator):
-                Console.WriteLine($"Actuator response is: {response}");
+                _logger.Debug($"Actuator response is: {response}");
                 return true;
 
             case (WebSocketResponseTypes.Error):
@@ -142,7 +147,7 @@ public class SimulationCommunicationService : ICommunicationService
 
         //Console.WriteLine($"Sending {serializedObject}");
 
-        var response = await _websocketService.SendRequestAndWaitForResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
+        var response = await _websocketService.SendRequestResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
         switch (response.Type)
         {

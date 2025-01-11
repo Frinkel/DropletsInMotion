@@ -89,6 +89,7 @@ namespace DropletsInMotion.Presentation
                 if (!string.IsNullOrWhiteSpace(path) && !Directory.Exists(path))
                 {
                     Console.WriteLine($"No folder found at path \"{path}\". Please try again.");
+                    Console.WriteLine();
                     path = null;
                 }
             }
@@ -229,8 +230,21 @@ namespace DropletsInMotion.Presentation
             if (!Directory.Exists(path))
                 throw new DirectoryNotFoundException("The configuration folder does not exist!");
 
+            try
+            {
+                ValidateConfiguration(path);
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                _logger.WriteColor($"There was an issue with the uploaded folder at path: {path}");
+                _logger.WriteColor($"\t {e.Message}");
+                _logger.WriteEmptyLine(1);
 
-            ValidateConfiguration(path);
+                GetPathToConfiguration();
+            }
+            
+
+
             //bool isConfigurationValid = IsConfigurationValid(path);
             //if (!isConfigurationValid) throw new RuntimeException("The configuration structure is invalid.");
 

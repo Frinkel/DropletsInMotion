@@ -86,9 +86,8 @@ namespace DropletsInMotion.Application.Execution
             Agents.Clear();
             Agent.ResetSubstanceId();
 
-            _router.Initialize(Board);
+            //_router.Initialize(Board);
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             
             List<BoardAction> boardActions = new List<BoardAction>();
 
@@ -205,8 +204,8 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                //Console.WriteLine();
-                //_contaminationService.PrintContaminationMap(ContaminationMap);
+                Console.WriteLine();
+                _contaminationService.PrintContaminationMap(ContaminationMap);
                 boardActions.Clear();
             }
 

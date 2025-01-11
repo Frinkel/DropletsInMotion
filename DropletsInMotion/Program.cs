@@ -8,7 +8,6 @@ using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication.Physical;
-using DropletsInMotion.Communication.Services;
 using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
@@ -108,7 +107,7 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
-            serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
+            //serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
             serviceCollection.AddSingleton<IDeviceRepository, DeviceRepository>();
             serviceCollection.AddSingleton<ITypeChecker, TypeChecker>();
             serviceCollection.AddSingleton<IPlatformRepository, PlatformRepository>();

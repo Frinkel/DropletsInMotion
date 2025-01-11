@@ -209,13 +209,23 @@ public class State
 
         foreach (State state in chosenStates)
         {
+            //foreach (var a in state.Agents.Values)
+            //{
+            //    foreach (var valueTuple in a.SnakeBody)
+            //    {
+            //        Console.WriteLine($"{a.DropletName}: ({valueTuple.x}, {valueTuple.y})");
+            //    }
+            //}
+
             foreach (var actionKvp in state.JointAction)
             {
-                
+
                 if (actionKvp.Value == RouteAction.NoOp)
                 {
+                    Console.WriteLine("HERE");
                     continue;
                 }
+
                 string dropletName = actionKvp.Key;
                 //string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
@@ -550,17 +560,17 @@ public class State
 
                 h += manhattanDistance;
 
-                // Reward open paths
+                //Reward open paths
                 if (!IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
                     h -= 2;
                     //h += 2;
                 }
 
-                // Penalize the act of standing still
+                ////Penalize the act of standing still
                 //if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == ActionType.NoOp)
                 //{
-                //    manhattanDistance += 1;
+                //    h += 1;
                 //}
 
                 // Prioritize moving along existing contamination
@@ -766,15 +776,14 @@ public class State
             hash = hash * 31 + agent.PositionY.GetHashCode();
         }
 
+        //if (Action != null) hash = hash * 31 + Action.Type == ActionType.NoOp ? 0 : 1;
+
         _cachedHash = hash;
         return hash;
     }
 
     public override bool Equals(object obj)
     {
-        if (Action != null && Action.Type == ActionType.NoOp)
-            return false;
-
         if (ReferenceEquals(this, obj))
             return true;
 
@@ -784,7 +793,7 @@ public class State
         if (!AreAgentsEqual(Agents, otherState.Agents))
             return false;
 
-        //if (!AreContaminationMapsEqual(ContaminationMap, otherState.ContaminationMap))
+        //if (Action != null && Action.Type == ActionType.NoOp)
         //    return false;
 
         return true;
