@@ -52,6 +52,11 @@ public class SimulationCommunicationService : ICommunicationService
 
     public async Task SendActions(List<BoardAction> boardActionDtoList)
     {
+        if (boardActionDtoList.Count == 0)
+        {
+            return;
+        }
+
         Queue<ActionQueueItem> actionQueue = new Queue<ActionQueueItem>();
 
         foreach (var boardActionDto in boardActionDtoList)

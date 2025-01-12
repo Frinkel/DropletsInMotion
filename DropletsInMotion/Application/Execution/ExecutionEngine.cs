@@ -214,6 +214,10 @@ namespace DropletsInMotion.Application.Execution
                 boardActions.Clear();
             }
 
+
+            // Done compiling
+            _communicationEngine.SendActions(new List<BoardAction>());
+
         }
 
         private void HandleWasteCommand(Waste wasteCommand, List<IDropletCommand> movesToExecute)
@@ -386,11 +390,11 @@ namespace DropletsInMotion.Application.Execution
 
                 // Handle time desync
                 // TODO: Check if mix sends its own request, we should do it here!
-                if (boardActionTime <= actualTime) // TODO: Do we need +1 here?
+                if (boardActionTime <= actualTime)
                 {
                     var timeDifference = actualTime - boardActionTime + 1; // TODO: how can we a good buffer?
                     boardActions.ForEach(b => b.Time += timeDifference);
-                    Time = boardActions.Last().Time; 
+                    Time = boardActions.Last().Time;
                 }
 
                 //Console.WriteLine("thetime" + boardActions.Last().Time);
