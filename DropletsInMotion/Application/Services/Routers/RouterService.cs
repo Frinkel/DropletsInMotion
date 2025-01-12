@@ -66,7 +66,6 @@ public class RouterService : IRouterService
         // Generate all permutations of the commands list
         var permutations = GetScoredPermutations(commands, commands.Count, command => ScoreCommand(command, agents));
 
-
         var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
         foreach (var commandOrder in permutations)
@@ -109,7 +108,7 @@ public class RouterService : IRouterService
         // If no solution was found across all permutations, throw an error
         if (sFinal == null)
         {
-            throw new InvalidOperationException("No solution found in any permutation of the commands!");
+            throw new InvalidOperationException($"No solution found in any permutation of the commands! {Debugger.Permutations}");
         }
 
         for (int i = 1; i < commitedStates.Count; i++)
@@ -293,8 +292,6 @@ public class RouterService : IRouterService
             .SelectMany(t => scoredMoves.Where(e => !t.Contains(e)),
                 (t1, t2) => t1.Concat(new[] { t2 }));
     }
-
-
 
     //public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
     //{

@@ -87,7 +87,7 @@ namespace DropletsInMotion.Application.Execution
             Dispensers.Clear();
             Agent.ResetSubstanceId();
 
-            //_router.Initialize(Board);
+            _router.Initialize(Board);
 
             
             List<BoardAction> boardActions = new List<BoardAction>();
@@ -209,10 +209,14 @@ namespace DropletsInMotion.Application.Execution
                 _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                Console.WriteLine();
-                _contaminationService.PrintContaminationMap(ContaminationMap);
+                //Console.WriteLine();
+                //_contaminationService.PrintContaminationMap(ContaminationMap);
                 boardActions.Clear();
             }
+
+
+            // Done compiling
+            _communicationEngine.SendActions(new List<BoardAction>());
 
         }
 
@@ -386,11 +390,11 @@ namespace DropletsInMotion.Application.Execution
 
                 // Handle time desync
                 // TODO: Check if mix sends its own request, we should do it here!
-                if (boardActionTime <= actualTime) // TODO: Do we need +1 here?
+                if (boardActionTime <= actualTime)
                 {
                     var timeDifference = actualTime - boardActionTime + 1; // TODO: how can we a good buffer?
                     boardActions.ForEach(b => b.Time += timeDifference);
-                    Time = boardActions.Last().Time; 
+                    Time = boardActions.Last().Time;
                 }
 
                 //Console.WriteLine("thetime" + boardActions.Last().Time);

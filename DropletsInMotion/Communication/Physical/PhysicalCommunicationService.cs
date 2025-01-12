@@ -7,6 +7,7 @@ using DropletsInMotion.Translation.Services;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
+using System.Linq;
 
 
 namespace DropletsInMotion.Communication.Physical
@@ -23,6 +24,7 @@ namespace DropletsInMotion.Communication.Physical
         private bool _disposed = false;
 
         public double? Time = null;
+        public bool HighVoltage = false;
 
         public PhysicalCommunicationService(ILogger logger, IPlatformRepository platformRepository)
         {
@@ -53,17 +55,18 @@ namespace DropletsInMotion.Communication.Physical
             _logger.Info($"Serial port '{_serialPort.PortName}' opened");
             _logger.Info("Sending initial commands..");
             SendCommand("shv 1 280 \r");
-            await Task.Delay(1000);
+            await Task.Delay(100);
             
             SendCommand("hvpoe 1 1 \r");
-            await Task.Delay(1000);
+            HighVoltage = true;
+            await Task.Delay(100);
 
             SendCommand("clra 0 \r");
-            await Task.Delay(1000);
+            await Task.Delay(100);
 
             SendCommand("clra 1 \r");
 
-            await Task.Delay(1000);
+            await Task.Delay(100);
         }
 
         public async Task StopCommunication()
@@ -76,6 +79,7 @@ namespace DropletsInMotion.Communication.Physical
 
             // Closing command
             SendCommand("hvpoe 1 0");
+            HighVoltage = false;
             await Task.Delay(100);
 
             SendCommand("clra 0 \r");
@@ -91,10 +95,24 @@ namespace DropletsInMotion.Communication.Physical
 
         public async Task SendActions(List<BoardAction> boardActionDtoList)
         {
-            if (boardActionDtoList == null || boardActionDtoList.Count == 0)
+            if (boardActionDtoList == null)
             {
-                _logger.Warning("Attempted to enqueue an empty or null list.");
+                _logger.Warning("Attempted to enqueue a null value.");
                 return;
+            }
+
+            // We need to turn on high voltage if it is off
+            if (!HighVoltage)
+            {
+                SendCommand("hvpoe 1 1 \r");
+                await Task.Delay(100);
+
+                SendCommand("clra 0 \r");
+                await Task.Delay(100);
+
+                SendCommand("clra 1 \r");
+
+                await Task.Delay(100);
             }
 
             _queue.Enqueue(new List<BoardAction>(boardActionDtoList));
@@ -113,7 +131,7 @@ namespace DropletsInMotion.Communication.Physical
                     if (_queue.TryDequeue(out var itemList))
                     {
                         _logger.Debug($"Dequeued list. Count: {itemList?.Count ?? 0}");
-                        if (itemList == null || itemList.Count == 0)
+                        if (itemList == null /*|| itemList.Count == 0*/)
                         {
                             _logger.Warning("Dequeued an empty or null list.");
                         }
@@ -138,7 +156,14 @@ namespace DropletsInMotion.Communication.Physical
         {
             if (itemList == null || itemList.Count == 0)
             {
-                _logger.Warning("Processing an empty or null list.");
+                _logger.Debug("Terminator received.");
+
+                // Turn off high voltage
+                SendCommand("hvpoe 1 0 \r");
+                HighVoltage = false;
+                await Task.Delay(100);
+
+                Time = null;
                 return;
             }
 
@@ -200,9 +225,13 @@ namespace DropletsInMotion.Communication.Physical
                         var x = id % len;
                         var y = id / len;
 
-                        command += _platformRepository.Board[x][y].ElectrodeId;
-                        command += " ";
+                        var electrodeId = _platformRepository.Board[x][y].ElectrodeId.ToString();
 
+                        if (!command.Split(" ").Contains(electrodeId))
+                        {
+                            command += electrodeId;
+                            command += " ";
+                        }
                     }
                     command = command.TrimEnd();
                     SendCommand(command);
@@ -243,9 +272,10 @@ namespace DropletsInMotion.Communication.Physical
             if (_serialPort.IsOpen)
             {
                 _logger.Debug($"Sent: {command}");
+                //_logger.WriteColor(command);
                 var sendCommand = command + " \r";
                 char[] output = sendCommand.ToCharArray();
-                _serialPort.Write(output, 0, output.Length);
+                //_serialPort.Write(output, 0, output.Length);
             }
             else
             {
