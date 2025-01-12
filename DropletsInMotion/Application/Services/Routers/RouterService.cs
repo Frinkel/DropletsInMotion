@@ -66,9 +66,6 @@ public class RouterService : IRouterService
         // Generate all permutations of the commands list
         var permutations = GetScoredPermutations(commands, commands.Count, command => ScoreCommand(command, agents));
 
-
-        Console.WriteLine(permutations.Count());
-
         var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
         foreach (var commandOrder in permutations)
