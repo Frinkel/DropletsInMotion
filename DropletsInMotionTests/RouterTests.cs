@@ -407,6 +407,66 @@ namespace DropletsInMotionTests
 
 
         [Test]
+        public void AStarSearchAroundEachotherExrtaDroplet()
+        {
+            IDropletCommand dropletCommand = new Move("a1", 20, 5);
+            IDropletCommand command2 = new Move("a2", 1, 5);
+            IDropletCommand command3 = new Move("a3", 20, 15);
+
+            var commands = new List<IDropletCommand>() { dropletCommand, command2, command3 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 5, 5, 400);
+            var a2 = new Agent("a2", 12, 5, 400);
+            var a3 = new Agent("a3", 5, 15, 400);
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+            agents.Add("a3", a3);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+
+        [Test]
+        public void AStarSearchCBSBreaking()
+        {
+            IDropletCommand dropletCommand = new Move("a1", 9, 15);
+            IDropletCommand command2 = new Move("a2", 18, 10);
+            //IDropletCommand command3 = new Move("a3", 20, 15);
+
+            var commands = new List<IDropletCommand>() { dropletCommand, command2 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+            var a1 = new Agent("a1", 9, 0, 400);
+            var a2 = new Agent("a2", 2, 10, 400);
+            //var a3 = new Agent("a3", 5, 15, 400);
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+            //agents.Add("a3", a3);
+
+            var board = CreateBoard();
+            var contaminationMap = new byte[board.Length, board[0].Length];
+
+            _routerService.Initialize(board, 1);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates}");
+
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+
+        [Test]
         public void AStarNewTest()
         {
 

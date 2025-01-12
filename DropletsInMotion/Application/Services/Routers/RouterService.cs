@@ -85,10 +85,10 @@ public class RouterService : IRouterService
         }
 
 
-        PrintConstraints(initialConstraints, contaminationMap.GetLength(0), contaminationMap.GetLength(1));
+        //PrintConstraints(initialConstraints, contaminationMap.GetLength(0), contaminationMap.GetLength(1));
         
 
-        Console.WriteLine($"Initial constraint count {initialConstraints.Count}");
+        //Console.WriteLine($"Initial constraint count {initialConstraints.Count}");
         
         // Find initial routes
         Dictionary<string, State> routes = FindLowLevelSolutions(agents, commands, contaminationMap, initialConstraints);
@@ -97,7 +97,7 @@ public class RouterService : IRouterService
         PriorityQueue<CbsNode, int> openNodes = new PriorityQueue<CbsNode, int>();
         CbsNode initialNode = new CbsNode(routes, initialConstraints, 0);
 
-        Console.WriteLine($"Initial node score {initialNode.Score}");
+        //Console.WriteLine($"Initial node score {initialNode.Score}");
         openNodes.Enqueue(initialNode, initialNode.Score);
 
         // Main CBS loop
@@ -115,7 +115,7 @@ public class RouterService : IRouterService
 
             if (conflict == null /*|| conflict.Count == 0*/)
             {
-                Console.WriteLine("Solution with no conflicts found!");
+                //Console.WriteLine("Solution with no conflicts found!");
                 // Extract actions from the routes!
 
                 foreach (var kvp in bestNode.Routes)
@@ -127,13 +127,24 @@ public class RouterService : IRouterService
 
                 PrintConstraints(bestNode.Constraints, contaminationMap.GetLength(0), contaminationMap.GetLength(1));
 
-                throw new Exception("YAY!");
-            }  else if (bestNode.Depth == 15)
+
+                List<BoardAction> finalActions = new List<BoardAction>();
+                // EXTRACT BOARD ACTIONS
+                //foreach (var bestNodeRoute in bestNode.Routes)
+                //{
+                //    finalActions.AddRange(bestNodeRoute.Value.ExtractActions(time));
+                //}
+
+                return finalActions;
+
+
+                //throw new Exception("YAY!");
+            }  else if (bestNode.Depth == 30)
             {
                 Console.WriteLine($"Constraints count {bestNode.Constraints.Count}");
 
 
-                PrintConstraints(bestNode.Constraints, contaminationMap.GetLength(0), contaminationMap.GetLength(1));
+                //PrintConstraints(bestNode.Constraints, contaminationMap.GetLength(0), contaminationMap.GetLength(1));
 
                 throw new Exception("Noooo");
             }
