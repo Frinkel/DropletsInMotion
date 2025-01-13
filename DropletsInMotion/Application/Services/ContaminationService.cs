@@ -259,6 +259,11 @@ namespace DropletsInMotion.Application.Services
                 return mergedSubstanceId;
             }
 
+            if (substance1.Equals(substance2))
+            {
+                return substance1;
+            }
+
             string newSubstanceName = _contaminationRepository.SubstanceTable[substance1].Item1 + "_" + _contaminationRepository.SubstanceTable[substance2].Item1;
             _contaminationRepository.SubstanceTable.Add((newSubstanceName, false));
 
