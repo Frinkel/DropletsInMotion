@@ -45,6 +45,22 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public async Task ManyDropletsTest()
+        {
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/ManyDropletsTest.txt";
+
+            await _executionEngine.Execute();
+
+            // Assertions
+            //Assert.That(_executionEngine.Agents.Count, Is.EqualTo(1));
+            //Assert.That(_executionEngine.Agents["d1"].PositionX, Is.EqualTo(3));
+            //Assert.That(_executionEngine.Agents["d1"].PositionY, Is.EqualTo(3));
+        }
+
+
+        [Test]
         public async Task MergeDropletsTest()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";

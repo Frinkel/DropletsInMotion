@@ -1,0 +1,5 @@
+Droplet(d1, 4, 5, 3000, "H2O");
+Move(d1, 14, 5);
+SplitByRatio(d1, d2, d3, 13, 5, 16, 5, 0.5);
+Mix(d3, 16, 5, 5, 5, 1);
+Merge(d2, d3, d1, 15, 5);
