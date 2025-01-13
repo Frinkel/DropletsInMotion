@@ -9,5 +9,6 @@
 
 public class PlatformInformation
 {
+    public double TimeScaleFactor { get; set; }
     public MovementInfo Movement { get; set; }
 }

@@ -1,4 +1,5 @@
 {
+  "TimeScaleFactor": 1,
   "Movement": {
     "MinimumMovementVolume": 350,
     "MaximumMovementVolume": 4000,

@@ -12,6 +12,7 @@ namespace DropletsInMotion.Infrastructure.Repositories
     public class PlatformRepository : IPlatformRepository
     {
         public Electrode[][] Board { get; set; }
+        public double TimeScaleFactor { get; set; }
         public double MinimumMovementVolume { get; set; }
         public double MaximumMovementVolume { get; set; }
         public double MinSize1x1 { get; set; }

@@ -16,14 +16,16 @@ namespace DropletsInMotion.Communication
     {
         private ICommunicationService? _communicationService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IPlatformRepository _platformRepository;
 
         public event EventHandler? ClientConnected;
         public event EventHandler? ClientDisconnected;
 
         private bool _isServerRunning = false;
 
-        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService)
+        public CommunicationEngine(IServiceProvider serviceProvider, IUserService userService, IPlatformRepository platformRepository)
         {
+            _platformRepository = platformRepository;
             _serviceProvider = serviceProvider;
             userService.CommunicationTypeChanged += OnCommunicationTypeChanged;
         }
@@ -79,6 +81,9 @@ namespace DropletsInMotion.Communication
                 return;
             }
 
+            // Apply the scaling factor
+            boardActionDtoList.ForEach(b => b.Time *= _platformRepository.TimeScaleFactor);
+
             await _communicationService.SendActions(boardActionDtoList);
         }
 
@@ -89,7 +94,7 @@ namespace DropletsInMotion.Communication
                 throw new InvalidOperationException("Tried to send request without an open communication channel!");
             }
 
-            return await _communicationService.SendSensorRequest(sensor, handler, time);
+            return await _communicationService.SendSensorRequest(sensor, handler, time * _platformRepository.TimeScaleFactor);
         }
 
         public async Task<bool> SendActuatorRequest(Actuator actuator, double time)
@@ -99,7 +104,7 @@ namespace DropletsInMotion.Communication
                 throw new InvalidOperationException("Tried to send request without an open communication channel!"); // TODO: Communication error here!
             }
 
-            return await _communicationService.SendActuatorRequest(actuator, time);
+            return await _communicationService.SendActuatorRequest(actuator, time * _platformRepository.TimeScaleFactor);
         }
 
         public async Task<double> SendTimeRequest()

@@ -293,6 +293,7 @@ namespace DropletsInMotion.Presentation.Services
 
             var platformInfo = JsonSerializer.Deserialize<PlatformInformation>(fileContent);
 
+            _platformRepository.TimeScaleFactor = 1/platformInfo.TimeScaleFactor;
             _platformRepository.MinimumMovementVolume = platformInfo.Movement.MinimumMovementVolume;
             _platformRepository.MaximumMovementVolume = platformInfo.Movement.MaximumMovementVolume;
             _platformRepository.MinSize1x1 = platformInfo.Movement.MinSize1x1;

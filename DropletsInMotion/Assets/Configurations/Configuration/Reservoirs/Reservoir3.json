@@ -1,0 +1,17 @@
+{
+  "name": "Reservoir3",
+  "outputX": 0,
+  "outputY": 9,
+  "dispenseSequence": [
+    {"id": 653, "status": 1, "time": 0},
+    {"id": 656, "status": 1, "time": 0.5},
+    {"id": 657, "status": 1, "time": 1},
+    {"id": 658, "status": 1, "time": 1.5},
+    {"id": 657, "status": 0, "time": 2},
+    {"id": 289, "status": 1, "time": 2},
+    {"id": 321, "status": 1, "time": 2},
+    {"id": 658, "status": 0, "time": 2.5},
+    {"id": 656, "status": 0, "time": 2.5},
+    {"id": 321, "status": 0, "time": 2.5}
+  ]
+}
