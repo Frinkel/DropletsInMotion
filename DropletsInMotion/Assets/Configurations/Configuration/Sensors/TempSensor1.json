@@ -7,8 +7,7 @@
   "argumentHandlers": {
     "temperature": {
       "request": {
-        "sensorId": 1,
-        "requestArgument": "read"
+        "sensorId": 1
       },
       "response": "valueTemperature"
     }

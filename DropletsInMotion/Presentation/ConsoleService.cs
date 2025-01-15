@@ -280,7 +280,7 @@ namespace DropletsInMotion.Presentation
             if (response != null && (response == "" || response.ToLower() == "yes" || response.ToLower() == "y"))
             {
                 // Load files
-                _logger.Debug("Load Files");
+                _logger.Info("Loading files...");
 
                 _userService.ProgramPath = program;
                 _userService.PlatformPath = platform;

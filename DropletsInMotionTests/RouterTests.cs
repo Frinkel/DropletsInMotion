@@ -670,6 +670,9 @@ namespace DropletsInMotionTests
         public void AStarSevenDropletsCrissCross()
         {
 
+            Debugger.ClearMemory();
+            Debugger.PrintMemoryUsage();
+
             IDropletCommand dropletCommandA1 = new Move("a1", 21, 11);
             IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
             IDropletCommand dropletCommandA3 = new Move("a3", 11, 11);
@@ -722,6 +725,7 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
+            Debugger.PrintMemoryUsage();
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();

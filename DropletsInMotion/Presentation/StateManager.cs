@@ -72,6 +72,7 @@ namespace DropletsInMotion.Presentation
 
                         case (ProgramState.WaitingForUserInput):
                             _currentState = await HandleUserInput(_cts.Token);
+                            await Task.Delay(100);
                             break;
 
                         case (ProgramState.CompilingProgram):
