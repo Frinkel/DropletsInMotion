@@ -1,0 +1,9 @@
+Droplet(d1, 9, 7, 400);
+Droplet(d2, 11, 7, 400);
+Droplet(d3, 13, 7, 400);
+Droplet(d4, 15, 7, 400);
+
+Move(d1, 15, 11);
+Move(d2, 9, 11);
+Move(d3, 11, 11);
+Move(d4, 13, 11);

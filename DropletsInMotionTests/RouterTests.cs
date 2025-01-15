@@ -604,6 +604,69 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public void AStarFiveDropletsCrissCross()
+        {
+            foreach (var bl in _contaminationRepository.ContaminationTable)
+            {
+                foreach (var b in bl)
+                {
+                    Console.Write(b);
+                }
+
+                Console.WriteLine();
+            }
+
+
+            IDropletCommand dropletCommandA1 = new Move("a1", 17, 11);
+            IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
+            IDropletCommand dropletCommandA3 = new Move("a3", 11, 11);
+            IDropletCommand dropletCommandA4 = new Move("a4", 13, 11);
+            IDropletCommand dropletCommandA5 = new Move("a4", 15, 11);
+
+            var commands = new List<IDropletCommand>() { dropletCommandA2, dropletCommandA3, dropletCommandA4, dropletCommandA1, dropletCommandA5 };
+
+            Dictionary<string, Agent> agents = new Dictionary<string, Agent>();
+
+
+            var a1Substance = _contaminationService.GetSubstanceId("");
+            var a2Substance = _contaminationService.GetSubstanceId("");
+            var a3Substance = _contaminationService.GetSubstanceId("");
+            var a4Substance = _contaminationService.GetSubstanceId("");
+            var a5Substance = _contaminationService.GetSubstanceId("");
+
+
+            var a1 = _agentFactory.CreateAgent("a1", 9, 7, 400, a1Substance);
+            var a2 = _agentFactory.CreateAgent("a2", 11, 7, 400, a2Substance);
+            var a3 = _agentFactory.CreateAgent("a3", 13, 7, 400, a3Substance);
+            var a4 = _agentFactory.CreateAgent("a4", 15, 7, 400, a4Substance);
+            var a5 = _agentFactory.CreateAgent("a5", 17, 7, 400, a5Substance);
+
+            agents.Add("a1", a1);
+            agents.Add("a2", a2);
+            agents.Add("a3", a3);
+            agents.Add("a4", a4);
+            agents.Add("a5", a5);
+
+            var board = CreateBoard();
+            var contaminationMap = _contaminationService.CreateContaminationMap(board.Length, board[0].Length);
+
+            _routerService.Initialize(board, 1);
+
+            _contaminationService.ApplyContamination(a1, contaminationMap);
+            _contaminationService.ApplyContamination(a2, contaminationMap);
+            _contaminationService.ApplyContamination(a3, contaminationMap);
+            _contaminationService.ApplyContamination(a4, contaminationMap);
+            _contaminationService.ApplyContamination(a5, contaminationMap);
+
+            _ = _routerService.Route(agents, commands, contaminationMap, 0);
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
+            //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
+            //Debugger.PrintDuplicateCounts();
+            Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
+        }
+
+        [Test]
         public void AStarSevenDropletsCrissCross()
         {
 
