@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,17 +20,20 @@ namespace DropletsInMotion.Infrastructure
 
         public static int Permutations { get; set; }
 
-        public static void ClearMemory()
+        private static double _prevMemory = 0;
+
+        public static Process GetProcess()
         {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            var process = Process.GetCurrentProcess();
+            return process;
         }
 
-        public static void PrintMemoryUsage()
+        public static void PrintMemoryUsage(Process process)
         {
-            long memory = GC.GetTotalMemory(false);
-            Console.WriteLine($"Current memory is: {memory / (1024.0 * 1024.0)} mb");
+            process.Refresh();
+            var memory = process.WorkingSet64 / (1024.0 * 1024.0);
+            Console.WriteLine($"Current memory '{process.ProcessName}': {memory - _prevMemory} MB");
+            _prevMemory = memory;
         }
 
 
