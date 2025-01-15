@@ -18,6 +18,19 @@ namespace DropletsInMotion.Infrastructure
 
         public static int Permutations { get; set; }
 
+        public static void ClearMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        public static void PrintMemoryUsage()
+        {
+            long memory = GC.GetTotalMemory(false);
+            Console.WriteLine($"Current memory is: {memory / (1024.0 * 1024.0)} mb");
+        }
+
 
         public static void PrintDuplicateCounts()
         {
