@@ -9,6 +9,8 @@ using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotionTests
 {
@@ -670,8 +672,12 @@ namespace DropletsInMotionTests
         public void AStarSevenDropletsCrissCross()
         {
 
-            Debugger.ClearMemory();
-            Debugger.PrintMemoryUsage();
+            var process = Debugger.GetProcess();
+
+            Debugger.PrintMemoryUsage(process);
+
+            //process.Refresh();
+            //Console.WriteLine($"mem: {process.WorkingSet64 / (1024.0 * 1024.0)}");
 
             IDropletCommand dropletCommandA1 = new Move("a1", 21, 11);
             IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);
@@ -725,7 +731,9 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Debugger.PrintMemoryUsage();
+            Debugger.PrintMemoryUsage(process);
+            //process.Refresh();
+            //Console.WriteLine($"mem: {process.WorkingSet64 / (1024.0 * 1024.0)}");
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
             //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
             //Debugger.PrintDuplicateCounts();
