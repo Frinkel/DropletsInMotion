@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using DropletsInMotion.Application.Execution.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
 {
@@ -19,25 +12,7 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
         Dictionary<string, (int x, int y)> FinalPositions { get; }
         Dictionary<string, (int x, int y)> InitialPositions { get; }
-        //List<(int x, int y)> AllPositions { get; }
-
         List<Dictionary<string, List<(int x, int y)>>> Blocks { get; set; }
-
-
-        //public List<(int x, int y)> GetAllPositions()
-        //{
-        //    List<(int x, int y)> positions = new List<(int x, int y)>();
-
-        //    foreach (var v in Blocks)
-        //    {
-        //        foreach (var kvp in v)
-        //        { 
-        //            positions.AddRange(kvp.Value);
-        //        }
-        //    }
-
-        //    return positions;
-        //}
 
         public List<BoardAction> Apply(int relativePosition, double time, double scale)
         {

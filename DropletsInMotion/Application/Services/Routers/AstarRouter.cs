@@ -17,7 +17,7 @@ namespace DropletsInMotion.Application.Services.Routers
 
             while (true)
             {
-                if (frontier.IsEmpty()) return null; //throw new Exception("No route can be found.");
+                if (frontier.IsEmpty()) return null;
 
                 State state = frontier.Pop();
 
@@ -36,7 +36,6 @@ namespace DropletsInMotion.Application.Services.Routers
                 {
                     if (!frontier.Contains(expandedState) && !explored.Contains(expandedState))
                     {
-                        if(expandedState.Action.Type == 0) Console.WriteLine("NOOP");
                         frontier.Add(expandedState);
                     }
                     else
@@ -44,7 +43,6 @@ namespace DropletsInMotion.Application.Services.Routers
                         Debugger.ExistingStates += 1;
                     }
                 }
-
             }
         }
     }

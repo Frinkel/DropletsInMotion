@@ -1,8 +1,5 @@
 ﻿namespace DropletsInMotion.Infrastructure.Models.Platform
 {
-    /// <summary>
-    /// Naming was decided by Joel whom you can complain to if you do not agree
-    /// </summary>
     public class Electrode
     {
         public int Id { get; }

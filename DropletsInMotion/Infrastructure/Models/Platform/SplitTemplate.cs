@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
 {
@@ -63,27 +61,5 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
             return copy;
         }
-
-
-        //public override string ToString()
-        //{
-        //    // Format Actions into a readable string
-        //    var actionsString = Actions != null && Actions.Any()
-        //        ? string.Join(", ", Actions.Select(a => a.ToString()))
-        //        : "No Actions";
-
-        //    // Format FinalPositions into a readable string
-        //    var finalPositionsString = FinalPositions != null && FinalPositions.Any()
-        //        ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
-        //        : "No Final Positions";
-
-        //    // Format InitialPositions into a readable string
-        //    var initialPositionsString = InitialPositions != null && InitialPositions.Any()
-        //        ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
-        //        : "No Initial Positions";
-
-        //    return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
-        //}
-
     }
 }

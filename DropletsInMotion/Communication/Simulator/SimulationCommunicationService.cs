@@ -1,10 +1,8 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Communication.Simulator.Models;
+﻿using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Communication.Simulator.Services;
 using System.Text.Json;
 using DropletsInMotion.Communication.Models;
 using System.Reflection;
-using System;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Infrastructure;
 
@@ -149,9 +147,6 @@ public class SimulationCommunicationService : ICommunicationService
             new WebSocketMessage<int>(WebSocketMessageTypes.Time, 200);
 
         string serializedObject = JsonSerializer.Serialize(requestDto);
-
-        //Console.WriteLine($"Sending {serializedObject}");
-
         var response = await _websocketService.SendRequestResponseAsync(requestDto.RequestId.ToString(), serializedObject, _cancellationTokenSource.Token);
 
         switch (response.Type)

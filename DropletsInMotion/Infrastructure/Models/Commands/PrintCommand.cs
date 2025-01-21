@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DropletsInMotion.Infrastructure.Models.Commands;
+﻿using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 
 public class PrintCommand : ICommand

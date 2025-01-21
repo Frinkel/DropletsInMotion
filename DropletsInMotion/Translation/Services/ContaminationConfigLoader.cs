@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Formats.Asn1;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Infrastructure;
+﻿using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Infrastructure.Services;
-using Microsoft.VisualBasic.FileIO;
-
 
 
 namespace DropletsInMotion.Translation.Services;
@@ -82,18 +72,13 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
 
         }
 
-
         var combinedHeaders = ContaminationTableHeaders.Union(MergeTableHeaders).ToList();
         CombinedHeaders = combinedHeaders;
 
-        // Add the base values to the substance table
-        _logger.Debug("Headers"); // TODO: DEBUG
         foreach (var s in combinedHeaders)
         {
             _contaminationRepository.InitialSubstanceTable.Add((s, true));
-            Console.Write(s + " ");
         }
-        Console.WriteLine();
     }
 
 
@@ -222,15 +207,15 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             .ToList();
 
 
-        _logger.Debug("Contamination table"); // TODO: Debug case for below.
-        for (int i = 0; i < cTable.GetLength(0); i++)
-        {
-            for (int j = 0; j < cTable.GetLength(1); j++)
-            {
-                Console.Write(cTable[i, j] + " ");
-            }
-            Console.WriteLine();
-        }
+        //_logger.Debug("Contamination table"); // TODO: Debug case for below.
+        //for (int i = 0; i < cTable.GetLength(0); i++)
+        //{
+        //    for (int j = 0; j < cTable.GetLength(1); j++)
+        //    {
+        //        Console.Write(cTable[i, j] + " ");
+        //    }
+        //    Console.WriteLine();
+        //}
 
     }
 
@@ -349,20 +334,20 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
         }
 
         // Convert to the data structure of the repository
-        _contaminationRepository.MergeTable = Enumerable.Range(0, mTable.GetLength(0))
-            .Select(i => Enumerable.Range(0, mTable.GetLength(1))
-                .Select(j => mTable[i, j]).ToList())
-            .ToList();
+        //_contaminationRepository.MergeTable = Enumerable.Range(0, mTable.GetLength(0))
+        //    .Select(i => Enumerable.Range(0, mTable.GetLength(1))
+        //        .Select(j => mTable[i, j]).ToList())
+        //    .ToList();
 
-        _logger.Debug("Merge Table"); // TODO: DEBUG
-        for (int i = 0; i < mTable.GetLength(0); i++)
-        {
-            for (int j = 0; j < mTable.GetLength(1); j++)
-            {
-                Console.Write(mTable[i, j] + " ");
-            }
-            Console.WriteLine();
-        }
+        //_logger.Debug("Merge Table"); // TODO: DEBUG
+        //for (int i = 0; i < mTable.GetLength(0); i++)
+        //{
+        //    for (int j = 0; j < mTable.GetLength(1); j++)
+        //    {
+        //        Console.Write(mTable[i, j] + " ");
+        //    }
+        //    Console.WriteLine();
+        //}
     }
 }
 

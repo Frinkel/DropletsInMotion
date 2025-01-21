@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
+﻿using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands
 {

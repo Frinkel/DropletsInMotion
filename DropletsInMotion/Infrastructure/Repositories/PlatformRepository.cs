@@ -1,11 +1,4 @@
-﻿using DropletsInMotion.Communication.Models;
-using DropletsInMotion.Infrastructure.Models.Platform;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Infrastructure.Repositories
 {

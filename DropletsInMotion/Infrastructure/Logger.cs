@@ -1,7 +1,17 @@
-﻿namespace DropletsInMotion.Infrastructure
+﻿using Microsoft.Extensions.Configuration;
+
+namespace DropletsInMotion.Infrastructure
 {
     public class Logger : ILogger
     {
+
+        private bool _isDebuggingEnabled = false;
+
+        public Logger(IConfiguration configuration)
+        {
+            _isDebuggingEnabled = configuration.GetValue<bool>("Development:Debugging");
+        }
+
         public void WriteSuccess(string message)
         {
             WriteColor(message, ConsoleColor.Green);
@@ -23,6 +33,7 @@
 
         public void Debug(string message)
         {
+            if (!_isDebuggingEnabled) return;
             WriteColor("Debug: " + message, ConsoleColor.Green);
         }
 

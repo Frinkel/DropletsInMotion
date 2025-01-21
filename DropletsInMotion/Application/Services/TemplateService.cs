@@ -7,16 +7,10 @@ namespace DropletsInMotion.Application.Services
 {
     public class TemplateService : ITemplateService
     {
-
-        private readonly IPlatformRepository _platformRepository;
-
         public List<(string, List<BoardAction>)> Templates { get; private set; } = new List<(string, List<BoardAction>)>();
         public Electrode[][]? Board { get; set; }
 
-        public TemplateService(IPlatformRepository platformRepository)
-        {
-            _platformRepository = platformRepository;
-        }
+        public TemplateService(IPlatformRepository platformRepository) { }
 
         public void Initialize(Electrode[][] board)
         {
@@ -49,7 +43,7 @@ namespace DropletsInMotion.Application.Services
             var boardActions = new List<BoardAction>();
             string[] lines = File.ReadAllLines(filePath);
             double timeOffset = 0;
-            int gridSize = lines.Skip(1).First(line => !line.Contains(",") && !string.IsNullOrWhiteSpace(line)).Length; // Determine grid size from the first non-time, non-empty line
+            int gridSize = lines.Skip(1).First(line => !line.Contains(",") && !string.IsNullOrWhiteSpace(line)).Length;
             int[] previousState = new int[gridSize * gridSize];
 
             int rowIndex = 0;
@@ -59,34 +53,31 @@ namespace DropletsInMotion.Application.Services
             {
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    continue; // Skip empty lines
+                    continue;
                 }
 
                 if (line.Contains(","))
                 {
                     string[] parts = line.Split(',');
                     timeOffset = double.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
-                    rowIndex = 0; // Reset row index for the next grid
+                    rowIndex = 0;
                 }
                 else if (line.Contains(";"))
                 {
-                    // End of a grid block, do nothing
+                    // End of a block, do nothing
                 }
                 else
                 {
-                    // Parse the action grid row by row
                     char[] chars = line.Trim().ToCharArray();
 
                     for (int colIndex = 0; colIndex < chars.Length; colIndex++)
                     {
                         int action = chars[colIndex] - '0';
 
-                        // Calculate electrodeIdOffset relative to the center of the grid
                         int centerRow = gridSize / 2;
                         int centerCol = gridSize / 2;
                         int electrodeIdOffset = (rowIndex - centerRow) * boardWidth + (colIndex - centerCol);
 
-                        // Ensure indices are within the grid bounds
                         if (rowIndex >= 0 && rowIndex < gridSize && colIndex >= 0 && colIndex < gridSize)
                         {
                             int index = rowIndex * gridSize + colIndex;

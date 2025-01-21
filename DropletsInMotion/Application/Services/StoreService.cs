@@ -1,5 +1,4 @@
-﻿using DropletsInMotion.Application.Services;
-using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+﻿using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -18,7 +17,7 @@ namespace DropletsInMotion.Application.Services
                 string dropletName = storeCommand.DropletName;
 
                 StoredDroplets.Add((dropletName, releaseTime));
-                _dropletNamesInQueue.Add(storeCommand.DropletName); // Track it in the HashSet
+                _dropletNamesInQueue.Add(storeCommand.DropletName);
             }
         }
 
@@ -33,7 +32,7 @@ namespace DropletsInMotion.Application.Services
             {
 
                 StoredDroplets.Add((dropletName, endTime));
-                _dropletNamesInQueue.Add(dropletName); // Track it in the HashSet
+                _dropletNamesInQueue.Add(dropletName);
             }
         }
 
@@ -46,10 +45,10 @@ namespace DropletsInMotion.Application.Services
                 StoredDroplets.Remove(storedDroplet);
                 _dropletNamesInQueue.Remove(dropletName);
 
-                return true; // The droplet was found and removed, indicating store completion
+                return true;
             }
 
-            return false; // The droplet either doesn't exist or its store time hasn't completed
+            return false;
         }
 
         public double PeekClosestTime()

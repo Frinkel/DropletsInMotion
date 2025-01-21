@@ -1,14 +1,6 @@
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-using DropletsInMotion.Communication;
-using static MicrofluidicsParser;
-using DropletsInMotion.Application.ExecutionEngine;
-using DropletsInMotion.Presentation.Language;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Application.Execution;
 using DropletsInMotion.Infrastructure.Services;
-using NUnit.Framework;
-using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure;
 
 namespace DropletsInMotionTests
@@ -19,9 +11,6 @@ namespace DropletsInMotionTests
         private readonly IExecutionEngine _executionEngine;
         private readonly IUserService _userService;
         private readonly IFileService _filerService;
-
-        private string projectDirectory;
-        private string platformPath;
 
         public CompilerTests()
         {
@@ -415,12 +404,10 @@ namespace DropletsInMotionTests
         public async Task A7DropletCrissCross()
         {
             
-            //Debugger.PrintMemoryUsage2();
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/7DropletCrissCross.txt";
 
             await _executionEngine.Execute();
-            //Debugger.PrintMemoryUsage2();
 
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
@@ -433,9 +420,6 @@ namespace DropletsInMotionTests
             //_userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/program.txt";
 
             //await _executionEngine.Execute();
-            //Debugger.PrintMemoryUsage2();
-
-            //Debugger.PrintMemoryUsage2();
 
         }
 

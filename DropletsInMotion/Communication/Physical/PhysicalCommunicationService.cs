@@ -3,11 +3,8 @@ using DropletsInMotion.Communication.Models;
 using System.IO.Ports;
 using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
-using DropletsInMotion.Translation.Services;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading;
-using System.Linq;
 
 
 namespace DropletsInMotion.Communication.Physical
@@ -39,7 +36,6 @@ namespace DropletsInMotion.Communication.Physical
         {
             string portName = GetPortName();
 
-            // TODO: Should this be part of configuration?
             _serialPort = new SerialPort
             {
                 PortName = portName,
@@ -131,7 +127,7 @@ namespace DropletsInMotion.Communication.Physical
                     if (_queue.TryDequeue(out var itemList))
                     {
                         _logger.Debug($"Dequeued list. Count: {itemList?.Count ?? 0}");
-                        if (itemList == null /*|| itemList.Count == 0*/)
+                        if (itemList == null)
                         {
                             _logger.Warning("Dequeued an empty or null list.");
                         }
@@ -262,7 +258,6 @@ namespace DropletsInMotion.Communication.Physical
 
         public async Task<double> SendTimeRequest()
         {
-            //throw new NotImplementedException();
             return 0d;
         }
 
@@ -272,10 +267,9 @@ namespace DropletsInMotion.Communication.Physical
             if (_serialPort.IsOpen)
             {
                 _logger.Debug($"Sent: {command}");
-                //_logger.WriteColor(command);
                 var sendCommand = command + " \r";
                 char[] output = sendCommand.ToCharArray();
-                //_serialPort.Write(output, 0, output.Length);
+                _serialPort.Write(output, 0, output.Length);
             }
             else
             {

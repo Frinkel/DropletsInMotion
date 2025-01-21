@@ -48,7 +48,7 @@ namespace DropletsInMotion.Infrastructure.Models
             Dependencies.Add(dependency);
         }
 
-        public List<IDependencyNode> getExecutableNodes()
+        public List<IDependencyNode> GetExecutableNodes()
         {
             if(Body.GetAllNodes().All(node => node.IsExecuted))
             {

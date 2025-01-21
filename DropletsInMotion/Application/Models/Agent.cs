@@ -1,6 +1,5 @@
 ﻿using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
-using System.Drawing;
 using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Application.Services;
 
@@ -72,11 +71,8 @@ namespace DropletsInMotion.Application.Models
                 case Types.ActionType.NoOp:
                     break;
                 case Types.ActionType.Move:
-                    //PositionX += action.DropletXDelta;
-                    //PositionY += action.DropletYDelta;
                     AddToSnake(PositionX + action.DropletXDelta,
                         PositionY + action.DropletYDelta);
-                    //Move(action.DropletXDelta, action.DropletYDelta);
                     break;
                 default:
                     throw new RuntimeException("Invalid action tried to be executed! (Agent.cs)");
@@ -92,13 +88,13 @@ namespace DropletsInMotion.Application.Models
             var deltaX = PositionX + action.DropletXDelta;
             var deltaY = PositionY + action.DropletYDelta;
 
-            //Check out of bounds
+            // Check out of bounds
             if (deltaX < 0 || deltaX >= contamination.GetLength(0) || deltaY < 0 || deltaY >= contamination.GetLength(1))
             {
                 return false;
             }
 
-            // check for contaminations
+            // Check for contaminations
             if (_contaminationService.IsConflicting(state.GetContamination(deltaX, deltaY), SubstanceId))
             {
                 return false;
@@ -109,16 +105,8 @@ namespace DropletsInMotion.Application.Models
                 return false;
             }
 
-            //if (state.Parent != null &&
-            //    action.Type != Types.ActionType.NoOp &&
-            //    deltaX == state.Parent.Agents[DropletName].PositionX &&
-            //    deltaY == state.Parent.Agents[DropletName].PositionY)
-            //{
-            //    return false;
-            //}
 
-
-            //Check for going near other agents of the same substance
+            // Check for going near other agents of the same substance
             foreach (var otherAgentKvp in otherAgents)
             {
                 var otherAgent = otherAgentKvp.Value;
@@ -156,12 +144,6 @@ namespace DropletsInMotion.Application.Models
                         }
                     }
                 }
-                    
-
-                //if (Math.Abs(otherAgent.PositionX - deltaX) <= 1 && Math.Abs(otherAgent.PositionY - deltaY) <= 1)
-                //{
-                //    return false;
-                //}
             }
 
             return true;

@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata;
-using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
@@ -14,7 +12,7 @@ using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Presentation;
-using DropletsInMotion.Presentation.Services;
+using DropletsInMotion.Translation;
 
 namespace DropletsInMotion.Application.Execution
 {
@@ -71,15 +69,14 @@ namespace DropletsInMotion.Application.Execution
 
         public async Task Execute()
         {
-            _translator.Translate(); // TODO: Move to state manager
-
+            _translator.Translate();
             Board = _translator.Board;
             DependencyGraph = _translator.DependencyGraph;
 
             Time = 0;
 
-            //Console.WriteLine(Board[0][1]);
-            //DependencyGraph.GenerateDotFile(); // TODO: Uncommented for now
+            // Used to generate dot files
+            //DependencyGraph.GenerateDotFile();
 
             // Reset the execution
             ContaminationMap = _contaminationService.CreateContaminationMap(Board.Length, Board[0].Length);
@@ -94,13 +91,6 @@ namespace DropletsInMotion.Application.Execution
 
             while (DependencyGraph.GetExecutableNodes().Count > 0)
             {
-                // TODO: Uncommented for now  
-                //foreach (var node in DependencyGraph.GetExecutableNodes())
-                //{
-                //    Console.WriteLine(node);
-                //}
-                //Console.WriteLine(Time);
-
                 List<IDependencyNode> executableNodes = DependencyGraph.GetExecutableNodes();
                 List<ICommand> commands = executableNodes.ConvertAll(node => node.Command);
                 List<IDropletCommand> commandsToExecute = commands
@@ -204,16 +194,12 @@ namespace DropletsInMotion.Application.Execution
                     Time = boundTime != null ? (double)boundTime : Time;
                 }
 
-                //Console.WriteLine(Time);
-
-                _dependencyService.updateExecutedNodes(executableNodes, Agents, Time);
+                _dependencyService.UpdateExecutedNodes(executableNodes, Agents, Time);
 
                 await SendActions(boardActions);
-                //Console.WriteLine();
-                //_contaminationService.PrintContaminationMap(ContaminationMap);
+
                 boardActions.Clear();
             }
-
 
             // Done compiling
             _communicationEngine.SendActions(new List<BoardAction>());
@@ -268,7 +254,6 @@ namespace DropletsInMotion.Application.Execution
             Agent agent = _agentFactory.CreateAgent(dispenseCommand.DropletName, reservoir.OutputX,
                 reservoir.OutputY, dispenseCommand.Volume, substanceId);
 
-            // Get the positions the new droplet will occupy
             var newDropletPositions = agent.GetAllAgentPositions();
 
             // Check if any of the new droplet's positions conflict with existing droplets
@@ -288,11 +273,6 @@ namespace DropletsInMotion.Application.Execution
                 BoardAction b = new BoardAction(Convert.ToInt32(kvp["id"]), Convert.ToInt32(kvp["status"]), kvp["time"] + Time);
                 boardActions.Add(b);
             }
-
-            // Update time
-            //executionTime = boardActions.Any() && boardActions.Last().Time > executionTime ? boardActions.Last().Time : Time;
-
-
 
 
             Agents.Add(dispenseCommand.DropletName, agent);
@@ -326,7 +306,6 @@ namespace DropletsInMotion.Application.Execution
             Agent potentialAgent = _agentFactory.CreateAgent(dropletCommand.DropletName, dropletCommand.PositionX,
                 dropletCommand.PositionY, dropletCommand.Volume, substance);
 
-            // Get the positions the new droplet will occupy
             var newDropletPositions = potentialAgent.GetAllAgentPositions();
 
             // Check if any of the new droplet's positions conflict with existing droplets
@@ -382,22 +361,17 @@ namespace DropletsInMotion.Application.Execution
         {
             if (boardActions.Count > 0)
             {
-                //boardActions.ForEach(b => Console.WriteLine(b));
                 var actualTime = await _communicationEngine.SendTimeRequest();
                 var boardActionTime = boardActions.First().Time;
 
-                //Console.WriteLine(actualTime);
 
                 // Handle time desync
-                // TODO: Check if mix sends its own request, we should do it here!
                 if (boardActionTime <= actualTime)
                 {
-                    var timeDifference = actualTime - boardActionTime + 1; // TODO: how can we a good buffer?
+                    var timeDifference = actualTime - boardActionTime + 1;
                     boardActions.ForEach(b => b.Time += timeDifference);
                     Time = boardActions.Last().Time;
                 }
-
-                //Console.WriteLine("thetime" + boardActions.Last().Time);
 
                 await _communicationEngine.SendActions(boardActions);
             }
@@ -420,7 +394,6 @@ namespace DropletsInMotion.Application.Execution
                 }
 
                 var sensorValue = await _communicationEngine.SendSensorRequest(sensor, handler, Time);
-                //Console.WriteLine($"Sensor value is {sensorValue}");
                 Variables[sensorCommand.VariableName] = sensorValue;
             }
         }
@@ -460,7 +433,6 @@ namespace DropletsInMotion.Application.Execution
 
 
                 var mergePositions = _schedulerService.ScheduleCommand(mergeCommand, agents, ContaminationMap, eligibleMergeTemplates);
-                //Console.WriteLine($"Optimal pos for merge {mergePositions.X1} {mergePositions.Y1}, {mergePositions.X2} {mergePositions.Y2}");
                 if (_actionService.InPositionToMerge(mergeCommand, movesToExecute, mergePositions, agents))
                 {
                     _commandLifetimeService.StoreCommand(mergeCommand);
@@ -551,6 +523,5 @@ namespace DropletsInMotion.Application.Execution
                 Agents.ContainsKey(splitByRatioCommand.InputName) ? Agents[splitByRatioCommand.InputName].Volume * splitByRatioCommand.Ratio : 1);
             HandleSplitByVolumeCommand(splitByVolumeCommand2, movesToExecute, boardActions, agents);
         }
-
     }
 }

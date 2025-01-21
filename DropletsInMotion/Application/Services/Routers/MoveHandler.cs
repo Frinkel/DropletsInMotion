@@ -1,11 +1,7 @@
 ﻿using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
-using static DropletsInMotion.Application.Services.Routers.Models.Types;
 
 namespace DropletsInMotion.Application.Services.Routers;
 
@@ -94,29 +90,4 @@ public class MoveHandler
 
         return iRavelTemplate.Apply(_platformRepository.Board[agent.PositionX - ravelTemplate.FinalPositions.First().Value.x][agent.PositionY - ravelTemplate.FinalPositions.First().Value.y].Id, time - ravelTemplate.Duration, 1);
     }
-
-    //public List<BoardAction> Unravel(Agent agent, Types.RouteAction action, double time)
-    //{
-    //    UnravelTemplate? unravelTemplate = _templateRepository?.UnravelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
-
-    //    if (unravelTemplate == null)
-    //    {
-    //        return new List<BoardAction>();
-    //    }
-
-    //    return unravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time + 0.5, 1);
-    //}
-
-    //public List<BoardAction> Ravel(Agent agent, Types.RouteAction action, double time)
-    //{
-    //    RavelTemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
-
-    //    if (ravelTemplate == null)
-    //    {
-    //        return new List<BoardAction>();
-    //    }
-
-    //    return ravelTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time - ravelTemplate.Duration, 1);
-    //}
-
 }

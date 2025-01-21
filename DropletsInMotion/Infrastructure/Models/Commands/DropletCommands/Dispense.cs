@@ -1,5 +1,4 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
-using System.Collections.Generic;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {

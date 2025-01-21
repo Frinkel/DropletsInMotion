@@ -1,15 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-using DropletsInMotion.Application.Factories;
+﻿using DropletsInMotion.Application.Factories;
 using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Application.Services;
-using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
 using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotionTests
@@ -673,11 +669,6 @@ namespace DropletsInMotionTests
         {
 
             var process = Debugger.GetProcess();
-
-            //Debugger.PrintMemoryUsage(process);
-
-            //process.Refresh();
-            //Console.WriteLine($"mem: {process.WorkingSet64 / (1024.0 * 1024.0)}");
 
             IDropletCommand dropletCommandA1 = new Move("a1", 21, 11);
             IDropletCommand dropletCommandA2 = new Move("a2", 9, 11);

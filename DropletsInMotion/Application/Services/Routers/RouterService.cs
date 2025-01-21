@@ -1,34 +1,15 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices.JavaScript;
-using System.Security.Cryptography;
-using System.Security.Principal;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
+using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
-using static DropletsInMotion.Application.Services.Routers.Models.Types;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Debugger = DropletsInMotion.Infrastructure.Debugger;
 
 namespace DropletsInMotion.Application.Services.Routers;
 public class RouterService : IRouterService
 {
-
-    /*
-     *  Actions:
-     *  Move, SplitByVolume, SplitByRatio, Merge
-     *
-     *  Constraints:
-     *  Single droplet routing
-     *  
-     */
-
     public int? Seed = null;
     private Electrode[][] Board { get; set; }
     
@@ -72,7 +53,6 @@ public class RouterService : IRouterService
         {
             Debugger.Permutations++;
 
-            // Clear commitedStates for each new permutation attempt
             commitedStates.Clear();
             sFinal = null;
 
@@ -81,7 +61,6 @@ public class RouterService : IRouterService
             foreach (var command in commandOrder)
             {
 
-                // Create initial state and search for a solution
                 State s0 = new State(command.GetInputDroplets().First(), agents, reservedContaminationMap, new List<IDropletCommand>() { command }, commitedStates, _contaminationService, _platformRepository, _templateRepository, Seed);
                 Frontier f = new Frontier();
                 sFinal = astarRouter.Search(s0, f);
@@ -92,12 +71,9 @@ public class RouterService : IRouterService
                     break;
                 }
 
-
-                // Combine states if a partial solution is found for this command
                 commitedStates = CombineStates(commitedStates, sFinal);
             }
 
-            // If a solution was found for this permutation, break out of the loop
             if (foundSolution && sFinal != null)
             {
                 break;
@@ -126,7 +102,6 @@ public class RouterService : IRouterService
 
         sFinal = FindFirstGoalState(sFinal, commands);
 
-        // TODO: Alex can we segregate this?
         if (boundTime != null)
         {
             List<State> chosenStates = new List<State>();
@@ -150,23 +125,18 @@ public class RouterService : IRouterService
                     {
                         continue;
                     }
+
                     string dropletName = actionKvp.Key;
                     string routeAction = actionKvp.Value.Name;
                     var parentAgents = state.Parent.Agents;
                     var agent = parentAgents[dropletName];
 
-                    //List<BoardAction> translatedActions = _templateService.ApplyTemplate(routeAction, parentAgents[dropletName], currentTime);
 
                     ITemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == routeAction && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
                     if (growTemplate != null)
                     {
                         finalActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, currentTime, 1));
                     }
-
-                    //boardActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1));
-
-                    //finalActions.AddRange(translatedActions);
-
                 }
 
                 finalActions = finalActions.OrderBy(b => b.Time).ToList();
@@ -180,7 +150,8 @@ public class RouterService : IRouterService
         }
 
         _contaminationService.CopyContaminationMap(sFinal.ContaminationMap, contaminationMap);
-        //remove reservations
+
+        // Remove contamination reservations
         _contaminationService.RemoveContaminations(commands, agents, contaminationMap);
         foreach (var (agentName, agent) in sFinal.Agents)
         {
@@ -206,7 +177,7 @@ public class RouterService : IRouterService
             }
             else
             {
-                Console.WriteLine($"Agent {agentKvp.Key} did NOT exist in droplets!");
+                throw new DropletNotFoundException($"Agent {agentKvp.Key} did NOT exist in droplets!");
             }
         }
 
@@ -230,9 +201,6 @@ public class RouterService : IRouterService
             }
         }
 
-        // TODO: Debug?
-        //_contaminationService.PrintContaminationMap(contaminationMap);
-        //Console.WriteLine();
         return sFinal.ExtractActions(time);
     }
 
@@ -246,7 +214,7 @@ public class RouterService : IRouterService
         var success = agents.TryGetValue(inputDroplets.First(), out var agent);
 
         if (!success)
-            throw new Exception($"Could not find {inputDroplets.First()} in the routable agents.");
+            throw new DropletNotFoundException($"Could not find {inputDroplets.First()} in the routable agents.");
 
         double score = 0;
 
@@ -274,10 +242,6 @@ public class RouterService : IRouterService
             score += substanceCount - 1;
         }
 
-        //Console.WriteLine($"TYPE IS: {command.GetType()}");
-        //Console.WriteLine("Agent " + inputDroplets.First());
-        //Console.WriteLine("Score so far: " + score);
-
         return score;
     }
 
@@ -293,14 +257,6 @@ public class RouterService : IRouterService
                 (t1, t2) => t1.Concat(new[] { t2 }));
     }
 
-    //public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
-    //{
-    //    if (length == 1) return list.Select(t => new T[] { t });
-
-    //    return GetPermutations(list, length - 1)
-    //        .SelectMany(t => list.Where(e => !t.Contains(e)),
-    //            (t1, t2) => t1.Concat(new T[] { t2 }));
-    //}
 
     private List<State> CombineStates(List<State> commitedStates, State newState)
     {
@@ -340,7 +296,6 @@ public class RouterService : IRouterService
 
                     state.ContaminationMap = cloneMap;
 
-                    // iv. Copy other agents' positions if needed
                     foreach (var kvp in lastCommittedState.Agents)
                     {
                         if (kvp.Key != state.RoutableAgent)
@@ -395,8 +350,6 @@ public class RouterService : IRouterService
 
     private List<int>[,] CombineContaminationMapAndContaminationChanges(List<int>[,] map1, Dictionary<(int x, int y), List<int>> contaminationChanges)
     {
-        //int width = map1.GetLength(0);
-        //int height = map1.GetLength(1);
         List<int>[,] resultMap = map1;
 
         foreach (var kvp in contaminationChanges)
@@ -416,64 +369,6 @@ public class RouterService : IRouterService
         return resultMap;
     }
 
-    public void ApplyContaminationChangesToMap(
-        Dictionary<(int x, int y), List<int>> contaminationChanges,
-        List<int>[,] contaminationMap)
-    {
-        foreach (var kvp in contaminationChanges)
-        {
-            var (x, y) = kvp.Key;
-            var changesList = kvp.Value;
-
-            //// Ensure coordinates are within bounds
-            //if (x < 0 || x >= contaminationMap.GetLength(0) ||
-            //    y < 0 || y >= contaminationMap.GetLength(1))
-            //{
-            //    continue; // Skip out-of-bounds entries
-            //}
-
-            var mapList = contaminationMap[x, y];
-
-            //if (mapList == null)
-            //{
-            //    // If the map list is null, create a new list with the changes
-            //    contaminationMap[x, y] = new List<int>(changesList);
-            //}
-            //else
-            //{
-                // Add each substanceId from changesList to mapList if not already present
-                foreach (var substanceId in changesList)
-                {
-                    if (!mapList.Contains(substanceId))
-                    {
-                        mapList.Add(substanceId);
-                    }
-                }
-            //}
-        }
-    }
-
-    //public void ApplyAllContaminationChangesToMap(State state, List<int>[,] contaminationMap)
-    //{
-    //    // Create a stack to hold states
-    //    var stateStack = new Stack<State>();
-
-    //    // Traverse up the parent chain and collect states
-    //    while (state != null)
-    //    {
-    //        stateStack.Push(state);
-    //        state = state.Parent;
-    //    }
-
-    //    // Apply contamination changes from the earliest state to the latest
-    //    while (stateStack.Count > 0)
-    //    {
-    //        var currentState = stateStack.Pop();
-    //        ApplyContaminationChangesToMap(currentState.ContaminationChanges, contaminationMap);
-    //    }
-    //}
-
-
     private List<int>[,] CombineContaminationMaps(List<int>[,] map1, List<int>[,] map2)
     {
         int width = map1.GetLength(0);
@@ -484,10 +379,8 @@ public class RouterService : IRouterService
         {
             for (int j = 0; j < height; j++)
             {
-                // Create a new list for the result cell
                 resultMap[i, j] = new List<int>(map1[i, j]);
 
-                // Add values from map2, avoiding duplicates
                 foreach (var value in map2[i, j])
                 {
                     if (!resultMap[i, j].Contains(value))
@@ -500,7 +393,6 @@ public class RouterService : IRouterService
 
         return resultMap;
     }
-
 
     private State FindFirstGoalState(State state, List<IDropletCommand> commands)
     {
@@ -523,39 +415,5 @@ public class RouterService : IRouterService
         }
         return state;
     }
-
-
-
-
-
-    // USED ONLY FOR TEST
-    //public void UpdateAgentSubstanceId(string agent, byte substanceId)
-    //{
-    //    Agents[agent].SubstanceId = substanceId;
-    //    ContaminationMap = _contaminationService.ApplyContaminationMerge(Agents[agent], ContaminationMap);
-
-    //}
-    //// USED ONLY FOR TEST
-    //public byte GetAgentSubstanceId(string agent)
-    //{
-    //    return Agents[agent].SubstanceId;
-    //}
-    //public byte[,] GetContaminationMap()
-    //{
-    //    return ContaminationMap;
-    //}
-    //public Dictionary<string, Agent> GetAgents()
-    //{
-    //    return Agents;
-    //}
-    //// USED ONLY FOR TEST
-    //public void UpdateContaminationMap(int x, int y, byte value)
-    //{
-    //    ContaminationMap[x, y] = value;
-    //}
-
-
-
-
 }
 

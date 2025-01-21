@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
-
-namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
+﻿namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class SensorCommand : IDropletCommand
     {

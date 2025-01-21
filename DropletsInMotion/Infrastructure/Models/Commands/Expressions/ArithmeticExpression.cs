@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DropletsInMotion.Infrastructure.Models.Commands.Expressions
+﻿namespace DropletsInMotion.Infrastructure.Models.Commands.Expressions
 {
     public abstract class ArithmeticExpression
     {

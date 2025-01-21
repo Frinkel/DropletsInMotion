@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
 {
@@ -25,44 +23,6 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
         public List<(int x, int y)> ContaminationPositions => throw new NotImplementedException();
 
         public List<Dictionary<string, List<(int x, int y)>>> Blocks { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        //public List<BoardAction> Apply(int relativePosition, double time, double scale)
-        //{
-        //    if (Actions == null || Actions.Count == 0)
-        //    {
-        //        throw new Exception($"Template {Name} has no action!");
-        //    }
-
-
-        //    List<BoardAction> finalActionDtos = new List<BoardAction>();
-        //    foreach (BoardAction boardAction in Actions)
-        //    {
-        //        BoardAction newAction = new BoardAction(boardAction.ElectrodeId + relativePosition, boardAction.Action,
-        //            (boardAction.Time * scale) + time);
-        //        finalActionDtos.Add(newAction);
-        //    }
-        //    return finalActionDtos;
-        //}
-
-        //public override string ToString()
-        //{
-        //    // Format Actions into a readable string
-        //    var actionsString = Actions != null && Actions.Any()
-        //        ? string.Join(", ", Actions.Select(a => a.ToString()))
-        //        : "No Actions";
-
-        //    // Format FinalPositions into a readable string
-        //    var finalPositionsString = FinalPositions != null && FinalPositions.Any()
-        //        ? string.Join(", ", FinalPositions.Select(fp => $"({fp.x}, {fp.y})"))
-        //        : "No Final Positions";
-
-        //    // Format InitialPositions into a readable string
-        //    var initialPositionsString = InitialPositions != null && InitialPositions.Any()
-        //        ? string.Join(", ", InitialPositions.Select(ip => $"({ip.x}, {ip.y})"))
-        //        : "No Initial Positions";
-
-        //    return $"Name: {Name}, MinSize: {MinSize}, MaxSize: {MaxSize}, Actions: [{actionsString}], FinalPositions: [{finalPositionsString}], InitialPositions: [{initialPositionsString}]";
-        //}
 
     }
 }
