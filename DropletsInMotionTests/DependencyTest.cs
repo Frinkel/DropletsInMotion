@@ -1,6 +1,5 @@
 ﻿
 using Antlr4.Runtime;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Execution;
@@ -11,6 +10,7 @@ using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Presentation;
 using Microsoft.Extensions.DependencyInjection;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
+using DropletsInMotion.Translation;
 
 namespace DropletsInMotionTests
 {
@@ -100,7 +100,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public void DependencyGraph_WhileLoop_SubgraphCreated()
+        public void DependencyWhileLoopTest()
         {
             var loopCommands = new List<ICommand>
             {
@@ -118,6 +118,38 @@ namespace DropletsInMotionTests
             var whileNode = graph.GetAllNodes().OfType<DependencyNodeWhile>().FirstOrDefault();
             Assert.AreEqual(1, whileNode.Body.GetAllNodes().Count);
         }
+
+        [Test]
+        public void DependencyGraphExecutableNodeTest()
+        {
+            var dependencyBuilder = new DependencyBuilder();
+
+            var commands = new List<ICommand>
+            {
+                new AssignCommand("x", new LiteralExpression(5)),
+                new DropletDeclaration("d1", new LiteralExpression(1), new LiteralExpression(1), new LiteralExpression(1.0), "H2O"), 
+                new Move("d1", new LiteralExpression(3), new LiteralExpression(3)),
+                new AssignCommand("y", new BinaryArithmeticExpression(new VariableExpression("x"), "+", new LiteralExpression(10))),
+                new Wait(new LiteralExpression(5)),
+                new Dispense("d2", "reservoir1", new LiteralExpression(10)),
+                new SplitByRatio("d2", "d3", "d4", new LiteralExpression(4), new LiteralExpression(4), new LiteralExpression(6), new LiteralExpression(6), new LiteralExpression(0.5)), 
+                new Merge("d1", "d3", "d5", new LiteralExpression(5), new LiteralExpression(5)),
+                new Mix("d5", new LiteralExpression(2), new LiteralExpression(2), new LiteralExpression(1), new LiteralExpression(1), new LiteralExpression(3)),
+                new Store("d4", new LiteralExpression(0), new LiteralExpression(0), new LiteralExpression(10)) 
+            };
+
+            var dependencyGraph = dependencyBuilder.Build(commands);
+
+            var nodes = dependencyGraph.GetAllNodes();
+
+            Assert.AreEqual(10, nodes.Count);
+
+
+            var executableNodes = dependencyGraph.GetExecutableNodes();
+            Assert.IsTrue(executableNodes.Any(n => n.Command is AssignCommand));
+            Assert.IsTrue(executableNodes.Any(n => n.Command is DropletDeclaration));
+        }
+
 
     }
 }

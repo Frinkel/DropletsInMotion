@@ -1,5 +1,4 @@
 ﻿using Antlr4.Runtime;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Execution;
@@ -58,6 +57,23 @@ namespace DropletsInMotionTests
                 Assert.Contains(agent.SubstanceId, contaminationMap[x, y]);
             }
         }
+
+        [Test]
+        public void IsConflictingNoContaminationTest()
+        {
+            _contaminationRepository.SubstanceTable = new List<(string, bool)>
+            {
+                ("s1", false)
+            };
+
+            var contaminationMap = _contaminationService.CreateContaminationMap(32, 20);
+
+            bool conflict = _contaminationService.IsConflicting(contaminationMap, 1, 1, 0);
+
+            Assert.IsFalse(conflict);
+        }
+
+
 
         [Test]
         public void IsConflictingDefaultTest()
