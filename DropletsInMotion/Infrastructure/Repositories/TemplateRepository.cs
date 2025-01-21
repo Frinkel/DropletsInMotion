@@ -257,7 +257,7 @@ public class TemplateRepository : ITemplateRepository
     {
         // Find all the blocks and actions
         shrinkTemplate.Actions = ParseTemplateFile(template);
-
+        
         ShrinkTemplates.Add(shrinkTemplate);
     }
 
@@ -269,20 +269,18 @@ public class TemplateRepository : ITemplateRepository
         int cols = block.Template[0].Trim().Length;
         int[,] grid = new int[rows, cols];
 
-        // Parse the block into a 2D array
         for (int i = 0; i < rows; i++)
         {
             var line = block.Template[i].Trim();
             for (int j = 0; j < cols; j++)
             {
-                grid[i, j] = line[j] - '0';  // Convert '0', '1', '2', etc., to integers
+                grid[i, j] = line[j] - '0';
             }
         }
 
         bool[,] visited = new bool[rows, cols];
         Dictionary<string, List<(int x, int y)>> clusters = new Dictionary<string, List<(int x, int y)>>();
 
-        // Direction vectors for navigating neighbors (up, down, left, right)
         int[] dRow = { -1, 1, 0, 0 };
         int[] dCol = { 0, 0, -1, 1 };
 
@@ -308,7 +306,6 @@ public class TemplateRepository : ITemplateRepository
             {
                 var (curR, curC) = stack.Pop();
 
-                // Visit all neighbors
                 for (int i = 0; i < 4; i++)
                 {
                     int newRow = curR + dRow[i];
@@ -354,7 +351,7 @@ public class TemplateRepository : ITemplateRepository
         int blockRows = 0;
         int blockCols = 0;
 
-        // First, parse all the blocks and ensure they have the same size
+        // First parse all the blocks and ensure they have the same size
         foreach (var stringBlock in stringBlocks)
         {
             var parts = stringBlock.Trim().Split(",", 2);
@@ -365,17 +362,15 @@ public class TemplateRepository : ITemplateRepository
             var blockTemplate = parts[1];
 
             var lines = blockTemplate.Trim().Split(Separator, StringSplitOptions.None);
-            lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray(); // Remove empty lines
+            lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
 
             if (blockRows == 0 && blockCols == 0)
             {
-                // Initialize block size based on the first block
                 blockRows = lines.Length;
                 blockCols = lines[0].Trim().Length;
             }
             else
             {
-                // Validate that the block size matches the initial block size
                 if (lines.Length != blockRows || lines.Any(line => line.Trim().Length != blockCols))
                 {
                     throw new InvalidOperationException("All blocks within a template must have the same size.");
@@ -434,20 +429,18 @@ public class TemplateRepository : ITemplateRepository
         int cols = block[0].Trim().Length;
         int[,] grid = new int[rows, cols];
 
-        // Parse the block into a 2D array
         for (int i = 0; i < rows; i++)
         {
             var line = block[i].Trim();
             for (int j = 0; j < cols; j++)
             {
-                grid[i, j] = line[j] - '0';  // Convert '0'/'1' characters to integers
+                grid[i, j] = line[j] - '0';
             }
         }
 
         bool[,] visited = new bool[rows, cols];
         List<(int id, int row, int col)> topLeftPositions = new List<(int id, int row, int col)>();
 
-        // Direction vectors for navigating neighbors (up, down, left, right)
         int[] dRow = { -1, 1, 0, 0 };
         int[] dCol = { 0, 0, -1, 1 };
 
@@ -461,14 +454,12 @@ public class TemplateRepository : ITemplateRepository
             {
                 var (curR, curC) = stack.Pop();
 
-                // Update top-left-most position
                 if (curR < minRow || (curR == minRow && curC < minCol))
                 {
                     minRow = curR;
                     minCol = curC;
                 }
 
-                // Visit all neighbors
                 for (int i = 0; i < 4; i++)
                 {
                     int newRow = curR + dRow[i];

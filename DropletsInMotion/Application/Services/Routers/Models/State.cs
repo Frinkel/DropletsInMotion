@@ -336,7 +336,8 @@ public class State
         ITemplate? growTemplate = _templateRepository?.GrowTemplates?.Find(t => t.Direction == action.Name && t.MinSize <= agent.Volume && agent.Volume < t.MaxSize) ?? null;
         if (growTemplate == null)
         {
-            throw new Exception($"No grow template found for agent {agent.DropletName}");
+            throw new Exception($"Droplet {agent.DropletName} was too small to move, with a volume of {agent.Volume}!");
+            //throw new Exception($"No grow template found for agent {agent.DropletName}");
         }
 
         boardActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1));

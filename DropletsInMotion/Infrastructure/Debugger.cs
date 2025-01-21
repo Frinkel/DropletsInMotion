@@ -22,9 +22,12 @@ namespace DropletsInMotion.Infrastructure
 
         private static double _prevMemory = 0;
 
+        private static Process _process;
+
         public static Process GetProcess()
         {
             var process = Process.GetCurrentProcess();
+            _process = process;
             return process;
         }
 
@@ -33,6 +36,15 @@ namespace DropletsInMotion.Infrastructure
             process.Refresh();
             var memory = process.WorkingSet64 / (1024.0 * 1024.0);
             Console.WriteLine($"Current memory '{process.ProcessName}': {memory - _prevMemory} MB");
+            _prevMemory = memory;
+        }
+
+        public static void PrintMemoryUsage2()
+        {
+            _process.Refresh();
+            var memory = _process.WorkingSet64 / (1024.0 * 1024.0);
+            Console.WriteLine($"Current memory '{_process.ProcessName}': {memory - _prevMemory} MB");
+            Console.WriteLine($"Max mem: {_process.PeakWorkingSet64 / (1024.0 * 1024.0)}");
             _prevMemory = memory;
         }
 

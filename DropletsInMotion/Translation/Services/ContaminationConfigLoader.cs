@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.VisualBasic.FileIO;
@@ -19,6 +20,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
     private readonly IContaminationRepository _contaminationRepository;
     private readonly IFileService _fileService;
     private readonly IUserService _userService;
+    private readonly ILogger _logger;
 
 
     private List<string> ContaminationTableHeaders { get; set; } = new List<string>();
@@ -32,11 +34,13 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
     private char ContaminationDelimiter { get; set; }
     private char MergeDelimiter { get; set; }
 
-    public ContaminationConfigLoader(IContaminationRepository contaminationRepository, IFileService fileService, IUserService userService)
+    public ContaminationConfigLoader(IContaminationRepository contaminationRepository, IFileService fileService, IUserService userService, ILogger logger)
     {
         _contaminationRepository = contaminationRepository;
         _fileService = fileService;
         _userService = userService;
+        _logger = logger;
+
     }
 
     public void Load()
@@ -83,7 +87,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
         CombinedHeaders = combinedHeaders;
 
         // Add the base values to the substance table
-        Console.WriteLine("Headers");
+        _logger.Debug("Headers"); // TODO: DEBUG
         foreach (var s in combinedHeaders)
         {
             _contaminationRepository.InitialSubstanceTable.Add((s, true));
@@ -218,7 +222,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
             .ToList();
 
 
-        Console.WriteLine("Contamination table");
+        _logger.Debug("Contamination table"); // TODO: Debug case for below.
         for (int i = 0; i < cTable.GetLength(0); i++)
         {
             for (int j = 0; j < cTable.GetLength(1); j++)
@@ -233,8 +237,6 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
 
     private void LoadMergeTable()
     {
-        Console.WriteLine("MERGE TABLE");
-
         if (_userService.MergeTablePath == null && !CombinedHeaders.Any())
         {
             _contaminationRepository.MergeTable = new List<List<int>>();
@@ -352,7 +354,7 @@ public class ContaminationConfigLoader : IContaminationConfigLoader
                 .Select(j => mTable[i, j]).ToList())
             .ToList();
 
-        Console.WriteLine("Merge table");
+        _logger.Debug("Merge Table"); // TODO: DEBUG
         for (int i = 0; i < mTable.GetLength(0); i++)
         {
             for (int j = 0; j < mTable.GetLength(1); j++)

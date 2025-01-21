@@ -99,13 +99,6 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-
-
-
-
-
-
-
         public void ApplyIfInBounds(List<int>[,] contaminationMap, int xPos, int yPos, int substanceId)
         {
             int rowCount = contaminationMap.GetLength(0);
@@ -344,11 +337,6 @@ namespace DropletsInMotion.Application.Services
 
             return contaminationMap;
         }
-
-
-
-
-
 
 
 

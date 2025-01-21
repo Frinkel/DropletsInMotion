@@ -285,9 +285,18 @@ public class TypeChecker : ITypeChecker
             if (!dropletStateAfterThen.SetEquals(dropletStateAfterElse))
             {
                 throw new CommandException(
-                    $"Error: The droplets in the 'then' and 'else' blocks do not match for the command {ifCommand}" +
+                    $"Error: The droplets in the 'then' and 'else' blocks do not match for the command {ifCommand}\n" +
                     $"Then block droplets: {string.Join(", ", dropletStateAfterThen)}, " +
                     $"Else block droplets: {string.Join(", ", dropletStateAfterElse)}", ifCommand);
+            }
+        } else
+        {
+            if (!dropletStateAfterThen.SetEquals(dropletStateBeforeIf))
+            {
+                throw new CommandException(
+                    $"Error: The droplets in the 'then' blocks does not match the implicit else case {ifCommand}\n" +
+                    $"Then block droplets: {string.Join(", ", dropletStateAfterThen)}, " +
+                    $"Else block droplets: {string.Join(", ", dropletStateBeforeIf)}", ifCommand);
             }
         }
 

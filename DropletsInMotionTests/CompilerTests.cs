@@ -41,6 +41,7 @@ namespace DropletsInMotionTests
             Debugger.Nodes = new List<(int x, int y)>();
             Debugger.ElapsedTime.Clear();
             Debugger.Permutations = 0;
+            Debugger.GetProcess();
         }
 
         [Test]
@@ -413,10 +414,14 @@ namespace DropletsInMotionTests
         [Test]
         public async Task A7DropletCrissCross()
         {
+            
+            Debugger.PrintMemoryUsage2();
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/7DropletCrissCross.txt";
 
             await _executionEngine.Execute();
+            Debugger.PrintMemoryUsage2();
+
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
         }
@@ -424,10 +429,13 @@ namespace DropletsInMotionTests
         [Test]
         public async Task A0SoakTask()
         {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/program.txt";
+            //_userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            //_userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/program.txt";
 
-            await _executionEngine.Execute();
+            //await _executionEngine.Execute();
+            Debugger.PrintMemoryUsage2();
+
+            Debugger.PrintMemoryUsage2();
 
         }
 

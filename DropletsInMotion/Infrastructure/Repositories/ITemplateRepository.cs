@@ -8,10 +8,9 @@ public interface ITemplateRepository
     void AddRavel(RavelTemplate ravelTemplate, string template);
     void AddUnravel(UnravelTemplate unravelTemplate, string template);
     void AddDeclare(DeclareTemplate declareTemplate, string template);
-
     void AddGrow(GrowTemplate growTemplate, string template);
-
     void AddShrink(ShrinkTemplate shrinkTemplate, string template);
+    void AddMerge(MergeTemplate mergeTemplate, string template);
 
 
     void Initialize();
@@ -22,5 +21,4 @@ public interface ITemplateRepository
     List<DeclareTemplate> DeclareTemplates { get; }
     List<GrowTemplate> GrowTemplates { get; }
     List<ShrinkTemplate> ShrinkTemplates { get; }
-    void AddMerge(MergeTemplate mergeTemplate, string template);
 }
