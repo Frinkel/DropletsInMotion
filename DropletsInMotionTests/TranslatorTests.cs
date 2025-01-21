@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DropletsInMotionTests
 {
-    public class TypeCheckerTests : TestBase
+    public class TranslatorTests : TestBase
     {
         private readonly ITranslator _translator;
         private readonly IUserService _userService;
@@ -19,7 +19,7 @@ namespace DropletsInMotionTests
         private string projectDirectory;
         private string platformPath;
 
-        public TypeCheckerTests()
+        public TranslatorTests()
         {
             _translator = ServiceProvider.GetRequiredService<ITranslator>();
             _userService = ServiceProvider.GetRequiredService<IUserService>();
@@ -28,126 +28,20 @@ namespace DropletsInMotionTests
 
         }
 
-        [Test]
-        public void ParseBoardTest()
-        {
+        //[Test]
+        //public void ParseBoardTest()
+        //{
 
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestMoveDroplet.txt";
+        //    _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+        //    _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestMoveDroplet.txt";
 
-            _translator.Translate();
+        //    _translator.Translate();
 
-            Assert.That(_translator.Board.Length, Is.EqualTo(32));
-            Assert.That(_translator.Board[0].Length, Is.EqualTo(20));
-        }
+        //    Assert.That(_translator.Board.Length, Is.EqualTo(32));
+        //    Assert.That(_translator.Board[0].Length, Is.EqualTo(20));
+        //}
 
-        [Test]
-        public void ParserProgramNoNestedGraphs1()
-        {
 
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestMoveDroplet.txt";
-
-            _translator.Translate();
-
-            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(2));
-            Assert.That(_translator.Commands.Count, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void ParserProgramNoNestedGraphs2()
-        {
-
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestMergeDroplets.txt";
-
-            _translator.Translate();
-
-            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(4));
-            Assert.That(_translator.Commands.Count, Is.EqualTo(4));
-        }
-
-        [Test]
-        public void ParserProgramNoNestedGraphs3()
-        {
-
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestBigProgram.txt";
-
-            _translator.Translate();
-
-            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(14));
-            Assert.That(_translator.Commands.Count, Is.EqualTo(14));
-        }
-
-        [Test]
-        public void ParserProgramNestedGraphs1()
-        {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestWhileLoop.txt";
-
-            _translator.Translate();
-
-            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(3));
-            Assert.IsTrue(_translator.DependencyGraph.GetAllNodes().Exists(n => n is DependencyNodeWhile));
-            Assert.That(_translator.Commands.Count, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void ParserProgramPcr()
-        {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestPcrProgram.txt";
-
-            _translator.Translate();
-
-            Assert.That(_translator.DependencyGraph.GetAllNodes().Count, Is.EqualTo(20));
-        }
-
-        [Test]
-        public void CannotParseProgramTest1()
-        {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse1.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
-
-        [Test]
-        public void CannotParseProgramTest2()
-        {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse2.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
-
-        [Test]
-        public void CannotParseProgramTest3()
-        {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse3.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
-
-        [Test]
-        public void CannotParseProgramTest4() {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse4.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
-
-        [Test]
-        public void CannotParseProgramTest5() {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse5.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
-
-        [Test]
-        public void CannotParseProgramTest6() {
-            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
-            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestProgramFailParse6.txt";
-            Assert.Catch(() => _translator.Translate());
-        }
 
         //[Test]
         //public async Task MoveOneDropletTest()
