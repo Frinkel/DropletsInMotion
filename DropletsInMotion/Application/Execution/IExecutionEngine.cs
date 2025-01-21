@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
+﻿using DropletsInMotion.Application.Models;
 
 namespace DropletsInMotion.Application.Execution
 {

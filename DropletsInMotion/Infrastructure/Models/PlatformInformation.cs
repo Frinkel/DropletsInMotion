@@ -1,4 +1,6 @@
-﻿public class MovementInfo
+﻿namespace DropletsInMotion.Infrastructure.Models;
+
+public class MovementInfo
 {
     public double MinimumMovementVolume { get; set; }
     public double MaximumMovementVolume { get; set; }

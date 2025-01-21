@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
+﻿using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 
 namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
 {
@@ -14,7 +10,6 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
         public string ActuatorName { get; }
         public Dictionary<string, double> KeyValuePairs { get; }
 
-        // Constructor for ActuatorCommand
         public ActuatorCommand(string dropletName, string actuatorName, Dictionary<string, double> keyValuePairs)
         {
             DropletName = dropletName;
@@ -22,10 +17,7 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands
             KeyValuePairs = keyValuePairs;
         }
 
-        public void Evaluate(Dictionary<string, double> variableValues)
-        {
-            // Implement logic for evaluating the command if necessary, using variableValues
-        }
+        public void Evaluate(Dictionary<string, double> variableValues){}
 
         public List<string> GetInputVariables()
         {

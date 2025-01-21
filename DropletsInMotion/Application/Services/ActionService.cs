@@ -1,24 +1,11 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Application.Models;
+﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.Factories;
-using DropletsInMotion.Application.Services.Routers.Models;
-using DropletsInMotion.Communication;
-using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Infrastructure.Exceptions;
-using DropletsInMotion.Infrastructure.Models.Commands.DeviceCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
-using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Translation.Services;
 
 namespace DropletsInMotion.Application.Services
@@ -76,13 +63,6 @@ namespace DropletsInMotion.Application.Services
 
             var newSubstanceId = _contaminationService.GetResultingSubstanceId(inputAgent1.SubstanceId, inputAgent2.SubstanceId);
             Agent newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY, outputDroplet.Volume, newSubstanceId);
-
-
-            //if (inputAgent1.SubstanceId == inputAgent2.SubstanceId)
-            //{
-            //    newAgent = _agentFactory.CreateAgent(outputDroplet.DropletName, outPutDropletX, outPutDropletY,
-            //        outputDroplet.Volume, GetResultingSubstanceId);
-            //}
 
             agents.Remove(inputDroplet1.DropletName);
             agents.Remove(inputDroplet2.DropletName);
@@ -365,7 +345,6 @@ namespace DropletsInMotion.Application.Services
 
             var moveCommand = new Move(mergeCommand.OutputName, mergeCommand.PositionX, mergeCommand.PositionY);
             movesToExecute.Add(moveCommand);
-            //Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
         }
 
 
@@ -390,7 +369,6 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet1.DropletName, mergePositions.X1, mergePositions.Y1);
                 movesToExecute.Add(moveCommand);
-                //Console.WriteLine($"Move dropletCommand added for droplet 1: {moveCommand}");
             }
 
             // Move inputDroplet2 to be next to the merge position
@@ -398,7 +376,6 @@ namespace DropletsInMotion.Application.Services
             {
                 var moveCommand = new Move(inputDroplet2.DropletName, mergePositions.X2, mergePositions.Y2);
                 movesToExecute.Add(moveCommand);
-                //Console.WriteLine($"Move dropletCommand added for droplet 2: {moveCommand}");
 
             }
 

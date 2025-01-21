@@ -1,13 +1,6 @@
-﻿using System;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Globalization;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace DropletsInMotion.Infrastructure.Repositories;
 public class TemplateRepository : ITemplateRepository
@@ -63,10 +56,6 @@ public class TemplateRepository : ITemplateRepository
         // Find all the blocks and actions
         splitTemplate.Actions = ParseTemplateFile(template);
 
-        // Find contamination positions
-        //splitTemplate.ContaminationPositions.AddRange(FindContaminationCoordinates(template));
-
-
         // Find the block positions with ids
         List<Dictionary<string, List<(int x, int y)>>> blockPositions = new List<Dictionary<string, List<(int x, int y)>>>();
         foreach (var block in _blocks)
@@ -74,8 +63,6 @@ public class TemplateRepository : ITemplateRepository
             blockPositions.Add(GetClusterPositions(block));
         }
         splitTemplate.Blocks = blockPositions;
-
-
 
 
         Block firstBlock = _blocks.First();
@@ -86,6 +73,7 @@ public class TemplateRepository : ITemplateRepository
         {
             throw new InvalidOperationException($"The split template \"{splitTemplate.Name}\" did not start with exactly 1 droplet!");
         }
+
         // Add the initial positions
         initialPositions.ForEach(pos => splitTemplate.InitialPositions.Add(pos.id.ToString(), (pos.x, pos.y)));
 
@@ -495,6 +483,4 @@ public class TemplateRepository : ITemplateRepository
 
         return topLeftPositions;
     }
-
-
 }

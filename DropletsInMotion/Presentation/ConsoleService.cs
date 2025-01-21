@@ -1,18 +1,15 @@
-﻿using System.Drawing;
-using DropletsInMotion.Infrastructure.Services;
+﻿using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Exceptions;
-using Microsoft.CSharp.RuntimeBinder;
 
 namespace DropletsInMotion.Presentation
 {
     public class ConsoleService : IConsoleService
     {
-        private IUserService _userService;
-        private IFileService _fileService;
-        private ILogger _logger;
+        private readonly IUserService _userService;
+        private readonly IFileService _fileService;
+        private readonly ILogger _logger;
 
         public bool IsDevelopment { get; private set; }
         public string? DevelopmentPath { get; private set; }
@@ -201,11 +198,6 @@ namespace DropletsInMotion.Presentation
             string templatesFolder = Directory.GetDirectories(folderPath, "templates", SearchOption.TopDirectoryOnly)
                 .SingleOrDefault() ?? throw new DirectoryNotFoundException("Templates folder is missing from the Configuration.");
 
-            //var first = macthingFolders.First(folder => folder.Contains("actuators"));
-
-
-            Console.WriteLine(actuatorFolder);
-
 
             // Validate important files
             string[] platformInformation = Directory.GetFiles(folderPath, "PlatformInformation.json", SearchOption.TopDirectoryOnly);
@@ -242,18 +234,10 @@ namespace DropletsInMotion.Presentation
 
                 GetPathToConfiguration();
             }
-            
-
-
-            //bool isConfigurationValid = IsConfigurationValid(path);
-            //if (!isConfigurationValid) throw new RuntimeException("The configuration structure is invalid.");
-
-
 
             List<string?> foundFiles = new List<string?>();
 
 
-            // TODO: Extract to another function 
             var program = GetFilePathInFolder("program", "txt", path);
             var platform = GetFilePathInFolder("platform", "json", path);
             var contaminationTable = GetFilePathInFolder("contaminationTable", "csv", path);
@@ -295,7 +279,6 @@ namespace DropletsInMotion.Presentation
                 throw new ArgumentException("Path to board configuration cannot be null!");
             }
 
-            Console.WriteLine($"Platform configuration path {path}\n");
             return path;
         }
 
@@ -330,7 +313,7 @@ namespace DropletsInMotion.Presentation
                 while (path == null || path?.Trim() == "")
                 {
                     Console.Write("Enter the path to your program: ");
-                    // TODO: Add validation logic for the path
+
                     path = Console.ReadLine();
 
                     if (!File.Exists(path))

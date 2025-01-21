@@ -1,10 +1,8 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services.Routers.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
-using System.Xml.Linq;
 
 namespace DropletsInMotion.Application.Services
 {
@@ -16,8 +14,6 @@ namespace DropletsInMotion.Application.Services
         {
             _contaminationRepository = contaminationRepository;
         }
-
-        //List<int>[,] array = new List<int>[rows, cols];
 
         public void ApplyContamination(Agent agent, State state)
         {
@@ -60,9 +56,6 @@ namespace DropletsInMotion.Application.Services
 
         }
 
-
-
-
         public bool IsConflicting(List<int> contaminationValues, int substanceId)
         {
             if (contaminationValues.Count == 0)
@@ -84,9 +77,6 @@ namespace DropletsInMotion.Application.Services
             foreach (var value in contaminationValues)
             {
                 var substanceInContaminationTable2 = _contaminationRepository.SubstanceTable[value].Item2;
-                //Console.WriteLine(substanceInContaminationTable2);
-                //Console.WriteLine($"{substanceId}, {value}");
-                //Console.WriteLine(_contaminationRepository.ContaminationTable[substanceId][value]);
 
                 if (!substanceInContaminationTable2 ||
                     _contaminationRepository.ContaminationTable[substanceId][value])
@@ -339,8 +329,6 @@ namespace DropletsInMotion.Application.Services
         }
 
 
-
-
         // Apply contamination for a split while taking the template into account
         public List<int>[,] ApplyContaminationSplit(Agent inputAgent, ScheduledPosition splitPositions, List<int>[,] contaminationMap)
         {
@@ -394,15 +382,15 @@ namespace DropletsInMotion.Application.Services
                         // Define the offsets for our padding of the contamination
                         var offsets = new List<(int xOffset, int yOffset)>
                         {
-                            (0, 0),   // Original position
-                            (1, 0),   // Right
-                            (-1, 0),  // Left
-                            (0, 1),   // Down
-                            (0, -1),  // Up
-                            (1, -1),  // Bottom-right diagonal
-                            (-1, 1),  // Top-left diagonal
-                            (1, 1),   // Top-right diagonal
-                            (-1, -1)  // Bottom-left diagonal
+                            (0, 0),
+                            (1, 0),
+                            (-1, 0),
+                            (0, 1),
+                            (0, -1),
+                            (1, -1),
+                            (-1, 1),
+                            (1, 1),
+                            (-1, -1)
                         };
 
                         foreach (var (xOffset, yOffset) in offsets)
@@ -452,13 +440,11 @@ namespace DropletsInMotion.Application.Services
 
         public void PrintContaminationMap(List<int>[,] contaminationMap)
         {
-            int rows = contaminationMap.GetLength(0); // Y-axis
-            int cols = contaminationMap.GetLength(1); // X-axis
+            int rows = contaminationMap.GetLength(0);
+            int cols = contaminationMap.GetLength(1);
 
-            // Determine the width of each cell for consistent padding
             int maxWidth = 0;
 
-            // Calculate the maximum width of any cell's content
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < cols; j++)
@@ -470,12 +456,10 @@ namespace DropletsInMotion.Application.Services
                 }
             }
 
-            // Print the map with flipped axes
-            for (int j = 0; j < cols; j++) // Iterate over X-axis (columns)
+            for (int j = 0; j < cols; j++)
             {
-                for (int i = 0; i < rows; i++) // Iterate over Y-axis (rows)
+                for (int i = 0; i < rows; i++)
                 {
-                    // Get the contamination values for the current cell
                     var contaminations = contaminationMap[i, j];
 
                     if (contaminations.Count > 0)
@@ -489,7 +473,7 @@ namespace DropletsInMotion.Application.Services
                         Console.Write("[ ]".PadRight(maxWidth + 3));
                     }
                 }
-                Console.WriteLine(); // Move to the next column
+                Console.WriteLine();
             }
         }
 
@@ -502,124 +486,35 @@ namespace DropletsInMotion.Application.Services
             int endX = Math.Min(rowCount - 1, startX + width - 1);
             int endY = Math.Min(colCount - 1, startY + height - 1);
 
-
-            // Iterate over the rectangular area and check for contamination
             for (int x = Math.Max(0, startX); x <= endX; x++)
             {
                 for (int y = Math.Max(0, startY); y <= endY; y++)
                 {
-                    // Check if the cell is contaminated
                     if (IsConflicting(contaminationMap, x, y, substanceId))
                     {
-                        return true; // Contamination detected
+                        return true;
                     }
                 }
             }
 
-            return false; // No contamination found
+            return false;
         }
 
         public void UpdateContaminationArea(List<int>[,] contaminationMap, int substanceId, int startX, int startY, int width, int height)
         {
-            // for disabeling contamination
-            //if (!_configuration.GetValue<bool>("Development:Contaminations"))
-            //{
-            //    return;
-            //}
-
             int rowCount = contaminationMap.GetLength(0);
             int colCount = contaminationMap.GetLength(1);
 
             int endX = Math.Min(rowCount - 1, startX + width);
             int endY = Math.Min(colCount - 1, startY + height);
+
             // Iterate over the rectangular area and update the contamination map
             for (int x = Math.Max(0, startX); x <= endX; x++)
             {
                 for (int y = Math.Max(0, startY); y <= endY; y++)
                 {
-                    //byte oldValue = contaminationMap[x, y];
-                    //byte newValue = (byte)(oldValue == 0 || oldValue == substanceId ? substanceId : 255);
-                    //contaminationMap[x, y] = newValue;
                     ApplyIfInBounds(contaminationMap, x, y, substanceId);
                 }
-            }
-        }
-
-        private static void SetColorForValue(byte value)
-        {
-            // Handle 0 as a special case
-            if (value == 0)
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-            }
-            else
-            {
-                // Get a unique color for each value using a hash function
-                var rgbColor = GetRGBFromHash(value);
-
-                // Convert RGB to closest ConsoleColor
-                var consoleColor = GetConsoleColorFromRGB(rgbColor.R, rgbColor.G, rgbColor.B);
-                Console.BackgroundColor = consoleColor;
-            }
-        }
-
-        // Method to generate an RGB color from a hash of the value
-        private static (byte R, byte G, byte B) GetRGBFromHash(byte value)
-        {
-            // Hash the value (using a simple hash function for demonstration)
-            int hash = (int)(value * 2654435761); // A simple, fast hash function
-
-            // Extract RGB components from the hash
-            byte r = (byte)(hash >> 16 & 0xFF);
-            byte g = (byte)(hash >> 8 & 0xFF);
-            byte b = (byte)(hash & 0xFF);
-
-            return (r, g, b);
-        }
-
-        // Convert RGB to a ConsoleColor (approximation due to limited colors in Console)
-        private static ConsoleColor GetConsoleColorFromRGB(byte r, byte g, byte b)
-        {
-            // Calculate the brightness level as an average of the RGB components
-            int brightness = (r + g + b) / 3;
-
-            // Check which ranges each component falls into to decide on the color
-            if (brightness < 64)
-            {
-                if (r > g && r > b) return ConsoleColor.DarkRed;
-                if (g > r && g > b) return ConsoleColor.DarkGreen;
-                if (b > r && b > g) return ConsoleColor.DarkBlue;
-                return ConsoleColor.Black;
-            }
-            else if (brightness < 128)
-            {
-                if (r > g && r > b) return ConsoleColor.Red;
-                if (g > r && g > b) return ConsoleColor.Green;
-                if (b > r && b > g) return ConsoleColor.Blue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.DarkGray;
-            }
-            else if (brightness < 192)
-            {
-                if (r > g && r > b) return ConsoleColor.DarkYellow;
-                if (g > r && g > b) return ConsoleColor.DarkGreen;
-                if (b > r && b > g) return ConsoleColor.DarkBlue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.Gray;
-            }
-            else
-            {
-                if (r > g && r > b) return ConsoleColor.Red;
-                if (g > r && g > b) return ConsoleColor.Green;
-                if (b > r && b > g) return ConsoleColor.Blue;
-                if (r == g && r > b) return ConsoleColor.Yellow;
-                if (r == b && r > g) return ConsoleColor.Magenta;
-                if (g == b && g > r) return ConsoleColor.Cyan;
-                return ConsoleColor.White;
             }
         }
 
@@ -633,9 +528,5 @@ namespace DropletsInMotion.Application.Services
                 }
             }
         }
-
-
     }
-
-
 }

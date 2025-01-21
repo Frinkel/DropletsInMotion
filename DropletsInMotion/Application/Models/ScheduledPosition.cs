@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Infrastructure.Models.Platform;
+﻿using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Application.Models
 {

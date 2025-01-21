@@ -1,13 +1,9 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using DropletsInMotion.Communication.Simulator;
+﻿using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Security.Cryptography.X509Certificates;
 using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Communication.Models;
 using DropletsInMotion.Communication.Physical;
-//using DropletsInMotion.Communication.Services;
 using DropletsInMotion.Infrastructure.Repositories;
 
 namespace DropletsInMotion.Communication
@@ -34,8 +30,6 @@ namespace DropletsInMotion.Communication
         {   
             try
             {
-                //_communicationTemplateService.LoadTemplates();
-
                 if (sender == null) throw new ArgumentNullException(nameof(sender));
                 if (_isServerRunning) throw new InvalidOperationException("A server is already running");
 

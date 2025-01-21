@@ -1,13 +1,12 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.Json;
-using DropletsInMotion.Infrastructure.Models.Platform;
-using DropletsInMotion.Infrastructure.Services;
-using DropletsInMotion.Infrastructure.Repositories;
-using System.IO;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using DropletsInMotion.Communication.Models;
-using DropletsInMotion.Translation.Services;
+using DropletsInMotion.Infrastructure.Models;
+using DropletsInMotion.Infrastructure.Models.Platform;
+using DropletsInMotion.Infrastructure.Repositories;
+using DropletsInMotion.Infrastructure.Services;
 
-namespace DropletsInMotion.Presentation.Services
+namespace DropletsInMotion.Translation.Services
 {
     public class PlatformService : IPlatformService
     {

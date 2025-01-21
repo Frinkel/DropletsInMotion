@@ -1,5 +1,4 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Commands;
-using System;
 
 namespace DropletsInMotion.Infrastructure.Models
 {
@@ -46,7 +45,7 @@ namespace DropletsInMotion.Infrastructure.Models
             Dependencies.Add(dependency);
         }
 
-        public List<IDependencyNode> getExecutableNodes()
+        public List<IDependencyNode> GetExecutableNodes()
         {
             IfCommand ifCommand = (IfCommand)Command;
 
@@ -72,7 +71,7 @@ namespace DropletsInMotion.Infrastructure.Models
 
         public bool IsComplete()
         {
-            //Check if all nodes in the chosen path have been executed
+            // Check if all nodes in the chosen path have been executed
             IfCommand ifCommand = (IfCommand)Command;
             if (ifCommand.Evaluation)
             {

@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
 {

@@ -1,6 +1,5 @@
 ﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using System.Collections.Generic;
 using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Application.Services

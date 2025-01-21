@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using DropletsInMotion.Application.Services;
-using DropletsInMotion.Infrastructure.Models.Commands;
 
 namespace DropletsInMotion.Infrastructure.Models
 {
@@ -17,7 +15,7 @@ namespace DropletsInMotion.Infrastructure.Models
         {
             return _nodes
                 .Where(n => !n.IsExecuted && n.CanExecute())
-                .SelectMany(n => n.getExecutableNodes())
+                .SelectMany(n => n.GetExecutableNodes())
                 .ToList();
         }
         

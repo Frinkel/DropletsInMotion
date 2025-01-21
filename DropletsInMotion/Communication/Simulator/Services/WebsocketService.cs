@@ -4,8 +4,6 @@ using System.Text;
 using System.Text.Json;
 using DropletsInMotion.Communication.Simulator.Models;
 using DropletsInMotion.Infrastructure;
-using DropletsInMotion.Presentation;
-using DropletsInMotion.UI;
 using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotion.Communication.Simulator.Services
@@ -90,7 +88,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
             }
             finally
             {
-                // Only stop the listener if explicitly shutting down
                 if (serverCancellationToken.IsCancellationRequested)
                 {
                     _httpListener.Stop();
@@ -119,7 +116,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                         break;
                     }
 
-                    // Handle the messages
                     HandleReceivedMessages(result, buffer);
                 }
             }
@@ -138,7 +134,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                     _httpListener.Start();
                 }
 
-                // Handle client disconnect and trigger events
                 _connectedClients.Remove(webSocket);
                 webSocket.Dispose();
 
@@ -226,8 +221,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client connection closed", CancellationToken.None);
                         webSocket.Dispose();
                         _connectedClients.Remove(webSocket);
-                        //Console.WriteLine($"Removed {webSocket.State}");
-                        //_clientConnectionTask.TrySetResult(false);
                     }
                     catch (Exception ex)
                     {
@@ -235,8 +228,6 @@ namespace DropletsInMotion.Communication.Simulator.Services
                     }
                 }
             }
-
-            //_connectedClients.Clear();
         }
 
         public int GetNumberOfConnectedClients()

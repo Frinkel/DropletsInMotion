@@ -3,6 +3,7 @@ using DropletsInMotion.Communication;
 using DropletsInMotion.Infrastructure;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Infrastructure.Services;
+using DropletsInMotion.Translation;
 using DropletsInMotion.UI.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,19 +92,6 @@ namespace DropletsInMotion.Presentation
                 }
                 catch (Exception e)
                 {
-                    //_consoleService.WriteColor("Stopping communication channels...");
-                    //_consoleService.WriteEmptyLine(1);
-                    //await _communicationEngine.StopCommunication();
-
-                    // TODO: Simplify this for user
-                    //_consoleService.WriteColor(e.Message, ConsoleColor.DarkRed);
-                    //_logger.Error("An error occurred:");
-                    //_logger.Error($"Message: {e.Message}");
-                    //_logger.Error($"Source: {e.Source}");
-                    //_logger.Error($"TargetSite: {e.TargetSite}");
-                    //_logger.Error($"StackTrace: {e.StackTrace}");
-                    //_logger.WriteEmptyLine(2);
-
                     _currentState = ProgramState.WaitingForUserInput;
                     throw;
                 }
@@ -162,7 +150,6 @@ namespace DropletsInMotion.Presentation
                 else
                 {
                     _userService.Communication = IUserService.CommunicationType.Physical;
-                    //throw new NotImplementedException();
                 }
             }
 
@@ -184,9 +171,7 @@ namespace DropletsInMotion.Presentation
             _logger.WriteColor(_programContent);
             _logger.WriteEmptyLine(2);
 
-            //_deviceTemplateService.LoadTemplates();
 
-            // Switch states
             return _configuration.GetValue<bool>("Development:SkipCommunication")
                 ? ProgramState.WaitingForUserInput
                 : ProgramState.WaitingForClientConnection;
@@ -201,7 +186,6 @@ namespace DropletsInMotion.Presentation
             {
                 if (Console.KeyAvailable)
                 {
-                    //_consoleService.WriteColor("User:", ConsoleColor.Blue, ConsoleColor.DarkGreen);
                     string userInput = Console.ReadLine()?.ToLower() ?? "";
                     switch (userInput)
                     {

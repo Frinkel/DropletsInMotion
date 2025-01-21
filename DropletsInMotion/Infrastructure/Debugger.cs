@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace DropletsInMotion.Infrastructure
 {
@@ -51,12 +45,10 @@ namespace DropletsInMotion.Infrastructure
 
         public static void PrintDuplicateCounts()
         {
-            // Group by unique entries and count each occurrence
             var duplicatesCount = Nodes
                 .GroupBy(p => p)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            // Print each unique entry with its duplicate count
             foreach (var entry in duplicatesCount)
             {
                 Console.WriteLine($"({entry.Key.x}, {entry.Key.y}): {entry.Value}");

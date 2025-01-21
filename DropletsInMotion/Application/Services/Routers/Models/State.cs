@@ -1,9 +1,4 @@
-﻿using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
+﻿using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
@@ -111,7 +106,6 @@ public class State
         Agent agent = Agents[RoutableAgent];
         agent.Execute(action);
         _contaminationService.ApplyContamination(agent, this);
-        //}
 
         H = CalculateHeuristic();
     }
@@ -209,25 +203,11 @@ public class State
 
         foreach (State state in chosenStates)
         {
-            //foreach (var a in state.Agents.Values)
-            //{
-            //    foreach (var valueTuple in a.SnakeBody)
-            //    {
-            //        Console.WriteLine($"{a.DropletName}: ({valueTuple.x}, {valueTuple.y})");
-            //    }
-            //}
 
             foreach (var actionKvp in state.JointAction)
             {
 
-                if (actionKvp.Value == RouteAction.NoOp)
-                {
-                    Console.WriteLine("HERE");
-                    continue;
-                }
-
                 string dropletName = actionKvp.Key;
-                //string routeAction = actionKvp.Value.Name;
                 var agents = state.Parent.Agents;
                 Agent agent = agents[dropletName];
                 Agent nextAgent = state.Agents[dropletName];
@@ -245,7 +225,8 @@ public class State
                         ravelActions.AddRange(ravelAction);
                         canRavel[dropletName] = false;
                         hasRaveled[actionKvp.Key] = true;
-                        //We need to wait with the shrink until the unrawel is complete.
+
+                        //We need to wait with the shrink until the unravel is complete.
                         var shrinkTime = endUnravel[dropletName] > tempTime ? endUnravel[dropletName] : tempTime;
                         shrinkActions.AddRange(ShrinkSnake(nextAgent, shrinkTime));
                     }
@@ -266,8 +247,6 @@ public class State
             }
             finalActions = finalActions.OrderBy(b => b.Time).ToList();
 
-            //var totalTime = finalActions.Last().Time - currentTime;
-            //currentTime = currentTime + (totalTime / scaleFactor);
             currentTime = finalActions.Last().Time;
         }
 
@@ -337,7 +316,6 @@ public class State
         if (growTemplate == null)
         {
             throw new Exception($"Droplet {agent.DropletName} was too small to move, with a volume of {agent.Volume}!");
-            //throw new Exception($"No grow template found for agent {agent.DropletName}");
         }
 
         boardActions.AddRange(growTemplate.Apply(_platformRepository.Board[agent.PositionX][agent.PositionY].Id, time, 1));
@@ -405,7 +383,7 @@ public class State
         {
 
             ITemplate? ravelTemplate = _templateRepository?.RavelTemplates?.Find(t => 
-                //Some magic to translate into the relative postion in order to compare
+
                 t.InitialPositions.First().Value == (nextAgent.PositionX - (finalAgent.PositionX - t.FinalPositions.First().Value.x) , nextAgent.PositionY - (finalAgent.PositionY - t.FinalPositions.First().Value.y))
                 && t.MinSize <= finalAgent.Volume && finalAgent.Volume < t.MaxSize) ?? null;
 
@@ -414,8 +392,6 @@ public class State
                 return new List<BoardAction>();
             }
 
-
-            // Board[][] the wierd thing inside it to calculate the ofset of the template
             return ravelTemplate.Apply(_platformRepository.Board[finalAgent.PositionX - ravelTemplate.FinalPositions.First().Value.x][finalAgent.PositionY - ravelTemplate.FinalPositions.First().Value.y].Id, time, 1);
         }
 
@@ -445,7 +421,6 @@ public class State
             }
         }
 
-
         foreach (var action in applicableActions)
         {
             State newState = new State(this, action);
@@ -454,12 +429,6 @@ public class State
             Debugger.ExpandedStates += 1;
         
         }
-
-        //Random random;
-
-        //random = Seed != null ? new Random((int)Seed) : new Random();
-
-        //expandedStates = expandedStates.OrderBy(x => random.Next()).ToList();
 
         return expandedStates;
     }
@@ -471,74 +440,6 @@ public class State
             return Agents;
         }
         return CommitedStates.Count > G ? CommitedStates[G].Agents : CommitedStates.Last().Agents;
-    }
-
-
-    private bool IsConflicting(Dictionary<string, RouteAction> jointAction)
-    {
-        Dictionary<string, Tuple<int, int>> agentDestinations = new Dictionary<string, Tuple<int, int>>();
-        foreach (var action in jointAction)
-        {
-            var agent = Agents[action.Key];
-            agentDestinations.Add(action.Key, new Tuple<int, int>(agent.PositionX + action.Value.DropletXDelta, agent.PositionY + action.Value.DropletYDelta));
-        }
-
-        foreach (var action in jointAction)
-        {
-            if (action.Value.Type == ActionType.NoOp)
-            {
-                continue;
-            }
-
-            foreach (var otherAction in jointAction)
-            {
-                if (action.Key == otherAction.Key || otherAction.Value.Type == ActionType.NoOp)
-                {
-                    continue;
-                }
-
-                if (Math.Abs(agentDestinations[action.Key].Item1 - agentDestinations[otherAction.Key].Item1) <= 1 &&
-                    Math.Abs(agentDestinations[action.Key].Item2 - agentDestinations[otherAction.Key].Item2) <= 1)
-                {
-                    return true;
-                }
-            }
-
-
-        }
-
-        return false;
-    }
-
-    static List<Dictionary<string, RouteAction>> GetActionPermutations(Dictionary<string, List<RouteAction>> agentActions)
-    {
-        var agents = agentActions.Keys.ToList();
-
-        List<Dictionary<string, RouteAction>> result = new List<Dictionary<string, RouteAction>>();
-        GeneratePermutations(agentActions, new Dictionary<string, RouteAction>(), agents, 0, result);
-        return result;
-    }
-
-    static void GeneratePermutations(
-        Dictionary<string, List<RouteAction>> agentActions,
-        Dictionary<string, RouteAction> current,
-        List<string> agents,
-        int depth,
-        List<Dictionary<string, RouteAction>> result)
-    {
-        if (depth == agents.Count)
-        {
-            result.Add(new Dictionary<string, RouteAction>(current));
-            return;
-        }
-        string agent = agents[depth];
-
-        foreach (var action in agentActions[agent])
-        {
-            current[agent] = action;
-
-            GeneratePermutations(agentActions, current, agents, depth + 1, result);
-        }
     }
 
 
@@ -565,14 +466,7 @@ public class State
                 if (!IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
                 {
                     h -= 2;
-                    //h += 2;
                 }
-
-                ////Penalize the act of standing still
-                //if (manhattanDistance != 0 && JointAction != null && JointAction[agent.DropletName].Type == ActionType.NoOp)
-                //{
-                //    h += 1;
-                //}
 
                 // Prioritize moving along existing contamination
                 if (Action != null && agent.IsMoveApplicable(Action, Agents, ContaminationMap, this))
@@ -588,11 +482,6 @@ public class State
                     }
                 }
 
-
-
-                //double epsilon = 0.01;
-                //double euclideanDistance = Math.Sqrt(Math.Pow(moveCommand.PositionX - agent.PositionX, 2) + Math.Pow(moveCommand.PositionY - agent.PositionY, 2));
-                //h += (int)Math.Round(euclideanDistance * epsilon);
             }
             else
             {
@@ -647,18 +536,6 @@ public class State
         return true;
     }
 
-    public bool IsGoalState(List<IDropletCommand> commands)
-    {
-        foreach (var command in commands)
-        {
-            if (!IsGoalState(command))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public bool IsOneGoalState()
     {
         foreach (var command in Commands)
@@ -682,7 +559,7 @@ public class State
         bool allGoalsReached = IsGoalState();
         if (allGoalsReached) return allGoalsReached;
 
-        //check that we dont terminate while we are in the process of unraveling a snake.
+        // Check that we don't terminate while we are in the process of unraveling a snake.
         foreach (var agent in Agents)
         {
             if (agent.Value.SnakeBody.Count < agent.Value.GetMaximumSnakeLength())
@@ -704,7 +581,6 @@ public class State
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
                 throw new InvalidOperationException("Trying to determine goalstate for unknown dropletCommand!");
-                break;
         }
 
     }
@@ -717,7 +593,6 @@ public class State
                 return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
             default:
                 throw new InvalidOperationException($"Trying to determine goalstate for unknown dropletCommand! {dropletCommand}");
-                break;
         }
 
     }
@@ -730,7 +605,7 @@ public class State
             {
                 case Move moveCommand:
                     var agent = Agents[moveCommand.GetInputDroplets().First()];
-                    //return agent.PositionX == moveCommand.PositionX && agent.PositionY == moveCommand.PositionY;
+
                     if (_contaminationService.IsConflicting(ContaminationMap, moveCommand.PositionX, moveCommand.PositionY, agent.SubstanceId))
                     {
                         throw new InvalidOperationException(
@@ -744,9 +619,6 @@ public class State
                     }
 
 
-                    break;
-
-                default:
                     break;
             }
         }
@@ -764,20 +636,12 @@ public class State
 
         int hash = 17;
 
-        //foreach (var value in ContaminationMap)
-        //{
-        //    hash = hash * 31 + value;
-        //}
-        //hash = hash * 31 + ContaminationMapHash;
-
         foreach (var agent in Agents.Values)
         {
             hash = hash * 31 + agent.DropletName.GetHashCode();
             hash = hash * 31 + agent.PositionX.GetHashCode();
             hash = hash * 31 + agent.PositionY.GetHashCode();
         }
-
-        //if (Action != null) hash = hash * 31 + Action.Type == ActionType.NoOp ? 0 : 1;
 
         _cachedHash = hash;
         return hash;
@@ -794,28 +658,8 @@ public class State
         if (!AreAgentsEqual(Agents, otherState.Agents))
             return false;
 
-        //if (Action != null && Action.Type == ActionType.NoOp)
-        //    return false;
-
         return true;
     }
-
-    //private bool AreContaminationMapsEqual(byte[,] map1, byte[,] map2)
-    //{
-    //    if (map1.GetLength(0) != map2.GetLength(0) || map1.GetLength(1) != map2.GetLength(1))
-    //        return false;
-
-    //    for (int i = 0; i < map1.GetLength(0); i++)
-    //    {
-    //        for (int j = 0; j < map1.GetLength(1); j++)
-    //        {
-    //            if (map1[i, j] != map2[i, j])
-    //                return false;
-    //        }
-    //    }
-
-    //    return true;
-    //}
 
     private bool AreAgentsEqual(Dictionary<string, Agent> agents1, Dictionary<string, Agent> agents2)
     {

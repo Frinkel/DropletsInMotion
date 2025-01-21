@@ -1,5 +1,4 @@
-﻿using Antlr4.Runtime.Misc;
-using Antlr4.Runtime.Tree;
+﻿using Antlr4.Runtime.Tree;
 using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Commands.Expressions;
@@ -14,39 +13,38 @@ namespace DropletsInMotion.Presentation.Language
 
         private ArithmeticExpression CreateExpression(MicrofluidicsParser.ArithmeticExpressionContext context)
         {
-            // If it's a binary operation (e.g., +, -, *, /)
+            // Binary operation (e.g., +, -, *, /)
             if (context.op != null && context.arithmeticExpression().Length == 2)
             {
-                ArithmeticExpression left = CreateExpression(context.arithmeticExpression(0)); // Left-hand side expression
-                ArithmeticExpression right = CreateExpression(context.arithmeticExpression(1)); // Right-hand side expression
-                string operatorSymbol = context.op.Text; // The operator, e.g., +, -, *, /
+                ArithmeticExpression left = CreateExpression(context.arithmeticExpression(0));
+                ArithmeticExpression right = CreateExpression(context.arithmeticExpression(1));
+                string operatorSymbol = context.op.Text;
 
-                // Return a BinaryArithmeticExpression (which handles +, -, *, /)
                 return new BinaryArithmeticExpression(left, operatorSymbol, right);
             }
 
-            // If it's a unary minus operation
+            // Unary minus operation
             if (context.GetText().StartsWith("-") && context.arithmeticExpression().Length == 1)
             {
                 ArithmeticExpression operand = CreateExpression(context.arithmeticExpression(0));
                 return new UnaryNegationExpression(operand);
             }
 
-            // If it's an integer literal
+            // Integer literal
             if (context.INT() != null)
             {
                 int value = int.Parse(context.INT().GetText());
                 return new LiteralExpression(value);
             }
 
-            // If it's a floating point literal
+            // Floating point literal
             if (context.FLOAT() != null)
             {
                 double value = double.Parse(context.FLOAT().GetText(), CultureInfo.InvariantCulture);
                 return new LiteralExpression(value);
             }
 
-            // If it's a variable (identifier)
+            // Variable (identifier)
             if (context.IDENTIFIER() != null)
             {
                 string variableName = context.IDENTIFIER().GetText();
@@ -71,17 +69,16 @@ namespace DropletsInMotion.Presentation.Language
             var positionYExpression = CreateExpression(context.arithmeticExpression(1));
             var volumeExpression = CreateExpression(context.arithmeticExpression(2));
 
-            // Check for the optional STRING parameter
             string substance = context.STRING() != null
-                ? context.STRING().GetText().Trim('"') // Remove quotes from the STRING
-                : ""; // Default to an empty string if not present
+                ? context.STRING().GetText().Trim('"')
+                : "";
 
             IDropletCommand dropletDeclaration = new DropletDeclaration(
                 dropletName,
                 positionXExpression,
                 positionYExpression,
                 volumeExpression,
-                substance // Pass the substance string
+                substance
             );
             dropletDeclaration.Line = context.Start.Line;
             dropletDeclaration.Column = context.Start.Column;
@@ -210,9 +207,6 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(new Store(name, time));
         }
 
-
-
-
         public override void ExitWaste(MicrofluidicsParser.WasteContext context)
         {
             string name = context.IDENTIFIER().GetText();
@@ -294,8 +288,6 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(printCommand);
         }
 
-
-
         public override void ExitActuatorCommand(MicrofluidicsParser.ActuatorCommandContext context)
         {
             string identifier = null;
@@ -327,114 +319,17 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(actuatorCommand);
         }
 
-
-
-        //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
-        //{
-        //    // Create the condition expression
-        //    BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
-
-        //    // Create a list for commands inside the "if" block
-        //    List<ICommand> ifCommands = new List<ICommand>();
-        //    foreach (var commandContext in context.block(0).command())
-        //    {
-        //        ifCommands.AddRange(CreateCommandsFromBlock(commandContext));
-        //    }
-
-        //    // Create the list for "else" block if present
-        //    List<ICommand> elseCommands = null;
-        //    if (context.block().Length > 1)
-        //    {
-        //        elseCommands = new List<ICommand>();
-        //        foreach (var commandContext in context.block(1).command())
-        //        {
-        //            elseCommands.AddRange(CreateCommandsFromBlock(commandContext));
-        //        }
-        //    }
-
-        //    // Create the IfCommand and add it to the command list
-        //    ICommand ifCommand = new IfCommand(condition, ifCommands, elseCommands);
-        //    Commands.Add(ifCommand);
-        //}
-
-
-        //private List<ICommand> CreateCommandsFromBlock(MicrofluidicsParser.CommandContext context)
-        //{
-        //    // Create commands from the block of statements
-        //    List<ICommand> commands = new List<ICommand>();
-        //    foreach (var commandContext in context.command())
-        //    {
-        //        // For each command, call the appropriate exit method manually
-        //        switch (commandContext)
-        //        {
-        //            case MicrofluidicsParser.MoveDropletContext moveContext:
-        //                ExitMoveDroplet(moveContext);
-        //                break;
-        //            case MicrofluidicsParser.DropletDeclarationContext dropletContext:
-        //                ExitDropletDeclaration(dropletContext);
-        //                break;
-        //                // Add cases for other command types like Split, Merge, etc.
-        //        }
-        //    }
-        //    return commands;
-        //}
-
-        //private BooleanExpression CreateBooleanExpression(MicrofluidicsParser.BooleanExpressionContext context)
-        //{
-        //    if (context.booleanExpression() != null)
-        //    {
-        //        BooleanExpression left = CreateBooleanExpression(context.booleanExpression(0));
-        //        BooleanExpression right = CreateBooleanExpression(context.booleanExpression(1));
-        //        string operatorSymbol = context.op.Text;
-
-        //        return new LogicalBinaryExpression(left, operatorSymbol, right);
-        //    }
-
-        //    if (context.arithmeticExpression() != null)
-        //    {
-        //        ArithmeticExpression left = CreateExpression(context.arithmeticExpression(0));
-        //        ArithmeticExpression right = CreateExpression(context.arithmeticExpression(1));
-        //        string comparisonOperator = context.op.Text;
-
-        //        return new ComparisonExpression(left, comparisonOperator, right);
-        //    }
-
-        //    if (context. != null)
-        //    {
-        //        BooleanExpression innerExpression = CreateBooleanExpression(context.booleanExpression(0));
-        //        return new LogicalNotExpression(innerExpression);
-        //    }
-
-        //    throw new InvalidOperationException("Unknown boolean expression structure.");
-        //}
-
-        //public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
-        //{
-        //    BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
-        //    List<ICommand> ifBlock = ExtractCommandsFromBlock(context.block(0));
-
-        //    // Optional else block
-        //    List<ICommand> elseBlock = null;
-        //    if (context.block(1) != null)
-        //    {
-        //        elseBlock = ExtractCommandsFromBlock(context.block(1));
-        //    }
-
-        //    ICommand ifCommand = new IfCommand(condition, ifBlock, elseBlock);
-        //    Commands.Add(ifCommand);
-        //}
-
         public override void ExitIfStatement(MicrofluidicsParser.IfStatementContext context)
         {
             // Extract the condition (boolean expression)
             BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
 
-            // Extract commands from the 'then' block
+            // Extract commands from the then block
             var thenCommands = ExtractCommandsFromBlock(context.block(0));
 
-            // Extract commands from the 'else' block, if it exists
+            // Extract commands from the else block, if it exists
             List<ICommand> elseCommands = new List<ICommand>();
-            if (context.block().Length > 1) // Check if there's an else block
+            if (context.block().Length > 1)
             {
                 elseCommands = ExtractCommandsFromBlock(context.block(1));
             }
@@ -451,10 +346,10 @@ namespace DropletsInMotion.Presentation.Language
         {
             BooleanExpression condition = CreateBooleanExpression(context.booleanExpression());
 
-            // Extract the commands from the while loop block
+            // While loop block
             List<ICommand> blockCommands = ExtractCommandsFromBlock(context.block());
 
-            // Create the WhileCommand using the extracted block commands
+            // Create the WhileCommand
             ICommand whileCommand = new WhileCommand(condition, blockCommands);
             whileCommand.Line = context.Start.Line;
             whileCommand.Column = context.Start.Column;
@@ -466,13 +361,10 @@ namespace DropletsInMotion.Presentation.Language
         {
             List<ICommand> blockCommands = new List<ICommand>();
 
-            // Capture the number of commands in the global list before the block is processed
             int initialGlobalCommandCount = Commands.Count;
 
-            // Process each command in the block
             foreach (var commandCtx in context.command())
             {
-                // Walk through each command in the block (this adds to global Commands list)
                 ParseTreeWalker.Default.Walk(this, commandCtx);
             }
 
@@ -486,36 +378,6 @@ namespace DropletsInMotion.Presentation.Language
 
             return blockCommands;
         }
-
-        //private List<ICommand> ExtractCommandsFromBlock(MicrofluidicsParser.BlockContext context)
-        //{
-        //    List<ICommand> blockCommands = new List<ICommand>();
-
-        //    // Temporarily store the global commands length
-        //    int globalCommandsCountBeforeBlock = Commands.Count;
-
-        //    // Process each command in the block manually
-        //    foreach (var commandCtx in context.command())
-        //    {
-        //        // Visit each command in the block
-        //        ParseTreeWalker.Default.Walk(this, commandCtx);
-
-        //        // After processing, the last command is added to the global list,
-        //        // so we capture it and remove it from the global list
-        //        if (Commands.Count > globalCommandsCountBeforeBlock)
-        //        {
-        //            // Collect the last processed command in the block
-        //            blockCommands.Add(Commands.Last());
-
-        //            // Remove it from the global list to keep it local to the block
-        //            Commands.RemoveAt(Commands.Count - 1);
-
-        //        }
-        //    }
-
-        //    return blockCommands;
-        //}
-
 
 
         private BooleanExpression CreateBooleanExpression(MicrofluidicsParser.BooleanExpressionContext context)
@@ -550,8 +412,5 @@ namespace DropletsInMotion.Presentation.Language
 
             throw new InvalidOperationException("Unknown boolean expression structure.");
         }
-
-
-
     }
 }

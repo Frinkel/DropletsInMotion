@@ -1,21 +1,12 @@
-﻿using System.Formats.Asn1;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
-using DropletsInMotion.Application.Models;
+﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Exceptions;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models.Platform;
-using DropletsInMotion.UI;
 
 namespace DropletsInMotion.Application.Services
 {
     public class SchedulerService : ISchedulerService
     {
-        //private IDropletCommand DropletCommand { get; set; }
-        //private List<IDropletCommand> CommandList { get; set; }
-        //private Dictionary<string, Droplet> Droplets { get; set; }
-
         IContaminationService _contaminationService;
         public SchedulerService(IContaminationService contaminationService)
         {
@@ -38,7 +29,6 @@ namespace DropletsInMotion.Application.Services
                         d1.PositionX, d1.PositionY, d2.PositionX, d2.PositionY, contaminationMap, d1SubstanceId, d2SubstanceId, agents, templates, mergeCommand);
 
                     return optimalPositions;
-                    //return null;
 
                 case SplitByVolume splitByVolumeCommand:
 
@@ -59,7 +49,7 @@ namespace DropletsInMotion.Application.Services
                     return optimalPositions;
                     
                 case SplitByRatio splitByRatioCommand:
-                    // This is handles as split by volume
+                    // This is handled as split by volume
                     break;
 
                 default:
@@ -192,9 +182,6 @@ namespace DropletsInMotion.Application.Services
                             continue;
                         }
 
-
-                        
-
                         // Out-of-bounds template check and applicable check
                         List<int> substanceIds = new List<int>() { d1SubstanceId, d2SubstanceId };
                         bool isTemplateApplicable = IsTemplateApplicable(optimalPositions, boardWidth, boardHeight, contaminationMap, substanceIds, allOtherAgentPositions);
@@ -230,15 +217,15 @@ namespace DropletsInMotion.Application.Services
         {
             var offsets = new List<(int xOffset, int yOffset)>
             {
-                (0, 0),   // Original position
-                (1, 0),   // Right
-                (-1, 0),  // Left
-                (0, 1),   // Down
-                (0, -1),  // Up
-                (1, -1),  // Bottom-right diagonal
-                (-1, 1),  // Top-left diagonal
-                (1, 1),   // Top-right diagonal
-                (-1, -1)  // Bottom-left diagonal
+                (0, 0),
+                (1, 0),
+                (-1, 0),
+                (0, 1),
+                (0, -1),
+                (1, -1),
+                (-1, 1),
+                (1, 1),
+                (-1, -1)
             };
 
             foreach (var val in scheduledPosition.Template.Blocks)
@@ -256,7 +243,6 @@ namespace DropletsInMotion.Application.Services
                         {
                             return false;
                         }
-
 
                         // Check contamination on active electrodes
                         List<int> contaminations = contaminationMap[relativeX, relativeY];
@@ -408,7 +394,5 @@ namespace DropletsInMotion.Application.Services
 
             return optimalPosition;
         }
-
-        
     }
 }

@@ -1,6 +1,4 @@
-﻿using DropletsInMotion.Infrastructure.Models.Commands;
-
-namespace DropletsInMotion.Infrastructure.Exceptions
+﻿namespace DropletsInMotion.Infrastructure.Exceptions
 {
     public class ContaminationException : Exception
     {

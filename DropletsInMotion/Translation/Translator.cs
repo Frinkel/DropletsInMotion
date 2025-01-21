@@ -6,7 +6,6 @@ using DropletsInMotion.Infrastructure.Models.Commands;
 using DropletsInMotion.Infrastructure.Models.Platform;
 using DropletsInMotion.Infrastructure.Repositories;
 using DropletsInMotion.Infrastructure.Services;
-using DropletsInMotion.Presentation;
 using DropletsInMotion.Presentation.Language;
 using DropletsInMotion.Presentation.Services;
 using DropletsInMotion.Translation.Services;
@@ -70,5 +69,4 @@ public class Translator : ITranslator
 
         DependencyGraph = _dependencyBuilder.Build(Commands);
     }
-
 }

@@ -4,7 +4,6 @@ namespace DropletsInMotion.Infrastructure.Models.Commands.DropletCommands
 {
     public class Mix : IDropletCommand
     {
-        //Mix(name, posX, posY, distanceX, distanceY, repeatTimes)
         public int Line { get; set; }
         public int Column { get; set; }
         public string DropletName { get; }

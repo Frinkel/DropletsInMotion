@@ -10,7 +10,7 @@ public interface IDependencyNode
     List<IDependencyNode> Dependencies { get; }
     void MarkAsExecuted();
     void AddDependency(IDependencyNode dependency);
-    List<IDependencyNode> getExecutableNodes();
+    List<IDependencyNode> GetExecutableNodes();
     bool CanExecute();
     string ToString();
     void Reset();

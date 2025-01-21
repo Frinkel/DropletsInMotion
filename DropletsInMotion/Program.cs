@@ -2,13 +2,10 @@
 using DropletsInMotion.Communication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DropletsInMotion.Application.ExecutionEngine;
 using DropletsInMotion.Application.Factories;
-using DropletsInMotion.Application.Models;
 using DropletsInMotion.Application.Services;
 using DropletsInMotion.Application.Services.Routers;
 using DropletsInMotion.Communication.Physical;
-using DropletsInMotion.UI;
 using DropletsInMotion.Infrastructure.Services;
 using DropletsInMotion.Communication.Simulator;
 using DropletsInMotion.Communication.Simulator.Services;
@@ -25,9 +22,7 @@ namespace DropletsInMotion
     public class Program
     {
         private static IConfiguration? _configuration;
-        private static IConsoleService? _consoleService;
         private static IFileService? _fileService;
-        private static ICommunicationEngine? _communicationEngine;
         private static ILogger? _logger;
         private static RuntimeExceptionHandler? _runtimeExceptionHandler;
 
@@ -36,8 +31,6 @@ namespace DropletsInMotion
         {
             using (var serviceProvider = Setup())
             {
-                _consoleService = serviceProvider.GetRequiredService<IConsoleService>();
-                _communicationEngine = serviceProvider.GetRequiredService<ICommunicationEngine>();
                 _logger = serviceProvider.GetRequiredService<ILogger>();
                 _runtimeExceptionHandler = serviceProvider.GetRequiredService<RuntimeExceptionHandler>();
                 _fileService = serviceProvider.GetRequiredService<IFileService>();
@@ -107,7 +100,6 @@ namespace DropletsInMotion
             serviceCollection.AddSingleton<ITemplateService, TemplateService>();
             serviceCollection.AddSingleton<IDependencyBuilder, DependencyBuilder>();
             serviceCollection.AddSingleton<IPlatformService, PlatformService>();
-            //serviceCollection.AddSingleton<ICommunicationTemplateService, CommunicationTemplateService>();
             serviceCollection.AddSingleton<IDeviceRepository, DeviceRepository>();
             serviceCollection.AddSingleton<ITypeChecker, TypeChecker>();
             serviceCollection.AddSingleton<IPlatformRepository, PlatformRepository>();

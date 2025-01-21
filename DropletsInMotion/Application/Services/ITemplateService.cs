@@ -1,6 +1,4 @@
-﻿using DropletsInMotion.Application.ExecutionEngine.Models;
-using System.Collections.Generic;
-using DropletsInMotion.Application.Execution.Models;
+﻿using DropletsInMotion.Application.Execution.Models;
 using DropletsInMotion.Infrastructure.Models.Platform;
 
 namespace DropletsInMotion.Application.Services

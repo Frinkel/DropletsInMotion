@@ -1,5 +1,4 @@
-﻿using System.Net.WebSockets;
-using DropletsInMotion.Communication.Simulator.Models;
+﻿using DropletsInMotion.Communication.Simulator.Models;
 
 namespace DropletsInMotion.Communication.Simulator.Services
 {

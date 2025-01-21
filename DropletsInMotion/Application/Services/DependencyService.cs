@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DropletsInMotion.Application.Models;
-using DropletsInMotion.Communication.Simulator.Models;
+﻿using DropletsInMotion.Application.Models;
 using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
 using DropletsInMotion.Infrastructure.Models;
 using DropletsInMotion.Infrastructure.Models.Commands;
@@ -22,8 +16,7 @@ namespace DropletsInMotion.Application.Services
             _commandLifetimeService = commandLifetimeService;
         }
 
-
-        public void updateExecutedNodes(List<IDependencyNode> nodes, Dictionary<string, Agent> agents, double currentTime)
+        public void UpdateExecutedNodes(List<IDependencyNode> nodes, Dictionary<string, Agent> agents, double currentTime)
         {
             foreach (IDependencyNode node in nodes)
             {
@@ -39,6 +32,7 @@ namespace DropletsInMotion.Application.Services
                             }
                         }
                         break;
+
                     case Merge mergeCommand:
                         if (agents.TryGetValue(mergeCommand.OutputName, out var mergeDroplet) &&
                             (mergeCommand.OutputName == mergeCommand.InputName1 || !agents.ContainsKey(mergeCommand.InputName1)) &&
@@ -53,6 +47,7 @@ namespace DropletsInMotion.Application.Services
                         }
 
                         break;
+
                     case SplitByRatio splitByRatio:
                         if (agents.TryGetValue(splitByRatio.OutputName1, out var splitDroplet1) &&
                             agents.TryGetValue(splitByRatio.OutputName2, out var splitDroplet2) &&
@@ -71,6 +66,7 @@ namespace DropletsInMotion.Application.Services
                         }
 
                         break;
+
                     case SplitByVolume splitByVolume:
                         if (agents.TryGetValue(splitByVolume.OutputName1, out var splitDroplet1v) &&
                             agents.TryGetValue(splitByVolume.OutputName2, out var splitDroplet2v) &&
@@ -88,23 +84,25 @@ namespace DropletsInMotion.Application.Services
                         }
 
                         break;
+
                     case Store storeCommand:
                         if (_storeService.IsStoreComplete(storeCommand.DropletName, currentTime))
                         {
-                            //Console.WriteLine($"Droplet {storeCommand.DropletName} has completed its store time.");
                             node.MarkAsExecuted();
                         }
                         break;
+
                     case WaitForUserInput command:
                         node.MarkAsExecuted();
                         break;
+
                     case Wait command:
                         node.MarkAsExecuted();
                         break;
+
                     case Mix mixCommand:
                         if (_storeService.IsStoreComplete(mixCommand.DropletName, currentTime))
                         {
-                            //Console.WriteLine($"Droplet {mixCommand.DropletName} has completed its mix.");
                             node.MarkAsExecuted();
                         }
                         break;
@@ -160,8 +158,6 @@ namespace DropletsInMotion.Application.Services
                         break;
                 }
             }
-
         }
-
     }
 }

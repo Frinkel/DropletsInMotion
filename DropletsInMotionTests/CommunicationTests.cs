@@ -1,12 +1,6 @@
-﻿using DropletsInMotion.Application.Models;
-using DropletsInMotion.Infrastructure.Models.Commands;
-using DropletsInMotion.Application.Services.Routers;
-using DropletsInMotion.Application.Services;
-using DropletsInMotion.Infrastructure;
-using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
+﻿using DropletsInMotion.Application.Services;
 using DropletsInMotion.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 
 namespace DropletsInMotionTests
 {

@@ -1,5 +1,4 @@
 ﻿using DropletsInMotion.Infrastructure.Models.Commands.DropletCommands;
-using System.Collections.Generic;
 
 public interface ICommandLifetimeService
 {

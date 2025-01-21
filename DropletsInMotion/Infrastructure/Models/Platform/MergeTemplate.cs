@@ -1,22 +1,10 @@
-﻿using System.Drawing;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using DropletsInMotion.Application.Execution.Models;
-using DropletsInMotion.Application.ExecutionEngine.Models;
 
 namespace DropletsInMotion.Infrastructure.Models.Platform
 {
     public class MergeTemplate : ITemplate
     {
-        //public SplitTemplate(string name, int minSize, int maxSize, double ratio, Dictionary<string, double> ratioRelation)
-        //{
-        //    Name = name;
-        //    MinSize = minSize;
-        //    MaxSize = maxSize;
-        //    Ratio = ratio;
-        //    RatioRelation = ratioRelation;
-        //}
-
-
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
@@ -62,9 +50,5 @@ namespace DropletsInMotion.Infrastructure.Models.Platform
 
             return copy;
         }
-
-
-        
-
     }
 }
