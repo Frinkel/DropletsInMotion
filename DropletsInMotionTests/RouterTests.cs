@@ -674,7 +674,7 @@ namespace DropletsInMotionTests
 
             var process = Debugger.GetProcess();
 
-            Debugger.PrintMemoryUsage(process);
+            //Debugger.PrintMemoryUsage(process);
 
             //process.Refresh();
             //Console.WriteLine($"mem: {process.WorkingSet64 / (1024.0 * 1024.0)}");
@@ -731,12 +731,8 @@ namespace DropletsInMotionTests
 
             _ = _routerService.Route(agents, commands, contaminationMap, 0);
 
-            Debugger.PrintMemoryUsage(process);
-            //process.Refresh();
-            //Console.WriteLine($"mem: {process.WorkingSet64 / (1024.0 * 1024.0)}");
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
-            //Console.WriteLine($"Average elapsed {Debugger.ElapsedTime.Sum() / Debugger.ElapsedTime.Count}");
-            //Debugger.PrintDuplicateCounts();
+
             Assert.That(true, Is.EqualTo(IsOneGoalState(commands, agents)));
         }
 

@@ -415,12 +415,12 @@ namespace DropletsInMotionTests
         public async Task A7DropletCrissCross()
         {
             
-            Debugger.PrintMemoryUsage2();
+            //Debugger.PrintMemoryUsage2();
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/7DropletCrissCross.txt";
 
             await _executionEngine.Execute();
-            Debugger.PrintMemoryUsage2();
+            //Debugger.PrintMemoryUsage2();
 
             Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
 
@@ -433,9 +433,9 @@ namespace DropletsInMotionTests
             //_userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/program.txt";
 
             //await _executionEngine.Execute();
-            Debugger.PrintMemoryUsage2();
+            //Debugger.PrintMemoryUsage2();
 
-            Debugger.PrintMemoryUsage2();
+            //Debugger.PrintMemoryUsage2();
 
         }
 
