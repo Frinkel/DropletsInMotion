@@ -1,0 +1,39 @@
+// Declare droplets
+Droplet(d1, 5, 5, 800, "Blood");
+
+// Move a droplet
+Move(d1, 10, 10);
+
+// Split a droplet
+SplitByRatio(d1, d3, d4, 5, 10, 15, 10, 0.5);
+
+// Merge two droplets
+Merge(d3, d4, d5, 10, 10);
+
+// Mix a droplet
+Mix(d5, 10, 10, 4, 4, 4);
+
+// Store a droplet
+Store(d5, 5, 5, 10);
+
+// Wait for 2 seconds
+Wait(2);
+
+// Dispose of a droplet
+Waste(d5, 0, 0);
+
+// Assignment operation
+i = 0;
+
+// If-statement
+if (i == 0) {
+    print("i is zero");
+} else {
+    print("i is not zero");
+};
+
+// While-loop
+while (i < 2) {
+    print("Loop iteration:", i);
+    i = i + 1;
+};

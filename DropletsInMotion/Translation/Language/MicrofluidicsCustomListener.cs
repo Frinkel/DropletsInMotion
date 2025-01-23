@@ -140,6 +140,24 @@ namespace DropletsInMotion.Presentation.Language
             Commands.Add(dropletCommand);
         }
 
+        public override void ExitSplit(MicrofluidicsParser.SplitContext context)
+        {
+            string input = context.IDENTIFIER(0).GetText();
+            string output1 = context.IDENTIFIER(1).GetText();
+            string output2 = context.IDENTIFIER(2).GetText();
+            var posX1 = CreateExpression(context.arithmeticExpression(0));
+            var posY1 = CreateExpression(context.arithmeticExpression(1));
+            var posX2 = CreateExpression(context.arithmeticExpression(2));
+            var posY2 = CreateExpression(context.arithmeticExpression(3));
+            var ratio = CreateExpression(context.arithmeticExpression(4));
+
+            IDropletCommand dropletCommand = new SplitByRatio(input, output1, output2, posX1, posY1, posX2, posY2, ratio);
+            dropletCommand.Line = context.Start.Line;
+            dropletCommand.Column = context.Start.Column;
+            Commands.Add(dropletCommand);
+        }
+
+
         public override void ExitSplitByVolume(MicrofluidicsParser.SplitByVolumeContext context)
         {
             string input = context.IDENTIFIER(0).GetText();

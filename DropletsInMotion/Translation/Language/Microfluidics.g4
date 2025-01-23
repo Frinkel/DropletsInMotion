@@ -12,7 +12,7 @@ command
     | dispense
     | moveDroplet
     | splitByRatio
-    | splitByVolume
+    | split
     | merge
     | mix
     | store
@@ -48,6 +48,10 @@ moveDroplet
 // Split
 splitByRatio
     : 'SplitByRatio' '(' IDENTIFIER ',' IDENTIFIER ',' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')'
+    ;
+
+split
+    : 'Split' '(' IDENTIFIER ',' IDENTIFIER ',' IDENTIFIER ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ',' arithmeticExpression ')'
     ;
 
 splitByVolume

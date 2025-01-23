@@ -108,7 +108,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public async Task SplitByVolumeTest()
+        public async Task SplitTest()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestSplitByVolume.txt";
@@ -138,7 +138,7 @@ namespace DropletsInMotionTests
         }
 
         [Test]
-        public async Task SplitByVolumeNameReusedTest()
+        public async Task SplitNameReusedTest()
         {
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/TestSplitByVolumeNamesReused.txt";
@@ -406,6 +406,19 @@ namespace DropletsInMotionTests
             
             _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
             _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/7DropletCrissCross.txt";
+
+            await _executionEngine.Execute();
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
+
+        }
+
+        [Test]
+        public async Task AllCommandsTestTask()
+        {
+            //all commands expect commands that interact with hardware or console.
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/AllCommandsAlmostTest.txt";
 
             await _executionEngine.Execute();
 

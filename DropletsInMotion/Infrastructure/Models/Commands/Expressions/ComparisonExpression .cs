@@ -15,16 +15,17 @@
 
         public override bool Evaluate(Dictionary<string, double> variableValues)
         {
+            const double epsilon = 1e-10;
+
             double leftValue = Left.Evaluate(variableValues);
             double rightValue = Right.Evaluate(variableValues);
 
-            //TODO consider adding a tolerance for floating point comparison
             return Operator switch
             {
-                ">" => leftValue > rightValue,
-                "<" => leftValue < rightValue,
-                "==" => leftValue == rightValue,
-                "!=" => leftValue != rightValue,
+                ">" => leftValue > rightValue + epsilon,
+                "<" => leftValue < rightValue - epsilon,
+                "==" => Math.Abs(leftValue - rightValue) < epsilon,
+                "!=" => Math.Abs(leftValue - rightValue) >= epsilon,
                 _ => throw new InvalidOperationException($"Unknown comparison operator: {Operator}")
             };
         }
