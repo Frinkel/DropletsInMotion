@@ -1,3 +1,4 @@
+// Input substance and dilutant
 Droplet(blood, 1, 1, 400, "blood");
 Droplet(water, 29, 1, 1600, "H2O");
 
@@ -7,18 +8,19 @@ SplitByRatio(wHalf1, w1, w2, 12, 1, 17, 1, 0.5);
 SplitByRatio(wHalf2, w3, w4, 22, 1, 27, 1, 0.5);
 
 // Perform the dilution series
+// 1 to 1
 Merge(blood, w1, dilution1, 12, 4);
 SplitByRatio(dilution1, dilution1, dilution2, 10, 4, 14, 4, 0.5);
 Move(dilution1, 12, 18);
-
+// 1 to 2
 Merge(dilution2, w2, dilution2, 17, 6);
 SplitByRatio(dilution2, dilution2, dilution3, 15, 6, 19, 6, 0.5);
 Move(dilution2, 17, 18);
-
+// 1 to 4
 Merge(dilution3, w3, dilution3, 22, 8);
 SplitByRatio(dilution3, dilution3, dilution4, 20, 8, 22, 8, 0.5);
 Move(dilution3, 22, 18);
-
+// 1 to 8
 Merge(dilution4, w4, dilution4, 27, 10);
 SplitByRatio(dilution4, dilution4, dilution5, 25, 10, 27, 10, 0.5);
 Move(dilution4, 27, 18);

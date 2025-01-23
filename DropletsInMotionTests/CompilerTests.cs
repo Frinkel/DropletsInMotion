@@ -5,14 +5,14 @@ using DropletsInMotion.Infrastructure;
 
 namespace DropletsInMotionTests
 {
-    public class CompilerTests : TestBase
+    public class FullSolutionTest : TestBase
     {
 
         private readonly IExecutionEngine _executionEngine;
         private readonly IUserService _userService;
         private readonly IFileService _filerService;
 
-        public CompilerTests()
+        public FullSolutionTest()
         {
             _executionEngine = ServiceProvider.GetRequiredService<IExecutionEngine>();
             _userService = ServiceProvider.GetRequiredService<IUserService>();

@@ -3,7 +3,7 @@ Droplet(d2, 11, 6, 400);
 Droplet(d3, 17, 6, 400);
 Merge(d1, d2, d4, 8, 6);
 Move(d4 8, 11);
-SplitByVolume(d4, d1, d2, 4, 11, 12, 11, 400);
+Split(d4, d1, d2, 4, 11, 12, 11, 0.5);
 Move(d1 4, 14);
 Move(d2 12, 14);
 SplitByRatio(d1, d1, d4, 2, 14, 6, 14, 0.5);
