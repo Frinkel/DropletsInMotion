@@ -17,7 +17,7 @@ public class State
     public State? Parent { get; set; }
     public Dictionary<string, RouteAction>? JointAction { get; set; }
     public RouteAction Action { get; private set; }
-    private int H { get; set; }
+    public int H { get; set; }
     public string RoutableAgent { get; set; }
     public List<IDropletCommand> Commands { get; set; }
 
@@ -463,10 +463,10 @@ public class State
                 h += manhattanDistance;
 
                 //Reward open paths
-                if (!IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
-                {
-                    h -= 2;
-                }
+                //if (!IsPathBlocked(agent.PositionX, agent.PositionY, moveCommand.PositionX, moveCommand.PositionY, agent))
+                //{
+                //    h -= 2;
+                //}
 
                 // Prioritize moving along existing contamination
                 if (Action != null && agent.IsMoveApplicable(Action, Agents, ContaminationMap, this))

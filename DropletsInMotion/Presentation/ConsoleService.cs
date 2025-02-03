@@ -163,7 +163,7 @@ namespace DropletsInMotion.Presentation
                 return path;
             }
 
-            _userService.MergeTablePath = ReadPathFromUserOptional("Enter the path to the contamination relation table:", ".csv");
+            _userService.MergeTablePath = ReadPathFromUserOptional("Enter the path to the merge table:", ".csv");
 
             if (!File.Exists(_userService.MergeTablePath) || _userService.MergeTablePath?.Trim() == "")
             {
