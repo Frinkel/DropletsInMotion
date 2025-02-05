@@ -9617,7 +9617,7 @@
       "positionY": 20,
       "sizeX": -1,
       "sizeY": -1,
-      "status": 1,
+      "status": 0,
       "corners": [
         [ 0, 0 ],
         [ 60, 0 ],
@@ -10989,18 +10989,7 @@
   "inputs": [],
   "outputs": [],
   "droplets": [
-    {
-      "name": "test droplet",
-      "ID": 0,
-      "substance_name": "h20",
-      "positionX": 30,
-      "positionY": 50,
-      "sizeX": 100,
-      "sizeY": 100,
-      "color": "#0000FF",
-      "temperature": 20,
-      "electrodeID": 641
-    }
+    
   ],
   "bubbles": [
   ],

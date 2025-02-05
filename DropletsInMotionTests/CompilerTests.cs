@@ -414,6 +414,19 @@ namespace DropletsInMotionTests
         }
 
         [Test]
+        public async Task A8DropletCrissCross()
+        {
+
+            _userService.PlatformPath = _filerService.GetProjectDirectory() + "/Assets/Configurations/platform.json";
+            _userService.ProgramPath = _filerService.GetProjectDirectory() + "/Assets/Programs/8DropletCrissCross.txt";
+
+            await _executionEngine.Execute();
+
+            Console.WriteLine($"Explored {Debugger.ExploredStates} - Existing {Debugger.ExistingStates} - Expanded {Debugger.ExpandedStates} - Permutations {Debugger.Permutations}");
+
+        }
+
+        [Test]
         public async Task AllCommandsTestTask()
         {
             //all commands expect commands that interact with hardware or console.

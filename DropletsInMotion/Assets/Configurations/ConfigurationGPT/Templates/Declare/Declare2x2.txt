@@ -1,0 +1,9 @@
+{
+	"name": "Declare 2x2",
+	"minSize": 1000,
+	"maxSize": 2800
+}
+?
+0.0,
+0110
+0110

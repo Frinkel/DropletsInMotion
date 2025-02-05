@@ -1,0 +1,16 @@
+{
+	"name": "shrink right",
+	"minSize": 350,
+	"maxSize": 4000,
+	"direction": "moveRight"
+}
+?
+0.0,
+000
+011
+000
+;
+0.5,
+000
+001
+000

@@ -1,0 +1,10 @@
+{
+  "TimeScaleFactor": 1,
+  "Movement": {
+    "MinimumMovementVolume": 350,
+    "MaximumMovementVolume": 4000,
+    "MinSize1x1": 350,
+    "MinSize2x2": 1000,
+    "MinSize3x3": 2800
+  }
+}

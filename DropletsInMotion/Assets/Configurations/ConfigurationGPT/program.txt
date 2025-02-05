@@ -1,0 +1,3 @@
+Droplet(d1, 0, 0, 380);
+Droplet(d2, 31, 0, 380);
+Merge(d1, d2, d3, 15, 19);

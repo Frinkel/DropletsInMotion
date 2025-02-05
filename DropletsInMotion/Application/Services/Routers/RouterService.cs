@@ -43,9 +43,9 @@ public class RouterService : IRouterService
         List<State> commitedStates = new List<State>();
         State? sFinal = null;
 
-
         // Generate all permutations of the commands list
         var permutations = GetScoredPermutations(commands, commands.Count, command => ScoreCommand(command, agents));
+        var chosenPermutation = permutations.First();
 
         var reservedContaminationMap = _contaminationService.ReserveContaminations(commands, agents, _contaminationService.CloneContaminationMap(contaminationMap));
 
@@ -55,7 +55,7 @@ public class RouterService : IRouterService
 
             commitedStates.Clear();
             sFinal = null;
-
+            chosenPermutation = commandOrder;
             bool foundSolution = true;
 
             foreach (var command in commandOrder)
@@ -99,7 +99,7 @@ public class RouterService : IRouterService
 
         sFinal = commitedStates.Last();
 
-
+        //Console.WriteLine(chosenPermutation);
         sFinal = FindFirstGoalState(sFinal, commands);
 
         if (boundTime != null)

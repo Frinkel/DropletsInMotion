@@ -1,15 +1,9 @@
-Droplet(d1, 9, 7, 400);
-Droplet(d2, 11, 7, 400);
-Droplet(d3, 13, 7, 400);
-Droplet(d4, 15, 7, 400);
-Droplet(d5, 17, 7, 400);
-Droplet(d6, 19, 7, 400);
-Droplet(d7, 21, 7, 400);
+Droplet (d1, 1, 1, 400) ;
+Droplet (d2, 7, 1, 400) ;
+Merge (d1 , d2 , d3 , 4, 1);
 
-Move(d1, 21, 11);
-Move(d2, 9, 11);
-Move(d3, 11, 11);
-Move(d4, 13, 11);
-Move(d5, 15, 11);
-Move(d6, 17, 11);
-Move(d7, 19, 11);
+i = 1;
+while (i < 5) {
+Move (d3, 8, 6 + i);
+i = i + 1;
+};

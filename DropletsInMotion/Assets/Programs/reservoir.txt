@@ -1,0 +1,9 @@
+DeclareDispenser(theDispenser, "Reservoir1", "H2O");
+Dispense(d1, theDispenser, 400);
+Move(d1, 5, 5);
+Dispense(d2, theDispenser, 400);
+Move(d2, 10, 5);
+Dispense(d3, theDispenser, 400);
+Move(d3, 15, 5);
+Dispense(d4, theDispenser, 400);
+Move(d4, 20, 5);

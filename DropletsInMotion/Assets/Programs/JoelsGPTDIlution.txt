@@ -1,0 +1,22 @@
+Droplet(blood, 1, 1, 400, "blood");
+Droplet(water, 29, 1, 1600, "H2O");
+
+Split(water, waterA, waterB, 25, 1, 29, 1, 0.5);
+Split(waterA, water1, water2, 21, 1, 25, 1, 0.5);
+Split(waterB, water3, water4, 29, 1, 29, 3, 0.5);
+
+Merge(blood, water1, diluted1, 5, 1);
+
+Split(diluted1, diluted1a, diluted1b, 5, 1, 10, 1, 0.5);
+Merge(diluted1a, water2, diluted2, 10, 1);
+
+Split(diluted2, diluted2a, diluted2b, 10, 1, 15, 1, 0.5);
+Merge(diluted2a, water3, diluted3, 15, 1);
+
+Split(diluted3, diluted3a, diluted3b, 15, 1, 20, 1, 0.5);
+Merge(diluted3a, water4, diluted4, 20, 1);
+
+Move(diluted1b, 5, 19);
+Move(diluted2b, 10, 19);
+Move(diluted3b, 15, 19);
+Move(diluted4, 20, 19);

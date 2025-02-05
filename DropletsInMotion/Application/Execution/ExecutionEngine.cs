@@ -199,11 +199,15 @@ namespace DropletsInMotion.Application.Execution
                 await SendActions(boardActions);
 
                 boardActions.Clear();
+
+                //Console.WriteLine("");
+                //Console.WriteLine("Press enter to continue");
+                //Console.WriteLine("");
+                //Console.ReadLine();
             }
 
             // Done compiling
             _communicationEngine.SendActions(new List<BoardAction>());
-
         }
 
         private void HandleWasteCommand(Waste wasteCommand, List<IDropletCommand> movesToExecute)
